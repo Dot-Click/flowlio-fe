@@ -1,0 +1,3 @@
+1: Auth Screen Image Fixed.
+2: Add the Details of Task under the Modal instead of add Extra colume Added.
+3: Edit your Project will take you to edit when the Database Connect to Website than it will work.
