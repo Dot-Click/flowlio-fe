@@ -15,19 +15,19 @@ export const Hero = () => {
 
       <Center className="items-center justify-center text-center gap-2">
         <img src="/home/dotvizion.svg" alt="logo" className="size-30" />
-        <Box className="text-[12px] text-gray-600 font-normal pb-2">
+        <Box className="text-[14px] text-gray-600 font-normal pb-2">
           work platform
         </Box>
       </Center>
 
       <Center className="-mt-2 px-2">
         <Stack className="text-center max-sm:w-full justify-between items-center">
-          <Box className="w-xl max-sm:w-full text-5xl max-sm:text-3xl font-extralight text-[#333333]">
+          <Box className="max-w-2xl max-sm:w-full text-6xl max-sm:text-3xl font-[100] text-[#333333]">
             Work
             <span className="text-[#F98618] font-semibold"> Better,</span> Track
             Faster, Grow Stronger
           </Box>
-          <Box className="w-xl max-sm:w-full mt-2 font-light text-gray-600 text-[14px]">
+          <Box className="w-xl max-sm:w-full mt-2 font-normal text-gray-600 text-[15px]">
             Streamline your client and project workflows, track time with
             precision, and boost team performance — all from one powerful,
             AI-enhanced platform.
