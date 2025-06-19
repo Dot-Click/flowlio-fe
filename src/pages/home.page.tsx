@@ -1,7 +1,11 @@
 import { Box } from "@/components/ui/box";
+import { GetSmart } from "@/components/user section/getsmart";
 import { Hero } from "@/components/user section/hero";
+import { ManageSmarter } from "@/components/user section/managesmarter";
+import { ManageTask } from "@/components/user section/managetask";
 import { Navbar } from "@/components/user section/navbar/navbar";
 import { Superchared } from "@/components/user section/superchared";
+import { TeamMember } from "@/components/user section/teammember";
 
 const HomePage = () => {
   return (
@@ -11,6 +15,10 @@ const HomePage = () => {
         <Hero />
         <Superchared />
       </Box>
+      <TeamMember />
+      <ManageTask />
+      <ManageSmarter />
+      <GetSmart />
     </>
   );
 };

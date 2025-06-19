@@ -10,7 +10,9 @@ export const Hero = () => {
   const navigate = useNavigate();
 
   return (
-    <Box className="relative w-full h-screen bg-[url(/home/blocks2.png)] bg-cover bg-center z-[10]">
+    <Box className="relative w-full h-full z-[10]">
+      <Box className="w-full h-screen bg-[url(/home/blocks2.png)] bg-cover bg-center absolute top-0 left-0"></Box>
+      {/* <Box className="absolute -z-10 top-110 right-0 w-40 h-100 bg-[#2B2BA0]/50 blur-3xl opacity-20 " /> */}
       <Box className="absolute -z-10 top-110 right-0 w-40 h-100 bg-[#2B2BA0]/50 blur-3xl opacity-20 " />
 
       <Center className="items-center justify-center text-center gap-2">

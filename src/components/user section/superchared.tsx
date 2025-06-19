@@ -91,14 +91,14 @@ export const Superchared = () => {
   const allCards = [...cards, ...cards];
 
   return (
-    <Box className="absolute top-212 max-sm:top-170 left-0 w-full bg-white z-[20]">
+    <Box className="w-full relative -mt-70 max-sm:mt-0  bg-white z-[20]">
       <img
         src="/home/graydot.svg"
         alt="dot"
         className="size-20 absolute left-18 max-sm:hidden"
       />
 
-      <Center className="flex-col gap-2 mt-10 text-center">
+      <Center className="flex-col gap-2 text-center bg-white p-6">
         <Box className="text-5xl font-[100] text-[#333333] max-sm:text-2xl">
           Your Workflow,
           <span className="text-[#F98618] font-semibold ">Supercharged</span>
@@ -108,7 +108,7 @@ export const Superchared = () => {
         </Box>
       </Center>
 
-      <Center className="w-full h-full">
+      <Center className="w-full h-full bg-white">
         <Box className="relative w-full overflow-hidden select-none">
           {/* Left brush effect */}
           <Box className="absolute left-0 top-0 w-20 h-full bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
@@ -118,7 +118,7 @@ export const Superchared = () => {
 
           <Center
             ref={scrollRef}
-            className="overflow-hidden min-w-[1200px] gap-8 p-12 group cursor-grab mt-10"
+            className="overflow-hidden min-w-[1200px] gap-8 p-18 group cursor-grab"
           >
             {allCards.map((card, i) => (
               <Flex
