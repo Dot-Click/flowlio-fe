@@ -67,7 +67,7 @@ export const ResetPasswordForm: FC = () => {
   return (
     <Flex className="flex flex-col text-start justify-start items-start max-md:py-8 w-[30rem] max-sm:w-full gap-4">
       <Anchor
-        to="/"
+        to="/login"
         className="flex text-center justify-center items-center gap-1 w-fit text-sm text-[#1797B9] hover:text-[#1797B9]/80 underline px-2"
       >
         <ArrowLeft className="size-4" />

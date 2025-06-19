@@ -8,7 +8,7 @@ export const ManageSmarter = () => {
   return (
     <Box className="w-full h-full bg-[#392AE2] p-8 max-sm:px-0">
       <Box className="relative z-30 mt-10 px-4">
-        <Flex className="justify-center w-full mx-auto gap-4 items-center max-sm:flex-col relative z-30">
+        <Flex className="justify-center w-full mx-auto gap-4 items-center max-md:flex-col relative z-30">
           <Center className="items-start max-sm:items-center gap-6 w-xl max-sm:w-full p-2 flex-col text-5xl font-[100] max-sm:text-2xl text-white  ">
             <h1 className="text-white max-sm:text-center">
               Start Managing Smarter
@@ -40,7 +40,7 @@ export const ManageSmarter = () => {
           <img
             src="/home/smart.png"
             alt="cards"
-            className="size-100 z-40 max-sm:size-70"
+            className="size-100 z-40 max-lg:size-70"
           />
         </Flex>
       </Box>

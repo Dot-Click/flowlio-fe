@@ -33,7 +33,7 @@ const cards = [
     bg: "bg-[#00FF85]",
   },
   {
-    title: "Analytics & Reports",
+    title: "Analytics Reports",
     desc: "Visualize progress & performance ",
     brand: "dotvizion Management",
     brandLogo: "/home/dotvizionwithtext.svg",
@@ -98,7 +98,7 @@ export const Superchared = () => {
         className="size-20 absolute left-18 max-sm:hidden"
       />
 
-      <Center className="flex-col gap-2 text-center bg-white p-6">
+      <Center className="flex-col gap-2 text-center bg-white p-8">
         <Box className="text-5xl font-[100] text-[#333333] max-sm:text-2xl">
           Your Workflow,
           <span className="text-[#F98618] font-semibold ">Supercharged</span>

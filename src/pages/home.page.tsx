@@ -4,6 +4,7 @@ import { Hero } from "@/components/user section/hero";
 import { ManageSmarter } from "@/components/user section/managesmarter";
 import { ManageTask } from "@/components/user section/managetask";
 import { Navbar } from "@/components/user section/navbar/navbar";
+import { SubscribeTo } from "@/components/user section/subscribeto";
 import { Superchared } from "@/components/user section/superchared";
 import { TeamMember } from "@/components/user section/teammember";
 
@@ -19,6 +20,7 @@ const HomePage = () => {
       <ManageTask />
       <ManageSmarter />
       <GetSmart />
+      <SubscribeTo />
     </>
   );
 };
