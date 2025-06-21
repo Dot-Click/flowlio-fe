@@ -8,15 +8,27 @@ import { Navbar } from "@/components/user section/navbar/navbar";
 import { SubscribeTo } from "@/components/user section/subscribeto";
 import { Superchared } from "@/components/user section/superchared";
 import { TeamMember } from "@/components/user section/teammember";
+import { useRenderComponentStore } from "@/store/renderComponent";
+import { useEffect } from "react";
 
 const HomePage = () => {
+  const { isComponentActive, setIsComponentActive } = useRenderComponentStore();
+
+  useEffect(() => {
+    setIsComponentActive(['home']);
+  }, []);
+
   return (
     <>
       <Navbar />
-      <Box className="relative w-full h-full">
-        <Hero />
-        <Superchared />
-      </Box>
+      {
+        isComponentActive.includes('home') && (
+          <Box className="relative w-full h-full">
+            <Hero />
+            <Superchared />
+          </Box>
+        ) 
+      }
       <TeamMember />
       <ManageTask />
       <ManageSmarter />

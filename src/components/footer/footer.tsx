@@ -12,6 +12,7 @@ const FooterLink = ({ href, children }: { href: string; children: React.ReactNod
 
 export const Footer = () => {
   return (
+    <>
     <Box  className="bg-black text-white py-12 px-4 sm:px-6 lg:px-8">
       <Flex className="container mx-auto max-w-5xl justify-between items-start flex-wrap gap-8">
 
@@ -62,5 +63,17 @@ export const Footer = () => {
 
       </Flex>
     </Box>
+    <Box className="bg-[#3F3F3F] text-white py-4 px-4 sm:px-6 lg:px-8">
+      <Flex className="container mx-auto max-w-5xl justify-between items-start flex-wrap gap-8">
+        <span>© 2025 Dotvizion. All rights reserved.</span>
+        <Flex className="text-white space-y-2 items-start max-sm:items-center">
+          <span>Privacy Policy</span>
+          <span>Terms of Service</span>
+          <span>Cookie Settings</span>
+        </Flex>
+      </Flex>
+    </Box>
+    </>
+
   );
 };

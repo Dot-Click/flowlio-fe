@@ -5,25 +5,41 @@ import { AlignJustify, ArrowRight } from "lucide-react";
 import { Flex } from "@/components/ui/flex";
 import { Center } from "@/components/ui/center";
 import { useNavigate } from "react-router";
+import { cn } from "@/lib/utils";
+import { useRenderComponentStore } from "@/store/renderComponent";
 
 export const Navbar = () => {
   const navigate = useNavigate();
+  const { isComponentActive , setIsComponentActive } = useRenderComponentStore();
+  
   return (
-    <Box className="relative w-full">
+    <Box className={cn("relative w-full", isComponentActive.includes('home') ? "bg-white" : "bg-black")}>
       <Box className="absolute -z-10 top-0 -left-12 w-100 h-100 bg-[#2B2BA0]/30 blur-3xl opacity-20 " />
       <Box className="absolute max-sm:hidden -z-10 top-30 right-8 w-60 h-90 bg-[#2B2BA0]/40 blur-3xl opacity-20 " />
 
       <header className="flex h-20 w-full shrink-0 items-center px-5 md:px-32 md:py-12">
         <Flex className="justify-between w-full">
           <Flex>
+            {
+              isComponentActive.includes('work-flow') ? (
             <img
-              src="/logo/logowithtext.svg"
+              src="/logo/logowithtextwhitebg.svg"
               alt="Logo"
-              className="h-56 w-38"
+              onClick={() => setIsComponentActive(['home'])}
+              className="h-56 w-38 cursor-pointer"
             />
+            ) : (
+              <img
+                src="/logo/logowithtext.svg"
+                alt="Logo"
+                onClick={() => setIsComponentActive(['work-flow'])}
+                className="h-56 w-38 cursor-pointer"
+              />
+            )}
             <a
               href="#"
-              className="group inline-flex h-9 w-max items-center justify-center rounded-md text-[#586689] bg-transparent px-4 py-2 text-[16px] font-medium transition-colors hover:bg-gray-100 hover:text-[#F98618] focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-100/50 data-[state=open]:bg-gray-100/50 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-gray-800/50 max-lg:hidden"
+              onClick={() => setIsComponentActive(['work-flow'])}
+              className="group inline-flex h-9 w-max items-center justify-center rounded-md text-[#586689] bg-transparent px-4 py-2 text-[16px] font-medium transition-colors hover:bg-gray-100 hover:text-[#F98618] focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-none data-[state=open]:bg-none dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-none max-lg:hidden"
             >
               Work Flow
             </a>
