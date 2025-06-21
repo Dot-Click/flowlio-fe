@@ -1,3 +1,4 @@
+import { Footer } from "@/components/footer/footer";
 import { Box } from "@/components/ui/box";
 import { GetSmart } from "@/components/user section/getsmart";
 import { Hero } from "@/components/user section/hero";
@@ -21,6 +22,7 @@ const HomePage = () => {
       <ManageSmarter />
       <GetSmart />
       <SubscribeTo />
+      <Footer />
     </>
   );
 };
