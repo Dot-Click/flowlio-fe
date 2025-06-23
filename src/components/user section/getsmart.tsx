@@ -1,9 +1,14 @@
+import { cn } from "@/lib/utils";
 import { Box } from "../ui/box";
 import { Center } from "../ui/center";
 import { Flex } from "../ui/flex";
 import { Stack } from "../ui/stack";
 
-export const GetSmart = () => {
+type GetSmartProps = {
+  isInsights?: boolean;
+};
+
+export const GetSmart = ({ isInsights = false }: GetSmartProps) => {
   const smartDetails = [
     {
       title: "Productivity",
@@ -23,26 +28,46 @@ export const GetSmart = () => {
   ];
 
   return (
-    <Center className="relative p-8 sm:p-8">
-      <img
-        src="/home/graydot.svg"
-        alt=""
-        className="z-40 size-18 absolute -top-6 left-42 max-md:left-0"
-      />
-      <Box
-        className="bg-[url(/home/manageblock1.png)] bg-cover bg-center bg-no-repeat absolute inset-0 top-20 z-0"
-        aria-hidden="true"
-      />
+    <Center
+      className={cn("relative p-8 sm:p-8", isInsights === true && "mb-12")}
+    >
+      {isInsights === false && (
+        <img
+          src="/home/graydot.svg"
+          alt=""
+          className="z-40 size-18 absolute -top-6 left-42 max-md:left-0"
+        />
+      )}
 
-      <Stack className="relative z-10 max-w-5xl max-lg:w-full mt-6 mb-2">
+      {isInsights === false && (
+        <Box
+          className="bg-[url(/home/manageblock1.png)] bg-cover bg-center bg-no-repeat absolute inset-0 top-20 z-0"
+          aria-hidden="true"
+        />
+      )}
+
+      <Stack className="relative z-10 max-w-5xl max-lg:w-full my-14">
         <Flex className="items-start justify-start text-start flex-col gap-6 ml-6">
-          <h1 className="text-3xl sm:text-5xl font-[100] w-sm max-lg:w-full max-sm:text-center">
+          <h1
+            className={cn(
+              " font-[100] max-lg:w-full max-sm:text-center",
+              isInsights === true
+                ? "sm:text-5xl text-xl w-sm"
+                : "sm:text-5xl text-3xl w-sm"
+            )}
+          >
             Get Smarter, With{" "}
             <span className="text-[#F98618] font-semibold">
               Dotiziion Insights
             </span>
           </h1>
-          <p className="text-base sm:text-lg text-black font-light leading-6  w-2xl max-md:w-full">
+
+          <p
+            className={cn(
+              "text-base text-black font-light leading-6 max-w-[40rem] max-md:w-full",
+              isInsights === true ? "w-xl text-[15px]" : "sm:text-lg"
+            )}
+          >
             Explore tips, trends, and expert advice on boosting team
             productivity, automating workflows, and building smarter
             organizations.
@@ -53,7 +78,10 @@ export const GetSmart = () => {
           {smartDetails.map((item, index) => (
             <Flex
               key={index}
-              className="w-full sm:w-80 max-w-md flex-col items-start justify-center gap-4 text-center sm:text-left"
+              className={cn(
+                "w-full max-w-md flex-col items-start justify-center gap-4 text-center sm:text-left",
+                isInsights && "sm:w-80"
+              )}
             >
               <img
                 src={item.img}

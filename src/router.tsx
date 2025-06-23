@@ -19,6 +19,9 @@ import SigninPage from "./pages/signin.page";
 import InboxPage from "./pages/inbox.page";
 import { UserLayout } from "./layouts/user.layout";
 import HomePage from "./pages/home.page";
+import { WorkFlowPage } from "./pages/workflow.page";
+import { InsightsPage } from "./pages/insights.page";
+import { PricingPage } from "./pages/pricing.page";
 
 export const Router = () => {
   return (
@@ -26,6 +29,9 @@ export const Router = () => {
       <Routes>
         <Route element={<UserLayout />}>
           <Route index element={<HomePage />} />
+          <Route path="work-flow" element={<WorkFlowPage />} />
+          <Route path="insights" element={<InsightsPage />} />
+          <Route path="pricing" element={<PricingPage />} />
         </Route>
 
         <Route element={<AuthenticationLayout />}>

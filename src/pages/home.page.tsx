@@ -8,48 +8,40 @@ import { Navbar } from "@/components/user section/navbar/navbar";
 import { SubscribeTo } from "@/components/user section/subscribeto";
 import { Superchared } from "@/components/user section/superchared";
 import { TeamMember } from "@/components/user section/teammember";
-import { useRenderComponentStore } from "@/store/renderComponent";
-import { useEffect, useState } from "react";
 
 const HomePage = () => {
-  const { isComponentActive, setIsComponentActive } = useRenderComponentStore();
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    setIsComponentActive(['home']);
-    
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 5000); 
+  // useEffect(() => {
 
-    return () => clearTimeout(timer);
-  }, []);
+  //   const timer = setTimeout(() => {
+  //     setIsLoading(false);
+  //   }, 5000);
 
-  if (isLoading) {
-    return (
-      <Box className="flex items-center justify-center min-h-screen bg-white">
-        <Box className="animate-pulse">
-          <img
-            src="/logo/logowithtext.svg"
-            alt="Loading..."
-            className="h-20 w-auto"
-          />
-        </Box>
-      </Box>
-    );
-  }
+  //   return () => clearTimeout(timer);
+  // }, []);
+
+  // if (isLoading) {
+  //   return (
+  //     <Box className="flex items-center justify-center min-h-screen bg-white">
+  //       <Box className="animate-pulse">
+  //         <img
+  //           src="/logo/logowithtext.svg"
+  //           alt="Loading..."
+  //           className="h-20 w-auto"
+  //         />
+  //       </Box>
+  //     </Box>
+  //   );
+  // }
 
   return (
     <>
       <Navbar />
-      {
-        isComponentActive.includes('home') && (
-          <Box className="relative w-full h-full">
-            <Hero />
-            <Superchared />
-          </Box>
-        ) 
-      }
+      <Box className="relative w-full h-full">
+        <Hero />
+        <Superchared isWorkFlow={false} />
+      </Box>
       <TeamMember />
       <ManageTask />
       <ManageSmarter />

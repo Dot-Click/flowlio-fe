@@ -2,6 +2,7 @@ import { Box } from "../ui/box";
 import { useRef, useEffect } from "react";
 import { Center } from "../ui/center";
 import { Flex } from "../ui/flex";
+import { cn } from "@/lib/utils";
 
 const cards = [
   {
@@ -55,7 +56,11 @@ const cards = [
   },
 ];
 
-export const Superchared = () => {
+type SupercharedProps = {
+  isWorkFlow?: boolean;
+};
+
+export const Superchared = ({ isWorkFlow }: SupercharedProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll animation
@@ -91,22 +96,34 @@ export const Superchared = () => {
   const allCards = [...cards, ...cards];
 
   return (
-    <Box className="w-full relative -mt-70 max-sm:mt-0  bg-white z-[20]">
-      <img
-        src="/home/graydot.svg"
-        alt="dot"
-        className="size-20 absolute left-18 max-sm:hidden"
-      />
+    <Box
+      className={cn(
+        "w-full relative max-sm:mt-0  bg-white z-[20]",
+        isWorkFlow === false ? "-mt-70" : "-mt-10"
+      )}
+    >
+      {isWorkFlow === false && (
+        <>
+          <img
+            src="/home/graydot.svg"
+            alt="dot"
+            className="size-20 absolute left-18 max-sm:hidden"
+          />
 
-      <Center className="flex-col gap-2 text-center bg-white p-8">
-        <Box className="text-5xl font-[100] text-[#333333] max-sm:text-2xl">
-          Your Workflow,
-          <span className="text-[#F98618] font-semibold ">Supercharged</span>
-        </Box>
-        <Box className="font-light text-[#333333] text-md max-sm:text-sm text-center">
-          Tailored modules for every department — pick what fits your workflow.
-        </Box>
-      </Center>
+          <Center className="flex-col gap-2 text-center bg-white p-8">
+            <Box className="text-5xl font-[100] text-[#333333] max-sm:text-2xl">
+              Your Workflow,
+              <span className="text-[#F98618] font-semibold ">
+                Supercharged
+              </span>
+            </Box>
+            <Box className="font-light text-[#333333] text-md max-sm:text-sm text-center">
+              Tailored modules for every department — pick what fits your
+              workflow.
+            </Box>
+          </Center>
+        </>
+      )}
 
       <Center className="w-full h-full bg-white">
         <Box className="relative w-full overflow-hidden select-none">

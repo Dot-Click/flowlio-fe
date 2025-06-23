@@ -4,51 +4,86 @@ import { Button } from "@/components/ui/button";
 import { AlignJustify, ArrowRight } from "lucide-react";
 import { Flex } from "@/components/ui/flex";
 import { Center } from "@/components/ui/center";
-import { useNavigate } from "react-router";
+import { Link, useNavigate, useLocation } from "react-router";
 import { cn } from "@/lib/utils";
-import { useRenderComponentStore } from "@/store/renderComponent";
+import { FC } from "react";
 
-export const Navbar = () => {
+interface NavbarProps {
+  isWorkflow?: boolean;
+  isInsights?: boolean;
+  isHome?: boolean;
+  isPricing?: boolean;
+}
+
+export const Navbar: FC<NavbarProps> = ({
+  isHome = false,
+  isWorkflow = false,
+  isInsights = false,
+}) => {
   const navigate = useNavigate();
-  const { isComponentActive , setIsComponentActive } = useRenderComponentStore();
-  
+  const location = useLocation();
+
+  const isHomePage = isHome || location.pathname === "/";
+  const isWorkflowPage = isWorkflow || location.pathname === "/work-flow";
+  const isInsightsPage = isInsights || location.pathname === "/insights";
+
   return (
-    <Box className={cn("relative w-full", isComponentActive.includes('home') ? "bg-white" : "bg-black")}>
+    <Box
+      className={cn(
+        "relative w-full z-40",
+        isWorkflowPage && "bg-[#161616]",
+        isInsightsPage && "bg-[#161616]"
+      )}
+    >
+      {(isWorkflowPage || isInsightsPage) === true && (
+        <Box className="w-full h-full bg-[url(/workflow/workflow-bg.svg)] bg-cover bg-center absolute top-0 left-0 -z-20 opacity-50"></Box>
+      )}
+
       <Box className="absolute -z-10 top-0 -left-12 w-100 h-100 bg-[#2B2BA0]/30 blur-3xl opacity-20 " />
       <Box className="absolute max-sm:hidden -z-10 top-30 right-8 w-60 h-90 bg-[#2B2BA0]/40 blur-3xl opacity-20 " />
 
       <header className="flex h-20 w-full shrink-0 items-center px-5 md:px-32 md:py-12">
         <Flex className="justify-between w-full">
           <Flex>
-            {
-              isComponentActive.includes('work-flow') ? (
-            <img
-              src="/logo/logowithtextwhitebg.svg"
-              alt="Logo"
-              onClick={() => setIsComponentActive(['home'])}
-              className="h-56 w-38 cursor-pointer"
-            />
+            {(isWorkflowPage || isInsightsPage) === true ? (
+              <Link to="/">
+                <img
+                  src="/logo/logowithtextwhitebg.svg"
+                  alt="Logo"
+                  className="h-56 w-38 cursor-pointer"
+                />
+              </Link>
             ) : (
-              <img
-                src="/logo/logowithtext.svg"
-                alt="Logo"
-                onClick={() => setIsComponentActive(['work-flow'])}
-                className="h-56 w-38 cursor-pointer"
-              />
+              <Link to="/">
+                <img
+                  src="/logo/logowithtext.svg"
+                  alt="Logo"
+                  className="h-56 w-38 cursor-pointer"
+                />
+              </Link>
             )}
-            <a
-              href="#"
-              onClick={() => setIsComponentActive(['work-flow'])}
-              className="group inline-flex h-9 w-max items-center justify-center rounded-md text-[#586689] bg-transparent px-4 py-2 text-[16px] font-medium transition-colors hover:bg-gray-100 hover:text-[#F98618] focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-none data-[state=open]:bg-none dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-none max-lg:hidden"
+            <Link
+              to="/work-flow"
+              className={cn(
+                "group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-[16px] font-medium transition-colors hover:bg-gray-100 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-none data-[state=open]:bg-none dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-none max-lg:hidden hover:text-[#F98618]",
+                isHomePage === true && "text-gray-500",
+                isInsightsPage === true && "text-white",
+                isWorkflowPage && "text-[#F98618]"
+              )}
             >
               Work Flow
-            </a>
-            <a
-              href="#"
-              className="group inline-flex h-9 w-max items-center justify-center rounded-md text-[#586689] text-[16px] bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-[#F98618] focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-100/50 data-[state=open]:bg-gray-100/50 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-gray-800/50 max-lg:hidden"
+            </Link>
+            <Link
+              to="/insights"
+              className={cn(
+                "group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-[16px] font-medium transition-colors hover:bg-gray-100 hover:text-[#F98618] focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-none data-[state=open]:bg-none dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-none max-lg:hidden",
+                isHomePage === true && "text-gray-500",
+                isWorkflowPage && "text-white",
+                isInsightsPage === true && "text-[#F98618]"
+              )}
             >
               Insights
-            </a>
+            </Link>
           </Flex>
 
           <Sheet>
@@ -59,53 +94,71 @@ export const Navbar = () => {
               </Button>
             </SheetTrigger>
             <SheetContent side="right">
-              <a href="#" className="mr-6 hidden lg:flex">
+              <Link to="/" className="mr-6 hidden lg:flex">
                 <img
                   src="/logo/logowithtext.svg"
                   alt="Logo"
                   className="h-12 w-34"
                 />
-              </a>
+              </Link>
               <div className="grid gap-2 py-6">
-                <a
-                  href="#"
+                <Link
+                  to="/"
                   className="flex w-full items-center py-2 text-lg font-semibold"
                 >
                   Home
-                </a>
-                <a
-                  href="#"
+                </Link>
+                <Link
+                  to="/work-flow"
                   className="flex w-full items-center py-2 text-lg font-semibold"
                 >
-                  About
-                </a>
-                <a
-                  href="#"
+                  Work Flow
+                </Link>
+                <Link
+                  to="/insights"
                   className="flex w-full items-center py-2 text-lg font-semibold"
                 >
-                  Services
-                </a>
-                <a
-                  href="#"
+                  Insights
+                </Link>
+                <Link
+                  to="/price"
                   className="flex w-full items-center py-2 text-lg font-semibold"
                 >
-                  Contact
-                </a>
+                  Price
+                </Link>
+                <Link
+                  to="/login"
+                  className="flex w-full items-center py-2 text-lg font-semibold"
+                >
+                  Login
+                </Link>
               </div>
             </SheetContent>
           </Sheet>
         </Flex>
 
         <Center className="ml-auto hidden lg:flex gap-3">
-          <a
-            href="#"
-            className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-[#586689] text-[16px]  text-sm font-medium transition-colors hover:bg-gray-100 hover:text-[#F98618] focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-100/50 data-[state=open]:bg-gray-100/50 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-gray-800/50"
+          <Link
+            to="/pricing"
+            onClick={() => navigate("/pricing")}
+            className={cn(
+              "group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-[16px] font-medium transition-colors hover:bg-gray-100 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-none data-[state=open]:bg-none dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-none max-lg:hidden hover:text-[#F98618]",
+              isHomePage === true && "text-gray-500",
+              isInsightsPage === true && "text-white",
+
+              isWorkflowPage && "text-white"
+            )}
           >
             Pricing
-          </a>
+          </Link>
           <Box
             onClick={() => navigate("/login")}
-            className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-[#586689] text-[16px]  text-sm font-medium transition-colors hover:bg-gray-100 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-100/50 data-[state=open]:bg-gray-100/50 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-gray-800/50 cursor-pointer hover:text-[#F98618]"
+            className={cn(
+              "group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-[16px] font-medium transition-colors hover:bg-gray-100 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-none data-[state=open]:bg-none dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-none max-lg:hidden hover:text-[#F98618] cursor-pointer",
+              isHomePage === true && "text-gray-500",
+              isWorkflowPage && "text-white",
+              isInsightsPage === true && "text-white"
+            )}
           >
             Login
           </Box>
