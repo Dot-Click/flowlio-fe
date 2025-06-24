@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 export const WorkflowdDetails = () => {
   return (
-    <Center className="max-w-6xl border max-lg:w-full flex-col mx-auto h-full overflow-hidden bg-white px-2 py-12">
+    <Center className="max-w-6xl max-lg:w-full flex-col mx-auto h-full overflow-hidden bg-white px-2 py-12">
       <Center className={`gap-8 py-12 px-4 max-sm:flex-col max-sm:items-start`}>
         <Box className="flex-1 max-w-md ">
           <Box className={cn(`text-5xl text-gray-800 mb-4`)}>

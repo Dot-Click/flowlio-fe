@@ -6,7 +6,8 @@ import { Flex } from "@/components/ui/flex";
 import { Center } from "@/components/ui/center";
 import { Link, useNavigate, useLocation } from "react-router";
 import { cn } from "@/lib/utils";
-import { FC } from "react";
+import { FC, useEffect, useRef } from "react";
+import { gsap } from "gsap";
 
 interface NavbarProps {
   isWorkflow?: boolean;
@@ -22,13 +23,73 @@ export const Navbar: FC<NavbarProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const navbarRef = useRef<HTMLDivElement>(null);
 
   const isHomePage = isHome || location.pathname === "/";
   const isWorkflowPage = isWorkflow || location.pathname === "/work-flow";
   const isInsightsPage = isInsights || location.pathname === "/insights";
 
+  useEffect(() => {
+    if (navbarRef.current) {
+      // Initial animation
+      gsap.fromTo(
+        navbarRef.current,
+        {
+          y: -100,
+          opacity: 0,
+        },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          ease: "power3.out",
+        }
+      );
+
+      // Text animation for navigation items
+      const navItems = navbarRef.current.querySelectorAll("a, button");
+      gsap.fromTo(
+        navItems,
+        {
+          y: 20,
+          opacity: 0,
+        },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          stagger: 0.1,
+          ease: "back.out(1.7)",
+          delay: 0.3,
+        }
+      );
+
+      // Logo animation
+      const logo = navbarRef.current.querySelector("img");
+      if (logo) {
+        gsap.fromTo(
+          logo,
+          {
+            scale: 0.8,
+            rotation: -5,
+            opacity: 0,
+          },
+          {
+            scale: 1,
+            rotation: 0,
+            opacity: 1,
+            duration: 1.2,
+            ease: "elastic.out(1, 0.3)",
+            delay: 0.1,
+          }
+        );
+      }
+    }
+  }, []);
+
   return (
     <Box
+      ref={navbarRef}
       className={cn(
         "relative w-full z-40",
         isWorkflowPage && "bg-[#161616]",
