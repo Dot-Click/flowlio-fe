@@ -20,6 +20,7 @@ export const Navbar: FC<NavbarProps> = ({
   isHome = false,
   isWorkflow = false,
   isInsights = false,
+  isPricing = false,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,7 +29,7 @@ export const Navbar: FC<NavbarProps> = ({
   const isHomePage = isHome || location.pathname === "/";
   const isWorkflowPage = isWorkflow || location.pathname === "/work-flow";
   const isInsightsPage = isInsights || location.pathname === "/insights";
-
+  const isPricingPage = isPricing || location.pathname === "/pricing";
   useEffect(() => {
     if (navbarRef.current) {
       // Initial animation
@@ -154,46 +155,61 @@ export const Navbar: FC<NavbarProps> = ({
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right">
-              <Link to="/" className="mr-6 hidden lg:flex">
-                <img
-                  src="/logo/logowithtext.svg"
-                  alt="Logo"
-                  className="h-12 w-34"
-                />
-              </Link>
-              <div className="grid gap-2 py-6">
-                <Link
-                  to="/"
-                  className="flex w-full items-center py-2 text-lg font-semibold"
-                >
-                  Home
+            <SheetContent side="top" className="px-6">
+              <Flex className="items-start justify-between px-12">
+                <Link to="/" className="mt-6 -ml-12">
+                  <img
+                    src="/logo/logowithtext.svg"
+                    alt="Logo"
+                    className="h-12 w-34"
+                  />
                 </Link>
-                <Link
-                  to="/work-flow"
-                  className="flex w-full items-center py-2 text-lg font-semibold"
-                >
-                  Work Flow
-                </Link>
-                <Link
-                  to="/insights"
-                  className="flex w-full items-center py-2 text-lg font-semibold"
-                >
-                  Insights
-                </Link>
-                <Link
-                  to="/price"
-                  className="flex w-full items-center py-2 text-lg font-semibold"
-                >
-                  Price
-                </Link>
-                <Link
-                  to="/login"
-                  className="flex w-full items-center py-2 text-lg font-semibold"
-                >
-                  Login
-                </Link>
-              </div>
+
+                <div className="grid gap-2 py-6">
+                  <Link
+                    to="/"
+                    className={cn(
+                      "flex w-full items-center py-2 text-lg font-semibold",
+                      isHomePage && "text-[#F98618]"
+                    )}
+                  >
+                    Home
+                  </Link>
+                  <Link
+                    to="/work-flow"
+                    className={cn(
+                      "flex w-full items-center py-2 text-lg font-semibold",
+                      isWorkflowPage && "text-[#F98618]"
+                    )}
+                  >
+                    Work Flow
+                  </Link>
+                  <Link
+                    to="/insights"
+                    className={cn(
+                      "flex w-full items-center py-2 text-lg font-semibold",
+                      isInsightsPage && "text-[#F98618]"
+                    )}
+                  >
+                    Insights
+                  </Link>
+                  <Link
+                    to="/pricing"
+                    className={cn(
+                      "flex w-full items-center py-2 text-lg font-semibold",
+                      isPricingPage && "text-[#F98618]"
+                    )}
+                  >
+                    Price
+                  </Link>
+                  <Link
+                    to="/login"
+                    className="flex w-full items-center py-2 text-lg font-semibold"
+                  >
+                    Login
+                  </Link>
+                </div>
+              </Flex>
             </SheetContent>
           </Sheet>
         </Flex>
