@@ -21,14 +21,14 @@ export const CalendarPopOver = () => {
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          size="icon"
           variant="outline"
-          className="ml-auto hidden max-[950px]:flex"
+          className="border border-gray-100 max-md:ml-auto"
         >
-          <CalendarArrowDown />
+          <CalendarArrowDown className="text-[#1797B9]" />
+          Monthly
         </Button>
       </PopoverTrigger>
-      <PopoverContent side="left" className="min-w-fit min-[950px]:hidden">
+      <PopoverContent side="bottom" className="max-w-full">
         <Calendar
           mode="range"
           selected={selected}

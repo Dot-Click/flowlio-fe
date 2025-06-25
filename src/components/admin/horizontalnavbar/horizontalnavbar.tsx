@@ -2,7 +2,7 @@ import { NotificationsDropdown } from "./notificationsdropdown";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { UserProfile } from "../../common/userprofile";
 import { ProjectSelector } from "./projectselector";
-import { FaqDropdown } from "./faqdropdown";
+// import { FaqDropdown } from "./faqdropdown";
 import { Box } from "@/components/ui/box";
 import { SearchBox } from "./searchbox";
 
@@ -16,10 +16,10 @@ export const HorizontalNavbar = () => {
         src="https://github.com/shadcn.png"
         description="Monday, June 14, 2025"
       />
-      <ProjectSelector selectTriggerClassname="min-w-[18rem] justify-self-center max-md:min-w-full" />
+      <ProjectSelector selectTriggerClassname="min-w-[12rem] justify-self-center max-md:min-w-full" />
       <SearchBox />
       <NotificationsDropdown />
-      <FaqDropdown className="max-md:hidden" />
+      {/* <FaqDropdown className="max-md:hidden" /> */}
     </Box>
   );
 };

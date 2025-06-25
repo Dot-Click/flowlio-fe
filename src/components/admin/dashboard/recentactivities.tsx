@@ -61,15 +61,12 @@ export const RecentActivities: FC<BoxProps> = ({ className, ...props }) => {
   ];
 
   return (
-    <ComponentWrapper className={cn("p-5 rounded-lg", className)} {...props}>
-      <Stack>
+    <ComponentWrapper className={cn(" rounded-lg", className)} {...props}>
+      <Stack className="p-4 relative overflow-hidden">
         <h1 className="text-lg font-medium"> Recent Activities</h1>
-        <img
-          src="/general/curved-border-activities.svg"
-          className="mt-2 mb-5"
-          alt="curved"
-        />
-        <Box className="max-h-[28rem] overflow-auto scroll scroll space-y-5">
+
+        <Box className="w-full h-0.5 bg-gray-200 rounded-full absolute top-14 left-0"></Box>
+        <Box className="max-h-[21rem] overflow-auto scroll scroll space-y-5 mt-5">
           {activitiesContent.map(({ activity, date, user }, key) => (
             <Link key={key} to={"#"} className="group block">
               <Flex className="items-start pl-1">

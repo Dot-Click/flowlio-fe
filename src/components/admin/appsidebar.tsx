@@ -5,7 +5,6 @@ import {
   SidebarGroup,
   SidebarHeader,
   SidebarFooter,
-  SidebarTrigger,
   SidebarContent,
   SidebarMenuSub,
   SidebarMenuItem,
@@ -76,21 +75,21 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
           isCompact={state === "collapsed" && !isMobile}
           className={state === "collapsed" ? "m-auto" : undefined}
           containerClassName={cn(
-            "bg-gray-300/30 py-5 rounded-md",
+            "bg-[#F8FAFB] py-5 rounded-md",
             state === "collapsed" && !isMobile
               ? "py-2 inset-0 bg-transparent"
-              : "justify-center!"
+              : "justify-start! ml-2"
           )}
         />
 
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <SidebarTrigger
+              {/* <SidebarTrigger
                 className={`ml-auto -mr-6 cursor-pointer ${
                   state === "collapsed" ? "rotate-180" : ""
                 }`}
-              />
+              /> */}
             </TooltipTrigger>
             <TooltipContent className="mb-2">
               <p>{state === "collapsed" ? "Open" : "Close"}</p>
@@ -150,18 +149,18 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                         >
                           <CollapsibleTrigger
                             asChild
-                            className={isActive ? "bg-gray-300/50" : ""}
+                            className={isActive ? "bg-[#1797B9]" : ""}
                           >
                             <Link
                               className="min-w-full min-h-10 flex justify-between"
                               to={item.url}
                             >
-                              <Center className="gap-2">
+                              <Center className="gap-2 bg-red-400">
                                 {renderIcon(
                                   item.icon,
                                   `${
                                     state === "collapsed" ? "ml-1" : undefined
-                                  }`
+                                  } `
                                 )}
                                 <span
                                   className={
@@ -252,7 +251,11 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                       </Collapsible>
                     ) : (
                       <SidebarMenuButton
-                        className={isActive ? "bg-gray-300/50" : ""}
+                        className={
+                          isActive
+                            ? "bg-[#1797B9] text-white fill-white hover:bg-[#1797B9]/70 hover:text-white rounded-full"
+                            : ""
+                        }
                         tooltip={{
                           children: (
                             <span className="capitalize text-[14px]">
@@ -273,8 +276,8 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                               state === "collapsed" && !is768 ? "m-auto" : ""
                             } ${
                               index === 0 && state !== "collapsed"
-                              // ? "transform rotate-180"
-                              // : ""
+                                ? "transform rotate-180"
+                                : ""
                             }`
                           )}
 

@@ -10,10 +10,10 @@ export const SearchBox: React.FC<{ className?: string }> = ({ className }) => {
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className="rounded-full h-[2.5rem] text-gray-500 hover:bg-white! hover:text-gray-500"
+          className="rounded-full h-[2.5rem] w-md max-lg:w-full text-gray-500 hover:bg-white! hover:text-gray-500 border-none items-center justify-start"
         >
-          <span className="max-md:hidden">Search...</span>
           <RiSearch2Line />
+          <h1 className="max-md:hidden">Search...</h1>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] top-20" withoutCloseButton>

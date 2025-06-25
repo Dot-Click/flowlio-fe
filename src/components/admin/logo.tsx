@@ -26,14 +26,14 @@ export const Logo: React.FC<LogoProps> = ({
         )}
       >
         <motion.img
-          src="/logo/logo-compact.svg"
+          src="/logo/logo.png"
           animate={{ rotate: isCompact ? 0 : 360 }}
           transition={{ duration: 0.4, ease: "easeInOut" }}
           className={cn("w-7", isCompact && "m-aut", className)}
         />
         <motion.img
-          src="/logo/logo-text.svg"
-          className={cn("max-w-22", className)}
+          src="/logo/logotext.png"
+          className={cn("max-w-26 h-12 -ml-3", className)}
           transition={{ duration: 0.3, ease: "easeInOut" }}
           animate={{
             display: isCompact ? "none" : "block",

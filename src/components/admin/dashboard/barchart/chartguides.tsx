@@ -7,16 +7,16 @@ export const ChartGuides: FC<FlexProps> = ({ ...props }) => {
   return (
     <Flex {...props}>
       <Center className="gap-1">
-        <Box className="bg-green-500 rounded-full p-1" />
-        <h1 className="text-xs">Completed</h1>
+        <Box className="bg-[#3f53b5] rounded-full p-1" />
+        <h1 className="text-xs">Completed Tasks</h1>
       </Center>
       <Center className="gap-1">
         <Box className="bg-yellow-400 rounded-full p-1" />
-        <h1 className="text-xs">In-Progress</h1>
+        <h1 className="text-xs">In Progress Tasks</h1>
       </Center>
       <Center className="gap-1">
         <Box className="bg-red-500 rounded-full p-1" />
-        <h1 className="text-xs">Delayed</h1>
+        <h1 className="text-xs">Delayed Tasks</h1>
       </Center>
     </Flex>
   );

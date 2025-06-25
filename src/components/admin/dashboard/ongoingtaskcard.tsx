@@ -39,7 +39,7 @@ export const OngoingTaskCard: FC<OngoingTaskCardProps> = ({
         )}
         {...props}
       >
-        <Stack className="bg-zinc-200 p-4 rounded-md gap-6">
+        <Stack className="bg-[#EAEFFA] p-4 rounded-md gap-6">
           <Flex className="justify-between flex-wrap">
             <Box className="bg-black p-2 rounded-full">
               <PanelLeftOpen className="text-white size-4" />

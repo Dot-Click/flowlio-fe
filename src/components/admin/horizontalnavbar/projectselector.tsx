@@ -15,7 +15,10 @@ export const ProjectSelector: React.FC<{
   return (
     <Select>
       <SelectTrigger
-        className={cn("rounded-full min-h-10", selectTriggerClassname)}
+        className={cn(
+          "rounded-full min-h-10 border border-gray-200",
+          selectTriggerClassname
+        )}
       >
         <SelectValue placeholder="Select Project" />
       </SelectTrigger>

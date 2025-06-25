@@ -22,7 +22,7 @@ export const Hero = () => {
         </Box>
       </Center>
 
-      <Center className="-mt-2 px-2">
+      <Center className="-mt-2 px-2 relative z-[40]">
         <Stack className="text-center max-sm:w-full justify-between items-center">
           <Box className="max-w-2xl max-sm:w-full text-6xl max-sm:text-3xl font-[100] text-[#333333]">
             Work

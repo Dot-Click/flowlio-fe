@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Stack } from "@/components/ui/stack";
 import { Flex } from "@/components/ui/flex";
 import { useMediaQuery } from "usehooks-ts";
-import { ListChecks } from "lucide-react";
 import { useMemo, type FC } from "react";
 import { cn } from "@/lib/utils";
 
@@ -18,7 +17,7 @@ export const OngoingTasks: FC<BoxProps> = ({ className, ...props }) => {
   const { state, isMobile } = useSidebar();
 
   const carouselMaxWidth = useMemo(() => {
-    const sidebarWidth = state === "collapsed" ? 82 : 256;
+    const sidebarWidth = state === "collapsed" ? 82 : 136;
 
     if (isMobile) return "100vw";
     if (is950) return `calc(90vw - ${sidebarWidth}px)`;
@@ -28,18 +27,15 @@ export const OngoingTasks: FC<BoxProps> = ({ className, ...props }) => {
   }, [isMobile, is950, is1154, state]);
 
   return (
-    <ComponentWrapper className={cn("p-5 rounded-lg", className)} {...props}>
+    <ComponentWrapper
+      className={cn("p-5 rounded-lg overflow-hidden", className)}
+      {...props}
+    >
       <Stack className="gap-5 items-center">
         <Flex className="justify-start mr-auto">
-          <ListChecks />
+          <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
           <h1 className="text-lg font-medium">Ongoing Tasks</h1>
         </Flex>
-
-        <img
-          src="/general/curved-border 1.svg"
-          className="mt-2 opacity-80"
-          alt="curved border"
-        />
 
         <EmblaCarousel
           withOutDots
