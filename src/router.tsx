@@ -22,6 +22,7 @@ import HomePage from "./pages/home.page";
 import { WorkFlowPage } from "./pages/workflow.page";
 import { InsightsPage } from "./pages/insights.page";
 import { PricingPage } from "./pages/pricing.page";
+import ProjectsPage from "./pages/projects.page";
 
 export const Router = () => {
   return (
@@ -43,6 +44,7 @@ export const Router = () => {
         </Route>
 
         <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route element={<ProjectsPage />} path="project" />
           <Route element={<UserManagementPage />} path="user-management" />
           <Route element={<TaskManagementPage />} path="task-management" />
           <Route element={<MyTaskPage />} path="task-management/my-task" />

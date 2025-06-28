@@ -22,12 +22,8 @@ const DashboardPage = () => {
           <RecentActivities className="w-full" />
         </Stack>
       </Flex>
+
       <TimeModal />
-      {/* <img
-        src="/dashboard/clock.svg"
-        className="absolute bottom-0 right-12 size-10"
-        alt="curved"
-      /> */}
     </Stack>
   );
 };
