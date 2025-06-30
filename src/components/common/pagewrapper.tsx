@@ -6,7 +6,7 @@ export const PageWrapper: FC<BoxProps> = ({ className, children }) => {
   return (
     <Box
       className={cn(
-        "bg-gray-100 border-[2px] rounded-xl border-white p-1 min-h-screen",
+        "bg-[#F8FAFB] border-[2px] rounded-xl border-white p-1 min-h-screen",
         className
       )}
     >

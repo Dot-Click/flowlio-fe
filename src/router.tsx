@@ -13,7 +13,6 @@ import { SettingsPage } from "./pages/settings.page";
 import { CommentsPage } from "./pages/comments.page";
 import DashboardPage from "./pages/dashboard.page";
 import { IssuesPage } from "./pages/issues.page";
-import { MyTaskPage } from "./pages/mytask.page";
 import { NotFound } from "./pages/notfound.page";
 import SigninPage from "./pages/signin.page";
 import InboxPage from "./pages/inbox.page";
@@ -23,6 +22,8 @@ import { WorkFlowPage } from "./pages/workflow.page";
 import { InsightsPage } from "./pages/insights.page";
 import { PricingPage } from "./pages/pricing.page";
 import ProjectsPage from "./pages/projects.page";
+import CreateProjectPage from "./pages/createproject.page";
+import CreateTaskPage from "./pages/createtask.page";
 
 export const Router = () => {
   return (
@@ -44,14 +45,20 @@ export const Router = () => {
         </Route>
 
         <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route
+            element={<CreateProjectPage />}
+            path="project/create-project"
+          />
+          <Route
+            element={<CreateTaskPage />}
+            path="task-management/create-task"
+          />
           <Route element={<ProjectsPage />} path="project" />
-          <Route element={<UserManagementPage />} path="user-management" />
           <Route element={<TaskManagementPage />} path="task-management" />
-          <Route element={<MyTaskPage />} path="task-management/my-task" />
+          <Route element={<UserManagementPage />} path="user-management" />
           <Route element={<AiAssistPage />} path="ai-assist" />
           <Route element={<CommentsPage />} path="comments" />
           <Route element={<SettingsPage />} path="settings" />
-          <Route element={<MyTaskPage />} path="my-task" />
           <Route element={<IssuesPage />} path="issues" />
           <Route element={<InboxPage />} path="inbox" />
           <Route index element={<DashboardPage />} />

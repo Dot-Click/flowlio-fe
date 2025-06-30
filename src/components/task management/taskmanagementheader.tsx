@@ -1,325 +1,116 @@
-import { DownloadIcon } from "lucide-react";
-import autoTable from "jspdf-autotable";
-import { FC, ReactNode, useState } from "react";
+import { ChevronDown, CirclePlus } from "lucide-react";
+import { PageWrapper } from "../common/pagewrapper";
 import { Button } from "../ui/button";
+import { Center } from "../ui/center";
+import { Stack } from "../ui/stack";
+import KanbanBoard, { initialTasks, Task } from "./kanbanboard";
 import { Flex } from "../ui/flex";
-import { format } from "date-fns";
-import { Box } from "../ui/box";
-import { jsPDF } from "jspdf";
-import { Calendar } from "../ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { addDays } from "date-fns";
-import { DateRange } from "react-day-picker";
+import { Search } from "lucide-react";
+import { Input } from "../ui/input";
+import { useState } from "react";
+import { useNavigate } from "react-router";
+import { DropdownMenu } from "../ui/dropdown-menu";
+import { DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { DropdownMenuContent } from "../ui/dropdown-menu";
+import { DropdownMenuCheckboxItem } from "../ui/dropdown-menu";
 
-export interface TaskManagementHeaderProps {
-  children?: ReactNode;
-}
+export const TaskManagementHeader = () => {
+  // const [globalFilter, setGlobalFilter] = useState("");
+  const navigate = useNavigate();
+  // const [range, setRange] = useState<DateRange | undefined>({
+  //   from: new Date(),
+  //   to: new Date(),
+  // });
 
-const TaskManagementHeader: FC<TaskManagementHeaderProps> = ({ children }) => {
-  const [date, setDate] = useState<DateRange | undefined>({
-    from: new Date(),
-    to: addDays(new Date(), 30),
-  });
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
 
-  const generatePDF = () => {
-    // Create new PDF document
-    const doc = new jsPDF();
-    let yPos = 20;
-    const margin = 20;
-    const pageWidth = doc.internal.pageSize.width;
-
-    // Add title
-    doc.setFontSize(20);
-    doc.text("Task Management Report", pageWidth / 2, yPos, {
-      align: "center",
-    });
-    yPos += 10;
-
-    doc.setFontSize(12);
-    doc.text(
-      `Generated on: ${format(new Date(), "PPP")}`,
-      pageWidth / 2,
-      yPos,
-      { align: "center" }
-    );
-    yPos += 10;
-
-    // Add date range if selected
-    if (date?.from && date?.to) {
-      doc.text(
-        `Report Period: ${format(date.from, "PPP")} - ${format(
-          date.to,
-          "PPP"
-        )}`,
-        pageWidth / 2,
-        yPos,
-        { align: "center" }
-      );
-    }
-    yPos += 20;
-
-    // Project Information
-    doc.setFontSize(16);
-    doc.text("Project Information", margin, yPos);
-    yPos += 10;
-
-    const projectData = [
-      ["Project Name", "some project name"],
-      ["Client Name", "carmella"],
-      ["Job Number", "#23"],
-      ["Start Date", "Feb 1, 2025"],
-      ["End Date", "Apr 1, 2025"],
-      ["Address", "TenStack University of Lagos"],
-    ];
-
-    autoTable(doc, {
-      startY: yPos,
-      head: [],
-      body: projectData,
-      theme: "plain",
-      styles: { fontSize: 10 },
-      columnStyles: {
-        0: { fontStyle: "bold", cellWidth: 40 },
-        1: { cellWidth: 100 },
-      },
-      margin: { left: margin },
-      didDrawPage: function (data: any) {
-        yPos = data.cursor.y + 20;
-      },
-    });
-
-    // Schedule Information
-    doc.setFontSize(16);
-    doc.text("Schedule Information", margin, yPos);
-    yPos += 10;
-
-    const scheduleData = [
-      ["Schedule Name", "Foundation Plan"],
-      ["Location", "Down Town Sector C"],
-      ["Start Date", "Jan 1, 2025"],
-      ["End Date", "Jun 1, 2025"],
-    ];
-
-    autoTable(doc, {
-      startY: yPos,
-      head: [],
-      body: scheduleData,
-      theme: "plain",
-      styles: { fontSize: 10 },
-      columnStyles: {
-        0: { fontStyle: "bold", cellWidth: 40 },
-        1: { cellWidth: 100 },
-      },
-      margin: { left: margin },
-      didDrawPage: function (data: any) {
-        yPos = data.cursor.y + 20;
-      },
-    });
-
-    // Tasks Table
-    doc.setFontSize(16);
-    doc.text("Tasks Overview", margin, yPos);
-    yPos += 10;
-
-    const tasksHead = [
-      [
-        "Task Name",
-        "Status",
-        "Submitted By",
-        "Start Date",
-        "End Date",
-        "Location",
-      ],
-    ];
-
-    // Filter tasks based on date range if selected
-    const allTasks = [
-      [
-        "Foundation Plan",
-        "Completed",
-        "carmella",
-        "Jan 1, 2025",
-        "Jun 1, 2025",
-        "Sector A",
-      ],
-      [
-        "Electrical Work",
-        "Ongoing",
-        "Silas22",
-        "Feb 1, 2025",
-        "Jul 1, 2025",
-        "Sector B",
-      ],
-      ["Plumbing", "Pending", "John", "Mar 1, 2025", "Aug 1, 2025", "Sector C"],
-    ];
-
-    // Filter tasks based on date range
-    const tasksData =
-      date?.from && date?.to
-        ? allTasks.filter((task) => {
-            const taskStartDate = new Date(task[3]);
-            const taskEndDate = new Date(task[4]);
-            return taskStartDate >= date.from! && taskEndDate <= date.to!;
-          })
-        : allTasks;
-
-    autoTable(doc, {
-      startY: yPos,
-      head: tasksHead,
-      body: tasksData,
-      theme: "striped",
-      styles: { fontSize: 9, cellPadding: 2 },
-      headStyles: {
-        fillColor: [41, 128, 185],
-        textColor: 255,
-        fontStyle: "bold",
-      },
-      columnStyles: {
-        0: { cellWidth: 30 },
-        1: { cellWidth: 25 },
-        2: { cellWidth: 30 },
-        3: { cellWidth: 25 },
-        4: { cellWidth: 25 },
-        5: { cellWidth: 25 },
-      },
-      margin: { left: margin, right: margin },
-      didDrawPage: function (data: any) {
-        yPos = data.cursor.y + 20;
-        // Re-add the header on new pages
-        if (data.pageCount > 1) {
-          doc.setFontSize(16);
-          doc.text("Tasks Overview (continued)", margin, 20);
-        }
-      },
-    });
-
-    // Start Materials & Equipment on new page
-    doc.addPage();
-    yPos = 20;
-
-    // Materials and Equipment
-    doc.setFontSize(16);
-    doc.text("Materials & Equipment", margin, yPos);
-    yPos += 10;
-
-    const materialsHead = [["Item Type", "Description", "Location", "Code"]];
-    const materialsData = [
-      ["Material", "Cement", "Storage A", "MAT001"],
-      ["Material", "Steel Bars", "Storage B", "MAT002"],
-      ["Equipment", "Crane", "Site 1", "EQP001"],
-      ["Equipment", "Excavator", "Site 2", "EQP002"],
-    ];
-
-    autoTable(doc, {
-      startY: yPos,
-      head: materialsHead,
-      body: materialsData,
-      theme: "striped",
-      styles: { fontSize: 9, cellPadding: 2 },
-      headStyles: {
-        fillColor: [41, 128, 185],
-        textColor: 255,
-        fontStyle: "bold",
-      },
-      columnStyles: {
-        0: { cellWidth: 35 },
-        1: { cellWidth: 50 },
-        2: { cellWidth: 35 },
-        3: { cellWidth: 35 },
-      },
-      margin: { left: margin, right: margin },
-      didDrawPage: function (data: any) {
-        yPos = data.cursor.y;
-        // Re-add the header on new pages
-        if (data.pageCount > 1) {
-          doc.setFontSize(16);
-          doc.text("Materials & Equipment (continued)", margin, 20);
-        }
-      },
-    });
-
-    // Footer
-    const pageCount = doc.getNumberOfPages();
-    doc.setFontSize(8);
-
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.text(
-        `Page ${i} of ${pageCount}`,
-        doc.internal.pageSize.width / 2,
-        doc.internal.pageSize.height - 10,
-        { align: "center" }
-      );
-    }
-
-    // Save the PDF
-    doc.save("Project-Management-Report.pdf");
-  };
-
+  const [search, setSearch] = useState("");
+  // Filter tasks by search query (task name or project name)
+  const filteredTasks = tasks.filter(
+    (task) =>
+      task.title.toLowerCase().includes(search.toLowerCase()) ||
+      task.project.toLowerCase().includes(search.toLowerCase())
+  );
   return (
-    <Box className="border-3 border-white rounded-2xl bg-[#F8FAFB] p-6 mt-6">
-      <Flex className="justify-between max-md:flex-col items-start gap-6">
-        <Box>
-          <h1 className="text-3xl font-medium capitalize">Task Management</h1>
-          <p className="text-gray-500 mt-1 text-sm">
-            Efficiently track, assign, and monitor tasks to ensure smooth
-            workflow and productivity.
-          </p>
-        </Box>
-
-        <Flex className="items-center gap-4">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={"outline"}
-                className={cn(
-                  "w-[300px] justify-start text-left font-normal",
-                  !date && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {date?.from ? (
-                  date.to ? (
-                    <>
-                      {format(date.from, "LLL dd, y")} -{" "}
-                      {format(date.to, "LLL dd, y")}
-                    </>
-                  ) : (
-                    format(date.from, "LLL dd, y")
-                  )
-                ) : (
-                  <span>Pick a date range</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
-                initialFocus
-                mode="range"
-                defaultMonth={date?.from}
-                selected={date}
-                onSelect={setDate}
-                numberOfMonths={2}
-              />
-            </PopoverContent>
-          </Popover>
+    <PageWrapper className="mt-6 p-4">
+      <Stack className="gap-4 py-2">
+        <Center className="justify-between">
+          <Stack className="gap-1">
+            <h1 className="text-black text-3xl max-sm:text-xl font-medium">
+              Task Management
+            </h1>
+            <h1 className={`max-sm:text-sm text-[#616572]`}>
+              Efficiently track, assign, and monitor tasks to ensure smooth
+              workflow and productivity.
+            </h1>
+          </Stack>
 
           <Button
-            className="bg-green-600 cursor-pointer hover:bg-green-500"
-            onClick={generatePDF}
-            size={"lg"}
+            variant="outline"
+            className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
+            onClick={() => navigate("/dashboard/task-management/create-task")}
           >
-            <DownloadIcon />
-            Download Report
+            <CirclePlus className="fill-white text-black size-5" />
+            Create Task
           </Button>
-        </Flex>
-      </Flex>
+        </Center>
 
-      {children}
-    </Box>
+        <Flex className="justify-between max-sm:items-start flex-col lg:flex-row items-center w-full gap-4">
+          <Flex className={cn("relative md:ml-auto w-full")}>
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5.5 w-5.5 text-gray-300 font-light" />
+            <Input
+              type="search"
+              placeholder="Search Project"
+              // value={globalFilter}
+              // onChange={(event) => setGlobalFilter(event.target.value)}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full md:w-115 lg:w-80 xl:w-[400px] py-4 pl-10 bg-white h-10  placeholder:text-black  placeholder:text-[15px] border border-gray-100 rounded-md focus:outline-none active:border-gray-200 focus:ring-0 focus:ring-offset-0"
+            />
+          </Flex>
+
+          <Flex className="max-md:w-full justify-between">
+            {/* <CalendarComponent
+              range={range}
+              setRange={(range) => setRange(range as DateRange)}
+            /> */}
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  aria-haspopup="dialog"
+                  className={cn(
+                    "ml-auto cursor-pointer bg-white border border-gray-200 rounded-full h-10 w-32 text-black shadow-none flex p-3 gap-8"
+                  )}
+                >
+                  <ChevronDown />
+                  Users
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuCheckboxItem>User 1</DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem>User 2</DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem>User 3</DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem>User 4</DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem>User 5</DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem>User 6</DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem>User 7</DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem>User 8</DropdownMenuCheckboxItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </Flex>
+        </Flex>
+      </Stack>
+
+      <KanbanBoard
+        tasks={tasks}
+        setTasks={setTasks}
+        // search={search}
+        // setSearch={setSearch}
+        filteredTasks={filteredTasks}
+      />
+    </PageWrapper>
   );
 };
-
-export { TaskManagementHeader };

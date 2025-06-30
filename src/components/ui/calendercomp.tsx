@@ -7,8 +7,8 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Calendar as CalendarIcon } from "lucide-react";
 import { DateRange } from "react-day-picker";
+import { CalendarIcon } from "../customeIcons";
 
 // CalendarComponent (unchanged)
 interface CalendarComponentProps {
@@ -25,9 +25,9 @@ export const CalendarComponent: React.FC<CalendarComponentProps> = ({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className="cursor-pointer flex items-center space-x-2 px-4 py-2 rounded-lg shadow-sm"
+          className="cursor-pointer flex items-center space-x-2 px-4 py-2 rounded-md border border-gray-200 h-10"
         >
-          <CalendarIcon className="size-5" />
+          <CalendarIcon />
           <span>
             {range?.from ? format(range.from, "MMM d, yyyy") : "Start Date"} -{" "}
             {range?.to ? format(range.to, "MMM d, yyyy") : "End Date"}
