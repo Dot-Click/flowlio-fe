@@ -1,182 +1,172 @@
-import {
-  ColumnDef,
-  flexRender,
-  SortingState,
-  useReactTable,
-  VisibilityState,
-  getCoreRowModel,
-  getSortedRowModel,
-  ColumnFiltersState,
-  getFilteredRowModel,
-  getPaginationRowModel,
-} from "@tanstack/react-table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenuCheckboxItem,
-} from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableRow,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-} from "@/components/ui/table";
+import { ColumnDef } from "@tanstack/react-table";
+import { Center } from "@/components/ui/center";
+import { Box } from "../ui/box";
+import { Flex } from "../ui/flex";
+import { ReusableTable } from "../reusable/reusabletable";
+import { format } from "date-fns";
 import {
   Tooltip,
-  TooltipTrigger,
   TooltipContent,
   TooltipProvider,
+  TooltipTrigger,
 } from "../ui/tooltip";
-import * as React from "react";
-import { UserManagementHeaderProps } from "./usermanagementheader";
+import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Filter, Search, Send, Trash2 } from "lucide-react";
-import { CalendarComponent } from "../ui/calendercomp";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Center } from "../ui/center";
-import { Switch } from "../ui/switch";
-import { Flex } from "../ui/flex";
-import { format } from "date-fns";
-import { Box } from "../ui/box";
+import { FaRegTrashAlt } from "react-icons/fa";
 
 const data: Data[] = [
   {
-    email: "mikewing@gmail.com",
-    status: "inactived",
-    name: "ken Stack",
-    company: "ken99",
+    id: "1",
     role: "Manager",
-    addedon: new Date(),
-  },
-  {
-    email: "mikewing@gmail.com",
-    name: "ken Stack",
     status: "active",
-    company: "Abe45",
-    role: "Manager",
-    addedon: new Date(),
+    projectname: "Mike Wangi",
+    email: "mikewangi@gmail.com",
+    addedon: new Date("2025-03-01T00:00:00"),
+    company: "XYZ Corp",
   },
   {
-    email: "mikewing@gmail.com",
-    name: "ken Stack",
+    id: "2",
+    role: "Manager",
+    projectname: "Mike Wangi",
+    status: "invited",
+    email: "Abe45@gmail.com",
+    addedon: new Date("2025-06-01T00:00:00"),
+    company: "XYZ Corp",
+  },
+  {
+    id: "3",
+    role: "Manager",
+    projectname: "Mike tyson",
+    status: "active",
+    email: "Monserrat44@gmail.com",
+    addedon: new Date("2025-02-01T00:00:00"),
+    company: "XYZ Corp",
+  },
+  {
+    id: "4",
+    role: "Field Engineer",
+    projectname: "Mike Wangi",
+    status: "invited",
+    email: "Silas22@gmail.com",
+    addedon: new Date("2025-06-01T00:00:00"),
+    company: "XYZ Corp",
+  },
+  {
+    id: "5",
+    role: "Field Engineer",
+    projectname: "Mike Wangi",
+    status: "active",
+    email: "carmella@gmail.com",
+    addedon: new Date("2025-04-01T00:00:00"),
+    company: "XYZ Corp",
+  },
+  {
+    id: "6",
+    role: "Field Engineer",
+    projectname: "Mike Wangi",
     status: "deactivated",
-    company: "Monserrat44",
-    role: "Manager",
-    addedon: new Date(),
+    email: "carmella@gmail.com",
+    addedon: new Date("2025-05-11T00:00:00"),
+    company: "XYZ Corp",
   },
   {
-    email: "mikewing@gmail.com",
-    name: "ken Stack",
+    id: "7",
+    role: "Sub Contractor",
+    projectname: "Mike Wangi",
     status: "active",
-    company: "Silas22",
-    role: "Manager",
-    addedon: new Date(),
+    email: "carmella@gmail.com",
+    addedon: new Date("2025-06-01T00:00:00"),
+    company: "XYZ Corp",
   },
   {
-    email: "mikewing@gmail.com",
-    name: "ken Stack",
-    status: "inactived",
-    company: "carmella",
-    role: "Manager",
-    addedon: new Date(),
+    id: "8",
+    role: "Sub Contractor",
+    projectname: "Mike Wangi",
+    status: "invited",
+    email: "carmella@gmail.com",
+    addedon: new Date("2025-06-01T00:00:00"),
+    company: "XYZ Corp",
   },
   {
-    email: "mikewing@gmail.com",
-    name: "ken Stack",
-    status: "active",
-    company: "carmella",
-    role: "Manager",
-    addedon: new Date(),
-  },
-  {
-    email: "mikewing@gmail.com",
-    name: "ken Stack",
+    id: "9",
+    role: "Sub Contractor",
+    projectname: "Mike Wangi",
     status: "deactivated",
-    company: "carmella",
-    role: "Manager",
-    addedon: new Date(),
-  },
-  {
-    email: "mikewing@gmail.com",
-    name: "ken Stack",
-    status: "active",
-    company: "carmella",
-    role: "Manager",
-    addedon: new Date(),
-  },
-  {
-    email: "mikewing@gmail.com",
-    name: "ken Stack",
-    status: "inactived",
-    company: "carmella",
-    role: "Manager",
-    addedon: new Date(),
+    email: "carmella@gmail.com",
+    addedon: new Date("2025-06-01T00:00:00"),
+    company: "XYZ Corp",
   },
 ];
 
 export type Data = {
-  email: string;
-  status: "active" | "inactived" | "deactivated";
-  company: string;
-  name: string;
+  id: string;
   role: string;
+  status: "active" | "invited" | "deactivated";
+  email: string;
+  company: string;
+  projectname: string;
   addedon: Date;
 };
 
-export const columns = (
-  goToStep: (step: UserManagementHeaderProps["step"]) => void
-): ColumnDef<Data>[] => [
+export const columns: ColumnDef<Data>[] = [
   {
-    accessorKey: "name",
-    header: () => <Box className="text-black text-center">Name</Box>,
+    accessorKey: "projectname",
+    header: () => <Box className="text-black pl-4">Name</Box>,
     cell: ({ row }) => (
-      <Center className="lowercase text-center gap-2">
-        <Avatar>
-          <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+      <Flex className="capitalize pl-4 w-30 max-sm:w-full">
+        <Avatar className="size-8">
+          <AvatarImage src="https://github.com/shadcn.png" />
           <AvatarFallback>CN</AvatarFallback>
         </Avatar>
-        {row.original.name}
-      </Center>
+
+        {row.original.projectname.length > 14
+          ? row.original.projectname.slice(0, 14) + "..."
+          : row.original.projectname}
+      </Flex>
     ),
   },
-
   {
     accessorKey: "email",
-    header: () => <Box className="text-center text-black">Email</Box>,
-    cell: ({ row }) => {
-      return <Box className="text-center">{row.original.email}</Box>;
-    },
+    header: () => (
+      <Box className="text-black text-start w-26 max-lg:w-full font-medium">
+        Email
+      </Box>
+    ),
+    cell: ({ row }) => (
+      <Flex className="items-start justify-start gap-2  w-26 max-lg:w-full">
+        <Box className="text-sm ">{row.original.email}</Box>
+      </Flex>
+    ),
   },
   {
     accessorKey: "company",
-    header: () => <Box className="text-center text-black">Company</Box>,
+    header: () => <Box className="text-black text-center">Company</Box>,
     cell: ({ row }) => (
-      <Box className="lowercase text-center">{row.original.company}</Box>
+      <Box className="captialize text-center">{row.original.company}</Box>
     ),
   },
 
   {
     accessorKey: "role",
-    header: () => <Box className="text-center text-black">Role</Box>,
+    header: () => <Box className="text-center text-black">role</Box>,
     cell: ({ row }) => {
-      return <Box className="text-center">{row.original.role}</Box>;
+      return <Center className="text-center">{row.original.role} </Center>;
     },
   },
-
   {
     accessorKey: "addedon",
     header: () => <Box className="text-center text-black">Added On</Box>,
     cell: ({ row }) => {
-      const addedon = row.original.addedon as Date;
-      return (
-        <Box className="text-center">
-          {format(new Date(addedon), "MMM d,yyyy")}
-        </Box>
-      );
+      const addedon = row.original.addedon;
+      try {
+        return (
+          <Box className="text-center">{format(addedon, "MMM d, yyyy")}</Box>
+        );
+      } catch (error) {
+        console.error("Invalid date:", addedon);
+        console.log(error);
+        return <Box className="text-center">Invalid Date</Box>;
+      }
     },
   },
 
@@ -186,47 +176,37 @@ export const columns = (
     cell: ({ row }) => {
       const status = row.original.status as
         | "active"
-        | "inactived"
+        | "invited"
         | "deactivated";
 
       const statusStyles: Record<typeof status, { text: string; dot: string }> =
         {
-          deactivated: {
-            text: "text-red-800 bg-red-100 border-red-800",
-            dot: "bg-red-600",
-          },
-          inactived: {
-            text: "text-blue-600 bg-blue-100 border-blue-600",
-            dot: "bg-blue-600",
-          },
           active: {
-            text: "text-green-600 bg-green-100/50 border-green-600",
-            dot: "bg-green-600",
+            text: "text-white bg-[#00A400] border-none rounded-full",
+            dot: "bg-white",
+          },
+          invited: {
+            text: "text-white bg-[#005FA4] border-none rounded-full",
+            dot: "bg-white",
+          },
+          deactivated: {
+            text: "text-white bg-[#A50403] border-none rounded-full",
+            dot: "bg-white",
           },
         };
 
       return (
         <Center>
-          <Center
-            className={`rounded-md capitalize w-32 h-10 flex items-center text-center gap-2 border ${statusStyles[status].text}`}
+          <Flex
+            className={`rounded-md capitalize w-30 h-10 gap-2 border justify-center items-center ${statusStyles[status].text}`}
           >
-            <Box
-              className={`w-2 h-2 rounded-full ${statusStyles[status].dot}`}
-            />
-            {status}
-          </Center>
-        </Center>
-      );
-    },
-  },
-
-  {
-    accessorKey: "project hours",
-    header: () => <Box className="text-center text-black">Project Hours</Box>,
-    cell: () => {
-      return (
-        <Center>
-          <Switch defaultChecked className="cursor-pointer" />
+            <Center className="gap-2">
+              <Flex
+                className={`w-2 h-2 items-start rounded-full ${statusStyles[status].dot}`}
+              />
+              <h1>{status}</h1>
+            </Center>
+          </Flex>
         </Center>
       );
     },
@@ -238,34 +218,17 @@ export const columns = (
     cell: () => {
       return (
         <Center className="space-x-2">
-          {" "}
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="outline"
-                  className="bg-accent cursor-pointer hover:bg-gray-200"
-                  onClick={() => goToStep("user management")}
+                  className="bg-[#A50403] border-none w-9 h-9 hover:bg-[#A50403]/80 cursor-pointer rounded-md "
                 >
-                  <Send />
+                  <FaRegTrashAlt className="text-white fill-white size-4 " />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent className="mb-1.5">
-                <p>Go To User</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="bg-red-100 border border-red-200 hover:bg-red-200"
-                >
-                  <Trash2 className="text-red-600" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="mb-1.5">
+              <TooltipContent className="mb-2">
                 <p>Delete User</p>
               </TooltipContent>
             </Tooltip>
@@ -276,149 +239,18 @@ export const columns = (
   },
 ];
 
-export const UserManagementTable: React.FC<UserManagementHeaderProps> = ({
-  goToStep,
-}) => {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
-
-  const table = useReactTable({
-    data,
-    columns: columns(goToStep),
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
-  });
+export const UserManagementTable = () => {
+  const handleStepChange = (step: string) => {
+    console.log("step:", step);
+  };
 
   return (
-    <Box className="w-full mt-4">
-      <Flex className="justify-between py-4 max-md:flex-col items-start">
-        <Flex className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <Input
-            type="search"
-            placeholder="Search..."
-            value={
-              (table.getColumn("company")?.getFilterValue() as string) ?? ""
-            }
-            onChange={(event) =>
-              table.getColumn("company")?.setFilterValue(event.target.value)
-            }
-            className="pl-10 bg-white"
-          />
-        </Flex>
-
-        <Flex className="max-md:w-full justify-between">
-          <CalendarComponent />
-          <DropdownMenu>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="ml-auto cursor-pointer"
-                    >
-                      <Filter />
-                      Filter
-                    </Button>
-                  </DropdownMenuTrigger>
-                </TooltipTrigger>
-                <TooltipContent className="mb-0.5">
-                  <p>Filter User Table</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </Flex>
-      </Flex>
-
-      <Box className="rounded-md border">
-        <Table>
-          <TableHeader className="bg-accent">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </Box>
-    </Box>
+    <ReusableTable
+      data={data}
+      columns={columns}
+      searchInput={false}
+      onRowClick={(row) => console.log("Row clicked:", row.original)}
+      goToStep={handleStepChange}
+    />
   );
 };

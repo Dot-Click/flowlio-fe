@@ -995,7 +995,8 @@
   /* margin-top: 6px; */
   background: #ffffff;
   border: 1px solid #cacaca;
-  border-radius: 7px;
+  border-radius: 27px;
+  margin-bottom: 2px;
   /* width: 300px; */
   outline: none;
   padding: 18.5px 14px 18.5px 58px;
@@ -1036,10 +1037,13 @@
 .react-tel-input .flag-dropdown {
   position: absolute;
   /* top: 0; */
-  top: 37%;
+  top: 47%;
   bottom: 0;
   padding: 0;
   border-radius: 3px 0 0 3px;
+  margin-left: 4px;
+  height: 32px;
+  width: 55px;
 }
 
 .react-tel-input .flag-dropdown:hover,

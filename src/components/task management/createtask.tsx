@@ -37,12 +37,6 @@ const formSchema = z.object({
   projectName: z.string().min(2, {
     message: "Project Name must be at least 2 characters.",
   }),
-  projectNumber: z.string().min(1, {
-    message: "Project Number is required.",
-  }),
-  clientName: z.string().min(2, {
-    message: "Client Name must be at least 2 characters.",
-  }),
   startDate: z.string().min(1, {
     message: "Start Date is required.",
   }),
@@ -52,10 +46,10 @@ const formSchema = z.object({
   assignedProject: z.string().min(1, {
     message: "Please select a project to assign.",
   }),
-  projectDescription: z.string().optional(),
-  address: z.string().min(2, {
-    message: "Address must be at least 2 characters.",
+  project: z.string().min(1, {
+    message: "Please select a project to assign.",
   }),
+  projectDescription: z.string().optional(),
 });
 
 export const CreateTask = () => {
@@ -68,13 +62,11 @@ export const CreateTask = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       projectName: "",
-      projectNumber: "",
-      clientName: "",
       startDate: "",
       endDate: "",
       assignedProject: "",
+      project: "",
       projectDescription: "",
-      address: "",
     },
   });
 
@@ -107,16 +99,16 @@ export const CreateTask = () => {
   });
 
   return (
-    <PageWrapper className="mt-6 px-4 py-6">
+    <PageWrapper className="mt-6 p-6">
       <Box className="flex items-center gap-2" onClick={() => navigate(-1)}>
         <IoArrowBack /> Back
       </Box>
 
-      <Center className="justify-between mt-6">
+      <Center className="justify-between mt-4">
         <Stack className="gap-0">
-          <h1 className="text-black text-xl font-medium">Create New Task</h1>
+          <h1 className="text-black text-xl font-medium">New Task</h1>
           <h1 className="text-gray-500">
-            Fill the details to create a new project
+            Create and assign tasks to keep your team aligned and productive.
           </h1>
         </Stack>
 
@@ -140,7 +132,7 @@ export const CreateTask = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Project Name:
+                        Task Name:
                         <span className="text-red-500 text-sm">*</span>
                       </FormLabel>
                       <FormControl>
@@ -148,7 +140,7 @@ export const CreateTask = () => {
                           className="bg-white rounded-full placeholder:text-gray-400"
                           size="lg"
                           type="text"
-                          placeholder="Enter Project Name"
+                          placeholder="Enter Task Name"
                           {...field}
                         />
                       </FormControl>
@@ -159,22 +151,33 @@ export const CreateTask = () => {
 
                 <FormField
                   control={form.control}
-                  name="projectNumber"
+                  name="assignedProject"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Project Number:
+                        Assign Project:
                         <span className="text-red-500 text-sm">*</span>
                       </FormLabel>
-                      <FormControl>
-                        <Input
-                          className="bg-white rounded-full placeholder:text-gray-400"
-                          placeholder="Enter Project Number"
-                          type="number"
-                          size="lg"
-                          {...field}
-                        />
-                      </FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl className="w-full h-12">
+                          <SelectTrigger
+                            size="lg"
+                            className="bg-gray-100 border border-gray-200 rounded-full w-full h-12 placeholder:text-gray-100"
+                          >
+                            <SelectValue placeholder="Select Project" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="w-full">
+                          <SelectItem value="pro1">Project 1</SelectItem>
+                          <SelectItem value="pro2">Project 2</SelectItem>
+                          <SelectItem value="pro3">Project 3</SelectItem>
+                          <SelectItem value="pro4">Project 4</SelectItem>
+                          <SelectItem value="pro5">Project 5</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -189,14 +192,14 @@ export const CreateTask = () => {
                   >
                     <img
                       src="/dashboard/upload.svg"
-                      alt="project-image"
+                      alt="task-image"
                       className="size-12"
                     />
                     <p className="text-gray-800 text-lg font-medium underline">
                       Click to upload PDF
                     </p>
                     <p className="text-gray-600 text-sm font-medium">
-                      Overall Project Schedule
+                      Overall Task Schedule
                     </p>
                     <input {...getInputProps()} />
                   </Center>
@@ -232,51 +235,6 @@ export const CreateTask = () => {
                   </Box>
                 )}
               </Box>
-            </Box>
-
-            <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
-              <FormField
-                control={form.control}
-                name="projectDescription"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Project Description:</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        className="bg-white rounded-md placeholder:text-gray-400 h-32"
-                        placeholder="Enter Project Description"
-                        rows={6}
-                        cols={18}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="mt-4 -mb-4 max-md:mt-0 max-md:-mb-0">
-                      Address:
-                      <span className="text-red-500 text-sm">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        className="bg-white rounded-full placeholder:text-gray-400"
-                        size="lg"
-                        type="text"
-                        placeholder="Enter Address"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </Box>
 
             <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
@@ -325,10 +283,48 @@ export const CreateTask = () => {
 
               <FormField
                 control={form.control}
+                name="project"
+                render={({ field }) => (
+                  <FormItem className="mb-1">
+                    <FormLabel>
+                      Project:
+                      <span className="text-red-500 text-sm">*</span>
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl className="w-full h-12">
+                        <SelectTrigger
+                          size="lg"
+                          className="bg-gray-100 border border-gray-200 rounded-full w-full h-12 placeholder:text-gray-100"
+                        >
+                          <SelectValue placeholder="Finalize Client Proposal Draft" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="w-full">
+                        <SelectItem value="pro1">User 1</SelectItem>
+                        <SelectItem value="pro2">User 2</SelectItem>
+                        <SelectItem value="pro3">User 3</SelectItem>
+                        <SelectItem value="pro4">User 4</SelectItem>
+                        <SelectItem value="pro5">User 5</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </Box>
+
+            <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1 mt-3 max-sm:mt-0">
+              <FormField
+                control={form.control}
                 name="endDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>End Date</FormLabel>
+                    <FormLabel className="-mb-6 max-sm:mb-0">
+                      End Date:
+                    </FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl className="h-12">
@@ -366,61 +362,22 @@ export const CreateTask = () => {
                   </FormItem>
                 )}
               />
-            </Box>
 
-            <Box className="grid grid-cols-2 gap-6">
               <FormField
                 control={form.control}
-                name="clientName"
+                name="projectDescription"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Client Name:
-                      <span className="text-red-500 text-sm">*</span>
-                    </FormLabel>
+                    <FormLabel>Task Description:</FormLabel>
                     <FormControl>
-                      <Input
-                        className="bg-white rounded-full placeholder:text-gray-400"
-                        size="lg"
-                        type="text"
-                        placeholder="Enter Client Name"
+                      <Textarea
+                        className="bg-white rounded-md placeholder:text-gray-400 h-32"
+                        placeholder="Enter Task Description"
+                        rows={6}
+                        cols={18}
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="assignedProject"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Assign Project:
-                      <span className="text-red-500 text-sm">*</span>
-                    </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl className="w-full h-11">
-                        <SelectTrigger
-                          size="lg"
-                          className="bg-gray-100 border border-gray-100 rounded-full w-full h-11"
-                        >
-                          <SelectValue placeholder="Select User" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="w-full">
-                        <SelectItem value="pro1">User 1</SelectItem>
-                        <SelectItem value="pro2">User 2</SelectItem>
-                        <SelectItem value="pro3">User 3</SelectItem>
-                        <SelectItem value="pro4">User 4</SelectItem>
-                        <SelectItem value="pro5">User 5</SelectItem>
-                      </SelectContent>
-                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

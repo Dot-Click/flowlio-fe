@@ -31,12 +31,12 @@ export const navItems: NavItem[] = [
     title: "Task Management",
     icon: <TaskManagementIcon />,
   },
+  {
+    url: "/dashboard/user-management",
+    title: "User Management",
+    icon: <LuUsers />,
+  },
 
-  // {
-  //   url: "/dashboard/cost-codes",
-  //   title: "Cost Codes",
-  //   icon: <UserRoundCog />,
-  // },
   {
     url: "/dashboard/comments",
     title: "Comments",
@@ -62,11 +62,7 @@ export const navItems: NavItem[] = [
     title: "Company Management",
     icon: <GoOrganization />,
   },
-  {
-    url: "/dashboard/user-management",
-    title: "User Management",
-    icon: <LuUsers />,
-  },
+
   {
     url: "/dashboard/inbox",
     title: "Inbox",

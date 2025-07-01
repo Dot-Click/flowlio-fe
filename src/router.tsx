@@ -2,7 +2,6 @@ import PasswordresetsucessPage from "./pages/passwordresetsuccess.page";
 import { CompanyManagementPage } from "./pages/companymanagement.page";
 import { AuthenticationLayout } from "./layouts/authentication.layout";
 import { TaskManagementPage } from "./pages/taskmanagement.page";
-import { UserManagementPage } from "./pages/usermanagement.page";
 import { DashboardLayout } from "./layouts/dashboard.layout";
 import { BrowserRouter, Route, Routes } from "react-router";
 import ResetpasswordPage from "./pages/resetpassword.page";
@@ -24,6 +23,8 @@ import { PricingPage } from "./pages/pricing.page";
 import ProjectsPage from "./pages/projects.page";
 import CreateProjectPage from "./pages/createproject.page";
 import CreateTaskPage from "./pages/createtask.page";
+import AddUserMembersPage from "./pages/addusermemebers.page";
+import UserManagementPage from "./pages/usermanagement.page";
 
 export const Router = () => {
   return (
@@ -52,6 +53,10 @@ export const Router = () => {
           <Route
             element={<CreateTaskPage />}
             path="task-management/create-task"
+          />
+          <Route
+            element={<AddUserMembersPage />}
+            path="user-management/add-user-members"
           />
           <Route element={<ProjectsPage />} path="project" />
           <Route element={<TaskManagementPage />} path="task-management" />

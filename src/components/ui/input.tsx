@@ -13,6 +13,7 @@ const inputVariants = cva(
         default: "h-9",
         lg: "h-12",
         sm: "h-8",
+        xl: "h-14",
       },
     },
     defaultVariants: {

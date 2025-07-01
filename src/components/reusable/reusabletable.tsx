@@ -31,19 +31,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Box } from "../ui/box";
 import { Flex } from "../ui/flex";
-import { CirclePlus, ListFilter, Search } from "lucide-react";
+import { ListFilter, Search } from "lucide-react";
 import { Input } from "../ui/input";
 import { CalendarComponent } from "../ui/calendercomp";
-import { Center } from "../ui/center";
-import { useNavigate } from "react-router";
 
 // Define the props interface for the reusable table
 export interface ReusableTableProps<TData> {
   data: TData[];
   enableSorting?: boolean;
   columns: ColumnDef<TData>[];
-  headerDescriptionWidth?: string;
-  headerDescription?: string;
   searchInput?: boolean;
   enableGlobalFilter?: boolean;
   enableColumnFilters?: boolean;
@@ -57,8 +53,6 @@ export interface ReusableTableProps<TData> {
 export const ReusableTable = <TData,>({
   data,
   columns,
-  headerDescriptionWidth = "w-full",
-  headerDescription = "Manage your data",
   searchInput = true,
   enableGlobalFilter = true,
   // onRowClick,
@@ -119,11 +113,10 @@ export const ReusableTable = <TData,>({
     }
   }, [range]);
 
-  const navigate = useNavigate();
   return (
-    <Box className="rounded-xl w-full px-4 py-6">
+    <Box className="rounded-xl w-full px-4 py-0">
       <Stack className="gap-4">
-        <Center className="justify-between">
+        {/* <Center className="justify-between">
           <Stack className="gap-1">
             <h1 className="text-black text-3xl max-sm:text-xl font-medium">
               Projects
@@ -141,7 +134,7 @@ export const ReusableTable = <TData,>({
             <CirclePlus className="fill-white text-black size-5" />
             Create New Project
           </Button>
-        </Center>
+        </Center> */}
 
         {enableGlobalFilter && (
           <Flex className="justify-between max-sm:items-start flex-col lg:flex-row items-center w-full">

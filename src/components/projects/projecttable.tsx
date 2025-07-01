@@ -299,9 +299,7 @@ export const ProjectTable = () => {
       data={data}
       columns={columns}
       searchInput={false}
-      headerDescription="Track and manage project efficiently."
       onRowClick={(row) => console.log("Row clicked:", row.original)}
-      headerDescriptionWidth="max-w-[600px] text-gray-500"
       goToStep={handleStepChange}
     />
   );

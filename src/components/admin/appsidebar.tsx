@@ -106,19 +106,30 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                   path.replace(/\/+$/, "").split("?")[0];
 
                 const currentPath = normalizePath(location.pathname);
-                const isActive = normalizePath(item.url) === currentPath;
+                const itemPath = normalizePath(item.url);
+                const isActive = itemPath === currentPath;
 
                 const theSubPath = item.subItems?.map((subItem) => subItem.url);
                 const isSubItemActive = theSubPath?.some(
                   (subPath) => normalizePath(subPath) === currentPath
                 );
 
+                // Check if current path includes the parent item's URL (for nested routes like dashboard/project/create-project)
+                const isParentActive =
+                  itemPath !== "/" &&
+                  itemPath !== "/dashboard" &&
+                  currentPath.startsWith(itemPath);
+
                 return (
                   <SidebarMenuItem key={item.title}>
                     {item.subItems ? (
                       <Collapsible className="group/collapsible">
                         <SidebarMenuButton
-                          className={isSubItemActive ? "bg-gray-300/50" : ""}
+                          className={
+                            isSubItemActive || isParentActive
+                              ? "bg-gray-300/50"
+                              : ""
+                          }
                           tooltip={{
                             className: "p-0",
                             children: (
@@ -149,13 +160,15 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                         >
                           <CollapsibleTrigger
                             asChild
-                            className={isActive ? "bg-[#1797B9]" : ""}
+                            className={
+                              isActive || isParentActive ? "bg-[#1797B9]" : ""
+                            }
                           >
                             <Link
                               className="min-w-full min-h-10 flex justify-between"
                               to={item.url}
                             >
-                              <Center className="gap-2 bg-red-400">
+                              <Center className="gap-2">
                                 {renderIcon(
                                   item.icon,
                                   `${
@@ -182,7 +195,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                         </SidebarMenuButton>
                         <CollapsibleContent
                           className={
-                            isSubItemActive
+                            isSubItemActive || isParentActive
                               ? "bg-gray-300/50 rounded-sm mt-1"
                               : ""
                           }
@@ -252,7 +265,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                     ) : (
                       <SidebarMenuButton
                         className={
-                          isActive
+                          isActive || isParentActive
                             ? "bg-[#1797B9] text-white fill-white hover:bg-[#1797B9]/70 hover:text-white rounded-full"
                             : ""
                         }

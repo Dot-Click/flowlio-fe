@@ -107,7 +107,7 @@ export const CreateProject = () => {
   });
 
   return (
-    <PageWrapper className="mt-6 px-4 py-6">
+    <PageWrapper className="mt-6 p-6">
       <Box className="flex items-center gap-2" onClick={() => navigate(-1)}>
         <IoArrowBack /> Back
       </Box>

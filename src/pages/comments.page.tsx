@@ -33,7 +33,6 @@ import {
 import { Filter, PencilLine, Search, Trash2, DownloadIcon } from "lucide-react";
 import { ComponentWrapper } from "@/components/common/componentwrapper";
 import { CalendarComponent } from "@/components/ui/calendercomp";
-import type { UserManagementStep } from "./usermanagement.page";
 import { UserProfile } from "@/components/common/userprofile";
 import { Center } from "@/components/ui/center";
 import { Button } from "@/components/ui/button";
@@ -45,11 +44,6 @@ import { faker } from "@faker-js/faker";
 import { format } from "date-fns";
 import * as React from "react";
 import { jsPDF } from "jspdf";
-
-export interface UserManagementHeaderProps {
-  steps: UserManagementStep[];
-  children?: React.ReactNode;
-}
 
 const data: Data[] = Array.from({ length: 10 }, () => ({
   profilePic: faker.image.avatar(),
