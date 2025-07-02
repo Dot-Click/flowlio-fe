@@ -1,7 +1,6 @@
 import { HorizontalNavbar } from "@/components/admin/horizontalnavbar/horizontalnavbar";
 import { AppSidebar, type NavItem } from "@/components/admin/appsidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { IoChatboxEllipsesOutline } from "react-icons/io5";
 import { IoCalendarOutline } from "react-icons/io5";
 import { IoSettingsOutline } from "react-icons/io5";
 import { LuWandSparkles } from "react-icons/lu";
@@ -38,25 +37,21 @@ export const navItems: NavItem[] = [
   },
 
   {
-    url: "/dashboard/comments",
-    title: "Comments",
-    icon: <IoChatboxEllipsesOutline />,
-  },
-  {
-    url: "/dashboard/issues",
-    title: "Issues",
-    icon: <TbReportSearch />,
-  },
-  {
-    url: "/dashboard/overall-schedule",
-    title: "Overall Schedule",
+    url: "/dashboard/calender",
+    title: "Calender",
     icon: <IoCalendarOutline />,
   },
   {
     url: "/dashboard/ai-assist",
-    title: "AI Assist",
+    title: "AI Assistance",
     icon: <LuWandSparkles />,
   },
+  {
+    url: "/dashboard/issues",
+    title: "Payment Links",
+    icon: <TbReportSearch />,
+  },
+
   {
     url: "/dashboard/company-management",
     title: "Company Management",

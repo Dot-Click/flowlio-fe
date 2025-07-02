@@ -7,13 +7,20 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AiAssitSidebar } from "@/components/ai assist/aiassistsidebar";
 import { AiAssistChat } from "@/components/ai assist/aiassistchat";
 import { Button } from "@/components/ui/button";
-import { Plus, Maximize } from "lucide-react";
 import { Stack } from "@/components/ui/stack";
 import { Flex } from "@/components/ui/flex";
 import { CSSProperties } from "react";
+import { useAiAssistChatStore } from "@/store/aiassistchat.store";
 
 export const AiAssistPage = () => {
   const modalProps = useGeneralModalDisclosure();
+  const { addChat, setActiveChat } = useAiAssistChatStore();
+
+  // Handler for New Chat button
+  const handleNewChat = () => {
+    const newId = addChat({ title: "New Chat", messages: [] });
+    setActiveChat(newId);
+  };
 
   return (
     <>
@@ -29,15 +36,23 @@ export const AiAssistPage = () => {
         >
           <AiAssitSidebar />
 
-          <SidebarInset>
-            <Stack className="p-3 h-full justify-between">
-              <Flex className="justify-end">
-                <Button className="" size={"lg"}>
-                  <Plus className="size-4" />
+          <SidebarInset className="bg-gradient-to-r from-[#F2F2F2] to-[#f0f2f7]">
+            <Stack className="p-3 h-16 justify-between bg-gradient-to-r from-white to-indigo-50">
+              <Flex className="justify-end gap-2">
+                <Button
+                  className="rounded-full h-11 w-32"
+                  size={"lg"}
+                  onClick={handleNewChat}
+                >
+                  <img
+                    src="/dashboard/newchaticon.svg"
+                    alt="plus"
+                    className="size-4"
+                  />
                   New Chat
                 </Button>
 
-                <Button
+                {/* <Button
                   size={"lg"}
                   variant={"outline"}
                   onClick={() => {
@@ -85,11 +100,11 @@ export const AiAssistPage = () => {
                 >
                   <Maximize className="size-4" />
                   Full Screen
-                </Button>
+                </Button> */}
               </Flex>
-
-              <AiAssistChat />
             </Stack>
+
+            <AiAssistChat />
           </SidebarInset>
         </SidebarProvider>
       </ComponentWrapper>

@@ -25,6 +25,7 @@ import CreateProjectPage from "./pages/createproject.page";
 import CreateTaskPage from "./pages/createtask.page";
 import AddUserMembersPage from "./pages/addusermemebers.page";
 import UserManagementPage from "./pages/usermanagement.page";
+import CalenderPage from "./pages/calender.page";
 
 export const Router = () => {
   return (
@@ -61,6 +62,7 @@ export const Router = () => {
           <Route element={<ProjectsPage />} path="project" />
           <Route element={<TaskManagementPage />} path="task-management" />
           <Route element={<UserManagementPage />} path="user-management" />
+          <Route element={<CalenderPage />} path="calender" />
           <Route element={<AiAssistPage />} path="ai-assist" />
           <Route element={<CommentsPage />} path="comments" />
           <Route element={<SettingsPage />} path="settings" />

@@ -100,8 +100,12 @@ export const CreateTask = () => {
 
   return (
     <PageWrapper className="mt-6 p-6">
-      <Box className="flex items-center gap-2" onClick={() => navigate(-1)}>
-        <IoArrowBack /> Back
+      <Box
+        className="flex items-center gap-2 w-20 cursor-pointer transition-all duration-300  hover:bg-gray-200 rounded-full hover:p-2 "
+        onClick={() => navigate(-1)}
+      >
+        <IoArrowBack />
+        <p className="text-black">Back</p>
       </Box>
 
       <Center className="justify-between mt-4">

@@ -4,7 +4,7 @@ import {
   SidebarMenu,
   SidebarGroup,
   SidebarHeader,
-  SidebarTrigger,
+  // SidebarTrigger,
   SidebarContent,
   SidebarMenuItem,
   SidebarMenuButton,
@@ -13,74 +13,166 @@ import {
 import { AiAssistLogo } from "./aiassistlogo";
 import { Flex } from "../ui/flex";
 import { cn } from "@/lib/utils";
+import { Stack } from "../ui/stack";
+import { Pencil, Trash, EllipsisVertical } from "lucide-react";
+import { useState } from "react";
+import { useAiAssistChatStore } from "@/store/aiassistchat.store";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../ui/dropdown-menu";
 
 export const AiAssitSidebar: React.FC<{ className?: string }> = ({
   className,
 }) => {
   const { state } = useSidebar();
+  const { chats, activeChatId, setActiveChat, deleteChat, editChatTitle } =
+    useAiAssistChatStore();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+
+  const handleEdit = (id: string, currentTitle: string) => {
+    setEditingId(id);
+    setEditValue(currentTitle);
+  };
+  const handleEditSave = (id: string) => {
+    editChatTitle(id, editValue.trim() || "Untitled Chat");
+    setEditingId(null);
+    setEditValue("");
+  };
+  const handleEditCancel = () => {
+    setEditingId(null);
+    setEditValue("");
+  };
 
   return (
     <Sidebar
+      // **:data-[sidebar=sidebar]:bg-red-400
       className={cn(
-        "**:data-[sidebar=sidebar]:bg-black **:data-[sidebar=sidebar]:border-4 **:data-[sidebar=sidebar]:border-black **:data-[sidebar=sidebar]:text-white absolute mt-24 z-[1] **:data-[sidebar=sidebar]:rounded-l-lg  **:data-[sidebar=sidebar]:overflow-hidden inset-y-0 mb-1 ml-1",
+        "**:data-[sidebar=sidebar]:bg-[url('/dashboard/aisidebarimg.png')]  **:data-[sidebar=sidebar]:bg-center **:data-[sidebar=sidebar]:bg-cover **:data-[sidebar=sidebar]:text-white absolute mt-24 z-[1] **:data-[sidebar=sidebar]:rounded-l-lg  **:data-[sidebar=sidebar]:overflow-hidden inset-y-0 mb-1 ml-1",
         className
       )}
       collapsible="icon"
     >
-      <SidebarHeader className="relative mt-4 p-4">
+      <SidebarHeader className="relative p-6">
         <Flex className="justify-between items-center gap-2">
           <AiAssistLogo
             isCompact={state === "collapsed"}
             className={cn(
-              state === "collapsed" ? "hidden" : "max-w-[80%]",
+              state === "collapsed" ? "hidden" : "max-w-[70%]",
               "min-w-0"
             )}
           />
-          <SidebarTrigger
+          {/* <SidebarTrigger
             className={cn(
               "text-white bg-gray-100/20 hover:bg-gray-100/30",
-              state === "collapsed" ? "-ml-3 rotate-180" : "ml-auto"
+              state === "collapsed" ? "-ml-4 rotate-180" : "ml-auto"
             )}
-          />
+          /> */}
         </Flex>
 
-        <p
+        <Stack
           className={cn(
-            "text-gray-300 text-sm mt-2",
+            "text-gray-300 text-sm mt-2 gap-0",
             state === "collapsed" && "hidden"
           )}
         >
-          Your Smart Virtual Assistant
-        </p>
+          <h1 className="text-lg font-semibold text-white">AI Assistance</h1>
+          <h1 className="text-xs font-light text-white/90">
+            Your Smart Virtual Assistant
+          </h1>
+        </Stack>
         <hr className="border border-gray-700/70 mt-2" />
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
+        <SidebarGroup className="px-6">
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  className="cursor-pointer"
-                  tooltip={{ children: "Chat Title" }}
+              <SidebarMenuItem className="items-center flex-col gap-2">
+                <p
+                  className={cn(
+                    "bg-white/30 border border-white/80 text-white/90 rounded-full p-1 h-7 w-18 text-center cursor-pointer hover:bg-white/30 text-[12px]",
+                    state === "collapsed" && "hidden"
+                  )}
                 >
-                  <span
-                    className={state === "collapsed" ? "hidden" : undefined}
+                  Today
+                </p>
+                {chats.length === 0 ? (
+                  <p
+                    className={cn(
+                      "text-white/70 text-xs text-center mt-4",
+                      state === "collapsed" && "hidden"
+                    )}
                   >
-                    Chat Title
-                  </span>
-                </SidebarMenuButton>
-                <SidebarMenuButton
-                  asChild
-                  className="cursor-pointer"
-                  tooltip={{ children: "Chat Title" }}
-                >
-                  <span
-                    className={state === "collapsed" ? "hidden" : undefined}
-                  >
-                    Previous Chat
-                  </span>
-                </SidebarMenuButton>
+                    No chats yet.
+                  </p>
+                ) : (
+                  chats.map((chat) => (
+                    <Flex key={chat.id} className="items-center w-full group">
+                      <SidebarMenuButton
+                        asChild
+                        className={cn(
+                          "flex-1 cursor-pointer hover:bg-white/30 hover:text-white my-1 py-1 px-2 rounded-lg",
+                          chat.id === activeChatId &&
+                            " text-white font-semibold",
+                          state === "collapsed" && "hidden"
+                        )}
+                        tooltip={{ children: chat.title }}
+                        onClick={() => setActiveChat(chat.id)}
+                      >
+                        {editingId === chat.id ? (
+                          <form
+                            onSubmit={(e) => {
+                              e.preventDefault();
+                              handleEditSave(chat.id);
+                            }}
+                            className="flex items-center w-full"
+                          >
+                            <input
+                              className="bg-white/80 text-black rounded px-2 py-1 w-full text-xs outline-none"
+                              value={editValue}
+                              autoFocus
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onBlur={() => handleEditSave(chat.id)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Escape") handleEditCancel();
+                              }}
+                            />
+                          </form>
+                        ) : (
+                          <span className="truncate text-xs">{chat.title}</span>
+                        )}
+                      </SidebarMenuButton>
+                      {state !== "collapsed" && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              className="hover:bg-white/30 rounded p-1 ml-1"
+                              title="More actions"
+                            >
+                              <EllipsisVertical className="size-4 text-white" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => handleEdit(chat.id, chat.title)}
+                            >
+                              <Pencil className="size-4 mr-2" /> Rename
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => deleteChat(chat.id)}
+                              variant="destructive"
+                            >
+                              <Trash className="size-4 mr-2" /> Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </Flex>
+                  ))
+                )}
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>

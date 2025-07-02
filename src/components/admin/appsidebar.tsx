@@ -11,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuSubItem,
   SidebarGroupContent,
+  SidebarTrigger,
 } from "../ui/sidebar";
 import {
   Collapsible,
@@ -48,6 +49,7 @@ interface AppSidebarProps extends ComponentProps<typeof Sidebar> {
 }
 
 import { cloneElement } from "react";
+import { Flex } from "../ui/flex";
 
 const renderIcon = (icon: NavItem["icon"], className?: string) => {
   if (icon) {
@@ -85,11 +87,11 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              {/* <SidebarTrigger
-                className={`ml-auto -mr-6 cursor-pointer ${
-                  state === "collapsed" ? "rotate-180" : ""
+              <SidebarTrigger
+                className={`ml-auto -mr-6 cursor-pointer  ${
+                  state === "collapsed" ? "rotate-180 -mt-12" : " -mt-16"
                 }`}
-              /> */}
+              />
             </TooltipTrigger>
             <TooltipContent className="mb-2">
               <p>{state === "collapsed" ? "Open" : "Close"}</p>
@@ -97,7 +99,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
           </Tooltip>
         </TooltipProvider>
       </SidebarHeader>
-      <SidebarContent className="overflow-auto">
+      <SidebarContent className="overflow-auto mt-10">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -316,13 +318,20 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <Button className="bg-transparent text-black hover:text-white cursor-pointer border">
-          <LogOut
-            className={state === "collapsed" ? "m-auto size-4" : "size-4"}
-          />
-          <span className={state === "collapsed" ? "hidden" : undefined}>
-            Logout
-          </span>
+        <Button className="bg-transparent text-black hover:bg-transparent cursor-pointer border-none flex items-start justify-start gap-2 shadow-none">
+          <Flex className="gap-2">
+            <LogOut
+              color="red"
+              className={state === "collapsed" ? "m-auto size-4" : "size-4"}
+            />
+            <span
+              className={`${
+                state === "collapsed" ? "hidden" : undefined
+              } text-red-400`}
+            >
+              Logout
+            </span>
+          </Flex>
         </Button>
       </SidebarFooter>
     </Sidebar>

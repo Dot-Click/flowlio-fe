@@ -23,7 +23,7 @@ export const AiAssistLogo: FC<AiAssistLogoProps> = ({
     >
       <img
         alt="logo"
-        src="/general/planflowlogo.png"
+        src="/logo/dotvizion.svg"
         className={cn("max-w-34", className)}
       />
     </Flex>

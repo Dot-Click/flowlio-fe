@@ -15,7 +15,6 @@ import {
 import { FC, useCallback, useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Textarea } from "@/components/ui/textarea";
-import { IssuesHeaderProps } from "./issuesheader";
 import { Button } from "@/components/ui/button";
 import { Center } from "@/components/ui/center";
 import { Input } from "@/components/ui/input";
@@ -42,7 +41,7 @@ const formSchema = z.object({
   }),
 });
 
-export const CreateIssue: FC<IssuesHeaderProps> = ({ previous }) => {
+export const CreateIssue: FC = () => {
   const [preview, setPreview] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -199,7 +198,6 @@ export const CreateIssue: FC<IssuesHeaderProps> = ({ previous }) => {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    onClick={previous}
                     className="w-24 h-10 bg-white text-black cursor-pointer"
                     variant={"outline"}
                     type="button"
