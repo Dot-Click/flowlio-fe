@@ -1,4 +1,4 @@
-import InvoiceHeader from "@/components/invoices/invoiceheader";
+import { InvoiceHeader } from "@/components/invoices/invoiceheader";
 
 const InvoicePage = () => {
   return <InvoiceHeader />;
