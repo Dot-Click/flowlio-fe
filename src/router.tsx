@@ -12,7 +12,6 @@ import { CommentsPage } from "./pages/comments.page";
 import DashboardPage from "./pages/dashboard.page";
 import { NotFound } from "./pages/notfound.page";
 import SigninPage from "./pages/signin.page";
-import InboxPage from "./pages/inbox.page";
 import { UserLayout } from "./layouts/user.layout";
 import HomePage from "./pages/home.page";
 import { WorkFlowPage } from "./pages/workflow.page";
@@ -26,6 +25,7 @@ import UserManagementPage from "./pages/usermanagement.page";
 import CalenderPage from "./pages/calender.page";
 import { PaymentLinksPage } from "./pages/paymentlinks.page";
 import InvoicePage from "./pages/invoice.page";
+import SupportPage from "./pages/support.page";
 
 export const Router = () => {
   return (
@@ -67,7 +67,9 @@ export const Router = () => {
           <Route element={<CommentsPage />} path="comments" />
           <Route element={<SettingsPage />} path="settings" />
           <Route element={<PaymentLinksPage />} path="payment-links" />
-          <Route element={<InboxPage />} path="inbox" />
+          <Route element={<SupportPage />} path="support" />
+
+          {/* <Route element={<InboxPage />} path="inbox" /> */}
           <Route element={<InvoicePage />} path="invoice" />
           <Route index element={<DashboardPage />} />
           <Route path="*" element={<NotFound />} />

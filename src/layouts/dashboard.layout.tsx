@@ -4,7 +4,6 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { IoCalendarOutline } from "react-icons/io5";
 import { IoSettingsOutline } from "react-icons/io5";
 import { LuWandSparkles } from "react-icons/lu";
-import { HiOutlineInbox } from "react-icons/hi";
 import { TbInvoice, TbReportSearch } from "react-icons/tb";
 import type { CSSProperties } from "react";
 import { Box } from "@/components/ui/box";
@@ -12,6 +11,7 @@ import { LuUsers } from "react-icons/lu";
 import { Outlet } from "react-router";
 import { SquareKanban } from "lucide-react";
 import { GroupIcon, TaskManagementIcon } from "@/components/customeIcons";
+import { MessageCircleQuestion } from "lucide-react";
 
 export const navItems: NavItem[] = [
   {
@@ -58,10 +58,15 @@ export const navItems: NavItem[] = [
   },
 
   {
-    url: "/dashboard/inbox",
-    title: "Inbox",
-    icon: <HiOutlineInbox />,
+    url: "/dashboard/support",
+    title: "Support",
+    icon: <MessageCircleQuestion />,
   },
+  // {
+  //   url: "/dashboard/inbox",
+  //   title: "Inbox",
+  //   icon: <HiOutlineInbox />,
+  // },
   {
     url: "/dashboard/settings",
     title: "Settings",
