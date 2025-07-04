@@ -38,23 +38,29 @@ import { CalendarComponent } from "../ui/calendercomp";
 // Define the props interface for the reusable table
 export interface ReusableTableProps<TData> {
   data: TData[];
+  searchInput?: boolean;
   enableSorting?: boolean;
   columns: ColumnDef<TData>[];
-  searchInput?: boolean;
   enableGlobalFilter?: boolean;
   enableColumnFilters?: boolean;
+  searchClassName?: string;
+  filterClassName?: string;
   defaultSorting?: SortingState;
+  goToStep?: (step: string) => void;
+  enablePaymentLinksCalender?: boolean;
   onRowClick?: (row: Row<TData>) => void;
   defaultColumnVisibility?: VisibilityState;
   defaultColumnFilters?: ColumnFiltersState;
-  goToStep?: (step: string) => void;
 }
 
 export const ReusableTable = <TData,>({
   data,
   columns,
   searchInput = true,
+  enablePaymentLinksCalender = false,
   enableGlobalFilter = true,
+  searchClassName,
+  filterClassName,
   // onRowClick,
   defaultColumnVisibility = {},
   defaultSorting = [],
@@ -72,14 +78,14 @@ export const ReusableTable = <TData,>({
     data,
     columns,
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    onGlobalFilterChange: setGlobalFilter,
+    onRowSelectionChange: setRowSelection,
     getSortedRowModel: getSortedRowModel(),
+    onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    onGlobalFilterChange: setGlobalFilter,
+    getPaginationRowModel: getPaginationRowModel(),
     globalFilterFn: (
       row: Row<TData>,
       _columnId: string,
@@ -97,6 +103,7 @@ export const ReusableTable = <TData,>({
       rowSelection,
       globalFilter,
     },
+    enableRowSelection: true,
   });
 
   const [range, setRange] = React.useState<{ from?: Date; to?: Date }>({});
@@ -116,26 +123,6 @@ export const ReusableTable = <TData,>({
   return (
     <Box className="rounded-xl w-full px-4 py-0">
       <Stack className="gap-4">
-        {/* <Center className="justify-between">
-          <Stack className="gap-1">
-            <h1 className="text-black text-3xl max-sm:text-xl font-medium">
-              Projects
-            </h1>
-            <h1 className={`max-sm:text-sm ${headerDescriptionWidth}`}>
-              {headerDescription}
-            </h1>
-          </Stack>
-
-          <Button
-            variant="outline"
-            className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
-            onClick={() => navigate("/dashboard/project/create-project")}
-          >
-            <CirclePlus className="fill-white text-black size-5" />
-            Create New Project
-          </Button>
-        </Center> */}
-
         {enableGlobalFilter && (
           <Flex className="justify-between max-sm:items-start flex-col lg:flex-row items-center w-full">
             <Flex className={cn("relative", searchInput && "md:ml-auto")}>
@@ -145,12 +132,17 @@ export const ReusableTable = <TData,>({
                 placeholder="Search"
                 value={globalFilter}
                 onChange={(event) => setGlobalFilter(event.target.value)}
-                className="w-full md:w-115 lg:w-80 xl:w-[400px] py-4 pl-10 bg-white h-10  placeholder:text-black  placeholder:text-[15px] border border-gray-100 rounded-md focus:outline-none active:border-gray-200 focus:ring-0 focus:ring-offset-0"
+                className={cn(
+                  "w-full md:w-115 lg:w-80 xl:w-[400px] py-4 pl-10 bg-white h-10  placeholder:text-black  placeholder:text-[15px] border border-gray-100  focus:outline-none active:border-gray-200 focus:ring-0 focus:ring-offset-0",
+                  searchClassName
+                )}
               />
             </Flex>
 
             <Flex className="max-md:w-full justify-between">
-              <CalendarComponent range={range} setRange={setRange} />
+              {enablePaymentLinksCalender && (
+                <CalendarComponent range={range} setRange={setRange} />
+              )}
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -158,7 +150,8 @@ export const ReusableTable = <TData,>({
                     variant="ghost"
                     aria-haspopup="dialog"
                     className={cn(
-                      "ml-auto cursor-pointer bg-white border border-gray-200 rounded-md h-10 text-black shadow-none"
+                      "ml-auto cursor-pointer bg-white border border-gray-200 h-10 text-black shadow-none",
+                      filterClassName
                     )}
                   >
                     <ListFilter />

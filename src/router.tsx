@@ -1,5 +1,4 @@
 import PasswordresetsucessPage from "./pages/passwordresetsuccess.page";
-import { CompanyManagementPage } from "./pages/companymanagement.page";
 import { AuthenticationLayout } from "./layouts/authentication.layout";
 import { TaskManagementPage } from "./pages/taskmanagement.page";
 import { DashboardLayout } from "./layouts/dashboard.layout";
@@ -11,7 +10,6 @@ import { AiAssistPage } from "./pages/aiassist.page";
 import { SettingsPage } from "./pages/settings.page";
 import { CommentsPage } from "./pages/comments.page";
 import DashboardPage from "./pages/dashboard.page";
-import { IssuesPage } from "./pages/issues.page";
 import { NotFound } from "./pages/notfound.page";
 import SigninPage from "./pages/signin.page";
 import InboxPage from "./pages/inbox.page";
@@ -26,6 +24,8 @@ import CreateTaskPage from "./pages/createtask.page";
 import AddUserMembersPage from "./pages/addusermemebers.page";
 import UserManagementPage from "./pages/usermanagement.page";
 import CalenderPage from "./pages/calender.page";
+import { PaymentLinksPage } from "./pages/paymentlinks.page";
+import InvoicePage from "./pages/invoice.page";
 
 export const Router = () => {
   return (
@@ -66,15 +66,11 @@ export const Router = () => {
           <Route element={<AiAssistPage />} path="ai-assist" />
           <Route element={<CommentsPage />} path="comments" />
           <Route element={<SettingsPage />} path="settings" />
-          <Route element={<IssuesPage />} path="issues" />
+          <Route element={<PaymentLinksPage />} path="payment-links" />
           <Route element={<InboxPage />} path="inbox" />
+          <Route element={<InvoicePage />} path="invoice" />
           <Route index element={<DashboardPage />} />
           <Route path="*" element={<NotFound />} />
-
-          <Route
-            element={<CompanyManagementPage />}
-            path="company-management"
-          />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

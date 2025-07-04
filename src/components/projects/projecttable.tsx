@@ -299,6 +299,7 @@ export const ProjectTable = () => {
       data={data}
       columns={columns}
       searchInput={false}
+      enablePaymentLinksCalender={true}
       onRowClick={(row) => console.log("Row clicked:", row.original)}
       goToStep={handleStepChange}
     />

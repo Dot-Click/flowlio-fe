@@ -4,9 +4,8 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { IoCalendarOutline } from "react-icons/io5";
 import { IoSettingsOutline } from "react-icons/io5";
 import { LuWandSparkles } from "react-icons/lu";
-import { GoOrganization } from "react-icons/go";
 import { HiOutlineInbox } from "react-icons/hi";
-import { TbReportSearch } from "react-icons/tb";
+import { TbInvoice, TbReportSearch } from "react-icons/tb";
 import type { CSSProperties } from "react";
 import { Box } from "@/components/ui/box";
 import { LuUsers } from "react-icons/lu";
@@ -47,15 +46,15 @@ export const navItems: NavItem[] = [
     icon: <LuWandSparkles />,
   },
   {
-    url: "/dashboard/issues",
+    url: "/dashboard/payment-links",
     title: "Payment Links",
     icon: <TbReportSearch />,
   },
 
   {
-    url: "/dashboard/company-management",
-    title: "Company Management",
-    icon: <GoOrganization />,
+    url: "/dashboard/invoice",
+    title: "Invoices",
+    icon: <TbInvoice />,
   },
 
   {

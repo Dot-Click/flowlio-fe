@@ -39,7 +39,9 @@ export const GeneralModal: React.FC<GeneralModalProp> = ({
         withoutCloseButton={withoutCloseButton}
         className={cn(contentProps?.className)}
         {...contentProps}
-      />
+      >
+        {props.children}
+      </DialogContent>
     </Dialog>
   );
 };
