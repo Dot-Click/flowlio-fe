@@ -5,25 +5,23 @@ import { PieChart, Pie, Cell } from "recharts";
 import { ComponentWrapper } from "@/components/common/componentwrapper";
 import { Stack } from "@/components/ui/stack";
 import { Flex } from "@/components/ui/flex";
-import Img1 from "/dashboard/prostat1.svg";
-import Img2 from "/dashboard/prostat2.svg";
-import Img3 from "/dashboard/projstat3.svg";
 
-const data = [
-  { name: "Ongoing", value: 10.61, icon: Img2, color: "#FFE000" },
-  { name: "Delayed", value: 18.46, icon: Img3, color: "#F50057" },
-  { name: "Finished", value: 70.93, icon: Img1, color: "#3f53b5" },
-];
+type ProjectStatusPieChartProps = {
+  data: { name: string; value: number; icon: string; color: string }[];
+  title: string;
+};
 
-export const ProjectStatusPieChart: FC<BoxProps> = ({
-  className,
-  ...props
-}) => {
+export const ProjectStatusPieChart: FC<
+  BoxProps & ProjectStatusPieChartProps
+> = ({ className, data, title, ...props }) => {
   return (
-    <ComponentWrapper className={cn("p-4 max-md:w-full", className)} {...props}>
+    <ComponentWrapper
+      className={cn("px-6 py-4 max-md:w-full", className)}
+      {...props}
+    >
       <Stack className="gap-2 w-full">
         <Flex className="items-center justify-between">
-          <h1 className="text-lg font-medium">Project Status</h1>
+          <h1 className="text-lg font-medium">{title}</h1>
         </Flex>
 
         <Box className="max-sm:w-full flex flex-col max-md:justify-center max-md:items-center">

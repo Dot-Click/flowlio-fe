@@ -10,12 +10,10 @@ import { Box } from "@/components/ui/box";
 import { Link } from "react-router";
 import { cn } from "@/lib/utils";
 import type { FC } from "react";
-import img1 from "/dashboard/1.svg";
-import img2 from "/dashboard/2.svg";
-import img3 from "/dashboard/3.svg";
-import img4 from "/dashboard/4.svg";
+
 import { Stack } from "@/components/ui/stack";
-type Stat = {
+
+export type Stat = {
   // icon: React.ForwardRefExoticComponent<
   //   Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement> | string
   // >;
@@ -26,38 +24,12 @@ type Stat = {
   link: string;
 };
 
-export const Stats: FC<{ className?: string }> = ({ className }) => {
-  const stats: Stat[] = [
-    {
-      link: "/dashboard",
-      title: "Total Clients",
-      description: "Active users on the platform",
-      icon: img1,
-      count: "22",
-    },
-    {
-      link: "/dashboard",
-      title: "Active Projects",
-      description: "Ongoing client projects",
-      icon: img2,
-      count: "20",
-    },
-    {
-      link: "/dashboard",
-      title: "Hours Tracked",
-      description: "Time logged this week",
-      icon: img3,
-      count: "45",
-    },
-    {
-      link: "/dashboard",
-      title: "Pending Tasks",
-      description: "Tasks in progress",
-      icon: img4,
-      count: "48",
-    },
-  ];
-
+export const Stats: FC<{
+  className?: string;
+  classNameDescription?: string;
+  stats: Stat[];
+  isSuperAdmin?: boolean;
+}> = ({ classNameDescription, className, stats, isSuperAdmin }) => {
   return (
     <Box
       className={cn(
@@ -76,8 +48,13 @@ export const Stats: FC<{ className?: string }> = ({ className }) => {
                 <Link to={item.link}>
                   <Flex className="justify-between items-center">
                     <Stack className="gap-0">
-                      <h2 className="text-sm font-medium">{item.title}</h2>
-                      <p className="text-sm font-light text-gray-500">
+                      <h2 className=" font-semibold">{item.title}</h2>
+                      <p
+                        className={cn(
+                          "font-light text-gray-500 text-sm",
+                          classNameDescription
+                        )}
+                      >
                         {item.description}
                       </p>
                     </Stack>
@@ -86,7 +63,14 @@ export const Stats: FC<{ className?: string }> = ({ className }) => {
                   <p className="text-2xl font-bold mt-5">
                     {item.count}{" "}
                     {index === 2 && (
-                      <span className="text-gray-400 font-light">hrs</span>
+                      <span
+                        className={cn(
+                          "text-gray-400 font-light",
+                          isSuperAdmin && "hidden"
+                        )}
+                      >
+                        hrs
+                      </span>
                     )}
                   </p>
                 </Link>

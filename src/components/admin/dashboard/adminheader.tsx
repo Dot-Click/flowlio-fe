@@ -2,12 +2,11 @@ import { BarChartComponent } from "./barchart/barchart";
 import { RecentActivities } from "./recentactivities";
 import { Center } from "@/components/ui/center";
 import { OngoingTasks } from "./ongoingtasks";
-import { Stats } from "./stats";
 
 const AdminHeader = () => {
   return (
     <>
-      <Stats />
+      {/* <Stats /> */}
       <Center className="justify-start items-start max-md:flex-col gap-2">
         <BarChartComponent />
         <RecentActivities />

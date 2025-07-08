@@ -7,7 +7,7 @@ import ResetpasswordPage from "./pages/resetpassword.page";
 import VerifyEmailPage from "./pages/verifyemail.page";
 import VerifyCodePage from "./pages/verifycode.page";
 import { AiAssistPage } from "./pages/aiassist.page";
-import { SettingsPage } from "./pages/settings.page";
+import SettingsPage from "./pages/settings.page";
 import { CommentsPage } from "./pages/comments.page";
 import DashboardPage from "./pages/dashboard.page";
 import { NotFound } from "./pages/notfound.page";
@@ -26,6 +26,8 @@ import CalenderPage from "./pages/calender.page";
 import { PaymentLinksPage } from "./pages/paymentlinks.page";
 import InvoicePage from "./pages/invoice.page";
 import SupportPage from "./pages/support.page";
+import { SuperAdminLayout } from "./layouts/superadmin.layout";
+import SuperAdminDashboardPage from "./pages/superadmindashboard.page";
 
 export const Router = () => {
   return (
@@ -68,12 +70,16 @@ export const Router = () => {
           <Route element={<SettingsPage />} path="settings" />
           <Route element={<PaymentLinksPage />} path="payment-links" />
           <Route element={<SupportPage />} path="support" />
-
-          {/* <Route element={<InboxPage />} path="inbox" /> */}
           <Route element={<InvoicePage />} path="invoice" />
           <Route index element={<DashboardPage />} />
           <Route path="*" element={<NotFound />} />
         </Route>
+
+        <Route path="/superadmin" element={<SuperAdminLayout />}>
+          <Route index element={<SuperAdminDashboardPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

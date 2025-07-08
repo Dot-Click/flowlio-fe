@@ -174,7 +174,7 @@ export const CalendarIcon: React.FC<React.SVGProps<SVGSVGElement>> = (
     width={props.width || "21"}
     height={props.height || "22"}
     viewBox="0 0 21 22"
-    fill={props.fill || "none"}
+    fill={props.fill || "#1797B9"}
     xmlns="http://www.w3.org/2000/svg"
     {...props}
   >
