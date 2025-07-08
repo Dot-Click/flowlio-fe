@@ -40,13 +40,13 @@ export interface ReusableTableProps<TData> {
   data: TData[];
   searchInput?: boolean;
   enableSorting?: boolean;
-  columns: ColumnDef<TData>[];
-  enableGlobalFilter?: boolean;
-  enableColumnFilters?: boolean;
   searchClassName?: string;
   filterClassName?: string;
+  columns: ColumnDef<TData>[];
+  enableSuperAdminTable?: boolean;
+  enableGlobalFilter?: boolean;
+  enableColumnFilters?: boolean;
   defaultSorting?: SortingState;
-  goToStep?: (step: string) => void;
   enablePaymentLinksCalender?: boolean;
   onRowClick?: (row: Row<TData>) => void;
   defaultColumnVisibility?: VisibilityState;
@@ -59,6 +59,7 @@ export const ReusableTable = <TData,>({
   searchInput = true,
   enablePaymentLinksCalender = false,
   enableGlobalFilter = true,
+  enableSuperAdminTable = false,
   searchClassName,
   filterClassName,
   // onRowClick,
@@ -181,7 +182,12 @@ export const ReusableTable = <TData,>({
         )}
       </Stack>
 
-      <Box className="mt-6 rounded-md border overflow-hidden">
+      <Box
+        className={cn(
+          "rounded-md border overflow-hidden",
+          enableSuperAdminTable ? "mt-0" : "mt-6"
+        )}
+      >
         <Table>
           <TableHeader className="bg-[#F3F5F5] rounded-md">
             {table.getHeaderGroups().map((headerGroup) => (

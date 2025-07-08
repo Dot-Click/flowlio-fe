@@ -2,7 +2,6 @@ import { Stat, Stats } from "@/components/admin/dashboard/stats";
 import { Stack } from "@/components/ui/stack";
 import { Flex } from "@/components/ui/flex";
 import { ProjectStatusPieChart } from "@/components/admin/dashboard/barchart/piechart";
-import TimeModal from "@/components/timemodal";
 import img1 from "/super admin/img2.svg";
 import img2 from "/super admin/img3.svg";
 import img3 from "/super admin/img4.svg";
@@ -11,31 +10,32 @@ import Img1 from "/dashboard/prostat1.svg";
 import Img2 from "/dashboard/prostat2.svg";
 import Img3 from "/dashboard/projstat3.svg";
 import { SuperAdminBarChartComponent } from "@/components/super admin section/super admin barchart/barchart";
+import { SuperAdminTable } from "@/components/super admin section/super admin barchart/superadmintable";
 
 const stats: Stat[] = [
   {
-    link: "/dashboard",
+    link: "/superadmin",
     title: "Total Companies",
     description: "Companies currently on platform",
     icon: img1,
     count: "122",
   },
   {
-    link: "/dashboard",
+    link: "/superadmin",
     title: "Total Projects",
     description: "All projects created by companies",
     icon: img2,
     count: "2,240",
   },
   {
-    link: "/dashboard",
+    link: "/superadmin",
     title: "Active Subscriptions",
     description: "Companies on active paid plans",
     icon: img3,
     count: "87",
   },
   {
-    link: "/dashboard",
+    link: "/superadmin",
     title: "Total Invoices",
     description: "Invoices created via platform",
     icon: img4,
@@ -67,7 +67,7 @@ const SuperAdminDashboardPage = () => {
         </Stack>
       </Flex>
 
-      <TimeModal />
+      <SuperAdminTable />
     </Stack>
   );
 };

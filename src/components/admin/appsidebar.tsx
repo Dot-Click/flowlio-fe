@@ -120,6 +120,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                 const isParentActive =
                   itemPath !== "/" &&
                   itemPath !== "/dashboard" &&
+                  itemPath !== "/superadmin" &&
                   currentPath.startsWith(itemPath);
 
                 return (

@@ -4,13 +4,23 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import type { CSSProperties } from "react";
 import { Box } from "@/components/ui/box";
 import { Outlet } from "react-router";
-import { SquareKanban } from "lucide-react";
+import { Building, SquareKanban, User } from "lucide-react";
 
 export const navItems: NavItem[] = [
   {
     title: "Dashboard",
     url: "/superadmin",
     icon: <SquareKanban />,
+  },
+  {
+    title: "Companies",
+    url: "/superadmin/companies",
+    icon: <Building />,
+  },
+  {
+    title: "Sub Admins",
+    url: "/superadmin/sub-admins",
+    icon: <User />,
   },
 ];
 

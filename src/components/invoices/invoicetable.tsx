@@ -173,10 +173,6 @@ export const columns: ColumnDef<Data>[] = [
 ];
 
 export const InvoiceTable = () => {
-  const handleStepChange = (step: string) => {
-    console.log("step:", step);
-  };
-
   return (
     <ReusableTable
       data={data}
@@ -186,7 +182,6 @@ export const InvoiceTable = () => {
       searchClassName="rounded-full"
       filterClassName="rounded-full"
       onRowClick={(row) => console.log("Row clicked:", row.original)}
-      goToStep={handleStepChange}
     />
   );
 };

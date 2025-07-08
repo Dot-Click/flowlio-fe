@@ -28,6 +28,8 @@ import InvoicePage from "./pages/invoice.page";
 import SupportPage from "./pages/support.page";
 import { SuperAdminLayout } from "./layouts/superadmin.layout";
 import SuperAdminDashboardPage from "./pages/superadmindashboard.page";
+import SuperAdminCompaniesPage from "./pages/superadmincompanies.page";
+import CompanyViewDetailsPage from "./pages/companyviewdetails.page";
 
 export const Router = () => {
   return (
@@ -76,6 +78,12 @@ export const Router = () => {
         </Route>
 
         <Route path="/superadmin" element={<SuperAdminLayout />}>
+          <Route path="companies" element={<SuperAdminCompaniesPage />} />
+          <Route
+            path="companies/details/:id"
+            element={<CompanyViewDetailsPage />}
+          />
+          {/* <Route path="sub-admins" element={<SuperAdminSubAdminsPage />} /> */}
           <Route index element={<SuperAdminDashboardPage />} />
           <Route path="*" element={<NotFound />} />
         </Route>

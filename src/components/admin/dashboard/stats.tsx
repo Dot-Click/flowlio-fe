@@ -48,7 +48,7 @@ export const Stats: FC<{
                 <Link to={item.link}>
                   <Flex className="justify-between items-center">
                     <Stack className="gap-0">
-                      <h2 className=" font-semibold">{item.title}</h2>
+                      <h2 className=" font-medium">{item.title}</h2>
                       <p
                         className={cn(
                           "font-light text-gray-500 text-sm",

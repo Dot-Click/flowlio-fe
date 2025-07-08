@@ -290,10 +290,6 @@ export const columns: ColumnDef<Data>[] = [
 ];
 
 export const ProjectTable = () => {
-  const handleStepChange = (step: string) => {
-    console.log("step:", step);
-  };
-
   return (
     <ReusableTable
       data={data}
@@ -301,7 +297,6 @@ export const ProjectTable = () => {
       searchInput={false}
       enablePaymentLinksCalender={true}
       onRowClick={(row) => console.log("Row clicked:", row.original)}
-      goToStep={handleStepChange}
     />
   );
 };

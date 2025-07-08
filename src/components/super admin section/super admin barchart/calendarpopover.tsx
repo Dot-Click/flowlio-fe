@@ -24,7 +24,7 @@ export const SuperAdminCalendarPopOver = () => {
           variant="outline"
           className="border border-gray-100 max-md:ml-auto"
         >
-          <CalendarIcon className="fill-[#1797B9]" fill="#1797B9" />
+          <CalendarIcon className="fill-[#1797B9]" />
           Yearly
         </Button>
       </PopoverTrigger>
