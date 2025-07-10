@@ -43,7 +43,7 @@ export const Stats: FC<{
             <TooltipTrigger asChild>
               <ComponentWrapper
                 key={index}
-                className="px-3 py-3 relative overflow-hidden cursor-pointer"
+                className="px-2.5 py-3 relative overflow-hidden cursor-pointer"
               >
                 <Link to={item.link}>
                   <Flex className="justify-between items-center">

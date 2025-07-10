@@ -2,10 +2,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Center } from "@/components/ui/center";
 import { Box } from "@/components/ui/box";
 import { ReusableTable } from "@/components/reusable/reusabletable";
-import { Button } from "@/components/ui/button";
 import { PageWrapper } from "@/components/common/pagewrapper";
-import { IoEye } from "react-icons/io5";
-import { Flex } from "@/components/ui/flex";
 
 const data: Data[] = [
   {
@@ -14,7 +11,7 @@ const data: Data[] = [
     submittedby: "Abe45",
     companyname: "Mike Wangi",
     email: "hello@novatech.com",
-    registrationDate: new Date(),
+    role: "Project Manager",
   },
   {
     id: "2",
@@ -22,7 +19,7 @@ const data: Data[] = [
     submittedby: "Abe45",
     companyname: "Mike Wangi",
     email: "hello@novatech.com",
-    registrationDate: new Date(),
+    role: "Project Manager",
   },
   {
     id: "3",
@@ -30,7 +27,7 @@ const data: Data[] = [
     submittedby: "Monserrat44",
     companyname: "Mike Wangi",
     email: "hello@novatech.com",
-    registrationDate: new Date(),
+    role: "Project Manager",
   },
   {
     id: "4",
@@ -38,7 +35,7 @@ const data: Data[] = [
     submittedby: "Silas22",
     companyname: "Mike Wangi",
     email: "hello@novatech.com",
-    registrationDate: new Date(),
+    role: "Project Manager",
   },
   {
     id: "5",
@@ -46,7 +43,7 @@ const data: Data[] = [
     submittedby: "carmella",
     companyname: "Mike Wangi",
     email: "hello@novatech.com",
-    registrationDate: new Date(),
+    role: "Project Manager",
   },
 ];
 
@@ -56,7 +53,7 @@ export type Data = {
   submittedby: string;
   companyname: string;
   email: string;
-  registrationDate: Date;
+  role: string;
 };
 
 export const columns: ColumnDef<Data>[] = [
@@ -79,50 +76,33 @@ export const columns: ColumnDef<Data>[] = [
     ),
   },
   {
-    accessorKey: "registrationDate",
-    header: () => (
-      <Box className="text-black text-start">Registration Date</Box>
-    ),
+    accessorKey: "role",
+    header: () => <Box className="text-black text-start">Role</Box>,
     cell: ({ row }) => (
-      <Box className="captialize text-start">
-        {row.original.registrationDate.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })}
-      </Box>
+      <Box className="captialize text-start">{row.original.role}</Box>
     ),
   },
 
   {
     accessorKey: "status",
-    header: () => <Center className="text-center text-black">Status</Center>,
+    header: () => <Center className="text-black">Status</Center>,
     cell: ({ row }) => {
       return (
-        <Flex className="capitalize w-18 h-7 gap-2 border justify-center items-center text-white bg-white border-[#00A400] rounded-full">
-          <Center className="gap-2">
-            <Flex className="w-1.5 h-1.5 items-start rounded-full bg-[#00A400]" />
-            <h1 className="text-[#00A400] text-xs">{row.original.status}</h1>
-          </Center>
-        </Flex>
+        <Center className="capitalize w-20 h-9 gap-2 border text-white bg-[#00A400] border-[#00A400] rounded-full text-center mx-auto">
+          <Box className="w-1.5 h-1.5 rounded-full bg-white" />
+          <h1 className="text-white text-xs text-center ">
+            {row.original.status}
+          </h1>
+        </Center>
       );
     },
   },
 
   {
     accessorKey: "actions",
-    header: () => <Box className="text-center text-black">Actions</Box>,
+    header: () => <Box className="text-center text-black">Last Active</Box>,
     cell: () => {
-      return (
-        <Center className="space-x-2">
-          <Button
-            variant="outline"
-            className="bg-[#424242] border-none hover:bg-black/80 cursor-pointer rounded-lg h-11 w-12"
-          >
-            <IoEye className="size-6 fill-white" />
-          </Button>
-        </Center>
-      );
+      return <Center className="space-x-2">Today</Center>;
     },
   },
 ];

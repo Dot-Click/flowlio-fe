@@ -62,11 +62,7 @@ export const navItems: NavItem[] = [
     title: "Support",
     icon: <MessageCircleQuestion />,
   },
-  // {
-  //   url: "/dashboard/inbox",
-  //   title: "Inbox",
-  //   icon: <HiOutlineInbox />,
-  // },
+
   {
     url: "/dashboard/settings",
     title: "Settings",

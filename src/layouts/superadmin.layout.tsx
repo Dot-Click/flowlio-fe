@@ -18,8 +18,8 @@ export const navItems: NavItem[] = [
     icon: <Building />,
   },
   {
-    title: "Sub Admins",
-    url: "/superadmin/sub-admins",
+    title: "Sub Admin",
+    url: "/superadmin/sub-admin",
     icon: <User />,
   },
 ];
