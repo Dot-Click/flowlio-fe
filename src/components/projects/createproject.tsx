@@ -116,7 +116,7 @@ export const CreateProject = () => {
         <p className="text-black">Back</p>
       </Box>
 
-      <Center className="justify-between mt-6">
+      <Center className="justify-between mt-6 max-sm:flex-col max-sm:items-start gap-2">
         <Stack className="gap-0">
           <h1 className="text-black text-xl font-medium">Create Project</h1>
           <h1 className="text-gray-500">
@@ -372,7 +372,7 @@ export const CreateProject = () => {
               />
             </Box>
 
-            <Box className="grid grid-cols-2 gap-6">
+            <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
               <FormField
                 control={form.control}
                 name="clientName"

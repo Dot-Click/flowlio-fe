@@ -10,7 +10,7 @@ export const UserManagementHeader = () => {
   const navigate = useNavigate();
   return (
     <PageWrapper className="mt-6">
-      <Center className="justify-between px-4 py-6">
+      <Center className="justify-between px-4 py-6 max-sm:flex-col max-sm:items-start gap-2">
         <Stack className="gap-1">
           <h1 className="text-black text-3xl max-sm:text-xl font-medium">
             User Management

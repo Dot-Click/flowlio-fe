@@ -109,7 +109,7 @@ export const SettingsHeader = () => {
   return (
     <ComponentWrapper className="mt-8 px-6 py-5 max-md:px-6">
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Center className="justify-between">
+        <Center className="justify-between max-sm:flex-col max-sm:items-start gap-2">
           <Stack className="gap-0">
             <h1 className="text-2xl font-medium">Setting</h1>
             <h1 className="text-gray-500 font-normal">

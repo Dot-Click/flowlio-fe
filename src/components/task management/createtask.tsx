@@ -101,14 +101,14 @@ export const CreateTask = () => {
   return (
     <PageWrapper className="mt-6 p-6">
       <Box
-        className="flex items-center gap-2 w-20 cursor-pointer transition-all duration-300  hover:bg-gray-200 rounded-full hover:p-2 "
+        className="flex items-center gap-2 w-20 cursor-pointer transition-all duration-300  hover:bg-gray-200 rounded-full hover:p-2"
         onClick={() => navigate(-1)}
       >
         <IoArrowBack />
         <p className="text-black">Back</p>
       </Box>
 
-      <Center className="justify-between mt-4">
+      <Center className="justify-between mt-4 max-sm:flex-col max-sm:items-start gap-2">
         <Stack className="gap-0">
           <h1 className="text-black text-xl font-medium">New Task</h1>
           <h1 className="text-gray-500">

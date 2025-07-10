@@ -71,7 +71,7 @@ export const AiAssistChat: React.FC<{ withoutWelcomeGrids?: boolean }> = ({
   };
 
   return (
-    <Center className="flex-col h-full min-h-[500px]">
+    <Center className="flex-col h-full min-h-[300px] w-full max-w-full p-2">
       {showWelcome ? <WelcomeContent /> : null}
       <ChatBox
         messages={activeChat?.messages || []}
@@ -84,7 +84,7 @@ export const AiAssistChat: React.FC<{ withoutWelcomeGrids?: boolean }> = ({
 
 const WelcomeContent = () => {
   return (
-    <Stack className="w-3xl max-lg:w-full items-center bg-gradient-to-r from-[#F2F2F2] to-[#f0f2f7] p-12 h-full mt-0.5">
+    <Stack className="w-full max-w-3xl mx-auto items-center justify-center bg-gradient-to-r from-[#F2F2F2] to-[#f0f2f7] h-full p-2">
       <img
         src="/dashboard/ailogocircleicon.svg"
         alt="frame"
@@ -92,11 +92,11 @@ const WelcomeContent = () => {
       />
       <h2 className="text-gray-500 text-sm mt-6">Hi there, 👋</h2>
       <h2 className="text-xl">How can I help?</h2>
-      <Flex className="flex-wrap w-3xl max-lg:w-full">
+      <Flex className="flex-wrap w-full gap-2 justify-center max-sm:flex-col overflow-hidden">
         {content.map((a, i) => (
           <Stack
             key={i}
-            className="bg-zinc-100 border-1 border-gray-400 p-4 rounded-xl h-34 min-w-60 max-sm:w-fit flex-1"
+            className="bg-zinc-100 border-1 border-gray-400 p-4 rounded-xl h-34  flex-1 w-56"
           >
             <Flex className={a.iconStyleBox}>
               <a.Icon className={a.iconStyle} />
@@ -131,7 +131,7 @@ const ChatBox: React.FC<{
   };
   return (
     <Center
-      className={`flex-col w-3xl max-lg:w-full mb-4 max-md:p-2 ${
+      className={`flex-col w-full max-w-3xl mx-auto mb-4 max-md:p-2 ${
         showWelcome ? "" : "flex-1 h-full"
       }`}
     >
@@ -141,7 +141,7 @@ const ChatBox: React.FC<{
       ) : (
         <Stack
           ref={chatRef}
-          className={`w-3xl max-lg:w-full p-2 mb-4 rounded-md border border-gray-300 bg-white ${
+          className={`w-full max-w-3xl mx-auto p-2 mb-4 rounded-md border border-gray-300 bg-white ${
             showWelcome
               ? "min-h-[200px] max-h-[400px]"
               : "flex-1 h-full min-h-[300px] max-h-[60vh]"
@@ -176,7 +176,7 @@ const ChatBox: React.FC<{
       )}
 
       {/* Input area */}
-      <Stack className="w-3xl max-lg:w-full p-2 mb-4 rounded-md border border-gray-300 sticky bottom-0 bg-white">
+      <Stack className="w-full max-w-3xl mx-auto p-2 mb-4 rounded-md border border-gray-300 sticky bottom-0 bg-white">
         <Input
           size="lg"
           value={input}
@@ -190,7 +190,7 @@ const ChatBox: React.FC<{
             border: "none !important",
           }}
         />
-        <Flex className="gap-0">
+        <Flex className="gap-0 flex-wrap">
           <Button variant={"ghost"} className="text-sm gap-1 text-gray-400">
             <CirclePlus className="size-4" />
             Upload Document
@@ -209,7 +209,8 @@ const ChatBox: React.FC<{
           </Button>
         </Flex>
       </Stack>
-      <p className="text-sm text-black">
+
+      <p className="text-sm text-black text-center w-full">
         Check our
         <span className="text-blue-500 cursor-pointer underline">
           {" "}

@@ -14,9 +14,7 @@ import {
 import { useGlobalNotifications } from "@/providers/notifications.provider";
 import { IoChatboxEllipsesOutline } from "react-icons/io5";
 import { Link, useNavigate } from "react-router";
-import { TbReportSearch } from "react-icons/tb";
 import { Bell, InboxIcon } from "lucide-react";
-import { GoTasklist } from "react-icons/go";
 import { Button } from "../../ui/button";
 import { Center } from "../../ui/center";
 import { Badge } from "../../ui/badge";
@@ -34,10 +32,6 @@ export const NotificationsDropdown: React.FC<{ className?: string }> = ({
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case "task":
-        return <GoTasklist className="h-4 w-4" />;
-      case "issue":
-        return <TbReportSearch className="h-4 w-4" />;
       case "message":
         return <IoChatboxEllipsesOutline className="h-4 w-4" />;
       default:
@@ -47,10 +41,6 @@ export const NotificationsDropdown: React.FC<{ className?: string }> = ({
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case "task":
-        return "bg-blue-500";
-      case "issue":
-        return "bg-red-500";
       case "message":
         return "bg-green-500";
       default:
@@ -60,7 +50,7 @@ export const NotificationsDropdown: React.FC<{ className?: string }> = ({
 
   const handleNotificationClick = (id: string) => {
     markAsRead(id);
-    navigate("/dashboard/inbox");
+    navigate("/dashboard/support");
   };
 
   return (
@@ -96,7 +86,7 @@ export const NotificationsDropdown: React.FC<{ className?: string }> = ({
           <Flex className="justify-between items-center">
             <span className="text-lg font-medium">Notifications</span>
             <Link
-              to="/dashboard/inbox"
+              to="/dashboard/support"
               className="text-sm text-blue-600 hover:text-blue-800"
             >
               View All

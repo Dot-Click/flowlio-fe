@@ -52,7 +52,7 @@ const data = [
 
 const DashboardPage = () => {
   return (
-    <Stack className="pt-5 gap-3">
+    <Stack className="pt-5 gap-3 px-2">
       <Stats stats={stats} />
       <Flex className="max-[950px]:flex-col items-start gap-3">
         <Stack className="w-full gap-3">

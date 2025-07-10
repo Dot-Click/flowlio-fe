@@ -7,7 +7,7 @@ import {
 } from "react";
 
 export interface Notification {
-  type: "task" | "issue" | "message" | "system";
+  type: "message" | "system";
   message: string;
   sender?: string;
   timestamp: Date;
@@ -35,20 +35,20 @@ const NotificationsContext = createContext<
 const initialNotifications: Notification[] = [
   {
     id: "1",
-    title: "Task Update Required",
-    message: "Project timeline needs review and update",
+    title: "New message Reported",
+    message: "Critical message reported in production environment",
     timestamp: new Date(),
     isRead: false,
-    type: "task",
+    type: "message",
     sender: "Project Manager",
   },
   {
     id: "2",
-    title: "New Issue Reported",
-    message: "Critical issue reported in production environment",
+    title: "New message Reported",
+    message: "Critical message reported in production environment",
     timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
     isRead: false,
-    type: "issue",
+    type: "message",
     sender: "System Monitor",
   },
   {

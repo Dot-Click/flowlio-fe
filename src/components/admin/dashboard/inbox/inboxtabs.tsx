@@ -38,11 +38,11 @@ export const InboxTabs: FC<{
               {tab === "unread" &&
                 notifications.filter((n) => !n.isRead).length}
 
-              {tab === "tasks" &&
+              {/* {tab === "tasks" &&
                 notifications.filter((n) => n.type === "task").length}
 
               {tab === "issues" &&
-                notifications.filter((n) => n.type === "issue").length}
+                notifications.filter((n) => n.type === "issue").length} */}
 
               {tab === "message" &&
                 notifications.filter((n) => n.type === "message").length}

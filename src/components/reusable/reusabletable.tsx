@@ -44,6 +44,7 @@ export interface ReusableTableProps<TData> {
   filterClassName?: string;
   columns: ColumnDef<TData>[];
   enableSuperAdminTable?: boolean;
+  enableCompanyDetailsTable?: boolean;
   enableGlobalFilter?: boolean;
   enableColumnFilters?: boolean;
   defaultSorting?: SortingState;
@@ -60,6 +61,7 @@ export const ReusableTable = <TData,>({
   enablePaymentLinksCalender = false,
   enableGlobalFilter = true,
   enableSuperAdminTable = false,
+  enableCompanyDetailsTable = false,
   searchClassName,
   filterClassName,
   // onRowClick,
@@ -122,7 +124,12 @@ export const ReusableTable = <TData,>({
   }, [range]);
 
   return (
-    <Box className="rounded-xl w-full px-4 py-0">
+    <Box
+      className={cn(
+        "rounded-xl w-full py-0",
+        enableCompanyDetailsTable ? "px-0" : "px-4"
+      )}
+    >
       <Stack className="gap-4">
         {enableGlobalFilter && (
           <Flex className="justify-between max-sm:items-start flex-col lg:flex-row items-center w-full">
@@ -185,6 +192,9 @@ export const ReusableTable = <TData,>({
       <Box
         className={cn(
           "rounded-md border overflow-hidden",
+          enableCompanyDetailsTable
+            ? "rounded-t-none border-none"
+            : "rounded-md",
           enableSuperAdminTable ? "mt-0" : "mt-6"
         )}
       >

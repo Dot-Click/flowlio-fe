@@ -269,8 +269,8 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                       <SidebarMenuButton
                         className={
                           isActive || isParentActive
-                            ? "bg-[#1797B9] text-white fill-white hover:bg-[#1797B9]/70 hover:text-white rounded-full"
-                            : ""
+                            ? "bg-[#1797B9] text-white fill-white hover:bg-[#1797B9]/70 hover:text-white rounded-full gap-4"
+                            : "gap-4"
                         }
                         tooltip={{
                           children: (
@@ -289,7 +289,9 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                                 ? ""
                                 : "transform rotate-360"
                             } ${
-                              state === "collapsed" && !is768 ? "m-auto" : ""
+                              state === "collapsed" && !is768
+                                ? "m-auto"
+                                : "ml-2"
                             } ${
                               index === 0 && state !== "collapsed"
                                 ? "transform rotate-180"

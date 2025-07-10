@@ -33,7 +33,7 @@ export const Logo: React.FC<LogoProps> = ({
         />
         <motion.img
           src="/logo/logotext.png"
-          className={cn("max-w-26 h-12 -ml-3", className)}
+          className={cn("max-w-28 h-12 -ml-3", className)}
           transition={{ duration: 0.3, ease: "easeInOut" }}
           animate={{
             display: isCompact ? "none" : "block",

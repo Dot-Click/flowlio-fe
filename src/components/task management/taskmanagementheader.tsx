@@ -35,7 +35,7 @@ export const TaskManagementHeader = () => {
   return (
     <PageWrapper className="mt-6 p-4">
       <Stack className="gap-4 py-2">
-        <Center className="justify-between">
+        <Center className="justify-between max-sm:flex-col max-sm:items-start gap-2">
           <Stack className="gap-1">
             <h1 className="text-black text-3xl max-sm:text-xl font-medium">
               Task Management

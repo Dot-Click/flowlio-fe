@@ -14,7 +14,7 @@ import { ChevronDown } from "lucide-react";
 export const InvoiceHeader: FC = () => {
   return (
     <PageWrapper className="mt-6">
-      <Center className="justify-between px-4 py-6">
+      <Center className="justify-between px-4 py-6 max-sm:flex-col max-sm:items-start gap-2">
         <Stack className="gap-1">
           <h1 className="text-black text-2xl max-sm:text-xl font-medium">
             Invoices

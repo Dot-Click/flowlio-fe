@@ -9,6 +9,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarGroupContent,
+  SidebarTrigger,
 } from "../ui/sidebar";
 import { AiAssistLogo } from "./aiassistlogo";
 import { Flex } from "../ui/flex";
@@ -51,7 +52,7 @@ export const AiAssitSidebar: React.FC<{ className?: string }> = ({
     <Sidebar
       // **:data-[sidebar=sidebar]:bg-red-400
       className={cn(
-        "**:data-[sidebar=sidebar]:bg-[url('/dashboard/aisidebarimg.png')]  **:data-[sidebar=sidebar]:bg-center **:data-[sidebar=sidebar]:bg-cover **:data-[sidebar=sidebar]:text-white absolute mt-24 z-[1] **:data-[sidebar=sidebar]:rounded-l-lg  **:data-[sidebar=sidebar]:overflow-hidden inset-y-0 mb-1 ml-1",
+        "**:data-[sidebar=sidebar]:bg-[url('/dashboard/aisidebarimg.png')]  **:data-[sidebar=sidebar]:bg-center **:data-[sidebar=sidebar]:bg-cover **:data-[sidebar=sidebar]:text-white absolute mt-24 z-[1] **:data-[sidebar=sidebar]:rounded-l-lg  **:data-[sidebar=sidebar]:overflow-hidden inset-y-0 mb-1 ml-2 h-screen",
         className
       )}
       collapsible="icon"
@@ -65,12 +66,12 @@ export const AiAssitSidebar: React.FC<{ className?: string }> = ({
               "min-w-0"
             )}
           />
-          {/* <SidebarTrigger
+          <SidebarTrigger
             className={cn(
-              "text-white bg-gray-100/20 hover:bg-gray-100/30",
+              "text-white max-md:text-black bg-gray-100/20 hover:bg-gray-100/30",
               state === "collapsed" ? "-ml-4 rotate-180" : "ml-auto"
             )}
-          /> */}
+          />
         </Flex>
 
         <Stack
@@ -79,8 +80,10 @@ export const AiAssitSidebar: React.FC<{ className?: string }> = ({
             state === "collapsed" && "hidden"
           )}
         >
-          <h1 className="text-lg font-semibold text-white">AI Assistance</h1>
-          <h1 className="text-xs font-light text-white/90">
+          <h1 className="text-lg font-semibold text-white max-md:text-black">
+            AI Assistance
+          </h1>
+          <h1 className="text-xs font-light text-white/90 max-md:text-black">
             Your Smart Virtual Assistant
           </h1>
         </Stack>
@@ -93,7 +96,7 @@ export const AiAssitSidebar: React.FC<{ className?: string }> = ({
               <SidebarMenuItem className="items-center flex-col gap-2">
                 <p
                   className={cn(
-                    "bg-white/30 border border-white/80 text-white/90 rounded-full p-1 h-7 w-18 text-center cursor-pointer hover:bg-white/30 text-[12px]",
+                    "bg-white/30 border border-white/80 text-white/90 rounded-full p-1 h-7 w-18 text-center cursor-pointer hover:bg-white/30 text-[12px] max-md:text-black",
                     state === "collapsed" && "hidden"
                   )}
                 >
@@ -102,7 +105,7 @@ export const AiAssitSidebar: React.FC<{ className?: string }> = ({
                 {chats.length === 0 ? (
                   <p
                     className={cn(
-                      "text-white/70 text-xs text-center mt-4",
+                      "text-white/70 text-xs text-center mt-4 max-md:text-black",
                       state === "collapsed" && "hidden"
                     )}
                   >
@@ -114,7 +117,7 @@ export const AiAssitSidebar: React.FC<{ className?: string }> = ({
                       <SidebarMenuButton
                         asChild
                         className={cn(
-                          "flex-1 cursor-pointer hover:bg-white/30 hover:text-white my-1 py-1 px-2 rounded-lg",
+                          "flex-1 cursor-pointer hover:bg-white/30 hover:text-white max-sm:hover:text-black my-1 py-1 px-2 rounded-lg",
                           chat.id === activeChatId &&
                             " text-white font-semibold",
                           state === "collapsed" && "hidden"

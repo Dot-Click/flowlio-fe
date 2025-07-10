@@ -51,7 +51,7 @@ const data = [
 
 const SuperAdminDashboardPage = () => {
   return (
-    <Stack className="pt-5 gap-3">
+    <Stack className="pt-5 gap-3 px-2">
       <Stats
         stats={stats}
         classNameDescription="text-[13px] leading-4"
