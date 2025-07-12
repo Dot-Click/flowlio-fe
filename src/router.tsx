@@ -32,6 +32,8 @@ import SuperAdminCompaniesPage from "./pages/superadmincompanies.page";
 import CompanyViewDetailsPage from "./pages/companyviewdetails.page";
 import SuperAdminSubAdminPage from "./pages/superadminsubadmin.page";
 import { CreateSubAdmin } from "./components/super admin section/sub admin/createsubadmin";
+import { SuperAdminSubscriptionsPage } from "./pages/superadminsubscriptions.page";
+import SuperAdminSupportTicketPage from "./pages/superadminsupportticket.page";
 
 export const Router = () => {
   return (
@@ -89,6 +91,14 @@ export const Router = () => {
           <Route
             path="sub-admin/create-sub-admin"
             element={<CreateSubAdmin />}
+          />
+          <Route
+            path="subscriptions"
+            element={<SuperAdminSubscriptionsPage />}
+          />
+          <Route
+            path="support-tickets"
+            element={<SuperAdminSupportTicketPage />}
           />
           <Route index element={<SuperAdminDashboardPage />} />
           <Route path="*" element={<NotFound />} />

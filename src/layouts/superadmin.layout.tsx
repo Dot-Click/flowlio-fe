@@ -4,7 +4,14 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import type { CSSProperties } from "react";
 import { Box } from "@/components/ui/box";
 import { Outlet } from "react-router";
-import { Building, SquareKanban, User } from "lucide-react";
+import {
+  BadgeCent,
+  Building,
+  MessageCircleQuestion,
+  Settings,
+  SquareKanban,
+  User,
+} from "lucide-react";
 
 export const navItems: NavItem[] = [
   {
@@ -21,6 +28,21 @@ export const navItems: NavItem[] = [
     title: "Sub Admin",
     url: "/superadmin/sub-admin",
     icon: <User />,
+  },
+  {
+    title: "Subscriptions",
+    url: "/superadmin/subscriptions",
+    icon: <BadgeCent />,
+  },
+  {
+    title: "Support Tickets",
+    url: "/superadmin/support-tickets",
+    icon: <MessageCircleQuestion />,
+  },
+  {
+    title: "Settings",
+    url: "/superadmin/settings",
+    icon: <Settings />,
   },
 ];
 

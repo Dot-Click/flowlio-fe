@@ -167,14 +167,14 @@ export const columns: ColumnDef<Data>[] = [
               <TooltipTrigger asChild>
                 <Button
                   variant="outline"
-                  className="bg-[#A50403] border-none w-30 h-10 hover:bg-[#A50403]/80 cursor-pointer rounded-md text-white"
+                  className="bg-[#A50403] border-none w-30 h-10 hover:bg-[#A50403]/80 cursor-pointer rounded-md text-white hover:text-white"
                 >
                   <FaRegTrashAlt className="text-white fill-white size-4 " />
                   Delete
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="mb-2">
-                <p>Delete Schedule</p>
+                <p>Delete Sub Admin</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

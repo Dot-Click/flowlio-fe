@@ -46,6 +46,7 @@ const Calendar: FC<DayPickerProps> = ({ ...props }) => {
       <DayPicker
         showOutsideDays
         components={{ Nav }}
+        // className="bg-red-400"
         classNames={{
           outside: "text-primary/30",
           selected: "text-sm",
