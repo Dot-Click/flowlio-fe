@@ -34,6 +34,9 @@ import SuperAdminSubAdminPage from "./pages/superadminsubadmin.page";
 import { CreateSubAdmin } from "./components/super admin section/sub admin/createsubadmin";
 import { SuperAdminSubscriptionsPage } from "./pages/superadminsubscriptions.page";
 import SuperAdminSupportTicketPage from "./pages/superadminsupportticket.page";
+import SuperAdminSettingsPage from "./pages/superadminsettings.page";
+import { ViewerLayout } from "./layouts/viewer.layout";
+import ViewerDashboardPage from "./pages/viewerdashboard.page";
 
 export const Router = () => {
   return (
@@ -54,6 +57,7 @@ export const Router = () => {
           <Route path="reset-success" element={<PasswordresetsucessPage />} />
         </Route>
 
+        {/* Operator dashboard layout */}
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route
             element={<CreateProjectPage />}
@@ -81,6 +85,7 @@ export const Router = () => {
           <Route path="*" element={<NotFound />} />
         </Route>
 
+        {/* super admin layout */}
         <Route path="/superadmin" element={<SuperAdminLayout />}>
           <Route path="companies" element={<SuperAdminCompaniesPage />} />
           <Route
@@ -100,7 +105,14 @@ export const Router = () => {
             path="support-tickets"
             element={<SuperAdminSupportTicketPage />}
           />
+          <Route path="settings" element={<SuperAdminSettingsPage />} />
           <Route index element={<SuperAdminDashboardPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+
+        {/* viewer layout */}
+        <Route path="/viewer" element={<ViewerLayout />}>
+          <Route index element={<ViewerDashboardPage />} />
           <Route path="*" element={<NotFound />} />
         </Route>
 

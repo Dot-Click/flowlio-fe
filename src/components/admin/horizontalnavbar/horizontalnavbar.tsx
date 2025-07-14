@@ -16,7 +16,8 @@ export const HorizontalNavbar = () => {
       className={cn(
         "pt-5 items-center grid max-md:grid-cols-[auto_auto_1fr_auto_auto_auto] grid-cols-[1fr_auto_auto_auto_auto] gap-2",
         pathname !== "/dashboard" && "gap-0.5",
-        pathname === "/superadmin" && "gap-1"
+        pathname === "/superadmin" && "gap-1",
+        pathname === "/viewer" && "gap-1.5"
       )}
     >
       <SidebarTrigger className="min-md:hidden" />
@@ -26,13 +27,14 @@ export const HorizontalNavbar = () => {
         src="https://github.com/shadcn.png"
         description="Monday, June 14, 2025"
       />
-      {pathname === "/dashboard" && (
-        <>
-          <ProjectSelector selectTriggerClassname="min-w-[12rem] justify-self-center max-md:min-w-full" />
+      {pathname === "/dashboard" ||
+        (pathname === "/viewer" && (
+          <>
+            <ProjectSelector selectTriggerClassname="min-w-[12rem] justify-self-center max-md:min-w-full" />
 
-          <SearchBox />
-        </>
-      )}
+            <SearchBox />
+          </>
+        ))}
       {pathname === "/superadmin" && <SearchBox />}
 
       <NotificationsDropdown className="max-lg:ml-auto" />

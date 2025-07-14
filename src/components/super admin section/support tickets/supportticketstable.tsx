@@ -2,9 +2,9 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Center } from "@/components/ui/center";
 import { Box } from "@/components/ui/box";
 import { Flex } from "@/components/ui/flex";
-import { ArrowUp, Eye, PencilLine } from "lucide-react";
+import { Eye } from "lucide-react";
 import { ReusableTable } from "@/components/reusable/reusabletable";
-import { format, isWithinInterval } from "date-fns";
+import { format } from "date-fns";
 import {
   Tooltip,
   TooltipContent,
@@ -12,219 +12,193 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import CheckSvg from "../../../../public/super admin/check.svg";
 
 const data: Data[] = [
   {
     id: "1",
-    progress: 3,
-    status: "completed",
-    projectname: "Foundation Plan",
+    priority: "High",
+    status: "closed",
+    subject: "Login issue on platform",
     submittedby: "ken99",
-    startDate: new Date("2025-02-21T00:00:00"),
-    endDate: new Date("2025-03-01T00:00:00"),
-    clientname: "Task 1",
+    createdon: new Date("2025-03-01T00:00:00"),
+    client: "Innovate Labs",
+    assignedto: "ken99",
   },
   {
     id: "2",
-    progress: 30,
-    projectname: "Foundation Plan",
-    status: "pending",
+    priority: "Medium",
+    subject: "Login issue on platform",
+    status: "open",
     submittedby: "Abe45",
-    startDate: new Date("2025-04-09T00:00:00"),
-    endDate: new Date("2025-06-01T00:00:00"),
-    clientname: "Task 2",
+    createdon: new Date("2025-06-01T00:00:00"),
+    client: "Innovate Labs",
+    assignedto: "Abe45",
   },
   {
     id: "3",
-    progress: 10,
-    projectname: "ClientBridge CRM Upgrade",
-    status: "completed",
+    priority: "Low",
+    subject: "Login issue on platform",
+    status: "closed",
     submittedby: "Monserrat44",
-    startDate: new Date("2025-01-14T00:00:00"),
-    endDate: new Date("2025-02-01T00:00:00"),
-    clientname: "Task 3",
+    createdon: new Date("2025-02-01T00:00:00"),
+    client: "Innovate Labs",
+    assignedto: "Monserrat44",
   },
   {
     id: "4",
-    progress: 3,
-    projectname: "ClientBridge CRM Upgrade",
-    status: "pending",
+    priority: "High",
+    subject: "Login issue on platform",
+    status: "open",
     submittedby: "Silas22",
-    startDate: new Date("2025-02-12T00:00:00"),
-    endDate: new Date("2025-06-01T00:00:00"),
-    clientname: "Task 4",
+    createdon: new Date("2025-06-01T00:00:00"),
+    client: "Innovate Labs",
+    assignedto: "Silas22",
   },
   {
     id: "5",
-    progress: 3,
-    projectname: "ClientBridge CRM Upgrade",
-    status: "completed",
+    priority: "Medium",
+    subject: "Login issue on platform",
+    status: "closed",
     submittedby: "carmella",
-    startDate: new Date("2025-03-10T00:00:00"),
-    endDate: new Date("2025-04-01T00:00:00"),
-    clientname: "Task 5",
+    createdon: new Date("2025-04-01T00:00:00"),
+    client: "Innovate Labs",
+    assignedto: "carmella",
   },
   {
     id: "6",
-    progress: 12,
-    projectname: "Foundation Plan",
-    status: "ongoing",
+    priority: "Low",
+    subject: "Login issue on platform",
+    status: "open",
     submittedby: "carmella",
-    startDate: new Date("2025-04-04T00:00:00"),
-    endDate: new Date("2025-05-11T00:00:00"),
-    clientname: "Task 6",
+    createdon: new Date("2025-05-11T00:00:00"),
+    client: "Innovate Labs",
+    assignedto: "carmella",
   },
   {
     id: "7",
-    progress: 3,
-    projectname: "Foundation Plan",
-    status: "completed",
+    priority: "High",
+    subject: "Login issue on platform",
+    status: "closed",
     submittedby: "carmella",
-    startDate: new Date("2025-01-01T00:00:00"),
-    endDate: new Date("2025-06-01T00:00:00"),
-    clientname: "Task 7",
+    createdon: new Date("2025-06-01T00:00:00"),
+    client: "Task 7",
+    assignedto: "carmella",
   },
   {
     id: "8",
-    progress: 24,
-    projectname: "Foundation Plan",
-    status: "pending",
+    priority: "Medium",
+    subject: "Login issue on platform",
+    status: "open",
     submittedby: "carmella",
-    startDate: new Date("2025-01-01T00:00:00"),
-    endDate: new Date("2025-06-01T00:00:00"),
-    clientname: "Task 8",
+    createdon: new Date("2025-06-01T00:00:00"),
+    client: "Task 8",
+    assignedto: "carmella",
   },
   {
     id: "9",
-    progress: 13,
-    projectname: "Foundation Plan",
-    status: "ongoing",
+    priority: "Low",
+    subject: "Login issue on platform",
+    status: "closed",
     submittedby: "carmella",
-    startDate: new Date("2025-01-01T00:00:00"),
-    endDate: new Date("2025-06-01T00:00:00"),
-    clientname: "Task 9",
+    createdon: new Date("2025-06-01T00:00:00"),
+    client: "Task 9",
+    assignedto: "carmella",
   },
 ];
 
 export type Data = {
   id: string;
-  progress: number;
-  status: "pending" | "completed" | "ongoing";
+  priority: "High" | "Medium" | "Low";
+  status: "open" | "closed";
   submittedby: string;
-  clientname: string;
-  projectname: string;
-  startDate: Date;
-  endDate: Date;
+  client: string;
+  subject: string;
+  createdon: Date;
+  assignedto: string;
 };
 
 export const columns: ColumnDef<Data>[] = [
   {
     id: "select",
-    header: () => <Box className="text-center text-black">#</Box>,
-    cell: ({ row }) => <Box className="text-center">{row.index + 1}</Box>,
+    header: () => <Box className="text-center text-black p-3">Ticket ID</Box>,
+    cell: ({ row }) => (
+      <Box className="text-center p-3">#TK{row.index + 100}</Box>
+    ),
     enableSorting: false,
     // enableHiding: false,
   },
 
   {
-    accessorKey: "projectname",
-    header: () => <Box className="text-black p-1">Project Name</Box>,
+    accessorKey: "subject",
+    header: () => <Box className="text-black ">Subject</Box>,
     cell: ({ row }) => (
-      <Box className="capitalize p-1 w-30 max-sm:w-full">
-        {row.original.projectname.length > 28
-          ? row.original.projectname.slice(0, 28) + "..."
-          : row.original.projectname}
+      <Box className="capitalize w-30 max-sm:w-full">
+        {row.original.subject.length > 28
+          ? row.original.subject.slice(0, 28) + "..."
+          : row.original.subject}
       </Box>
     ),
   },
+
   {
-    accessorKey: "clientname",
+    accessorKey: "client",
     header: () => <Box className="text-black text-center">Client</Box>,
     cell: ({ row }) => (
-      <Box className="captialize text-center">{row.original.clientname}</Box>
+      <Box className="captialize text-center">{row.original.client}</Box>
+    ),
+  },
+  {
+    accessorKey: "assignedto",
+    header: () => <Box className="text-black text-center">Assigned To</Box>,
+    cell: ({ row }) => (
+      <Box className="captialize text-center">{row.original.assignedto}</Box>
     ),
   },
 
   {
-    accessorKey: "startDate",
-    header: () => <Box className="text-center text-black">Start Date</Box>,
-    cell: ({ row }) => {
-      const startDate = row.original.startDate;
-      try {
-        return (
-          <Box className="text-center">{format(startDate, "MMM d, yyyy")}</Box>
-        );
-      } catch (error) {
-        console.error("Invalid date:", startDate);
-        console.log(error);
-        return <Box className="text-center">Invalid Date</Box>;
-      }
-    },
-    filterFn: (row, __columnId, filterValue: { from?: Date; to?: Date }) => {
-      try {
-        const { from, to } = filterValue || {};
-        if (!from || !to) return true;
-        const startDate = row.original.startDate;
-        const endDate = row.original.endDate;
-        return (
-          isWithinInterval(startDate, { start: from, end: to }) ||
-          isWithinInterval(endDate, { start: from, end: to }) ||
-          (startDate <= from && endDate >= to)
-        );
-      } catch (error) {
-        console.error("Date comparison error:", error);
-        return false;
-      }
-    },
-  },
-
-  {
-    accessorKey: "endDate",
-    header: () => <Box className="text-center text-black">End Date</Box>,
-    cell: ({ row }) => {
-      const endDate = row.original.endDate;
-      try {
-        return (
-          <Box className="text-center">{format(endDate, "MMM d, yyyy")}</Box>
-        );
-      } catch (error) {
-        console.error("Invalid date:", endDate);
-        console.log(error);
-        return <Box className="text-center">Invalid Date</Box>;
-      }
-    },
-  },
-
-  {
-    accessorKey: "progress",
-    header: () => <Box className="text-center text-black">Progress</Box>,
+    accessorKey: "priority",
+    header: () => <Box className="text-center text-black">priority</Box>,
     cell: ({ row }) => {
       return (
-        <Center className="text-center">
-          {row.original.progress + "%"}{" "}
-          <ArrowUp className="size-4 text-green-600 font-semibold" />
+        <Center className="text-center font-semibold">
+          {row.original.priority}
         </Center>
       );
     },
   },
+
+  {
+    accessorKey: "createdon",
+    header: () => <Box className="text-center text-black">Created On</Box>,
+    cell: ({ row }) => {
+      const createdon = row.original.createdon;
+      try {
+        return (
+          <Box className="text-center">{format(createdon, "d MMM yyyy")}</Box>
+        );
+      } catch (error) {
+        console.error("Invalid date:", createdon);
+        console.log(error);
+        return <Box className="text-center">Invalid Date</Box>;
+      }
+    },
+  },
+
   {
     accessorKey: "status",
     header: () => <Box className="text-center text-black">Status</Box>,
     cell: ({ row }) => {
-      const status = row.original.status as "pending" | "completed" | "ongoing";
+      const status = row.original.status as "open" | "closed";
 
       const statusStyles: Record<typeof status, { text: string; dot: string }> =
         {
-          completed: {
+          open: {
             text: "text-white bg-[#00A400] border-none rounded-full",
             dot: "bg-white",
           },
-          pending: {
+          closed: {
             text: "text-white bg-[#F98618] border-none rounded-full",
-            dot: "bg-white",
-          },
-          ongoing: {
-            text: "text-white bg-[#005FA4] border-none rounded-full",
             dot: "bg-white",
           },
         };
@@ -232,7 +206,7 @@ export const columns: ColumnDef<Data>[] = [
       return (
         <Center>
           <Flex
-            className={`rounded-md capitalize w-32 h-10 gap-2 border items-center ${statusStyles[status].text}`}
+            className={`rounded-md capitalize w-26 h-10 gap-2 border items-center ${statusStyles[status].text}`}
           >
             <Flex className="ml-5.5">
               <Flex
@@ -263,7 +237,7 @@ export const columns: ColumnDef<Data>[] = [
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="mb-2">
-                <p>Delete Schedule</p>
+                <p>View Ticket</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -275,11 +249,27 @@ export const columns: ColumnDef<Data>[] = [
                   variant="outline"
                   className="bg-[#23B95D] hover:bg-[#23B95D]/80 rounded-md border-none cursor-pointer"
                 >
-                  <PencilLine className="fill-white text-white" />
+                  <img src={CheckSvg} alt="check" className="size-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="mb-2">
-                <p>Edit Schedule</p>
+                <p>Close Ticket</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="bg-[#A50403] hover:bg-[#A50403]/80 rounded-md border-none cursor-pointer text-white hover:text-white"
+                >
+                  X
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="mb-2">
+                <p>Delete Ticket</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

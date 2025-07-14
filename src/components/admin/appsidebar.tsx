@@ -121,6 +121,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                   itemPath !== "/" &&
                   itemPath !== "/dashboard" &&
                   itemPath !== "/superadmin" &&
+                  itemPath !== "/viewer" &&
                   currentPath.startsWith(itemPath);
 
                 return (

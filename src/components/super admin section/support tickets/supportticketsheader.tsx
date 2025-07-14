@@ -18,7 +18,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -28,21 +27,15 @@ import {
 } from "@/components/ui/select";
 import { Form } from "@/components/ui/form"; // or "@/components/ui/form"
 import { useForm } from "react-hook-form";
-import { Textarea } from "@/components/ui/textarea";
 import { SupportTicketTable } from "./supportticketstable";
+import { Flex } from "@/components/ui/flex";
 
 const formSchema = z.object({
-  clientname: z.string().min(2, {
+  agent: z.string().min(2, {
     message: "First Name must be at least 2 characters.",
   }),
-  projects: z.string().min(2, {
-    message: "Last Name must be at least 2 characters.",
-  }),
-  amount: z.string().min(2, {
+  priority: z.string().min(2, {
     message: "Must be amount number.",
-  }),
-  description: z.string().min(2, {
-    message: "Must be proper description",
   }),
 });
 
@@ -50,10 +43,8 @@ export const SupportTicketsHeader: FC = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      clientname: "",
-      projects: "",
-      amount: "",
-      description: "",
+      agent: "",
+      priority: "",
     },
   });
 
@@ -81,23 +72,23 @@ export const SupportTicketsHeader: FC = () => {
           className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
         >
           <CirclePlus className="fill-white text-black size-5" />
-          Create Ticket
+          Create New Ticket
         </Button>
       </Center>
 
       <SupportTicketTable />
 
       <GeneralModal {...modalProps}>
-        <h2 className="text-lg font-normal mb-4">Create Payment Link</h2>
+        <h2 className="text-lg font-normal mb-4">Assign Ticket</h2>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <Box className="bg-white/80 gap-4 grid grid-cols-1">
+            <Box className="bg-white/80 gap-6 grid grid-cols-1">
               <FormField
                 control={form.control}
-                name="clientname"
+                name="agent"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Client</FormLabel>
+                    <FormLabel>Agent</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -107,13 +98,13 @@ export const SupportTicketsHeader: FC = () => {
                           size="lg"
                           className="bg-gray-100 border border-gray-200 rounded-full w-full h-12 placeholder:text-gray-100"
                         >
-                          <SelectValue placeholder="Select Client" />
+                          <SelectValue placeholder="Select Agent" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="w-full">
-                        <SelectItem value="client1">Client 1</SelectItem>
-                        <SelectItem value="client2">Client 2</SelectItem>
-                        <SelectItem value="client3">Client 3</SelectItem>
+                        <SelectItem value="agent1">Agent 1</SelectItem>
+                        <SelectItem value="agent2">Agent 2</SelectItem>
+                        <SelectItem value="agent3">Agent 3</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -123,10 +114,10 @@ export const SupportTicketsHeader: FC = () => {
 
               <FormField
                 control={form.control}
-                name="projects"
+                name="priority"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project</FormLabel>
+                    <FormLabel>Priority</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -136,13 +127,13 @@ export const SupportTicketsHeader: FC = () => {
                           size="lg"
                           className="bg-gray-100 border border-gray-200 rounded-full w-full h-12 placeholder:text-gray-100"
                         >
-                          <SelectValue placeholder="Select Project" />
+                          <SelectValue placeholder="Select Priority" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="w-full">
-                        <SelectItem value="project1">Project 1</SelectItem>
-                        <SelectItem value="project2">Project 2</SelectItem>
-                        <SelectItem value="project3">Project 3</SelectItem>
+                        <SelectItem value="priority1">Priority 1</SelectItem>
+                        <SelectItem value="priority2">Priority 2</SelectItem>
+                        <SelectItem value="priority3">Priority 3</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -150,53 +141,22 @@ export const SupportTicketsHeader: FC = () => {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Amount</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="bg-white rounded-full placeholder:text-gray-400"
-                        size="lg"
-                        type="number"
-                        placeholder="$ 0"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        className="bg-white rounded-xl placeholder:text-gray-400 h-32"
-                        rows={4}
-                        cols={50}
-                        placeholder="Briefly describe the purpose of this payment link"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button
-                variant="outline"
-                className="bg-[#1797b9] hover:bg-[#1797b9]/80 hover:text-white text-white border border-gray-200 rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
-                type="submit"
-              >
-                Save
-              </Button>
+              <Flex className="justify-end ">
+                <Button
+                  variant="outline"
+                  className="bg-[#1797b9]/30 hover:bg-[#1797b9]/80 hover:text-white text-black border border-gray-200 font-normal rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
+                  type="submit"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="outline"
+                  className="bg-[#1797b9] hover:bg-[#1797b9]/80 hover:text-white text-white border border-gray-200 rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
+                  type="submit"
+                >
+                  Assign
+                </Button>
+              </Flex>
             </Box>
           </form>
         </Form>

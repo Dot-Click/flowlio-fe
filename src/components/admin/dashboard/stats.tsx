@@ -7,16 +7,15 @@ import {
 import { ComponentWrapper } from "@/components/common/componentwrapper";
 import { Flex } from "@/components/ui/flex";
 import { Box } from "@/components/ui/box";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import { cn } from "@/lib/utils";
 import type { FC } from "react";
 
 import { Stack } from "@/components/ui/stack";
+import { CircularProgress } from "@/components/ui/circularprogress";
+import { Center } from "@/components/ui/center";
 
 export type Stat = {
-  // icon: React.ForwardRefExoticComponent<
-  //   Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement> | string
-  // >;
   icon: string;
   title: string;
   count: string;
@@ -29,7 +28,9 @@ export const Stats: FC<{
   classNameDescription?: string;
   stats: Stat[];
   isSuperAdmin?: boolean;
-}> = ({ classNameDescription, className, stats, isSuperAdmin }) => {
+  isViewer?: boolean;
+}> = ({ classNameDescription, className, stats, isSuperAdmin, isViewer }) => {
+  const pathname = useLocation();
   return (
     <Box
       className={cn(
@@ -43,37 +44,78 @@ export const Stats: FC<{
             <TooltipTrigger asChild>
               <ComponentWrapper
                 key={index}
-                className="px-2.5 py-3 relative overflow-hidden cursor-pointer"
+                className={cn(
+                  "px-2.5 py-3 relative overflow-hidden cursor-pointer",
+                  index !== 3 || (isViewer && "bg-[#d5f6fc]")
+                )}
               >
-                <Link to={item.link}>
-                  <Flex className="justify-between items-center">
-                    <Stack className="gap-0">
-                      <h2 className=" font-medium">{item.title}</h2>
-                      <p
-                        className={cn(
-                          "font-light text-gray-500 text-sm",
-                          classNameDescription
+                <Link to={item.link} className="flex flex-col">
+                  {pathname.pathname === "/viewer" && index === 3 ? (
+                    <Flex className="flex-row items-center justify-between w-full gap-2">
+                      <Center className="flex-col flex-1 items-start gap-4">
+                        <Stack className="gap-0">
+                          <h2 className="font-medium text-left">
+                            {item.title}
+                          </h2>
+                          <p
+                            className={cn(
+                              "font-light text-gray-500 text-sm text-left",
+                              classNameDescription
+                            )}
+                          >
+                            {item.description}
+                          </p>
+                        </Stack>
+                        <Box className="bg-black w-38 text-white p-2 rounded-sm text-xs font-light mt-2">
+                          Total Production : 48 hrs
+                        </Box>
+                      </Center>
+                      <div className="flex flex-col">
+                        <CircularProgress
+                          value={70}
+                          time="5:45:32"
+                          label="Total Hours"
+                        />
+                      </div>
+                    </Flex>
+                  ) : (
+                    <>
+                      <Flex className="justify-between items-center">
+                        <Stack className="gap-0">
+                          <h2 className=" font-medium">{item.title}</h2>
+                          <p
+                            className={cn(
+                              "font-light text-gray-500 text-sm",
+                              classNameDescription
+                            )}
+                          >
+                            {item.description}
+                          </p>
+                        </Stack>
+                        <img
+                          src={item.icon}
+                          className="size-10"
+                          alt={item.title}
+                        />
+                      </Flex>
+                      <p className="text-2xl font-bold mt-5">
+                        {item.count}{" "}
+                        {index === 2 && (
+                          <span
+                            className={cn(
+                              "text-gray-400 font-light",
+                              (isSuperAdmin || isViewer) && "hidden"
+                            )}
+                          >
+                            hrs
+                          </span>
                         )}
-                      >
-                        {item.description}
                       </p>
-                    </Stack>
-                    <img src={item.icon} className="size-10" alt={item.title} />
-                  </Flex>
-                  <p className="text-2xl font-bold mt-5">
-                    {item.count}{" "}
-                    {index === 2 && (
-                      <span
-                        className={cn(
-                          "text-gray-400 font-light",
-                          isSuperAdmin && "hidden"
-                        )}
-                      >
-                        hrs
-                      </span>
-                    )}
-                  </p>
+                    </>
+                  )}
                 </Link>
+
+                {pathname.pathname === "/viewer" && index === 3 && null}
               </ComponentWrapper>
             </TooltipTrigger>
             <TooltipContent className="mb-2">
