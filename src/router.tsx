@@ -37,6 +37,10 @@ import SuperAdminSupportTicketPage from "./pages/superadminsupportticket.page";
 import SuperAdminSettingsPage from "./pages/superadminsettings.page";
 import { ViewerLayout } from "./layouts/viewer.layout";
 import ViewerDashboardPage from "./pages/viewerdashboard.page";
+import ViewermyProjectsPage from "./pages/viewermyprojects.page";
+import { ViewermyTasksPage } from "./pages/viewermytasks.page";
+import ViewerSupportsPage from "./pages/viewersupports.page";
+import ViewerSettingsPage from "./pages/viewersettings.page";
 
 export const Router = () => {
   return (
@@ -113,6 +117,10 @@ export const Router = () => {
         {/* viewer layout */}
         <Route path="/viewer" element={<ViewerLayout />}>
           <Route index element={<ViewerDashboardPage />} />
+          <Route path="my-projects" element={<ViewermyProjectsPage />} />
+          <Route path="my-tasks" element={<ViewermyTasksPage />} />
+          <Route path="viewer-support" element={<ViewerSupportsPage />} />
+          <Route path="viewer-settings" element={<ViewerSettingsPage />} />
           <Route path="*" element={<NotFound />} />
         </Route>
 

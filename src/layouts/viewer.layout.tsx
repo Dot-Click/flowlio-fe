@@ -15,7 +15,7 @@ export const navItems: NavItem[] = [
     icon: <SquareKanban />,
   },
   {
-    url: "/viewer/project",
+    url: "/viewer/my-projects",
     title: "Projects",
     icon: <GroupIcon />,
   },
@@ -25,13 +25,13 @@ export const navItems: NavItem[] = [
     icon: <TaskManagementIcon />,
   },
   {
-    url: "/viewer/support",
+    url: "/viewer/viewer-support",
     title: "Support",
     icon: <MessageCircleQuestion />,
   },
 
   {
-    url: "/viewer/settings",
+    url: "/viewer/viewer-settings",
     title: "Settings",
     icon: <IoSettingsOutline />,
   },

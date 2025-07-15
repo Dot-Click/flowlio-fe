@@ -27,14 +27,14 @@ export const HorizontalNavbar = () => {
         src="https://github.com/shadcn.png"
         description="Monday, June 14, 2025"
       />
-      {pathname === "/dashboard" ||
-        (pathname === "/viewer" && (
-          <>
-            <ProjectSelector selectTriggerClassname="min-w-[12rem] justify-self-center max-md:min-w-full" />
+      {(pathname === "/viewer" || pathname === "/dashboard") && (
+        <>
+          <ProjectSelector selectTriggerClassname="min-w-[12rem] justify-self-center max-md:min-w-full" />
 
-            <SearchBox />
-          </>
-        ))}
+          <SearchBox />
+        </>
+      )}
+
       {pathname === "/superadmin" && <SearchBox />}
 
       <NotificationsDropdown className="max-lg:ml-auto" />

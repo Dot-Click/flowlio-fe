@@ -46,6 +46,7 @@ export interface ReusableTableProps<TData> {
   enableSuperAdminTable?: boolean;
   enableCompanyDetailsTable?: boolean;
   enableGlobalFilter?: boolean;
+  enableMyTaskTable?: boolean;
   enableSubscriptionsTable?: boolean;
   enableColumnFilters?: boolean;
   defaultSorting?: SortingState;
@@ -64,6 +65,7 @@ export const ReusableTable = <TData,>({
   enableSuperAdminTable = false,
   enableCompanyDetailsTable = false,
   enableSubscriptionsTable = false,
+  enableMyTaskTable = false,
   searchClassName,
   filterClassName,
   // onRowClick,
@@ -130,7 +132,8 @@ export const ReusableTable = <TData,>({
       className={cn(
         "rounded-xl w-full py-0",
         enableCompanyDetailsTable ? "px-0" : "px-4",
-        enableSubscriptionsTable ? "px-0" : "px-4"
+        enableSubscriptionsTable ? "px-0" : "px-4",
+        enableMyTaskTable && "px-0"
       )}
     >
       <Stack className="gap-4">
@@ -199,7 +202,8 @@ export const ReusableTable = <TData,>({
             ? "rounded-t-none border-none"
             : "rounded-md",
           enableSuperAdminTable ? "mt-0" : "mt-6",
-          enableSubscriptionsTable ? "mt-4" : "mt-6"
+          enableSubscriptionsTable ? "mt-4" : "mt-6",
+          enableMyTaskTable && "mt-4"
         )}
       >
         <Table>
