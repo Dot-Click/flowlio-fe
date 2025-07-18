@@ -7,7 +7,7 @@ import { ManageTask } from "@/components/user section/managetask";
 import { Navbar } from "@/components/user section/navbar/navbar";
 import { SubscribeTo } from "@/components/user section/subscribeto";
 import { Superchared } from "@/components/user section/superchared";
-import { TeamMember } from "@/components/user section/teammember";
+import { TeamMember2 } from "@/components/user section/teammember2";
 
 const HomePage = () => {
   // const [isLoading, setIsLoading] = useState(true);
@@ -42,7 +42,8 @@ const HomePage = () => {
         <Hero />
         <Superchared isWorkFlow={false} />
       </Box>
-      <TeamMember />
+      {/* <TeamMember /> */}
+      <TeamMember2 />
       <ManageTask />
       <ManageSmarter />
       <GetSmart />

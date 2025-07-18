@@ -17,7 +17,7 @@ export const ManageSmarter = () => {
                 For Free
               </span>
             </h1>
-            <p className="text-white font-extralight text-[16px] w-md leading-5">
+            <p className="text-white font-extralight text-[16px] w-md max-sm:w-full leading-5">
               Dotiziion helps you streamline your workflows, automate tasks, and
               boost team productivity — all from one powerful dashboard.
             </p>

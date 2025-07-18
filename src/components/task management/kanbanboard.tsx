@@ -4,54 +4,54 @@ import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { Box } from "../ui/box";
 import { Flex } from "../ui/flex";
 import { cn } from "@/lib/utils";
-import { AlignJustify } from "lucide-react";
+
 export const initialTasks: Task[] = [
   {
     id: "1",
     title: "Invoice Task",
-    project: "P1 C1",
+    project: "Marketing Plan",
     dueDate: "16 Oct, 2024",
-    status: "Pending",
+    status: "To Do",
   },
   {
     id: "2",
     title: "Sample Task",
-    project: "P1 C1",
+    project: "Marketing Plan",
     dueDate: "12th Feb, 2024",
-    status: "On Going",
+    status: "In Progress",
   },
   {
     id: "3",
     title: "Mini Project Task",
-    project: "P1 C1",
+    project: "Marketing Plan",
     dueDate: "16th Oct, 2024",
-    status: "On Going",
+    status: "In Progress",
   },
   {
     id: "4",
     title: "Sample Task",
-    project: "P1 C1",
+    project: "Marketing Plan",
     dueDate: "16th Oct, 2024",
     status: "Delay",
   },
   {
     id: "5",
     title: "Sample Task",
-    project: "P1 C1",
+    project: "Marketing Plan",
     dueDate: "03th Feb, 2025",
-    status: "Delay",
+    status: "In Progress",
   },
   {
     id: "6",
     title: "Sample Task",
-    project: "P1 C1",
+    project: "Marketing Plan",
     dueDate: "10th Oct, 2024",
-    status: "Changes",
+    status: "Delay",
   },
   {
     id: "7",
     title: "Sample Task",
-    project: "P1 C1",
+    project: "Marketing Plan",
     dueDate: "19th Oct, 2024",
     status: "Updated",
     comments: "No Comments",
@@ -59,28 +59,29 @@ export const initialTasks: Task[] = [
   {
     id: "8",
     title: "Sample Task",
-    project: "P1 C1",
+    project: "Marketing Plan",
     dueDate: "18th Oct, 2024",
-    status: "Completed",
+    status: "Changes",
     comments: "No Comments",
   },
   {
     id: "9",
     title: "Sample Task",
-    project: "P1 C1",
+    project: "Marketing Plan",
     dueDate: "22th Oct, 2024",
-    status: "On Going",
+    status: "Completed",
     comments: "No Comments",
   },
   {
     id: "10",
     title: "Sample Task",
-    project: "P1 C1",
+    project: "Marketing Plan",
     dueDate: "10th Oct, 2024",
-    status: "Pending",
+    status: "To Do",
     comments: "No Comments",
   },
 ];
+
 // Task type
 export type Task = {
   id: string;
@@ -92,16 +93,25 @@ export type Task = {
 };
 
 type StatusType =
-  | "Pending"
-  | "On Going"
+  | "To Do"
+  | "In Progress"
   | "Delay"
   | "Changes"
   | "Updated"
   | "Completed";
 
+const STATUS_COLORS: Record<StatusType, string> = {
+  "To Do": "#5B60FE",
+  "In Progress": "#FFA632",
+  Delay: "#FF0080",
+  Changes: "#4DCDC9",
+  Updated: "#A94DCD",
+  Completed: "#CD4D4F",
+};
+
 const STATUS_COLUMNS: StatusType[] = [
-  "Pending",
-  "On Going",
+  "To Do",
+  "In Progress",
   "Delay",
   "Changes",
   "Updated",
@@ -117,43 +127,55 @@ function DraggableTask({ task }: { task: Task }) {
 
   return (
     <Box
+      className={cn(
+        "bg-[#F6F6F6] rounded-lg border border-gray-200 p-4 cursor-grab min-w-[240px] mb-3 mx-2 transition-all duration-200",
+        "hover:shadow-md hover:border-gray-300 active:cursor-grabbing",
+        isDragging && "opacity-50 shadow-lg scale-105"
+      )}
       style={{
-        opacity: isDragging ? 0.5 : 1,
         transform: transform
           ? `translate(${transform.x}px, ${transform.y}px)`
           : undefined,
-        background: "#f6f6f6",
-        borderRadius: 16,
-        border: "1px solid #e0e0e0",
-        borderTop: "1px solid #e0e0e0",
-        borderBottom: "10px solid #c5c5d5",
-        borderLeft: "1px solid #e0e0e0",
-        borderRight: "1px solid #e0e0e0",
-        boxShadow: "0 2px 8px #0001",
-        margin: "16px 0",
-        padding: 16,
-        cursor: "grab",
-        minWidth: 220,
       }}
       ref={setNodeRef}
       {...attributes}
       {...listeners}
     >
-      <Flex className="flex-col w-full items-start">
-        <Flex className="w-full justify-between items-start">
-          <Box className="font-semibold">{task.title}</Box>
-          <AlignJustify className="text-[#888] size-4" />
-        </Flex>
-        <Box className="text-[#888] text-sm">
-          Project: <b>{task.project}</b>
+      <Flex className="flex-col w-full items-start gap-2">
+        <Box className="font-semibold text-gray-800 text-md leading-tight">
+          {task.title}
         </Box>
-      </Flex>
 
-      {/* {task.comments && (
-        <Box className="text-[#888] text-sm">{task.comments}</Box>
-      )} */}
-      <Flex className="text-[#FF0000] text-sm mt-2 float-right">
-        {task.dueDate}
+        <Flex className="mt-4 flex-col items-start gap-1">
+          <Flex className="text-gray-600">
+            <Flex className="gap-1 text-sm font-normal">
+              <img
+                src="/dashboard/analytics.svg"
+                className="size-4"
+                alt="calendericon"
+              />
+              Project:
+            </Flex>
+
+            <span className="font-nromal text-black text-sm ml-4">
+              {task.project}
+            </span>
+          </Flex>
+
+          <Flex className="mt-1 text-gray-600">
+            <Flex className="gap-1 text-sm">
+              <img
+                src="/dashboard/calendericonfordraging.svg"
+                className="size-4"
+                alt="calendericon"
+              />
+              Deadline:
+            </Flex>
+            <Box className="text-red-500 text-xs font-medium rounded ml-2">
+              {task.dueDate}
+            </Box>
+          </Flex>
+        </Flex>
       </Flex>
     </Box>
   );
@@ -174,17 +196,23 @@ function DroppableColumn({
   return (
     <Flex
       className={cn(
-        "flex-col flex-1 min-w-[260px] bg-white/80  rounded-xl border border-gray-200 p-6",
-        isOver || (highlight && "border-2 border-[#00bcd4]"),
-        status === "Completed" && "bg-[#eaffea]",
-        "max-h-[800px] overflow-y-auto overflow-x-hidden"
+        "flex-col flex-1 min-w-[280px] bg-white rounded-xl border-1 border-gray-200",
+        "overflow-hidden max-h-[700px] transition-all duration-200",
+        isOver && "border-dashed border-blue-400 bg-blue-50/30",
+        highlight && "border-green-300 bg-green-50"
       )}
       ref={setNodeRef}
     >
-      <Box className="text-center text-xl font-semibold text-[#1797B9] mb-2">
-        {status}
+      <Box
+        className="text-base font-semibold text-white w-full px-4 py-3 flex items-center justify-between"
+        style={{ backgroundColor: STATUS_COLORS[status] }}
+      >
+        <span>{status}</span>
+        <span className="text-xs opacity-80">
+          {React.Children.count(children)}
+        </span>
       </Box>
-      {children}
+      <Box className="flex-1 overflow-y-auto p-2">{children}</Box>
     </Flex>
   );
 }
@@ -205,6 +233,7 @@ export default function KanbanBoard({
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
     setActiveTask(null);
+
     if (!over) return;
     if (active.id === over.id) return;
 
@@ -222,7 +251,7 @@ export default function KanbanBoard({
 
   return (
     <Box className="w-full">
-      <Flex className="w-full items-start min-h-[500px] overflow-x-auto mt-5 py-2">
+      <Flex className="w-full items-start gap-4 min-h-[600px] overflow-x-auto mt-5 p-0 bg-gray-100/50 rounded-lg">
         <DndContext
           collisionDetection={closestCenter}
           onDragStart={(event) => {
@@ -246,7 +275,29 @@ export default function KanbanBoard({
             </DroppableColumn>
           ))}
           <DragOverlay>
-            {activeTask ? <DraggableTask task={activeTask} /> : null}
+            {activeTask ? (
+              <Box className="bg-white rounded-lg border-2 border-blue-400 p-4 min-w-[240px] shadow-xl">
+                <Flex className="flex-col w-full items-start gap-2">
+                  <Box className="font-semibold text-gray-800 text-sm leading-tight">
+                    {activeTask.title}
+                  </Box>
+                  <Box className="text-gray-600 text-xs">
+                    Project:{" "}
+                    <span className="font-medium">{activeTask.project}</span>
+                  </Box>
+                  {activeTask.comments && (
+                    <Box className="text-gray-500 text-xs italic">
+                      {activeTask.comments}
+                    </Box>
+                  )}
+                </Flex>
+                <Flex className="justify-end mt-3">
+                  <Box className="text-red-500 text-xs font-medium bg-red-50 px-2 py-1 rounded">
+                    {activeTask.dueDate}
+                  </Box>
+                </Flex>
+              </Box>
+            ) : null}
           </DragOverlay>
         </DndContext>
       </Flex>

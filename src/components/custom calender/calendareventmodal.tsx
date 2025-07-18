@@ -120,14 +120,14 @@ export const EventModal: React.FC<EventModalProps> = ({
   if (!modalProps.open) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#4D5B6259]"
+    <Center
+      className="fixed inset-0 z-50 bg-[#4D5B6259]"
       onClick={onClose}
       aria-modal="true"
       role="dialog"
       tabIndex={-1}
     >
-      <div
+      <Box
         className={
           modalProps.contentProps?.className +
           " bg-white rounded-xl p-0 min-w-[340px] min-h-[100px] z-[1001] relative box-shadow-[0_4px_32px_rgba(0,0,0,0.12)]"
@@ -429,7 +429,7 @@ export const EventModal: React.FC<EventModalProps> = ({
             </Button>
           </Flex>
         </form>
-      </div>
-    </div>
+      </Box>
+    </Center>
   );
 };
