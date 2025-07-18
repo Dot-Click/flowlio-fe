@@ -8,32 +8,32 @@ import { Navbar } from "@/components/user section/navbar/navbar";
 import { SubscribeTo } from "@/components/user section/subscribeto";
 import { Superchared } from "@/components/user section/superchared";
 import { TeamMember2 } from "@/components/user section/teammember2";
+import { useEffect, useState } from "react";
 
 const HomePage = () => {
-  // const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // useEffect(() => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 5000);
 
-  //   const timer = setTimeout(() => {
-  //     setIsLoading(false);
-  //   }, 5000);
+    return () => clearTimeout(timer);
+  }, []);
 
-  //   return () => clearTimeout(timer);
-  // }, []);
-
-  // if (isLoading) {
-  //   return (
-  //     <Box className="flex items-center justify-center min-h-screen bg-white">
-  //       <Box className="animate-pulse">
-  //         <img
-  //           src="/logo/logowithtext.svg"
-  //           alt="Loading..."
-  //           className="h-20 w-auto"
-  //         />
-  //       </Box>
-  //     </Box>
-  //   );
-  // }
+  if (isLoading) {
+    return (
+      <Box className="flex items-center justify-center min-h-screen bg-white">
+        <Box className="animate-pulse">
+          <img
+            src="/logo/logowithtext.svg"
+            alt="Loading..."
+            className="h-20 w-auto"
+          />
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <>

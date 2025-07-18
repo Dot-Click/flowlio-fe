@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Box } from "@/components/ui/box";
 import { Flex } from "@/components/ui/flex";
 import { Stack } from "@/components/ui/stack";
@@ -42,6 +42,14 @@ export const CustomCalendarHeader = () => {
   const [selectedEvent, setSelectedEvent] = useState<CustomEvent | null>(null);
   const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
   const [editEvent, setEditEvent] = useState<CustomEvent | null>(null);
+  // Floating time indicator state
+  const [hoveredGridTime, setHoveredGridTime] = useState<{
+    hour: number;
+    minute: number;
+    y: number;
+    visible: boolean;
+  }>({ hour: 0, minute: 0, y: 0, visible: false });
+  const gridContainerRef = useRef<HTMLDivElement>(null);
 
   // Separate modal props for new and edit modals
   const newEventModalProps = useGeneralModalDisclosure();
@@ -168,6 +176,7 @@ export const CustomCalendarHeader = () => {
                 className="w-full p-0 overflow-hidden mt-4"
                 mode="single"
                 selected={miniCalRange.from}
+                classNameforCustomCalendar="bg-[#1797B9] text-white size-6"
                 onSelect={(date) => setMiniCalRange({ from: date })}
               />
             </Stack>
@@ -306,8 +315,9 @@ export const CustomCalendarHeader = () => {
                 ))}
               </Flex>
             </Flex>
+
             {/* Date Row */}
-            <Box className="grid grid-cols-[80px_repeat(7,1fr)] bg-[#F8FAFC] border-b border-[#E5E7EB]">
+            <Box className="grid grid-cols-[80px_repeat(7,1fr)] bg-[#F8FAFC] border-b border-[#E5E7EB] mt-6">
               <Box></Box>
               {weekDates.map((d, i) => (
                 <Center
@@ -329,7 +339,11 @@ export const CustomCalendarHeader = () => {
             </Box>
 
             {/* Time grid */}
-            <Box className="grid grid-cols-[80px_repeat(7,1fr)] ml-2 rounded-lg">
+            <Box
+              className="grid grid-cols-[80px_repeat(7,1fr)] ml-2 rounded-lg"
+              style={{ position: "relative" }}
+              ref={gridContainerRef}
+            >
               {hours.map((hour) => (
                 <React.Fragment key={hour}>
                   <Box className="text-right p-3 bg-white font-normal text-[#888] text-sm">
@@ -351,6 +365,7 @@ export const CustomCalendarHeader = () => {
                       : undefined;
                     return (
                       <Box
+                        className="text-center p-0 border border-gray-200 min-h-[79px] min-w-[86px] relative bg-white"
                         key={dayIdx}
                         style={{
                           textAlign: "center",
@@ -362,10 +377,36 @@ export const CustomCalendarHeader = () => {
                           background: "#fff",
                           padding: 0,
                         }}
-                        onMouseEnter={() =>
-                          eventId && setHoveredEventId(eventId)
-                        }
-                        onMouseLeave={() => setHoveredEventId(null)}
+                        onMouseMove={(e) => {
+                          const gridRect =
+                            gridContainerRef.current?.getBoundingClientRect();
+                          const cellRect =
+                            e.currentTarget.getBoundingClientRect();
+                          const relativeY = e.clientY - cellRect.top;
+                          const minute = Math.floor(
+                            (relativeY / cellRect.height) * 60
+                          );
+                          let y = 0;
+                          if (gridRect) {
+                            y = e.clientY - gridRect.top;
+                          }
+                          setHoveredGridTime({
+                            hour,
+                            minute,
+                            y,
+                            visible: true,
+                          });
+                        }}
+                        onMouseLeave={() => {
+                          setHoveredEventId(null);
+                          setHoveredGridTime((prev) => ({
+                            ...prev,
+                            visible: false,
+                          }));
+                        }}
+                        onMouseEnter={() => {
+                          if (eventId) setHoveredEventId(eventId);
+                        }}
                       >
                         {event && isEventStart && (
                           <Flex
@@ -457,6 +498,22 @@ export const CustomCalendarHeader = () => {
                   })}
                 </React.Fragment>
               ))}
+
+              {/* Floating time indicator aligned with time column */}
+              {hoveredGridTime.visible && (
+                <Box
+                  className="absolute left-0 top-0 w-20 bg-[#1797B9] text-white p-2 rounded-sm font-normal text-sm z-[999] shadow-md text-right pointer-events-none"
+                  style={{
+                    top: hoveredGridTime.y - 12, // center the indicator",
+                  }}
+                >
+                  {`${hoveredGridTime.hour
+                    .toString()
+                    .padStart(2, "0")}:${hoveredGridTime.minute
+                    .toString()
+                    .padStart(2, "0")}`}
+                </Box>
+              )}
             </Box>
           </Box>
         </Flex>
