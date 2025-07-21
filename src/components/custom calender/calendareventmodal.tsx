@@ -104,7 +104,7 @@ const TimeDropdown = ({ value, onChange, options }: TimeDropdownProps) => {
       </Center>
 
       {open && (
-        <ul className="absolute z-10 mt-2 w-full bg-white border border-cyan-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <ul className="absolute z-10 mt-2 w-full bg-white rounded-lg shadow-lg max-h-60 overflow-y-auto">
           {options.map((opt) => (
             <li
               key={opt.value}
@@ -116,7 +116,7 @@ const TimeDropdown = ({ value, onChange, options }: TimeDropdownProps) => {
                 setOpen(false);
               }}
             >
-              <Clock className="size-3 text-cyan-400" />
+              {/* <Clock className="size-3 text-cyan-400" /> */}
               {opt.label}
             </li>
           ))}

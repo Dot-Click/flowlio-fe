@@ -164,8 +164,6 @@ export const CustomCalendarHeader = () => {
                 })
               : ""}
             <br />
-            {daysShort[event.day]}
-            <br />
             {formatHour(event.startHour)} - {formatHour(event.endHour)}
           </Box>
 
@@ -522,14 +520,8 @@ export const CustomCalendarHeader = () => {
                         className="text-center p-0 border border-gray-200 min-h-[79px] min-w-[86px] relative bg-white"
                         key={dayIdx}
                         style={{
-                          textAlign: "center",
                           border: "0.5px solid #eee",
-                          minHeight: 79,
-                          minWidth: 86,
-                          position: "relative",
                           cursor: event ? "pointer" : "default",
-                          background: "#fff",
-                          padding: 0,
                         }}
                         onMouseMove={(e) => {
                           const gridRect =
