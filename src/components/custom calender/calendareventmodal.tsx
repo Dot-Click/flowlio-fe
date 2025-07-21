@@ -403,7 +403,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                   name="whatsappNumber"
                   placeholder="WhatsApp Number"
                   required={platform === "whatsapp"}
-                  className="w-full p-2 rounded-full border border-gray-200"
+                  className="w-full p-2 rounded-full border border-gray-200 placeholder:text-gray-400 bg-white h-12 text-sm"
                 />
               </div>
             ) : platform === "outlook" ? (
@@ -413,7 +413,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                   name="outlookEvent"
                   placeholder="Outlook Event"
                   required={platform === "outlook"}
-                  className="w-full p-2 rounded-full border border-gray-200"
+                  className="w-full p-2 rounded-full border border-gray-200 placeholder:text-gray-400 bg-white h-12 text-sm"
                 />
               </div>
             ) : null}
@@ -427,7 +427,13 @@ export const EventModal: React.FC<EventModalProps> = ({
                   calendarType === "work" ? "bg-cyan-100" : "bg-transparent"
                 }`}
               >
-                <img src={WhatsAppCheckBoxIcon} alt="Work" className="size-4" />{" "}
+                {calendarType === "work" ? (
+                  <img
+                    src={WhatsAppCheckBoxIcon}
+                    alt="Work"
+                    className="size-4"
+                  />
+                ) : null}
                 Work
               </Flex>
               <button
@@ -439,11 +445,13 @@ export const EventModal: React.FC<EventModalProps> = ({
                     : "bg-transparent"
                 }`}
               >
-                <img
-                  src={EducationCheckBoxIcon}
-                  alt="Education"
-                  className="size-4"
-                />{" "}
+                {calendarType === "education" ? (
+                  <img
+                    src={EducationCheckBoxIcon}
+                    alt="Education"
+                    className="size-4"
+                  />
+                ) : null}
                 Education
               </button>
               <button
@@ -453,11 +461,13 @@ export const EventModal: React.FC<EventModalProps> = ({
                   calendarType === "personal" ? "bg-pink-100" : "bg-transparent"
                 }`}
               >
-                <img
-                  src={PersolCheckBoxIcon}
-                  alt="Personal"
-                  className="size-4"
-                />{" "}
+                {calendarType === "personal" ? (
+                  <img
+                    src={PersolCheckBoxIcon}
+                    alt="Personal"
+                    className="size-4"
+                  />
+                ) : null}
                 Personal
               </button>
             </Flex>
