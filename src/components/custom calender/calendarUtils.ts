@@ -10,6 +10,8 @@ export type CustomEvent = {
   calendarType: "work" | "education" | "personal";
   platform?: "google_meet" | "whatsapp" | "outlook" | "none";
   meetLink?: string;
+  whatsappNumber?: string;
+  outlookEvent?: string;
 };
 
 export const initialEvents: CustomEvent[] = [];

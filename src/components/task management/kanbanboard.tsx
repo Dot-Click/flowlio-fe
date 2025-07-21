@@ -185,8 +185,8 @@ function DraggableTask({ task }: { task: Task }) {
 function DroppableColumn({
   status,
   children,
-  highlight,
-}: {
+}: // highlight,
+{
   status: StatusType;
   children: React.ReactNode;
   highlight?: boolean;
@@ -198,8 +198,8 @@ function DroppableColumn({
       className={cn(
         "flex-col flex-1 min-w-[280px] bg-white rounded-xl border-1 border-gray-200",
         "overflow-hidden max-h-[700px] transition-all duration-200",
-        isOver && "border-dashed border-blue-400 bg-blue-50/30",
-        highlight && "border-green-300 bg-green-50"
+        isOver && "border-dashed border-blue-400 bg-blue-50/30"
+        // highlight && "border-green-300 bg-green-50"
       )}
       ref={setNodeRef}
     >

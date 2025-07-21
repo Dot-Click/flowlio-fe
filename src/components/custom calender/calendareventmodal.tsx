@@ -3,22 +3,14 @@ import { CustomEvent } from "./calendarUtils";
 import { GeneralModalReturnTypeProps } from "../common/generalmodal";
 import { Input } from "../ui/input";
 import { Flex } from "../ui/flex";
-import { ArrowRight, Clock } from "lucide-react";
+import { ArrowRight, Clock, X } from "lucide-react";
 import { Center } from "../ui/center";
 import GoogleMeetIcon from "../../../public/dashboard/google-meet.svg";
 import WhatsappIcon from "../../../public/dashboard/whatsapp-icon.svg";
 import OutlookIcon from "../../../public/dashboard/google-drive.svg";
 import { Box } from "../ui/box";
 import { Button } from "../ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
+import { useRef } from "react";
 import WhatsAppCheckBoxIcon from "../../../public/dashboard/whatsappcheckbox.svg";
 import EducationCheckBoxIcon from "../../../public/dashboard/educationcheckbox.svg";
 import PersolCheckBoxIcon from "../../../public/dashboard/personalicon.svg";
@@ -43,6 +35,8 @@ interface EventFormData {
   calendarType: "work" | "education" | "personal";
   platform: "google_meet" | "whatsapp" | "outlook" | "none";
   meetLink: string;
+  whatsappNumber: string;
+  outlookEvent: string;
 }
 
 const hours = Array.from({ length: 24 }, (_, i) => i); // 0-23 (24 hours)
@@ -57,6 +51,80 @@ function getDuration(startHour: number, endHour: number) {
   if (duration <= 0) return "";
   return `${duration} hour${duration > 1 ? "s" : ""}`;
 }
+
+interface TimeDropdownOption {
+  value: number;
+  label: string;
+}
+
+interface TimeDropdownProps {
+  value: number;
+  onChange: (value: number) => void;
+  options: TimeDropdownOption[];
+  label: string;
+}
+
+const TimeDropdown = ({ value, onChange, options }: TimeDropdownProps) => {
+  const [open, setOpen] = React.useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node))
+        setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  return (
+    <Box className="relative w-40" ref={ref}>
+      <Center
+        className="justify-between w-full p-3 rounded-full border border-gray-200 text-cyan-900 font-semibold"
+        onClick={() => setOpen((o: boolean) => !o)}
+      >
+        <span className="flex items-center gap-2 font-normal text-gray-400">
+          <Clock className="size-4 text-[#1797B9]" />
+          {options.find((o) => o.value === value)?.label || "Select"}
+        </span>
+
+        <svg
+          className="ml-2 w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </Center>
+
+      {open && (
+        <ul className="absolute z-10 mt-2 w-full bg-white border border-cyan-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+          {options.map((opt) => (
+            <li
+              key={opt.value}
+              className={`flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-cyan-100 text-cyan-900 ${
+                value === opt.value ? "bg-cyan-100 font-bold" : ""
+              }`}
+              onClick={() => {
+                onChange(opt.value);
+                setOpen(false);
+              }}
+            >
+              <Clock className="size-3 text-cyan-400" />
+              {opt.label}
+            </li>
+          ))}
+        </ul>
+      )}
+    </Box>
+  );
+};
 
 export const EventModal: React.FC<EventModalProps> = ({
   onSave,
@@ -76,10 +144,12 @@ export const EventModal: React.FC<EventModalProps> = ({
       title: eventToEdit?.title || "",
       date: eventToEdit ? new Date(eventToEdit.date) : new Date(),
       startHour: eventToEdit?.startHour ?? 8,
-      endHour: eventToEdit?.endHour ?? 9,
+      endHour: eventToEdit?.endHour ?? 13,
       calendarType: eventToEdit?.calendarType || "work",
       platform: eventToEdit?.platform || "none",
       meetLink: eventToEdit?.meetLink || "",
+      whatsappNumber: eventToEdit?.whatsappNumber || "",
+      outlookEvent: eventToEdit?.outlookEvent || "",
     },
   });
 
@@ -89,33 +159,33 @@ export const EventModal: React.FC<EventModalProps> = ({
   const endHour = watch("endHour");
   const calendarType = watch("calendarType");
   const platform = watch("platform");
-  // const meetLink = watch("meetLink");
   const isValid = startHour < endHour && !!date && !!title;
 
   useEffect(() => {
     if (eventToEdit) {
       reset({
-        title: eventToEdit.title,
-        date: new Date(eventToEdit.date),
-        startHour: eventToEdit.startHour,
-        endHour: eventToEdit.endHour,
-        calendarType: eventToEdit.calendarType,
-        platform: eventToEdit.platform || "none",
-        meetLink: eventToEdit.meetLink || "",
+        ...eventToEdit,
+        date: eventToEdit.date ? new Date(eventToEdit.date) : new Date(),
+        startHour:
+          typeof eventToEdit.startHour === "number" ? eventToEdit.startHour : 8,
+        endHour:
+          typeof eventToEdit.endHour === "number" ? eventToEdit.endHour : 13,
       });
     } else {
       reset({
         title: "",
         date: new Date(),
         startHour: 8,
-        endHour: 9,
+        endHour: 13,
         calendarType: "work",
         platform: "none",
         meetLink: "",
+        whatsappNumber: "",
+        outlookEvent: "",
       });
     }
     // eslint-disable-next-line
-  }, [eventToEdit, reset]);
+  }, [eventToEdit, reset, modalProps.open]);
 
   if (!modalProps.open) return null;
 
@@ -153,19 +223,23 @@ export const EventModal: React.FC<EventModalProps> = ({
               platform: data.platform,
               meetLink:
                 data.platform === "google_meet" ? data.meetLink : undefined,
+              whatsappNumber:
+                data.platform === "whatsapp" ? data.whatsappNumber : undefined,
+              outlookEvent:
+                data.platform === "outlook" ? data.outlookEvent : undefined,
             });
             onClose();
           })}
         >
           <Button
-            className="absolute top-4 right-4 text-black border-none font-normal shadow-none"
+            className="absolute top-4 right-4 text-black border-none font-normal shadow-none cursor-pointer"
             onClick={onClose}
             variant="outline"
             size="icon"
             aria-label="Close"
             type="button"
           >
-            X
+            <X className="size-4" />
           </Button>
           <h1 className="mb-4 font-normal text-[20px]">
             {eventToEdit ? "Edit Event" : "New Event"}
@@ -209,7 +283,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                 <Calendar
                   className="w-72 p-2"
                   mode="single"
-                  selected={date ? new Date(date) : undefined}
+                  selected={date instanceof Date ? date : new Date(date)}
                   onSelect={(d) => setValue("date", d ?? new Date())}
                   initialFocus
                 />
@@ -221,49 +295,29 @@ export const EventModal: React.FC<EventModalProps> = ({
           </Flex>
           <Box className="my-3">
             <Center className="justify-between gap-2 mt-1">
-              <Select
-                value={String(startHour)}
-                onValueChange={(value) => setValue("startHour", Number(value))}
-              >
-                <SelectTrigger className="w-40 p-3 rounded-full min-h-12 border border-gray-200">
-                  <Flex className="gap-2">
-                    <Clock className="size-4 text-[#1797B9]" />
-                    <SelectValue placeholder="Start Time" />
-                  </Flex>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Start Time</SelectLabel>
-                    {hours.map((h) => (
-                      <SelectItem value={h.toString()} key={h}>
-                        {formatHour(h)}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <ArrowRight className="size-6 text-gray-400" />
-              <Select
-                value={String(endHour)}
-                onValueChange={(value) => setValue("endHour", Number(value))}
-              >
-                <SelectTrigger className="w-40 p-3 rounded-full min-h-12 border border-gray-200">
-                  <Flex className="gap-2">
-                    <Clock className="size-4 text-[#1797B9]" />
-                    <SelectValue placeholder="End Time" />
-                  </Flex>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>End Time</SelectLabel>
-                    {hours.map((h) => (
-                      <SelectItem value={h.toString()} key={h}>
-                        {formatHour(h)}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+              {(() => {
+                const hourOptions = hours.map((h) => ({
+                  value: h,
+                  label: formatHour(h),
+                }));
+                return (
+                  <>
+                    <TimeDropdown
+                      value={startHour}
+                      onChange={(v: number) => setValue("startHour", v)}
+                      options={hourOptions}
+                      label=""
+                    />
+                    <ArrowRight className="size-6 text-gray-400" />
+                    <TimeDropdown
+                      value={endHour}
+                      onChange={(v: number) => setValue("endHour", v)}
+                      options={hourOptions}
+                      label=""
+                    />
+                  </>
+                );
+              })()}
             </Center>
             {Number(startHour) >= Number(endHour) && (
               <div className="text-red-500 mt-1 text-xs">
@@ -345,8 +399,8 @@ export const EventModal: React.FC<EventModalProps> = ({
             ) : platform === "whatsapp" ? (
               <div className="mt-2">
                 <input
-                  {...register("meetLink")}
-                  name="meetLink"
+                  {...register("whatsappNumber")}
+                  name="whatsappNumber"
                   placeholder="WhatsApp Number"
                   required={platform === "whatsapp"}
                   className="w-full p-2 rounded-full border border-gray-200"
@@ -355,8 +409,8 @@ export const EventModal: React.FC<EventModalProps> = ({
             ) : platform === "outlook" ? (
               <div className="mt-2">
                 <input
-                  {...register("meetLink")}
-                  name="meetLink"
+                  {...register("outlookEvent")}
+                  name="outlookEvent"
                   placeholder="Outlook Event"
                   required={platform === "outlook"}
                   className="w-full p-2 rounded-full border border-gray-200"

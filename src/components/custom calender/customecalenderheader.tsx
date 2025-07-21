@@ -8,13 +8,15 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  CopyCheck,
   Pencil,
   Plus,
+  Trash2,
+  X,
 } from "lucide-react";
 import { Center } from "../ui/center";
 import { cn } from "@/lib/utils";
 import { EventModal } from "./calendareventmodal";
-// import ReactDOM from "react-dom";
 import { useGeneralModalDisclosure } from "../common/generalmodal";
 import {
   getStartOfWeek,
@@ -23,7 +25,6 @@ import {
   daysShort,
   formatHour,
   CustomEvent,
-  initialEvents,
 } from "./calendarUtils";
 import GoogleMeetIcon from "../../../public/dashboard/google-meet.svg";
 import WhatsappIcon from "../../../public/dashboard/whatsapp-icon.svg";
@@ -31,17 +32,19 @@ import OutlookIcon from "../../../public/dashboard/google-drive.svg";
 import WhatsAppCheckBoxIcon from "../../../public/dashboard/whatsappcheckbox.svg";
 import EducationCheckBoxIcon from "../../../public/dashboard/educationcheckbox.svg";
 import PersolCheckBoxIcon from "../../../public/dashboard/personalicon.svg";
+import { useCalendarEventsStore } from "@/store/calendarEvents.store";
 
 const hours = Array.from({ length: 24 }, (_, i) => i); // 0-23 (24 hours)
 
 export const CustomCalendarHeader = () => {
-  const [events, setEvents] = useState<CustomEvent[]>(initialEvents);
+  const { events, addEvent, updateEvent } = useCalendarEventsStore();
   const [currentWeek, setCurrentWeek] = useState(getStartOfWeek(new Date()));
   const [miniCalRange, setMiniCalRange] = useState<{ from?: Date }>({});
   const [viewMode, setViewMode] = useState<"day" | "week" | "month">("week");
   const [selectedEvent, setSelectedEvent] = useState<CustomEvent | null>(null);
   const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
   const [editEvent, setEditEvent] = useState<CustomEvent | null>(null);
+
   // Floating time indicator state
   const [hoveredGridTime, setHoveredGridTime] = useState<{
     hour: number;
@@ -49,6 +52,7 @@ export const CustomCalendarHeader = () => {
     y: number;
     visible: boolean;
   }>({ hour: 0, minute: 0, y: 0, visible: false });
+
   const gridContainerRef = useRef<HTMLDivElement>(null);
 
   // Separate modal props for new and edit modals
@@ -64,81 +68,218 @@ export const CustomCalendarHeader = () => {
   }: {
     event: CustomEvent;
     onClose: () => void;
-  }) => (
-    <Center
-      className="fixed top-0 left-0 w-full h-full bg-black/30 z-[1001]"
-      onClick={onClose}
-    >
-      <Box
-        className="relative bg-white p-6 rounded-xl min-w-[340px] shadow-lg"
-        onClick={(e) => e.stopPropagation()}
+  }) => {
+    const [copied, setCopied] = useState(false);
+    const [copiedNumber, setCopiedNumber] = useState(false);
+    const handleCopy = async () => {
+      if (event.meetLink) {
+        await navigator.clipboard.writeText(event.meetLink);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1200);
+      }
+    };
+    const handleCopyNumber = async () => {
+      if (event.whatsappNumber) {
+        await navigator.clipboard.writeText(event.whatsappNumber);
+        setCopiedNumber(true);
+        setTimeout(() => setCopiedNumber(false), 1200);
+      }
+    };
+    return (
+      <Center
+        className="fixed top-0 -left-20 w-full h-full z-[1001]"
+        onClick={onClose}
       >
-        <h3 className="mb-4 font-bold text-[20px]">{event.title}</h3>
+        <Box
+          className="relative bg-white p-4 rounded-xl min-w-[260px] h-auto shadow-xl border border-gray-200"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Center className="justify-between mb-4">
+            <Flex className="gap-2 items-center">
+              {/* Calendar type dot */}
+              <span
+                className={cn(
+                  "w-3 h-3 rounded-full",
+                  event.calendarType === "work"
+                    ? "bg-[#6ee7b7]"
+                    : event.calendarType === "education"
+                    ? "bg-[#818cf8]"
+                    : "bg-[#f472b6]"
+                )}
+              ></span>
+              <h3 className="font-normal text-[18px] capitalize">
+                {event.title.length > 18
+                  ? event.title.slice(0, 18) + "..."
+                  : event.title}
+              </h3>
+            </Flex>
 
-        <Flex className="mb-4 gap-4 items-center">
-          {/* Calendar type dot */}
-          <span
-            className={cn(
-              "w-4 h-4 rounded-full",
-              event.calendarType === "work"
-                ? "bg-[#6ee7b7]"
-                : event.calendarType === "education"
-                ? "bg-[#818cf8]"
-                : "bg-[#f472b6]"
+            <Flex className="gap-0">
+              <Button
+                className="bg-transparent border-none rounded-full cursor-pointer w-6 h-6 p-4"
+                variant="ghost"
+                size="icon"
+                title="Delete"
+              >
+                <Trash2 className="size-4 text-red-500" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                title="Close"
+                onClick={onClose}
+                className="w-6 h-6 p-4 bg-white cursor-pointer text-black border-none rounded-full"
+              >
+                <X className="size-4" />
+              </Button>
+            </Flex>
+          </Center>
+
+          <Flex className="mb-2 gap-2 items-center">
+            {/* Platform icon */}
+            {event.platform === "google_meet" && (
+              <img src={GoogleMeetIcon} alt="Google Meet" className="size-4" />
             )}
-          ></span>
-          <span className="font-medium">
-            {event.calendarType.charAt(0).toUpperCase() +
-              event.calendarType.slice(1)}
-          </span>
-        </Flex>
-        <Flex className="mb-4 gap-4 items-center">
-          {/* Platform icon */}
-          {event.platform === "google_meet" && (
-            <img src={GoogleMeetIcon} alt="Google Meet" className="size-5" />
-          )}
-          {event.platform === "whatsapp" && (
-            <img src={WhatsappIcon} alt="WhatsApp" className="size-5" />
-          )}
-          {event.platform === "outlook" && (
-            <img src={OutlookIcon} alt="Outlook" className="size-5" />
-          )}
-          <span className="font-medium">
-            {event.platform && event.platform !== "none"
-              ? event.platform
-                  .replace("_", " ")
-                  .replace(/\b\w/g, (l) => l.toUpperCase())
-              : "No Platform"}
-          </span>
-        </Flex>
-        <Box className="mb-4">
-          <b>Date:</b>{" "}
-          {event.date ? new Date(event.date).toLocaleDateString() : ""}
-          <br />
-          <b>Day:</b> {daysShort[event.day]}
-          <br />
-          <b>Time:</b> {formatHour(event.startHour)} -{" "}
-          {formatHour(event.endHour)}
-        </Box>
-        {event.platform === "google_meet" && event.meetLink && (
-          <Flex className="mb-4">
-            <img src={GoogleMeetIcon} alt="Google Meet" className="size-6" />
-            <a
-              href={event.meetLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: "#007bff", textDecoration: "underline" }}
-            >
-              Join with Google Meet
-            </a>
+            {event.platform === "whatsapp" && (
+              <img src={WhatsappIcon} alt="WhatsApp" className="size-4" />
+            )}
+            {event.platform === "outlook" && (
+              <img src={OutlookIcon} alt="Outlook" className="size-4" />
+            )}
+            <span className="font-medium">
+              {event.platform && event.platform !== "none"
+                ? event.platform
+                    .replace("_", " ")
+                    .replace(/\b\w/g, (l) => l.toUpperCase())
+                : "No Platform"}
+            </span>
           </Flex>
-        )}
-        <Button onClick={onClose} className="mt-4">
-          Close
-        </Button>
-      </Box>
-    </Center>
-  );
+
+          <Box className="mb-4 text-sm text-gray-500">
+            {event.date
+              ? new Date(event.date).toLocaleDateString("en-US", {
+                  weekday: "long",
+                  month: "long",
+                  day: "numeric",
+                })
+              : ""}
+            <br />
+            {daysShort[event.day]}
+            <br />
+            {formatHour(event.startHour)} - {formatHour(event.endHour)}
+          </Box>
+
+          {/* Google Meet Join Button and Copy Link */}
+          {event.platform === "google_meet" && event.meetLink ? (
+            <Flex className="mb-4 flex-col gap-2 items-start">
+              <Flex className="gap-2 items-center justify-between w-full">
+                <span className="text-xs text-gray-500 truncate max-w-[120px]">
+                  {event.meetLink}
+                </span>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="p-1 text-black rounded"
+                  onClick={handleCopy}
+                  title="Copy link"
+                >
+                  {copied ? (
+                    <CopyCheck className="size-4 text-green-500" />
+                  ) : (
+                    <svg
+                      className="cursor-pointer"
+                      width="16"
+                      height="16"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke="#aaa"
+                        strokeWidth="2"
+                        d="M8 17H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"
+                      />
+                      <rect
+                        width="10"
+                        height="10"
+                        x="12"
+                        y="12"
+                        rx="2"
+                        stroke="#aaa"
+                        strokeWidth="2"
+                      />
+                    </svg>
+                  )}
+                </Button>
+              </Flex>
+
+              <Flex
+                className="items-center justify-between w-full gap-2 bg-gray-200 hover:bg-gray-200/90 text-black px-4 py-2 rounded-lg text-base font-normal shadow-md cursor-pointer"
+                style={{ width: "100%" }}
+              >
+                <a
+                  href={event.meetLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    width: "100%",
+                  }}
+                >
+                  Join with Google Meet
+                  <img
+                    src={GoogleMeetIcon}
+                    alt="Google Meet"
+                    className="size-6 ml-2"
+                  />
+                </a>
+              </Flex>
+            </Flex>
+          ) : event.platform === "whatsapp" && event.whatsappNumber ? (
+            <Flex className="gap-2 items-center justify-between w-full">
+              <span className="text-xs text-gray-500 truncate max-w-[120px]">
+                {event.whatsappNumber}
+              </span>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="p-1 text-black rounded cursor-pointer"
+                title="Copy number"
+                onClick={handleCopyNumber}
+              >
+                {copiedNumber ? (
+                  <CopyCheck className="size-4 text-green-500" />
+                ) : (
+                  <svg
+                    className="cursor-pointer"
+                    width="16"
+                    height="16"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke="#aaa"
+                      strokeWidth="2"
+                      d="M8 17H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"
+                    />
+                    <rect
+                      width="10"
+                      height="10"
+                      x="12"
+                      y="12"
+                      rx="2"
+                      stroke="#aaa"
+                      strokeWidth="2"
+                    />
+                  </svg>
+                )}
+              </Button>
+            </Flex>
+          ) : null}
+        </Box>
+      </Center>
+    );
+  };
 
   // Navigation handlers
   const goToToday = () => setCurrentWeek(getStartOfWeek(new Date()));
@@ -168,7 +309,10 @@ export const CustomCalendarHeader = () => {
               <Button
                 className="w-full bg-[#1797B9] hover:bg-[#1797B9]/80 hover:text-white text-white rounded-full h-11 cursor-pointer "
                 size="lg"
-                onClick={() => newEventModalProps.onOpenChange(true)}
+                onClick={() => {
+                  setEditEvent(null);
+                  newEventModalProps.onOpenChange(true);
+                }}
               >
                 New Event <Plus className="size-5 text-white" />
               </Button>
@@ -264,7 +408,12 @@ export const CustomCalendarHeader = () => {
             <Flex className="items-center justify-between px-6 pt-6 pb-2">
               {/* Navigation */}
               <Flex className="items-center gap-2">
-                <Button variant="ghost" size="icon" onClick={goToPrev}>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={goToPrev}
+                  className="cursor-pointer"
+                >
                   <ChevronLeft />
                 </Button>
 
@@ -275,7 +424,12 @@ export const CustomCalendarHeader = () => {
                   })}
                 </Box>
 
-                <Button variant="ghost" size="icon" onClick={goToNext}>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={goToNext}
+                  className="cursor-pointer"
+                >
                   <ChevronRight />
                 </Button>
               </Flex>
@@ -458,9 +612,9 @@ export const CustomCalendarHeader = () => {
                               )}
 
                               {/* Event title */}
-                              <Box className="text-sm font-medium w-full">
-                                {event.title.length > 10
-                                  ? event.title.slice(0, 10) + "..."
+                              <Box className="text-sm font-medium w-full capitalize">
+                                {event.title.length > 7
+                                  ? event.title.slice(0, 7) + "..."
                                   : event.title}
                               </Box>
                             </Flex>
@@ -523,7 +677,7 @@ export const CustomCalendarHeader = () => {
       <EventModal
         modalProps={newEventModalProps}
         onSave={(newEvent: CustomEvent) => {
-          setEvents([...events, newEvent]);
+          addEvent(newEvent);
           newEventModalProps.onOpenChange(false);
         }}
         onClose={() => newEventModalProps.onOpenChange(false)}
@@ -542,18 +696,7 @@ export const CustomCalendarHeader = () => {
         modalProps={editEventModalProps}
         eventToEdit={editEvent}
         onSave={(updatedEvent: CustomEvent) => {
-          setEvents(
-            events.map((ev) => {
-              // Find the event to update by matching date and startHour
-              if (
-                ev.date === editEvent?.date &&
-                ev.startHour === editEvent?.startHour
-              ) {
-                return updatedEvent;
-              }
-              return ev;
-            })
-          );
+          updateEvent(updatedEvent);
           setEditEvent(null);
           editEventModalProps.onOpenChange(false);
         }}
