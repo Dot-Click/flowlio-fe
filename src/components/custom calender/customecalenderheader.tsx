@@ -230,14 +230,14 @@ export const CustomCalendarHeader = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="bg-white w-24 h-9 border"
+                className="bg-white w-24 h-9 border cursor-pointer"
                 onClick={goToToday}
               >
                 Today
               </Button>
 
               {/* View Mode Toggle */}
-              <Flex className="gap-2 bg-[#F2F3F7] p-1 rounded-lg">
+              <Flex className="gap-0 bg-[#F2F3F7] p-1 rounded-lg">
                 {["day", "week", "month"].map((mode) => (
                   <button
                     key={mode}
