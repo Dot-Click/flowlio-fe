@@ -437,7 +437,7 @@ export const ProjectTable = () => {
           <Box className="mb-4 text-lg font-semibold">Project Comments</Box>
           <Box className="flex flex-col gap-2 max-h-64 overflow-y-auto mb-4 bg-gray-50 p-2 rounded">
             {activeProjectId &&
-              (comments[activeProjectId]?.length !== 1 ? (
+              (comments[activeProjectId]?.length === 0 ? (
                 <Box className="text-gray-400 text-center">
                   No comments yet.
                 </Box>
