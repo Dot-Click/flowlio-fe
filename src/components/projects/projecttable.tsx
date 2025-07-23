@@ -2,7 +2,13 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Center } from "@/components/ui/center";
 import { Box } from "../ui/box";
 import { Flex } from "../ui/flex";
-import { ArrowUp, Eye, PencilLine } from "lucide-react";
+import {
+  ArrowUp,
+  Eye,
+  MessageCircleReply,
+  PencilLine,
+  Trash2,
+} from "lucide-react";
 import { ReusableTable } from "../reusable/reusabletable";
 import { format, isWithinInterval } from "date-fns";
 import {
@@ -12,6 +18,13 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { Button } from "../ui/button";
+import {
+  GeneralModal,
+  useGeneralModalDisclosure,
+} from "../common/generalmodal";
+import { useState } from "react";
+import { Input } from "../ui/input";
+import { Stack } from "../ui/stack";
 
 const data: Data[] = [
   {
@@ -263,7 +276,7 @@ export const columns: ColumnDef<Data>[] = [
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="mb-2">
-                <p>Delete Schedule</p>
+                <p>View Project</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -279,7 +292,22 @@ export const columns: ColumnDef<Data>[] = [
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="mb-2">
-                <p>Edit Schedule</p>
+                <p>Edit Project</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="bg-[#40aeed] hover:bg-[#40aeed]/80 rounded-md border-none cursor-pointer"
+                >
+                  <MessageCircleReply className="text-white size-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="mb-2">
+                <p>Add Comment</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -290,13 +318,174 @@ export const columns: ColumnDef<Data>[] = [
 ];
 
 export const ProjectTable = () => {
+  const [comments, setComments] = useState<
+    Record<string, { id: string; text: string; timestamp: Date }[]>
+  >({});
+  const props = useGeneralModalDisclosure();
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const [input, setInput] = useState("");
+
+  // Add comment handler
+  const handleAddComment = () => {
+    if (!activeProjectId || !input.trim()) return;
+    setComments((prev) => {
+      const newComment = {
+        id: Math.random().toString(36).slice(2),
+        text: input.trim(),
+        timestamp: new Date(),
+      };
+      return {
+        ...prev,
+        [activeProjectId]: [...(prev[activeProjectId] || []), newComment],
+      };
+    });
+    setInput("");
+  };
+
+  // Delete comment handler
+  const handleDeleteComment = (commentId: string) => {
+    if (!activeProjectId) return;
+    setComments((prev) => ({
+      ...prev,
+      [activeProjectId]: (prev[activeProjectId] || []).filter(
+        (c) => c.id !== commentId
+      ),
+    }));
+  };
+
+  // Open comment modal for a project
+  const openCommentModal = (projectId: string) => {
+    setActiveProjectId(projectId);
+    props.onOpenChange(true);
+    setInput("");
+  };
+
+  const patchedColumns = columns.map((col) => {
+    if ((col as any).accessorKey === "actions") {
+      return {
+        ...col,
+        cell: ({ row }: any) => (
+          <Center className="space-x-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="bg-black border-none w-10 h-9 hover:bg-black cursor-pointer rounded-md "
+                  >
+                    <Eye className="fill-white size-7 " />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="mb-2">
+                  <p>View Project</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="bg-[#23B95D] hover:bg-[#23B95D]/80 rounded-md border-none cursor-pointer"
+                  >
+                    <PencilLine className="fill-white text-white" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="mb-2">
+                  <p>Edit Project</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="bg-[#40aeed] hover:bg-[#40aeed]/80 rounded-md border-none cursor-pointer"
+                    onClick={() => openCommentModal(row.original.id)}
+                  >
+                    <MessageCircleReply className="text-white size-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="mb-2">
+                  <p>Add Comment</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </Center>
+        ),
+      };
+    }
+    return col;
+  });
+
   return (
-    <ReusableTable
-      data={data}
-      columns={columns}
-      searchInput={false}
-      enablePaymentLinksCalender={true}
-      onRowClick={(row) => console.log("Row clicked:", row.original)}
-    />
+    <>
+      <ReusableTable
+        data={data}
+        columns={patchedColumns}
+        searchInput={false}
+        enablePaymentLinksCalender={true}
+        onRowClick={(row) => {
+          console.log("Row clicked:", row.original);
+        }}
+      />
+
+      <GeneralModal {...props}>
+        <Box>
+          <Box className="mb-4 text-lg font-semibold">Project Comments</Box>
+          <Box className="flex flex-col gap-2 max-h-64 overflow-y-auto mb-4 bg-gray-50 p-2 rounded">
+            {activeProjectId &&
+              (comments[activeProjectId]?.length === 0 ? (
+                <Box className="text-gray-400 text-center">
+                  No comments yet.
+                </Box>
+              ) : (
+                comments[activeProjectId]?.map((comment) => (
+                  <Box
+                    key={comment.id}
+                    className="flex items-start gap-2 group"
+                  >
+                    <Flex className="flex-1 items-start justify-between bg-white p-2 rounded shadow text-sm">
+                      <Stack>
+                        <Box className="w-82 overflow-hidden break-words whitespace-pre-line">
+                          {comment.text}
+                        </Box>
+                        <Box className="text-xs text-gray-400 mt-1">
+                          {format(comment.timestamp, "MMM d, yyyy hh:mm a")}
+                        </Box>
+                      </Stack>
+
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-red-500 cursor-pointer"
+                        onClick={() => handleDeleteComment(comment.id)}
+                        title="Delete"
+                      >
+                        <Trash2 />
+                      </Button>
+                    </Flex>
+                  </Box>
+                ))
+              ))}
+          </Box>
+          <Box className="flex gap-2">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type a comment..."
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleAddComment();
+              }}
+            />
+            <Button onClick={handleAddComment} disabled={!input.trim()}>
+              Send
+            </Button>
+          </Box>
+        </Box>
+      </GeneralModal>
+    </>
   );
 };

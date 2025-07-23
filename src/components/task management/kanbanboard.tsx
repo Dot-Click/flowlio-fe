@@ -4,6 +4,10 @@ import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { Box } from "../ui/box";
 import { Flex } from "../ui/flex";
 import { cn } from "@/lib/utils";
+import { Button } from "../ui/button";
+import { TooltipContent } from "../ui/tooltip";
+import { Tooltip, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { GripVertical, MessageCircleMore } from "lucide-react";
 
 export const initialTasks: Task[] = [
   {
@@ -54,7 +58,6 @@ export const initialTasks: Task[] = [
     project: "Marketing Plan",
     dueDate: "19th Oct, 2024",
     status: "Updated",
-    comments: "No Comments",
   },
   {
     id: "8",
@@ -62,7 +65,6 @@ export const initialTasks: Task[] = [
     project: "Marketing Plan",
     dueDate: "18th Oct, 2024",
     status: "Changes",
-    comments: "No Comments",
   },
   {
     id: "9",
@@ -70,7 +72,6 @@ export const initialTasks: Task[] = [
     project: "Marketing Plan",
     dueDate: "22th Oct, 2024",
     status: "Completed",
-    comments: "No Comments",
   },
   {
     id: "10",
@@ -78,7 +79,6 @@ export const initialTasks: Task[] = [
     project: "Marketing Plan",
     dueDate: "10th Oct, 2024",
     status: "To Do",
-    comments: "No Comments",
   },
 ];
 
@@ -87,7 +87,6 @@ export type Task = {
   id: string;
   title: string;
   project: string;
-  comments?: string;
   dueDate: string;
   status: StatusType;
 };
@@ -128,8 +127,8 @@ function DraggableTask({ task }: { task: Task }) {
   return (
     <Box
       className={cn(
-        "bg-[#F6F6F6] rounded-lg border border-gray-200 p-4 cursor-grab min-w-[240px] mb-3 mx-2 transition-all duration-200",
-        "hover:shadow-md hover:border-gray-300 active:cursor-grabbing",
+        "bg-[#F6F6F6] rounded-lg border border-gray-200 p-4  min-w-[240px] mb-3 mx-2 transition-all duration-200",
+        "hover:shadow-md hover:border-gray-300",
         isDragging && "opacity-50 shadow-lg scale-105"
       )}
       style={{
@@ -138,15 +137,48 @@ function DraggableTask({ task }: { task: Task }) {
           : undefined,
       }}
       ref={setNodeRef}
-      {...attributes}
-      {...listeners}
     >
       <Flex className="flex-col w-full items-start gap-2">
-        <Box className="font-semibold text-gray-800 text-md leading-tight">
-          {task.title}
-        </Box>
+        <Flex className="w-full justify-between items-center">
+          {/* Drag handle */}
+          <Flex
+            className="font-semibold text-gray-800 text-md leading-tight cursor-grab"
+            {...attributes}
+            {...listeners}
+          >
+            <GripVertical className="text-gray-400 size-4" />
 
-        <Flex className="mt-4 flex-col items-start gap-1">
+            {task.title}
+          </Flex>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    console.log("View Comments");
+                  }}
+                  variant="outline"
+                  className="bg-[#40aeed] hover:bg-[#40aeed]/80 w-8 h-8 rounded-full border-none cursor-pointer flex items-center justify-center text-center"
+                >
+                  <MessageCircleMore className="text-white size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="mb-2">
+                <p>View Comments</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </Flex>
+
+        <Flex
+          className="mt-4 flex-col items-start gap-1 pointer-events-none"
+          style={{
+            userSelect: "none",
+          }}
+        >
           <Flex className="text-gray-600">
             <Flex className="gap-1 text-sm font-normal">
               <img
@@ -185,11 +217,9 @@ function DraggableTask({ task }: { task: Task }) {
 function DroppableColumn({
   status,
   children,
-}: // highlight,
-{
+}: {
   status: StatusType;
   children: React.ReactNode;
-  highlight?: boolean;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
@@ -199,7 +229,6 @@ function DroppableColumn({
         "flex-col flex-1 min-w-[280px] bg-white rounded-xl border-1 border-gray-200",
         "overflow-hidden max-h-[700px] transition-all duration-200",
         isOver && "border-dashed border-blue-400 bg-blue-50/30"
-        // highlight && "border-green-300 bg-green-50"
       )}
       ref={setNodeRef}
     >
@@ -262,11 +291,7 @@ export default function KanbanBoard({
           onDragCancel={() => setActiveTask(null)}
         >
           {STATUS_COLUMNS.map((status) => (
-            <DroppableColumn
-              key={status}
-              status={status}
-              highlight={status === "Completed"}
-            >
+            <DroppableColumn key={status} status={status}>
               {filteredTasks
                 .filter((task) => task.status === status)
                 .map((task) => (
@@ -285,11 +310,6 @@ export default function KanbanBoard({
                     Project:{" "}
                     <span className="font-medium">{activeTask.project}</span>
                   </Box>
-                  {activeTask.comments && (
-                    <Box className="text-gray-500 text-xs italic">
-                      {activeTask.comments}
-                    </Box>
-                  )}
                 </Flex>
                 <Flex className="justify-end mt-3">
                   <Box className="text-red-500 text-xs font-medium bg-red-50 px-2 py-1 rounded">

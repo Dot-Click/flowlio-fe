@@ -32,6 +32,7 @@ export const TaskManagementHeader = () => {
       task.title.toLowerCase().includes(search.toLowerCase()) ||
       task.project.toLowerCase().includes(search.toLowerCase())
   );
+
   return (
     <PageWrapper className="mt-6 p-4">
       <Stack className="gap-4 py-2">
