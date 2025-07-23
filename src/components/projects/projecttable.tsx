@@ -292,7 +292,7 @@ export const columns: ColumnDef<Data>[] = [
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="mb-2">
-                <p>Edit Project</p>
+                <p>Edit Task</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -365,7 +365,7 @@ export const ProjectTable = () => {
       return {
         ...col,
         cell: ({ row }: any) => (
-          <Center className="space-x-2">
+          <Center className="space-x-2 ">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -471,7 +471,7 @@ export const ProjectTable = () => {
                 ))
               ))}
           </Box>
-          <Box className="flex gap-2">
+          <Flex className="items-center justify-between">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -479,11 +479,17 @@ export const ProjectTable = () => {
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleAddComment();
               }}
+              className="bg-white rounded-full placeholder:text-gray-400 h-11 border border-gray-400"
             />
-            <Button onClick={handleAddComment} disabled={!input.trim()}>
+
+            <Button
+              onClick={handleAddComment}
+              disabled={!input.trim()}
+              className="rounded-full h-11 cursor-pointer"
+            >
               Send
             </Button>
-          </Box>
+          </Flex>
         </Box>
       </GeneralModal>
     </>

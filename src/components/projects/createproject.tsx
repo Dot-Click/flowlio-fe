@@ -56,6 +56,7 @@ const formSchema = z.object({
   address: z.string().min(2, {
     message: "Address must be at least 2 characters.",
   }),
+  contractfile: z.string().optional(),
 });
 
 export const CreateProject = () => {
@@ -75,6 +76,7 @@ export const CreateProject = () => {
       assignedProject: "",
       projectDescription: "",
       address: "",
+      contractfile: "",
     },
   });
 
@@ -379,18 +381,27 @@ export const CreateProject = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Client Name:
+                      Assign Client:
                       <span className="text-red-500 text-sm">*</span>
                     </FormLabel>
-                    <FormControl>
-                      <Input
-                        className="bg-white rounded-full placeholder:text-gray-400"
-                        size="lg"
-                        type="text"
-                        placeholder="Enter Client Name"
-                        {...field}
-                      />
-                    </FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl className="w-full h-11">
+                        <SelectTrigger
+                          size="lg"
+                          className="bg-white border border-gray-300 rounded-full w-full h-12"
+                        >
+                          <SelectValue placeholder="Select Client" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="w-full">
+                        <SelectItem value="cl1">Client 1</SelectItem>
+                        <SelectItem value="cl2">Client 2</SelectItem>
+                        <SelectItem value="cl3">Client 3</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -425,6 +436,26 @@ export const CreateProject = () => {
                         <SelectItem value="pro5">User 5</SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="contractfile"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Upload Contract File:</FormLabel>
+                    <FormControl>
+                      <Input
+                        className="bg-white rounded-full h-11"
+                        size="lg"
+                        type="file"
+                        placeholder="Upload Contract File"
+                        {...field}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

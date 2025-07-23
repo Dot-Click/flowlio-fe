@@ -8,79 +8,7 @@ import { Button } from "../ui/button";
 import { TooltipContent } from "../ui/tooltip";
 import { Tooltip, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { GripVertical, MessageCircleMore } from "lucide-react";
-
-export const initialTasks: Task[] = [
-  {
-    id: "1",
-    title: "Invoice Task",
-    project: "Marketing Plan",
-    dueDate: "16 Oct, 2024",
-    status: "To Do",
-  },
-  {
-    id: "2",
-    title: "Sample Task",
-    project: "Marketing Plan",
-    dueDate: "12th Feb, 2024",
-    status: "In Progress",
-  },
-  {
-    id: "3",
-    title: "Mini Project Task",
-    project: "Marketing Plan",
-    dueDate: "16th Oct, 2024",
-    status: "In Progress",
-  },
-  {
-    id: "4",
-    title: "Sample Task",
-    project: "Marketing Plan",
-    dueDate: "16th Oct, 2024",
-    status: "Delay",
-  },
-  {
-    id: "5",
-    title: "Sample Task",
-    project: "Marketing Plan",
-    dueDate: "03th Feb, 2025",
-    status: "In Progress",
-  },
-  {
-    id: "6",
-    title: "Sample Task",
-    project: "Marketing Plan",
-    dueDate: "10th Oct, 2024",
-    status: "Delay",
-  },
-  {
-    id: "7",
-    title: "Sample Task",
-    project: "Marketing Plan",
-    dueDate: "19th Oct, 2024",
-    status: "Updated",
-  },
-  {
-    id: "8",
-    title: "Sample Task",
-    project: "Marketing Plan",
-    dueDate: "18th Oct, 2024",
-    status: "Changes",
-  },
-  {
-    id: "9",
-    title: "Sample Task",
-    project: "Marketing Plan",
-    dueDate: "22th Oct, 2024",
-    status: "Completed",
-  },
-  {
-    id: "10",
-    title: "Sample Task",
-    project: "Marketing Plan",
-    dueDate: "10th Oct, 2024",
-    status: "To Do",
-  },
-];
+import { format } from "date-fns";
 
 // Task type
 export type Task = {
@@ -89,7 +17,170 @@ export type Task = {
   project: string;
   dueDate: string;
   status: StatusType;
+  comments?: { id: string; text: string; timestamp: Date }[];
 };
+
+export const initialTasks: Task[] = [
+  {
+    id: "1",
+    title: "Invoice Task",
+    project: "Marketing Plan",
+    dueDate: "16 Oct, 2024",
+    status: "To Do",
+    comments: [
+      {
+        id: "1",
+        text: "Started this task.",
+        timestamp: new Date("2024-06-01T10:30:00"),
+      },
+      {
+        id: "2",
+        text: "Waiting for review.",
+        timestamp: new Date("2024-06-02T14:45:00"),
+      },
+      {
+        id: "3",
+        text: "This is a comment.",
+        timestamp: new Date("2024-06-02T14:45:00"),
+      },
+      {
+        id: "4",
+        text: "This is a comment.",
+        timestamp: new Date("2024-06-02T14:45:00"),
+      },
+      {
+        id: "5",
+        text: "This is a comment.",
+        timestamp: new Date("2024-06-02T14:45:00"),
+      },
+    ],
+  },
+  {
+    id: "2",
+    title: "Sample Task",
+    project: "Marketing Plan",
+    dueDate: "12th Feb, 2024",
+    status: "In Progress",
+    comments: [
+      {
+        id: "1",
+        text: "Started this task.",
+        timestamp: new Date("2024-06-01T10:30:00"),
+      },
+      {
+        id: "2",
+        text: "Started this task.",
+        timestamp: new Date("2024-06-01T10:30:00"),
+      },
+    ],
+  },
+  {
+    id: "3",
+    title: "Mini Project Task",
+    project: "Marketing Plan",
+    dueDate: "16th Oct, 2024",
+    status: "In Progress",
+    comments: [],
+  },
+  {
+    id: "4",
+    title: "Sample Task",
+    project: "Marketing Plan",
+    dueDate: "16th Oct, 2024",
+    status: "Delay",
+    comments: [
+      {
+        id: "1",
+        text: "Started this task.",
+        timestamp: new Date("2024-06-01T10:30:00"),
+      },
+    ],
+  },
+  {
+    id: "5",
+    title: "Sample Task",
+    project: "Marketing Plan",
+    dueDate: "03th Feb, 2025",
+    status: "In Progress",
+    comments: [
+      {
+        id: "1",
+        text: "Started this task.",
+        timestamp: new Date("2024-06-01T10:30:00"),
+      },
+    ],
+  },
+  {
+    id: "6",
+    title: "Sample Task",
+    project: "Marketing Plan",
+    dueDate: "10th Oct, 2024",
+    status: "Delay",
+    comments: [
+      {
+        id: "1",
+        text: "Started this task.",
+        timestamp: new Date("2024-06-01T10:30:00"),
+      },
+    ],
+  },
+  {
+    id: "7",
+    title: "Sample Task",
+    project: "Marketing Plan",
+    dueDate: "19th Oct, 2024",
+    status: "Updated",
+    comments: [
+      {
+        id: "1",
+        text: "Started this task.",
+        timestamp: new Date("2024-06-01T10:30:00"),
+      },
+    ],
+  },
+  {
+    id: "8",
+    title: "Sample Task",
+    project: "Marketing Plan",
+    dueDate: "18th Oct, 2024",
+    status: "Changes",
+    comments: [
+      {
+        id: "1",
+        text: "Started this task.",
+        timestamp: new Date("2024-06-01T10:30:00"),
+      },
+    ],
+  },
+  {
+    id: "9",
+    title: "Sample Task",
+    project: "Marketing Plan",
+    dueDate: "22th Oct, 2024",
+    status: "Completed",
+    comments: [
+      {
+        id: "1",
+        text: "Started this task.",
+        timestamp: new Date("2024-06-01T10:30:00"),
+      },
+    ],
+  },
+  {
+    id: "10",
+    title: "Sample Task",
+    project: "Marketing Plan",
+    dueDate: "10th Oct, 2024",
+    status: "To Do",
+    comments: [
+      {
+        id: "1",
+        text: "Started this task.",
+        timestamp: new Date("2024-06-01T10:30:00"),
+      },
+    ],
+  },
+];
 
 type StatusType =
   | "To Do"
@@ -124,91 +215,122 @@ function DraggableTask({ task }: { task: Task }) {
       id: task.id,
     });
 
+  const [showComments, setShowComments] = useState(false);
   return (
-    <Box
-      className={cn(
-        "bg-[#F6F6F6] rounded-lg border border-gray-200 p-4  min-w-[240px] mb-3 mx-2 transition-all duration-200",
-        "hover:shadow-md hover:border-gray-300",
-        isDragging && "opacity-50 shadow-lg scale-105"
-      )}
-      style={{
-        transform: transform
-          ? `translate(${transform.x}px, ${transform.y}px)`
-          : undefined,
-      }}
-      ref={setNodeRef}
-    >
-      <Flex className="flex-col w-full items-start gap-2">
-        <Flex className="w-full justify-between items-center">
-          {/* Drag handle */}
+    <Box className="relative">
+      <Box
+        className={cn(
+          "bg-[#F6F6F6] rounded-lg border border-gray-200 p-4  min-w-[240px] mb-3 mx-2 transition-all duration-200",
+          "hover:shadow-md hover:border-gray-300",
+          isDragging && "opacity-50 shadow-lg scale-105"
+        )}
+        style={{
+          transform: transform
+            ? `translate(${transform.x}px, ${transform.y}px)`
+            : undefined,
+        }}
+        ref={setNodeRef}
+      >
+        <Flex className="flex-col w-full items-start gap-2">
+          <Flex className="w-full justify-between items-center">
+            {/* Drag handle */}
+            <Flex
+              className="font-semibold text-gray-800 text-md leading-tight cursor-grab"
+              {...attributes}
+              {...listeners}
+            >
+              <GripVertical className="text-gray-400 size-4" />
+
+              {task.title}
+            </Flex>
+
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      setShowComments(!showComments);
+                    }}
+                    variant="outline"
+                    className="bg-[#40aeed] hover:bg-[#40aeed]/80 w-8 h-8 rounded-full border-none cursor-pointer flex items-center justify-center text-center"
+                  >
+                    <MessageCircleMore className="text-white size-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="mb-2">
+                  <p>View Comments</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </Flex>
+
           <Flex
-            className="font-semibold text-gray-800 text-md leading-tight cursor-grab"
-            {...attributes}
-            {...listeners}
+            className="mt-4 flex-col items-start gap-1 pointer-events-none"
+            style={{
+              userSelect: "none",
+            }}
           >
-            <GripVertical className="text-gray-400 size-4" />
+            <Flex className="text-gray-600">
+              <Flex className="gap-1 text-sm font-normal">
+                <img
+                  src="/dashboard/analytics.svg"
+                  className="size-4"
+                  alt="calendericon"
+                />
+                Project:
+              </Flex>
 
-            {task.title}
+              <span className="font-nromal text-black text-sm ml-4">
+                {task.project}
+              </span>
+            </Flex>
+
+            <Flex className="mt-1 text-gray-600">
+              <Flex className="gap-1 text-sm">
+                <img
+                  src="/dashboard/calendericonfordraging.svg"
+                  className="size-4"
+                  alt="calendericon"
+                />
+                Deadline:
+              </Flex>
+              <Box className="text-red-500 text-xs font-medium rounded ml-2">
+                {task.dueDate}
+              </Box>
+            </Flex>
           </Flex>
+        </Flex>
+      </Box>
 
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    console.log("View Comments");
-                  }}
-                  variant="outline"
-                  className="bg-[#40aeed] hover:bg-[#40aeed]/80 w-8 h-8 rounded-full border-none cursor-pointer flex items-center justify-center text-center"
+      {showComments && (
+        <Box className="absolute top-0 left-0 w-full h-full z-50 flex flex-col bg-black/50 rounded">
+          <Button
+            onClick={() => setShowComments(false)}
+            className="bg-blue-500 text-white px-4 py-2 rounded-full cursor-pointer self-end m-2"
+          >
+            Close Comments
+          </Button>
+          <Box className="flex-1 flex flex-col gap-2 max-h-70 overflow-y-auto bg-gray-50 p-2 rounded">
+            {task.comments && task.comments.length > 0 ? (
+              task.comments.map((comment) => (
+                <Box
+                  key={comment.id}
+                  className="bg-white p-2 rounded shadow text-sm"
                 >
-                  <MessageCircleMore className="text-white size-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="mb-2">
-                <p>View Comments</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </Flex>
-
-        <Flex
-          className="mt-4 flex-col items-start gap-1 pointer-events-none"
-          style={{
-            userSelect: "none",
-          }}
-        >
-          <Flex className="text-gray-600">
-            <Flex className="gap-1 text-sm font-normal">
-              <img
-                src="/dashboard/analytics.svg"
-                className="size-4"
-                alt="calendericon"
-              />
-              Project:
-            </Flex>
-
-            <span className="font-nromal text-black text-sm ml-4">
-              {task.project}
-            </span>
-          </Flex>
-
-          <Flex className="mt-1 text-gray-600">
-            <Flex className="gap-1 text-sm">
-              <img
-                src="/dashboard/calendericonfordraging.svg"
-                className="size-4"
-                alt="calendericon"
-              />
-              Deadline:
-            </Flex>
-            <Box className="text-red-500 text-xs font-medium rounded ml-2">
-              {task.dueDate}
-            </Box>
-          </Flex>
-        </Flex>
-      </Flex>
+                  <Box>{comment.text}</Box>
+                  <Box className="text-xs text-gray-400 mt-1">
+                    {format(comment.timestamp, "MMM d, yyyy hh:mm a")}
+                  </Box>
+                </Box>
+              ))
+            ) : (
+              <Box className="text-gray-400 text-center">No comments yet.</Box>
+            )}
+          </Box>
+        </Box>
+      )}
     </Box>
   );
 }

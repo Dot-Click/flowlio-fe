@@ -41,6 +41,8 @@ import ViewermyProjectsPage from "./pages/viewermyprojects.page";
 import { ViewermyTasksPage } from "./pages/viewermytasks.page";
 import ViewerSupportsPage from "./pages/viewersupports.page";
 import ViewerSettingsPage from "./pages/viewersettings.page";
+import ClientManagementPage from "./pages/clientmanagement.page";
+import { CreateClient } from "./components/client management/createclient";
 
 export const Router = () => {
   return (
@@ -85,6 +87,11 @@ export const Router = () => {
           <Route element={<PaymentLinksPage />} path="payment-links" />
           <Route element={<SupportPage />} path="support" />
           <Route element={<InvoicePage />} path="invoice" />
+          <Route element={<ClientManagementPage />} path="client-management" />
+          <Route
+            element={<CreateClient />}
+            path="client-management/create-client"
+          />
           <Route index element={<DashboardPage />} />
           <Route path="*" element={<NotFound />} />
         </Route>

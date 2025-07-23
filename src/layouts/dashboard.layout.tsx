@@ -9,7 +9,7 @@ import type { CSSProperties } from "react";
 import { Box } from "@/components/ui/box";
 import { LuUsers } from "react-icons/lu";
 import { Outlet } from "react-router";
-import { SquareKanban } from "lucide-react";
+import { SquareKanban, UserPen } from "lucide-react";
 import { GroupIcon, TaskManagementIcon } from "@/components/customeIcons";
 import { MessageCircleQuestion } from "lucide-react";
 
@@ -24,6 +24,7 @@ export const navItems: NavItem[] = [
     title: "Projects",
     icon: <GroupIcon />,
   },
+
   {
     url: "/dashboard/task-management",
     title: "Task Management",
@@ -34,7 +35,11 @@ export const navItems: NavItem[] = [
     title: "User Management",
     icon: <LuUsers />,
   },
-
+  {
+    url: "/dashboard/client-management",
+    title: "Client Management",
+    icon: <UserPen />,
+  },
   {
     url: "/dashboard/calender",
     title: "Calender",
