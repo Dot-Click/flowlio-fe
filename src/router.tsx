@@ -8,7 +8,7 @@ import VerifyEmailPage from "./pages/verifyemail.page";
 import VerifyCodePage from "./pages/verifycode.page";
 import { AiAssistPage } from "./pages/aiassist.page";
 import SettingsPage from "./pages/settings.page";
-import { CommentsPage } from "./pages/comments.page";
+// import { CommentsPage } from "./pages/comments.page";
 import DashboardPage from "./pages/dashboard.page";
 import { NotFound } from "./pages/notfound.page";
 import SigninPage from "./pages/signin.page";
@@ -82,7 +82,7 @@ export const Router = () => {
           <Route element={<UserManagementPage />} path="user-management" />
           <Route element={<CalenderPage />} path="calender" />
           <Route element={<AiAssistPage />} path="ai-assist" />
-          <Route element={<CommentsPage />} path="comments" />
+          {/* <Route element={<CommentsPage />} path="comments" /> */}
           <Route element={<SettingsPage />} path="settings" />
           <Route element={<PaymentLinksPage />} path="payment-links" />
           <Route element={<SupportPage />} path="support" />

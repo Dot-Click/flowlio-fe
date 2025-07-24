@@ -81,7 +81,10 @@ export const NotificationsDropdown: React.FC<{ className?: string }> = ({
         </Tooltip>
       </TooltipProvider>
 
-      <DropdownMenuContent align="end" className="max-w-[25rem] p-2">
+      <DropdownMenuContent
+        align="end"
+        className="max-w-[25rem] max-sm:w-[18rem] p-2"
+      >
         <DropdownMenuLabel className="mb-2">
           <Flex className="justify-between items-center">
             <span className="text-lg font-medium">Notifications</span>

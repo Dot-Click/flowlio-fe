@@ -432,7 +432,10 @@ export const ProjectTable = () => {
         }}
       />
 
-      <GeneralModal {...props}>
+      <GeneralModal
+        {...props}
+        contentProps={{ className: "overflow-hidden max-sm:p-3" }}
+      >
         <Box>
           <Box className="mb-4 text-lg font-semibold">Project Comments</Box>
           <Box className="flex flex-col gap-2 max-h-64 overflow-y-auto mb-4 bg-gray-50 p-2 rounded">
@@ -449,7 +452,7 @@ export const ProjectTable = () => {
                   >
                     <Flex className="flex-1 items-start justify-between bg-white p-2 rounded shadow text-sm">
                       <Stack>
-                        <Box className="w-82 overflow-hidden break-words whitespace-pre-line">
+                        <Box className="w-82 max-sm:w-48 overflow-hidden break-words whitespace-pre-line">
                           {comment.text}
                         </Box>
                         <Box className="text-xs text-gray-400 mt-1">
