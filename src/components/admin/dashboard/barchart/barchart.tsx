@@ -6,7 +6,7 @@ import { ChartGuides } from "./chartguides";
 import { Stack } from "@/components/ui/stack";
 import { CalendarPopOver } from "./calendarpopover";
 import { Box, type BoxProps } from "@/components/ui/box";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
 import { ComponentWrapper } from "@/components/common/componentwrapper";
 
 const chartData = [
@@ -24,6 +24,30 @@ const chartData = [
   { project: "Project L", Completed: 44, "In-Progress": 10, Delayed: 8 },
   { project: "Project O", Completed: 23, "In-Progress": 30, Delayed: 21 },
 ];
+
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: any;
+  label?: any;
+}) => {
+  if (active && payload && payload.length) {
+    return (
+      <Box className="bg-white border border-gray-200 rounded-md p-2 shadow-md">
+        <p style={{ margin: 0, fontWeight: 600 }}>{label}</p>
+        {payload.map((entry: any, idx: any) => (
+          <p key={idx} style={{ color: entry.color, margin: 0 }}>
+            {entry.name}: {entry.value}
+          </p>
+        ))}
+      </Box>
+    );
+  }
+  return null;
+};
 
 export const BarChartComponent: FC<BoxProps> = ({ className, ...props }) => {
   return (
@@ -84,14 +108,10 @@ export const BarChartComponent: FC<BoxProps> = ({ className, ...props }) => {
             tickLine={false}
             tick={{ fontSize: 12 }}
             tickCount={7}
-            // label={{
-            //   value: "Task",
-            //   angle: -90,
-            //   position: "insideLeft",
-            //   offset: 10,
-            //   style: { textAnchor: "middle", fontSize: 14 },
-            // }}
           />
+
+          {/* Tooltip for bar hover info */}
+          <Tooltip content={<CustomTooltip />} />
 
           <Bar
             dataKey="Completed"
