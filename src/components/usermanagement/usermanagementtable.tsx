@@ -148,7 +148,7 @@ export const columns: ColumnDef<Data>[] = [
 
   {
     accessorKey: "role",
-    header: () => <Box className="text-center text-black">role</Box>,
+    header: () => <Box className="text-center text-black">Role</Box>,
     cell: ({ row }) => {
       return <Center className="text-center">{row.original.role} </Center>;
     },

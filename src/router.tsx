@@ -67,7 +67,7 @@ export const Router = () => {
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route
             element={<CreateProjectPage />}
-            path="project/create-project"
+            path="project/create-project/:id"
           />
           <Route
             element={<CreateTaskPage />}

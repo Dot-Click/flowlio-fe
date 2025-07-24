@@ -25,6 +25,7 @@ import {
 import { useState } from "react";
 import { Input } from "../ui/input";
 import { Stack } from "../ui/stack";
+import { useNavigate } from "react-router";
 
 const data: Data[] = [
   {
@@ -359,6 +360,7 @@ export const ProjectTable = () => {
     props.onOpenChange(true);
     setInput("");
   };
+  const navigate = useNavigate();
 
   const patchedColumns = columns.map((col) => {
     if ((col as any).accessorKey === "actions") {
@@ -388,6 +390,11 @@ export const ProjectTable = () => {
                   <Button
                     variant="outline"
                     className="bg-[#23B95D] hover:bg-[#23B95D]/80 rounded-md border-none cursor-pointer"
+                    onClick={() => {
+                      navigate(
+                        `/dashboard/project/create-project/${row.original.id}`
+                      );
+                    }}
                   >
                     <PencilLine className="fill-white text-white" />
                   </Button>
@@ -440,7 +447,8 @@ export const ProjectTable = () => {
           <Box className="mb-4 text-lg font-semibold">Project Comments</Box>
           <Box className="flex flex-col gap-2 max-h-64 overflow-y-auto mb-4 bg-gray-50 p-2 rounded">
             {activeProjectId &&
-              (comments[activeProjectId]?.length === 0 ? (
+              (!comments[activeProjectId] ||
+              comments[activeProjectId].length === 0 ? (
                 <Box className="text-gray-400 text-center">
                   No comments yet.
                 </Box>
