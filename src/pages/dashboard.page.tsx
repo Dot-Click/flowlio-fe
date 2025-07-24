@@ -13,6 +13,7 @@ import img4 from "/dashboard/4.svg";
 import Img1 from "/dashboard/prostat1.svg";
 import Img2 from "/dashboard/prostat2.svg";
 import Img3 from "/dashboard/projstat3.svg";
+
 const stats: Stat[] = [
   {
     link: "/dashboard",

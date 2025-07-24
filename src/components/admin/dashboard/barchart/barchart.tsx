@@ -40,17 +40,21 @@ export const BarChartComponent: FC<BoxProps> = ({ className, ...props }) => {
         </Flex>
       </Stack>
 
-      <Box className="absolute top-65 left-6 transform -translate-y-1/2 -rotate-90 origin-left text-sm font-light text-gray-600 max-md:top-80">
+      <Box className="absolute top-65 left-6 transform -translate-y-1/2 -rotate-90 origin-left text-sm max-sm:hidden font-light text-gray-600 max-md:top-80">
         Task
       </Box>
 
-      <ChartContainer className="mt-5 w-full h-[21.8rem]" config={{}}>
+      <ChartContainer
+        className="mt-5 w-full max-sm:-ml-6  h-[21.8rem] max-sm:h-[16rem] max-sm:overflow-x-scroll"
+        config={{}}
+      >
         <BarChart
           width={900}
           height={300}
           data={chartData}
           barGap={0}
           barCategoryGap="16%"
+          className="max-sm:overflow-x-scroll"
         >
           <CartesianGrid
             vertical={true}

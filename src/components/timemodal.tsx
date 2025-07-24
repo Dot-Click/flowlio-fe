@@ -11,6 +11,7 @@ import { Play } from "lucide-react";
 import { Center } from "./ui/center";
 import { Flex } from "./ui/flex";
 import { Stack } from "./ui/stack";
+import { Box } from "./ui/box";
 
 export default function TimeModal() {
   const [timer, setTimer] = useState(0);
@@ -65,8 +66,8 @@ export default function TimeModal() {
       </Button>
 
       {open && (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end pointer-events-none">
-          <div className="bg-white rounded-2xl shadow-xl w-[700px] max-sm:w-full max-w-full max-h-[90vh] p-0 pointer-events-auto relative">
+        <Stack className="fixed bottom-6 right-6 z-50 items-end pointer-events-none gap-0">
+          <Box className="bg-white rounded-2xl shadow-xl w-[700px] max-lg:w-[500px] max-sm:w-[300px] max-w-full max-h-[90vh] p-0 pointer-events-auto relative">
             <button
               onClick={() => setOpen(false)}
               className="absolute top-4 right-4 size-8 hover:text-gray-700 text-xl cursor-pointer bg-red-400 text-white rounded-full pb-1"
@@ -105,7 +106,8 @@ export default function TimeModal() {
                     </SelectContent>
                   </Select>
                 </Stack>
-                <Stack className="flex-1 gap-2">
+
+                <Stack className="flex-1 max-sm:w-full gap-2">
                   <label className="font-medium">
                     Activity Type<span className="text-red-500">*</span>
                   </label>
@@ -120,13 +122,13 @@ export default function TimeModal() {
                   </Select>
                 </Stack>
               </Flex>
-              <div className="flex items-center justify-end gap-4 mt-4">
+              <Flex className="items-center justify-end max-sm:flex-col gap-4 mt-4">
                 <span className="text-2xl font-mono font-bold">
                   {formatTime(timer)}
                 </span>
                 <Button
                   type="button"
-                  className="cursor-pointer rounded-full px-6 py-4 h-14 text-lg bg-yellow-500 hover:bg-yellow-600"
+                  className="cursor-pointer rounded-full px-6 py-4 h-14 text-lg max-sm:text-sm bg-yellow-500 hover:bg-yellow-600"
                   onClick={handlePause}
                   disabled={!isRunning}
                 >
@@ -134,13 +136,13 @@ export default function TimeModal() {
                 </Button>
                 <Button
                   type="button"
-                  className="cursor-pointer rounded-full px-8 py-4 h-14 text-lg bg-[#47C363] hover:bg-[#47C363]/80"
+                  className="cursor-pointer rounded-full px-8 py-4 max-sm:px-4 max-sm:py-2 h-14 text-lg bg-[#47C363] hover:bg-[#47C363]/80"
                   onClick={handleStart}
                   disabled={isRunning}
                 >
                   <span className="flex items-center gap-2">
                     <Center
-                      className=" w-5 h-5 rounded-full border-2 border-white flex-shrink-0"
+                      className="w-5 h-5 rounded-full border-2 border-white flex-shrink-0"
                       style={{
                         background: isRunning ? "#22c55e" : "transparent",
                       }}
@@ -150,10 +152,10 @@ export default function TimeModal() {
                     Start
                   </span>
                 </Button>
-              </div>
+              </Flex>
             </form>
-          </div>
-        </div>
+          </Box>
+        </Stack>
       )}
     </>
   );

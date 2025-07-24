@@ -160,15 +160,18 @@ const ChatBox: React.FC<{
                   msg.role === "user" ? "justify-end" : "justify-start"
                 }
               >
-                <div
+                <Box
                   className={
                     msg.role === "user"
                       ? "bg-blue-100 text-blue-900 rounded-xl px-4 py-2 m-1 max-w-[70%]"
                       : "bg-gray-100 text-gray-800 rounded-xl px-4 py-2 m-1 max-w-[70%]"
                   }
                 >
-                  {msg.text}
-                </div>
+                  <h1 className="text-sm w-full max-sm:w-36 overflow-hidden break-words whitespace-pre-line">
+                    {msg.text}
+                  </h1>
+                  {/* <h1>{new Date().toLocaleTimeString()}</h1> */}
+                </Box>
               </Flex>
             ))
           )}

@@ -24,6 +24,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "../ui/dropdown-menu";
+import { Button } from "../ui/button";
 
 export const AiAssitSidebar: React.FC<{ className?: string }> = ({
   className,
@@ -105,7 +106,7 @@ export const AiAssitSidebar: React.FC<{ className?: string }> = ({
                 {chats.length === 0 ? (
                   <p
                     className={cn(
-                      "text-white/70 text-xs text-center mt-4 max-md:text-black",
+                      "text-black text-xs text-center mt-4 max-md:text-black",
                       state === "collapsed" && "hidden"
                     )}
                   >
@@ -117,9 +118,9 @@ export const AiAssitSidebar: React.FC<{ className?: string }> = ({
                       <SidebarMenuButton
                         asChild
                         className={cn(
-                          "flex-1 cursor-pointer hover:bg-white/30 hover:text-white max-sm:hover:text-black my-1 py-1 px-2 rounded-lg",
+                          "flex-1 text-black cursor-pointer hover:bg-white/30 hover:text-white max-sm:hover:text-black my-1 py-1 px-2 rounded-lg",
                           chat.id === activeChatId &&
-                            " text-white font-semibold",
+                            " text-black font-semibold",
                           state === "collapsed" && "hidden"
                         )}
                         tooltip={{ children: chat.title }}
@@ -151,12 +152,13 @@ export const AiAssitSidebar: React.FC<{ className?: string }> = ({
                       {state !== "collapsed" && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <button
+                            <Button
+                              variant="ghost"
                               className="hover:bg-white/30 rounded p-1 ml-1"
                               title="More actions"
                             >
-                              <EllipsisVertical className="size-4 text-white" />
-                            </button>
+                              <EllipsisVertical className="size-4 text-black" />
+                            </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
