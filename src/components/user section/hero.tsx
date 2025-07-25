@@ -35,7 +35,7 @@ export const Hero = () => {
             AI-enhanced platform.
           </Box>
           <Button
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/pricing")}
             className="p-2 mt-4 h-12 w-36 rounded-3xl bg-[#1797B9] cursor-pointer hover:bg-[#1797B9]/80"
           >
             Get Started

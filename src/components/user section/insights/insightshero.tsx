@@ -31,7 +31,7 @@ export const InsightsHero = () => {
             real-time data designed for modern teams.
           </Box>
           <Button
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/pricing")}
             className="p-2 mt-2 h-12 w-36 rounded-3xl bg-[#1797B9] cursor-pointer hover:bg-[#1797B9]/80"
           >
             Get Started

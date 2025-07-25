@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router";
 import { Box } from "../ui/box";
 import { Button } from "../ui/button";
 import { Center } from "../ui/center";
@@ -5,6 +6,7 @@ import { Flex } from "../ui/flex";
 import { CiCircleCheck } from "react-icons/ci";
 
 export const ManageSmarter = () => {
+  const navigate = useNavigate();
   return (
     <Box className="w-full h-full bg-[#392AE2] p-8 max-sm:px-0">
       <Box className="relative z-30 mt-10 px-4">
@@ -33,7 +35,10 @@ export const ManageSmarter = () => {
                 No credit card required
               </h1>
             </Flex>
-            <Button className="p-2 h-11 w-34 rounded-3xl bg-[#1797B9] cursor-pointer hover:bg-[#1797B9]/80">
+            <Button
+              onClick={() => navigate("/pricing")}
+              className="p-2 h-11 w-34 rounded-3xl bg-[#1797B9] cursor-pointer hover:bg-[#1797B9]/80"
+            >
               Try Free Trail
             </Button>
           </Center>
