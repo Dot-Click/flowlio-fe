@@ -43,6 +43,7 @@ import ViewerSupportsPage from "./pages/viewersupports.page";
 import ViewerSettingsPage from "./pages/viewersettings.page";
 import ClientManagementPage from "./pages/clientmanagement.page";
 import { CreateClient } from "./components/client management/createclient";
+import CheckoutPage from "./pages/checkout.page";
 
 export const Router = () => {
   return (
@@ -53,6 +54,7 @@ export const Router = () => {
           <Route path="work-flow" element={<WorkFlowPage />} />
           <Route path="insights" element={<InsightsPage />} />
           <Route path="pricing" element={<PricingPage />} />
+          <Route path="checkout" element={<CheckoutPage />} />
         </Route>
 
         <Route element={<AuthenticationLayout />}>

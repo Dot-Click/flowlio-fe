@@ -8,12 +8,16 @@ import { Link, useNavigate, useLocation } from "react-router";
 import { cn } from "@/lib/utils";
 import { FC, useEffect, useRef } from "react";
 import { gsap } from "gsap";
+import { toast } from "sonner";
 
 interface NavbarProps {
   isWorkflow?: boolean;
   isInsights?: boolean;
   isHome?: boolean;
   isPricing?: boolean;
+  isPlanSelected?: boolean;
+  setIsPlanSelected?: (isPlanSelected: boolean) => void;
+  selectedPlan?: number | null;
 }
 
 export const Navbar: FC<NavbarProps> = ({
@@ -21,6 +25,9 @@ export const Navbar: FC<NavbarProps> = ({
   isWorkflow = false,
   isInsights = false,
   isPricing = false,
+  isPlanSelected = false,
+  setIsPlanSelected = () => {},
+  selectedPlan,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -30,6 +37,7 @@ export const Navbar: FC<NavbarProps> = ({
   const isWorkflowPage = isWorkflow || location.pathname === "/work-flow";
   const isInsightsPage = isInsights || location.pathname === "/insights";
   const isPricingPage = isPricing || location.pathname === "/pricing";
+
   useEffect(() => {
     if (navbarRef.current) {
       // Initial animation
@@ -241,8 +249,24 @@ export const Navbar: FC<NavbarProps> = ({
           </Box>
 
           <Button
-            onClick={() => navigate("/login")}
-            className="p-2 h-11 w-34 rounded-3xl bg-[#1797B9] cursor-pointer hover:bg-[#1797B9]/80"
+            onClick={() => {
+              if (isPricingPage) {
+                if (selectedPlan == null) {
+                  toast.warning("Please select a plan.");
+                } else {
+                  navigate("/checkout", { state: { selectedPlan } });
+                }
+              } else if (isPlanSelected === true) {
+                navigate("/checkout");
+              } else {
+                navigate("/pricing");
+                setIsPlanSelected(true);
+              }
+            }}
+            className={cn(
+              "p-2 h-11 w-34 rounded-3xl bg-[#1797B9] cursor-pointer hover:bg-[#1797B9]/80",
+              location.pathname === "/checkout" && "hidden"
+            )}
           >
             Get Started
             <ArrowRight />
