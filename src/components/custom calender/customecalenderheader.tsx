@@ -23,13 +23,13 @@ import {
   formatHour,
   CustomEvent,
 } from "./calendarUtils";
-import GoogleMeetIcon from "../../../public/dashboard/google-meet.svg";
-import WhatsappIcon from "../../../public/dashboard/whatsapp-icon.svg";
-import OutlookIcon from "../../../public/dashboard/google-drive.svg";
-import WhatsAppCheckBoxIcon from "../../../public/dashboard/whatsappcheckbox.svg";
-import EducationCheckBoxIcon from "../../../public/dashboard/educationcheckbox.svg";
-import PersolCheckBoxIcon from "../../../public/dashboard/personalicon.svg";
-import CheckBox from "../../../public/dashboard/checkbox.svg";
+import GoogleMeetIcon from "/dashboard/google-meet.svg";
+import WhatsappIcon from "/dashboard/whatsapp-icon.svg";
+import OutlookIcon from "/dashboard/google-drive.svg";
+import WhatsAppCheckBoxIcon from "/dashboard/whatsappcheckbox.svg";
+import EducationCheckBoxIcon from "/dashboard/educationcheckbox.svg";
+import PersolCheckBoxIcon from "/dashboard/personalicon.svg";
+import CheckBox from "/dashboard/checkbox.svg";
 import { useCalendarEventsStore } from "@/store/calendarEvents.store";
 import { EventDetailsPopup } from "./eventdetailspopup";
 

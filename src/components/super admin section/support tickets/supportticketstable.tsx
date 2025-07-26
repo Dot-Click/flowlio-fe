@@ -12,7 +12,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import CheckSvg from "../../../../public/super admin/check.svg";
+import CheckSvg from "/super admin/check.svg";
 
 const data: Data[] = [
   {

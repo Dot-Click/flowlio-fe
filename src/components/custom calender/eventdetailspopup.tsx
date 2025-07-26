@@ -4,9 +4,9 @@ import { Box } from "../ui/box";
 import { Flex } from "../ui/flex";
 import { Button } from "../ui/button";
 import { CopyCheck, Trash2, X } from "lucide-react";
-import GoogleMeetIcon from "../../../public/dashboard/google-meet.svg";
-import WhatsappIcon from "../../../public/dashboard/whatsapp-icon.svg";
-import OutlookIcon from "../../../public/dashboard/google-drive.svg";
+import GoogleMeetIcon from "/dashboard/google-meet.svg";
+import WhatsappIcon from "/dashboard/whatsapp-icon.svg";
+import OutlookIcon from "/dashboard/google-drive.svg";
 import { CustomEvent, formatHour } from "./calendarUtils";
 import { cn } from "@/lib/utils";
 
