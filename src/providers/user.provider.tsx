@@ -12,18 +12,22 @@ import {
   emailOTPClient,
   twoFactorClient,
 } from "better-auth/client/plugins";
+import * as permissions from "@/configs/permission.config";
 import { backendDomain } from "@/configs/axios.config";
 
+const { ac, ...roles } = permissions;
+
 export const authClient = createAuthClient({
-  plugins: [adminClient(), emailOTPClient(), twoFactorClient()],
+  plugins: [adminClient({ ac, roles }), emailOTPClient(), twoFactorClient()],
   baseURL: backendDomain,
 });
 
 type SessionObject = typeof authClient.$Infer.Session;
+export type Role = keyof typeof roles;
 
 type Data = {
   // Typed role property( Modify as needed )
-  user: SessionObject["user"];
+  user: SessionObject["user"] & { role: Role };
   session: SessionObject["session"];
 };
 

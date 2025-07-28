@@ -25,46 +25,85 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useUser } from "@/providers/user.provider";
+import { toast } from "sonner";
+import { ErrorWithMessage } from "@/configs/axios.config";
+import { useCreateSubAdmin } from "@/hooks/usecreatesubadmin";
 
-const formSchema = z.object({
-  projectName: z.string().min(2, {
-    message: "Project Name must be at least 2 characters.",
-  }),
-  projectNumber: z.string().min(1, {
-    message: "Project Number is required.",
-  }),
-  clientName: z.string().min(2, {
-    message: "Client Name must be at least 2 characters.",
-  }),
-
-  assignedProject: z.string().min(1, {
-    message: "Please select a project to assign.",
-  }),
-  address: z.string().min(2, {
-    message: "Address must be at least 2 characters.",
-  }),
-});
+const formSchema = z
+  .object({
+    firstName: z.string().min(2, {
+      message: "First Name must be at least 2 characters.",
+    }),
+    lastName: z.string().min(2, {
+      message: "Last Name must be at least 2 characters.",
+    }),
+    email: z.string().email({
+      message: "Please enter a valid email address.",
+    }),
+    contactNumber: z.string().optional(),
+    permission: z.enum(["Admin", "Sub Admin", "User"], {
+      message: "Please select a valid permission level.",
+    }),
+    password: z.string().min(8, {
+      message: "Password must be at least 8 characters.",
+    }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 export const CreateSubAdmin = () => {
   const navigate = useNavigate();
+  const { data } = useUser();
+  const { isPending: isCreatePending, mutate: createSubAdminMutate } =
+    useCreateSubAdmin();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      projectName: "",
-      projectNumber: "",
-      clientName: "",
-      assignedProject: "",
-      address: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      contactNumber: "",
+      permission: "Sub Admin",
+      password: "",
+      confirmPassword: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(value: z.infer<typeof formSchema>) {
+    console.log(value);
+    createSubAdminMutate(
+      {
+        firstName: value.firstName,
+        lastName: value.lastName,
+        email: value.email,
+        contactNumber: value.contactNumber || undefined,
+        permission: value.permission,
+        password: value.password,
+        userId: data?.user?.id,
+      },
+      {
+        onError: (error: ErrorWithMessage) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.message ||
+            "Failed to create sub admin";
+          toast.error(errorMessage);
+        },
+        onSuccess: async (response) => {
+          toast.success(response.message || "Sub Admin created successfully");
+          navigate("/superadmin/sub-admin");
+        },
+      }
+    );
   }
 
   return (
-    <PageWrapper className="mt-6 p-6">
+    <PageWrapper className="mt-6 p-6 relative">
       <Box
         className="flex items-center gap-2 w-20 cursor-pointer transition-all duration-300  hover:bg-gray-200 rounded-full hover:p-2 "
         onClick={() => navigate(-1)}
@@ -81,23 +120,23 @@ export const CreateSubAdmin = () => {
             productive.
           </h1>
         </Stack>
-
-        <Button
-          variant="outline"
-          className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
-          onClick={() => navigate("/superadmin/sub-admin")}
-        >
-          Add & Save
-        </Button>
       </Center>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8">
+          <Button
+            variant="outline"
+            className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer absolute top-20 right-4"
+            isLoading={isCreatePending}
+            type="submit"
+          >
+            Add & Save
+          </Button>
           <Box className="bg-white/80 rounded-xl border border-gray-200 p-6 gap-4 grid grid-cols-1">
             <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
               <FormField
                 control={form.control}
-                name="projectName"
+                name="firstName"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>First Name:</FormLabel>
@@ -117,7 +156,7 @@ export const CreateSubAdmin = () => {
 
               <FormField
                 control={form.control}
-                name="projectNumber"
+                name="lastName"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Last Name:</FormLabel>
@@ -125,7 +164,7 @@ export const CreateSubAdmin = () => {
                       <Input
                         className="bg-white rounded-full placeholder:text-gray-400"
                         placeholder="Enter Last Name"
-                        type="number"
+                        type="text"
                         size="lg"
                         {...field}
                       />
@@ -139,7 +178,7 @@ export const CreateSubAdmin = () => {
             <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1 mt-2">
               <FormField
                 control={form.control}
-                name="projectNumber"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Email:</FormLabel>
@@ -159,15 +198,15 @@ export const CreateSubAdmin = () => {
 
               <FormField
                 control={form.control}
-                name="address"
+                name="contactNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Contact Number:</FormLabel>
+                    <FormLabel>Contact Number (Optional):</FormLabel>
                     <FormControl>
                       <Input
                         className="bg-white rounded-full placeholder:text-gray-400"
                         size="lg"
-                        type="number"
+                        type="tel"
                         placeholder="Enter Contact Number"
                         {...field}
                       />
@@ -181,7 +220,7 @@ export const CreateSubAdmin = () => {
             <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1 mt-2">
               <FormField
                 control={form.control}
-                name="assignedProject"
+                name="permission"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Permission:</FormLabel>
@@ -213,7 +252,7 @@ export const CreateSubAdmin = () => {
             <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1 mt-2">
               <FormField
                 control={form.control}
-                name="clientName"
+                name="password"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Password:</FormLabel>
@@ -221,7 +260,7 @@ export const CreateSubAdmin = () => {
                       <Input
                         className="bg-white rounded-full placeholder:text-gray-400"
                         size="lg"
-                        type="text"
+                        type="password"
                         placeholder="Enter Password"
                         {...field}
                       />
@@ -233,7 +272,7 @@ export const CreateSubAdmin = () => {
 
               <FormField
                 control={form.control}
-                name="clientName"
+                name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Confirm Password:</FormLabel>
@@ -241,7 +280,7 @@ export const CreateSubAdmin = () => {
                       <Input
                         className="bg-white rounded-full placeholder:text-gray-400"
                         size="lg"
-                        type="text"
+                        type="password"
                         placeholder="Enter Confirm Password"
                         {...field}
                       />

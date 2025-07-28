@@ -59,11 +59,8 @@ export const SignInForm: FC = () => {
   z.infer<typeof formSchema>) => {
     authClient.signIn.email(
       {
-        // name: "User",
         email,
         password,
-        // isSuperAdmin: true,
-        // rememberMe,
       },
       {
         onRequest: () => {
@@ -74,10 +71,11 @@ export const SignInForm: FC = () => {
           setError(null);
           if (email === "superadmin@gmail.com") {
             navigate("/superadmin");
+            toast.success("Super Admin Login successful");
           } else {
             navigate("/dashboard");
+            toast.success("Login successful");
           }
-          toast.success("Login successful");
         },
         onError: (ctx) => {
           toast.error(ctx.error.message);
