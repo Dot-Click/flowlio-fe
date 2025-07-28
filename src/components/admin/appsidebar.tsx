@@ -26,7 +26,7 @@ import {
 } from "../ui/tooltip";
 import { ComponentProps, FC, type ReactElement } from "react";
 import { ChevronRight, LogOut } from "lucide-react";
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { useMediaQuery } from "usehooks-ts";
 import { Button } from "../ui/button";
 import { Center } from "../ui/center";
@@ -50,6 +50,8 @@ interface AppSidebarProps extends ComponentProps<typeof Sidebar> {
 
 import { cloneElement } from "react";
 import { Flex } from "../ui/flex";
+import { authClient } from "@/providers/user.provider";
+import { toast } from "sonner";
 
 const renderIcon = (icon: NavItem["icon"], className?: string) => {
   if (icon) {
@@ -63,6 +65,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
   const is768 = useMediaQuery("(max-width: 768px)");
   const { state, isMobile } = useSidebar();
   const location = useLocation();
+  const navigate = useNavigate();
 
   return (
     <Sidebar
@@ -322,7 +325,14 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <Button className="bg-transparent text-black hover:bg-transparent cursor-pointer border-none flex items-start justify-start gap-2 shadow-none">
+        <Button
+          className="bg-transparent text-black hover:bg-red-50 cursor-pointer border-none flex items-start justify-start gap-2 shadow-none"
+          onClick={() => {
+            authClient.signOut();
+            toast.success("Logged out successfully");
+            navigate("/");
+          }}
+        >
           <Flex className="gap-2">
             <LogOut
               color="red"

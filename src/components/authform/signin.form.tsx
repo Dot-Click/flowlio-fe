@@ -14,8 +14,12 @@ import { Anchor } from "../ui/anchor";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Flex } from "../ui/flex";
+import { useState } from "react";
+import { authClient } from "@/providers/user.provider";
 import type { FC } from "react";
 import { z } from "zod";
+import { Box } from "../ui/box";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   password: z
@@ -36,18 +40,51 @@ const formSchema = z.object({
 
 export const SignInForm: FC = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       rememberMe: true,
-      password: "",
-      email: "",
+      password: "Superadmin@123",
+      email: "superadmin@gmail.com",
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-    navigate("/dashboard");
+  const onSubmit = async ({
+    email,
+    password,
+  }: // rememberMe,
+  z.infer<typeof formSchema>) => {
+    authClient.signIn.email(
+      {
+        // name: "User",
+        email,
+        password,
+        // isSuperAdmin: true,
+        // rememberMe,
+      },
+      {
+        onRequest: () => {
+          setIsLoading(true);
+        },
+        onSuccess: () => {
+          setIsLoading(false);
+          setError(null);
+          if (email === "superadmin@gmail.com") {
+            navigate("/superadmin");
+          } else {
+            navigate("/dashboard");
+          }
+          toast.success("Login successful");
+        },
+        onError: (ctx) => {
+          toast.error(ctx.error.message);
+          setIsLoading(false);
+        },
+      }
+    );
   };
 
   return (
@@ -104,11 +141,19 @@ export const SignInForm: FC = () => {
               Forgot Password?
             </Anchor>
           </Flex>
+
+          {error && (
+            <Box className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-600 text-sm">{error}</p>
+            </Box>
+          )}
+
           <Button
             size="xl"
-            className="bg-[#1797B9] text-white rounded-full cursor-pointer hover:bg-[#1797B9]/80"
+            disabled={isLoading}
+            className="bg-[#1797B9] text-white rounded-full cursor-pointer hover:bg-[#1797B9]/80 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Sign In
+            {isLoading ? "Signing In..." : "Sign In"}
           </Button>
         </form>
       </Form>

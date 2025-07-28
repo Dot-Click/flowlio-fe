@@ -6,15 +6,21 @@ export interface WithMessage {
   message: string;
 }
 
-const sanitizeDomain = (domain: string) =>
-  domain.at(-1) === "/" ? domain.slice(0, -1) + "/api" : domain + "/api";
+export interface ApiResponse<T = {}> {
+  data: null | undefined | T;
+  message: string;
+}
 
-export const backendDomains = {
-  production: "https://railway.app",
-  development: "http://localhost:3000",
+const sanitizeDomain = (domain: string) => {
+  if (domain.at(-1) === "/")
+    throw new Error(
+      "Invalid domain format \n valid domains:\nhttps://www.example.com\nhttp://localhost:3000"
+    );
+  return domain.at(-1) === "/" ? domain.slice(0, -1) + "/api" : domain + "/api";
 };
 
-export const url = sanitizeDomain(backendDomains[environment]);
+export const backendDomain = import.meta.env.VITE_BACKEND_DOMAIN;
+export const url = sanitizeDomain(backendDomain);
 
 export const axios = ax.create({
   baseURL: url,
