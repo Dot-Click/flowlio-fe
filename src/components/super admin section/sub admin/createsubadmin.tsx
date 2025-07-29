@@ -25,10 +25,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useUser } from "@/providers/user.provider";
+import { useCreateSubAdmin } from "@/hooks/usecreatesubadmin";
 import { toast } from "sonner";
 import { ErrorWithMessage } from "@/configs/axios.config";
-import { useCreateSubAdmin } from "@/hooks/usecreatesubadmin";
 
 const formSchema = z
   .object({
@@ -57,7 +56,6 @@ const formSchema = z
 
 export const CreateSubAdmin = () => {
   const navigate = useNavigate();
-  const { data } = useUser();
   const { isPending: isCreatePending, mutate: createSubAdminMutate } =
     useCreateSubAdmin();
 
@@ -84,7 +82,6 @@ export const CreateSubAdmin = () => {
         contactNumber: value.contactNumber || undefined,
         permission: value.permission,
         password: value.password,
-        userId: data?.user?.id,
       },
       {
         onError: (error: ErrorWithMessage) => {

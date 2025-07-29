@@ -6,12 +6,12 @@ import {
 import { ISubAdmin, CreateSubAdminRequest } from "@/types";
 import { useMutation } from "@tanstack/react-query";
 
-interface Data extends CreateSubAdminRequest {
-  userId?: string;
-}
-
 export const useCreateSubAdmin = () => {
-  return useMutation<ApiResponse<ISubAdmin>, ErrorWithMessage, Data>({
+  return useMutation<
+    ApiResponse<ISubAdmin>,
+    ErrorWithMessage,
+    CreateSubAdminRequest
+  >({
     mutationKey: ["create subadmin"],
     mutationFn: async (body) => {
       const formData = new FormData();
@@ -29,6 +29,50 @@ export const useCreateSubAdmin = () => {
         {
           headers: {
             "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return res.data;
+    },
+  });
+};
+
+// Sub Admin Login Hook
+interface SubAdminLoginRequest {
+  email: string;
+  password: string;
+}
+
+interface SubAdminLoginResponse {
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    isSuperAdmin: boolean;
+  };
+  subAdmin: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    permission: string;
+    logo?: string | null;
+  };
+}
+
+export const useSubAdminLogin = () => {
+  return useMutation<
+    ApiResponse<SubAdminLoginResponse>,
+    ErrorWithMessage,
+    SubAdminLoginRequest
+  >({
+    mutationKey: ["subadmin login"],
+    mutationFn: async (credentials) => {
+      const res = await axios.post<ApiResponse<SubAdminLoginResponse>>(
+        "/superadmin/subadmin-login",
+        credentials,
+        {
+          headers: {
+            "Content-Type": "application/json",
           },
         }
       );

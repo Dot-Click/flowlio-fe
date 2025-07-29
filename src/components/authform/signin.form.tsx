@@ -55,6 +55,7 @@ export const SignInForm: FC = () => {
   });
 
   const onSubmit = async ({ email, password }: z.infer<typeof formSchema>) => {
+    // Use Better Auth for all login types (Super Admin and Sub Admin)
     authClient.signIn.email(
       {
         email,
@@ -69,11 +70,11 @@ export const SignInForm: FC = () => {
           setError(null);
 
           if (response.data.user.isSuperAdmin) {
-            navigate("/dashboard");
             toast.success("Login successful");
+            navigate("/dashboard");
           } else {
             navigate("/superadmin");
-            toast.success("Super Admin Login successful");
+            toast.success("Super Admin login successful");
           }
         },
         onError: (ctx) => {
