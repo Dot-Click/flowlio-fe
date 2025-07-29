@@ -237,9 +237,9 @@ export const CreateSubAdmin = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="w-full">
-                        <SelectItem value="Admin">Admin</SelectItem>
+                        {/* <SelectItem value="Admin">Admin</SelectItem> */}
                         <SelectItem value="Sub Admin">Sub Admin</SelectItem>
-                        <SelectItem value="User">User</SelectItem>
+                        {/* <SelectItem value="User">User</SelectItem> */}
                       </SelectContent>
                     </Select>
                     <FormMessage />

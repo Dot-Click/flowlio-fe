@@ -15,9 +15,10 @@ import {
 import * as permissions from "@/configs/permission.config";
 import { backendDomain } from "@/configs/axios.config";
 
-const { ac, ...roles } = permissions;
+const { ac, roles } = permissions;
 
 export const authClient = createAuthClient({
+  // plugins: [adminClient({ ac, roles }), emailOTPClient(), twoFactorClient()],
   plugins: [adminClient({ ac, roles }), emailOTPClient(), twoFactorClient()],
   baseURL: backendDomain,
 });

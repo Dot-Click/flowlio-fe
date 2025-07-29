@@ -5,16 +5,13 @@ const pages = {
   ...defaultStatements,
   Dashboard: ["view"],
   Projects: ["create", "read", "update", "delete"],
-  "Cost Codes": ["create", "read", "update", "delete"],
-  Schedules: ["create", "read", "update", "delete"],
   "Task Management": ["create", "read", "update", "delete"],
-  Comments: ["create", "read", "update", "delete"],
-  Issues: ["create", "read", "update", "delete"],
-  "AI Assist": ["use"],
-  "Company Management": ["create", "read", "update", "delete", "impersonate"],
+  "Client Management": ["create", "read", "update", "delete", "impersonate"],
   "User Management": adminAc.statements.user,
+  Calender: ["create", "read", "update", "delete"],
+  Invoices: ["create", "read", "update", "delete"],
+  "AI Assist": ["use"],
   "Sub Admin Management": ["create", "read", "update", "delete", "impersonate"],
-  Inbox: ["view"],
   Settings: ["view"],
 } as const;
 
@@ -23,10 +20,14 @@ export const ac = createAccessControl(pages);
 // Super Admin: Full system access - can manage everything
 export const superAdmin = ac.newRole({
   Dashboard: ["view"],
-  "Company Management": ["create", "read", "update", "delete", "impersonate"],
+  "Client Management": ["create", "read", "update", "delete", "impersonate"],
   "User Management": adminAc.statements.user,
   "Sub Admin Management": ["create", "read", "update", "delete", "impersonate"],
-  Inbox: ["view"],
+  Projects: ["create", "read", "update", "delete"],
+  "Task Management": ["create", "read", "update", "delete"],
+  Calender: ["create", "read", "update", "delete"],
+  Invoices: ["create", "read", "update", "delete"],
+  "AI Assist": ["use"],
   Settings: ["view"],
   ...adminAc.statements,
 });
@@ -35,12 +36,28 @@ export const superAdmin = ac.newRole({
 export const subAdmin = ac.newRole({
   Dashboard: ["view"],
   Projects: ["create", "read", "update", "delete"],
-  "Cost Codes": ["create", "read", "update", "delete"],
-  Schedules: ["create", "read", "update", "delete"],
   "Task Management": ["create", "read", "update", "delete"],
-  Issues: ["create", "read", "update", "delete"],
-  "AI Assist": ["use"],
   "User Management": ["list"], // Limited user management - can only list users
-  Inbox: ["view"],
   Settings: ["view"],
 });
+
+// User: Basic access - can view dashboard and settings
+export const user = ac.newRole({
+  Dashboard: ["view"],
+  "Client Management": ["create", "read", "update", "delete", "impersonate"],
+  "User Management": adminAc.statements.user,
+  "Sub Admin Management": ["create", "read", "update", "delete", "impersonate"],
+  Projects: ["create", "read", "update", "delete"],
+  "Task Management": ["create", "read", "update", "delete"],
+  Calender: ["create", "read", "update", "delete"],
+  Invoices: ["create", "read", "update", "delete"],
+  "AI Assist": ["use"],
+  Settings: ["view"],
+});
+
+// Export roles for the adminClient plugin - using the correct structure
+export const roles = {
+  superadmin: superAdmin,
+  subadmin: subAdmin,
+  user: user,
+};

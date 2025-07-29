@@ -17,181 +17,186 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useFetchSubAdmins } from "@/hooks/usefetchsubadmins";
+import { useEffect } from "react";
+import { toast } from "sonner";
+import { useDeleteSubAdmin } from "@/hooks/usedeletesubadmin";
 
-const data: Data[] = [
-  {
-    id: "1",
-    contact: "+ 1 3452 12213",
-    name: "Foundation Plan",
-    submittedby: "ken99",
-    email: "ken99@gmail.com",
-    permission: "Admin",
-  },
-  {
-    id: "2",
-    name: "Foundation Plan",
-    contact: "+ 1 3452 12213",
-    submittedby: "Abe45",
-    email: "Abe45@gmail.com",
-    permission: "Admin",
-  },
-  {
-    id: "3",
-    name: "ClientBridge CRM Upgrade",
-    contact: "+ 1 3452 12213",
-    submittedby: "Monserrat44",
-    email: "Monserrat44@gmail.com",
-    permission: "Admin",
-  },
-  {
-    id: "4",
-    name: "ClientBridge CRM Upgrade",
-    contact: "+ 1 3452 12213",
-    submittedby: "Silas22",
-    email: "Silas22@gmail.com",
-    permission: "Admin",
-  },
-  {
-    id: "5",
-    name: "ClientBridge CRM Upgrade",
-    contact: "+ 1 3452 12213",
-    submittedby: "carmella",
-    email: "carmella@gmail.com",
-    permission: "Admin",
-  },
-  {
-    id: "6",
-    name: "Foundation Plan",
-    contact: "+ 1 3452 12213",
-    submittedby: "carmella",
-    email: "carmella@gmail.com",
-    permission: "Admin",
-  },
-  {
-    id: "7",
-    name: "Foundation Plan",
-    contact: "+ 1 3452 12213",
-    submittedby: "carmella",
-    email: "carmella@gmail.com",
-    permission: "Admin",
-  },
-  {
-    id: "8",
-    name: "Foundation Plan",
-    contact: "+ 1 3452 12213",
-    submittedby: "carmella",
-    email: "carmella@gmail.com",
-    permission: "Admin",
-  },
-  {
-    id: "9",
-    name: "Foundation Plan",
-    contact: "+ 1 3452 12213",
-    submittedby: "carmella",
-    email: "carmella@gmail.com",
-    permission: "Admin",
-  },
-];
-
-export type Data = {
+export type SubAdminData = {
   id: string;
-  contact: string;
-  name: string;
-  submittedby: string;
+  firstName: string;
+  lastName: string;
   email: string;
+  contactNumber: string;
   permission: string;
+  createdAt: string;
 };
 
-export const columns: ColumnDef<Data>[] = [
-  {
-    accessorKey: "name",
-    header: () => <Box className="text-black p-3">Name</Box>,
-    cell: ({ row }) => (
-      <Box className="capitalize p-3 max-sm:w-full">
-        {row.original.name.length > 28
-          ? row.original.name.slice(0, 28) + "..."
-          : row.original.name}
-      </Box>
-    ),
-  },
-  {
-    accessorKey: "email",
-    header: () => <Box className="text-black text-start">Email</Box>,
-    cell: ({ row }) => (
-      <Box className="captialize text-start">{row.original.email}</Box>
-    ),
-  },
-
-  {
-    accessorKey: "contact",
-    header: () => <Box className="text-black text-center">Contact</Box>,
-    cell: ({ row }) => (
-      <Box className="captialize text-center">{row.original.contact}</Box>
-    ),
-  },
-
-  {
-    accessorKey: "permission",
-    header: () => (
-      <Box className="text-black text-center ml-12 max-sm:ml-4 w-44">
-        Permission
-      </Box>
-    ),
-    cell: () => {
-      return (
-        <Select>
-          <SelectTrigger className="border rounded-md p-3 text-center bg-[#F3F5F5] ml-12 max-sm:ml-4 w-44">
-            <SelectValue
-              className="text-black"
-              placeholder="Select Permission"
-            />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Admin">Admin</SelectItem>
-            <SelectItem value="Sub Admin">Sub Admin</SelectItem>
-            <SelectItem value="User">User</SelectItem>
-          </SelectContent>
-        </Select>
-      );
-    },
-  },
-
-  {
-    accessorKey: "actions",
-    header: () => <Box className="text-center text-black">Actions</Box>,
-    cell: () => {
-      return (
-        <Center className="space-x-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="bg-[#A50403] border-none w-30 h-10 hover:bg-[#A50403]/80 cursor-pointer rounded-md text-white hover:text-white"
-                >
-                  <FaRegTrashAlt className="text-white fill-white size-4 " />
-                  Delete
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="mb-2">
-                <p>Delete Sub Admin</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </Center>
-      );
-    },
-  },
-];
-
 export const SubAdminTable = () => {
+  const { fetchNextPage, hasNextPage, isLoading, error, data, refetch } =
+    useFetchSubAdmins();
+
+  const { mutate: deleteSubAdmin } = useDeleteSubAdmin();
+
+  useEffect(() => {
+    if (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to fetch sub admins"
+      );
+    }
+  }, [error]);
+
+  const transformedData: SubAdminData[] =
+    data?.pages.flatMap(
+      (page) =>
+        page.data?.map((item: any) => ({
+          id: item.id,
+          firstName: item.firstName || "",
+          lastName: item.lastName || "",
+          email: item.email || "",
+          contactNumber: item.contactNumber || "",
+          permission: item.permission || "Sub Admin",
+          createdAt: item.createdAt || new Date().toISOString(),
+        })) || []
+    ) || [];
+
+  const handleDelete = (id: string) => {
+    if (window.confirm("Are you sure you want to delete this sub admin?")) {
+      deleteSubAdmin(
+        { id },
+        {
+          onSuccess: () => {
+            toast.success("Sub Admin deleted successfully");
+            // Refetch the subadmin data after successful deletion
+            refetch();
+          },
+          onError: (error) => {
+            toast.error(
+              error.response?.data?.message || "Failed to delete sub admin"
+            );
+          },
+        }
+      );
+    }
+  };
+
+  // Create columns with access to handleDelete function
+  const tableColumns: ColumnDef<SubAdminData>[] = [
+    {
+      accessorKey: "name",
+      header: () => <Box className="text-black font-semibold p-3">Name</Box>,
+      cell: ({ row }) => (
+        <Box className="p-3">
+          <div className="font-medium">
+            {row.original.firstName} {row.original.lastName}
+          </div>
+        </Box>
+      ),
+    },
+    {
+      accessorKey: "email",
+      header: () => (
+        <Box className="text-black font-semibold text-center">Email</Box>
+      ),
+      cell: ({ row }) => (
+        <Box className="text-center">{row.original.email || "N/A"}</Box>
+      ),
+    },
+    {
+      accessorKey: "contactNumber",
+      header: () => (
+        <Box className="text-black font-semibold text-center">Contact</Box>
+      ),
+      cell: ({ row }) => (
+        <Box className="text-center">{row.original.contactNumber || "N/A"}</Box>
+      ),
+    },
+    {
+      accessorKey: "permission",
+      header: () => (
+        <Box className="text-black font-semibold text-center">Permission</Box>
+      ),
+      cell: ({ row }) => {
+        return (
+          <Center>
+            <Select defaultValue={row.original.permission}>
+              <SelectTrigger className="border rounded-md p-2 text-center bg-white w-32">
+                <SelectValue placeholder="Select" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Sub Admin">Sub Admin</SelectItem>
+              </SelectContent>
+            </Select>
+          </Center>
+        );
+      },
+    },
+    {
+      accessorKey: "createdAt",
+      header: () => (
+        <Box className="text-black font-semibold text-center">Created</Box>
+      ),
+      cell: ({ row }) => (
+        <Box className="text-center text-sm text-gray-600">
+          {new Date(row.original.createdAt).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+        </Box>
+      ),
+    },
+    {
+      accessorKey: "actions",
+      header: () => (
+        <Box className="text-center text-black font-semibold">Actions</Box>
+      ),
+      cell: ({ row }) => {
+        return (
+          <Center className="space-x-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={() => handleDelete(row.original.id)}
+                    variant="outline"
+                    className="bg-[#A50403] border-none w-30 h-10 hover:bg-[#A50403]/80 cursor-pointer rounded-md text-white hover:text-white"
+                  >
+                    <FaRegTrashAlt className="text-white fill-white size-4 " />
+                    Delete
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Delete Sub Admin</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </Center>
+        );
+      },
+    },
+  ];
+
   return (
-    <ReusableTable
-      data={data}
-      columns={columns}
-      searchInput={false}
-      enablePaymentLinksCalender={true}
-      onRowClick={(row) => console.log("Row clicked:", row.original)}
-    />
+    <>
+      <ReusableTable
+        data={transformedData}
+        columns={tableColumns}
+        searchInput={true}
+        enablePaymentLinksCalender={false}
+      />
+
+      {hasNextPage && (
+        <div className="flex justify-center mt-4">
+          <Button
+            onClick={() => fetchNextPage()}
+            variant="outline"
+            disabled={isLoading}
+          >
+            {isLoading ? "Loading..." : "Load More"}
+          </Button>
+        </div>
+      )}
+    </>
   );
 };

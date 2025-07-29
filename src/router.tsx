@@ -44,6 +44,7 @@ import ViewerSettingsPage from "./pages/viewersettings.page";
 import ClientManagementPage from "./pages/clientmanagement.page";
 import { CreateClient } from "./components/client management/createclient";
 import CheckoutPage from "./pages/checkout.page";
+import SignupPage from "./pages/signup.page";
 
 export const Router = () => {
   return (
@@ -59,6 +60,7 @@ export const Router = () => {
 
         <Route element={<AuthenticationLayout />}>
           <Route path="login" element={<SigninPage />} />
+          <Route path="signup" element={<SignupPage />} />
           <Route path="verify-code" element={<VerifyCodePage />} />
           <Route path="verify-email" element={<VerifyEmailPage />} />
           <Route path="reset-password" element={<ResetpasswordPage />} />

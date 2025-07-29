@@ -15,8 +15,6 @@ interface NavbarProps {
   isInsights?: boolean;
   isHome?: boolean;
   isPricing?: boolean;
-  isPlanSelected?: boolean;
-  setIsPlanSelected?: (isPlanSelected: boolean) => void;
   selectedPlan?: number | null;
 }
 
@@ -25,8 +23,6 @@ export const Navbar: FC<NavbarProps> = ({
   isWorkflow = false,
   isInsights = false,
   isPricing = false,
-  isPlanSelected = false,
-  setIsPlanSelected = () => {},
   selectedPlan,
 }) => {
   const navigate = useNavigate();
@@ -256,16 +252,13 @@ export const Navbar: FC<NavbarProps> = ({
                 } else {
                   navigate("/checkout", { state: { selectedPlan } });
                 }
-              } else if (isPlanSelected === true) {
-                navigate("/checkout");
               } else {
-                navigate("/pricing");
-                setIsPlanSelected(true);
+                // For home page and other pages, always go to signup
+                navigate("/signup");
               }
             }}
             className={cn(
-              "p-2 h-11 w-34 rounded-3xl bg-[#1797B9] cursor-pointer hover:bg-[#1797B9]/80",
-              location.pathname === "/checkout" && "hidden"
+              "p-2 h-11 w-34 rounded-3xl bg-[#1797B9] cursor-pointer hover:bg-[#1797B9]/80"
             )}
           >
             Get Started

@@ -10,20 +10,21 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FormWrapper } from "./formwrapper";
 import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
-import { Anchor } from "../ui/anchor";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { Flex } from "../ui/flex";
 import { useState } from "react";
 import { authClient } from "@/providers/user.provider";
 import type { FC } from "react";
 import { z } from "zod";
 import { Box } from "../ui/box";
 import { toast } from "sonner";
+import { Anchor } from "../ui/anchor";
+import { Flex } from "../ui/flex";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 
 const formSchema = z.object({
-  password: z
+  username: z.string().min(1, { message: "Required field" }),
+  createpassword: z
     .string()
     .min(8, "Invalid Password")
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
@@ -39,7 +40,7 @@ const formSchema = z.object({
   rememberMe: z.boolean(),
 });
 
-export const SignInForm: FC = () => {
+export const SignUpForm: FC = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,35 +50,36 @@ export const SignInForm: FC = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       rememberMe: true,
-      password: "Super@123",
-      email: "superadmin@gmail.com",
+      createpassword: "Test@123",
+      email: `test${Date.now()}@gmail.com`,
+      username: `test${Date.now()}`,
     },
   });
 
-  const onSubmit = async ({ email, password }: z.infer<typeof formSchema>) => {
-    authClient.signIn.email(
+  const onSubmit = async ({
+    email,
+    createpassword,
+    username,
+  }: z.infer<typeof formSchema>) => {
+    authClient.signUp.email(
       {
+        name: username,
         email,
-        password,
+        password: createpassword,
       },
       {
         onRequest: () => {
           setIsLoading(true);
         },
-        onSuccess: (response) => {
+        onSuccess: () => {
           setIsLoading(false);
           setError(null);
-
-          if (response.data.user.isSuperAdmin) {
-            navigate("/dashboard");
-            toast.success("Login successful");
-          } else {
-            navigate("/superadmin");
-            toast.success("Super Admin Login successful");
-          }
+          navigate("/login");
+          toast.success("Signup successful! Please login to continue.");
         },
         onError: (ctx) => {
           toast.error(ctx.error.message);
+          console.log(ctx.error);
           setIsLoading(false);
         },
       }
@@ -86,20 +88,38 @@ export const SignInForm: FC = () => {
 
   return (
     <FormWrapper
-      description="Log In to access your account"
+      description="A Seamless Way to Manage Your Dashboard"
       logoSource="/logo/logowithtext.png"
-      label="Log In. Take Control"
+      label="Create an account"
     >
       <Form {...form}>
         <form
-          className="flex flex-col gap-5"
+          className="flex flex-col gap-3"
           onSubmit={form.handleSubmit(onSubmit)}
         >
           <FormField
             control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem className="mt-4">
+                <FormLabel className="font-normal">Username</FormLabel>
+                <FormControl>
+                  <Input
+                    size="lg"
+                    placeholder="Enter username here"
+                    {...field}
+                    className="bg-white rounded-full border border-gray-100 placeholder:text-gray-400 focus:border-gray-400 placeholder:text-sm"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
             name="email"
             render={({ field }) => (
-              <FormItem className="mt-8">
+              <FormItem>
                 <FormLabel className="font-normal">Email</FormLabel>
                 <FormControl>
                   <Input
@@ -113,19 +133,20 @@ export const SignInForm: FC = () => {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
-            name="password"
+            name="createpassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="font-normal">Password</FormLabel>
+                <FormLabel className="font-normal">Create Password</FormLabel>
                 <FormControl>
                   <Box className="relative">
                     <Input
                       size="lg"
                       type={showPassword ? "text" : "password"}
-                      placeholder="Enter Password"
-                      className="bg-white rounded-full border border-gray-100 placeholder:text-gray-400 focus:border-gray-400 placeholder:text-sm"
+                      placeholder="Create a New Password"
+                      className="bg-white rounded-full border border-gray-100 placeholder:text-gray-400 focus:border-gray-400 placeholder:text-sm pr-12"
                       {...field}
                     />
                     <button
@@ -146,12 +167,9 @@ export const SignInForm: FC = () => {
             )}
           />
 
-          <Flex className="justify-between mb-8 gap-0">
-            <Anchor to="/signup" className="text-sm text-black">
-              Don't have an account?
-            </Anchor>
-            <Anchor to="/verify-email" className="text-sm text-[#F48E2D]">
-              Forgot Password?
+          <Flex className="justify-end gap-0">
+            <Anchor to="/login" className="text-sm text-blue-500">
+              Already have an account?
             </Anchor>
           </Flex>
 
@@ -166,7 +184,7 @@ export const SignInForm: FC = () => {
             disabled={isLoading}
             className="bg-[#1797B9] text-white rounded-full cursor-pointer hover:bg-[#1797B9]/80 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? "Signing In..." : "Sign In"}
+            {isLoading ? "Signing Up..." : "Sign Up"}
           </Button>
         </form>
       </Form>

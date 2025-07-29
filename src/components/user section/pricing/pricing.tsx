@@ -137,9 +137,10 @@ export const Pricing: FC<PricingProps> = ({
                   "bg-gradient-to-r from-white to-indigo-300 cursor-pointer border border-gray-200 px-4 py-2 rounded-lg hidden hover:border-white font-Outfit text-sm text-gray-800",
                   selectedPlan === index && "max-sm:flex"
                 )}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent triggering the parent onClick
                   if (selectedPlan === index) {
-                    navigate("/checkout", { state: { selectedPlan } });
+                    navigate("/checkout", { state: { selectedPlan: index } });
                   } else {
                     setSelectedPlan(index);
                   }

@@ -1,6 +1,7 @@
 import type { FC, PropsWithChildren } from "react";
 import { Stack } from "../ui/stack";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router";
 
 interface FormWrapperProps extends PropsWithChildren {
   description: string;
@@ -16,6 +17,7 @@ export const FormWrapper: FC<FormWrapperProps> = ({
   children,
   label,
 }) => {
+  const navigate = useNavigate();
   // bg-slate-50 shadow-md rounded-3xl border-4 border-white
   return (
     <Stack
@@ -25,7 +27,12 @@ export const FormWrapper: FC<FormWrapperProps> = ({
       )}
     >
       <Stack className="items-start">
-        <img className="w-32 h-11" src={logoSource} alt="Company Logo" />
+        <img
+          onClick={() => navigate("/")}
+          className="w-32 h-11 cursor-pointer"
+          src={logoSource}
+          alt="Company Logo"
+        />
         <h1 className="text-2xl font-semibold text-start w-[28rem] max-sm:w-full">
           {label}
         </h1>
