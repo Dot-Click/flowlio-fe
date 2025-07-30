@@ -87,7 +87,7 @@ export const SubAdminTable = () => {
       header: () => <Box className="text-black font-semibold p-3">Name</Box>,
       cell: ({ row }) => (
         <Box className="p-3">
-          <div className="font-medium">
+          <div className="font-medium capitalize">
             {row.original.firstName} {row.original.lastName}
           </div>
         </Box>

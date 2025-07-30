@@ -1,4 +1,4 @@
-import { IoArrowBack } from "react-icons/io5";
+import { IoArrowBack, IoEye, IoEyeOff } from "react-icons/io5";
 import { PageWrapper } from "@/components/common/pagewrapper";
 import { Box } from "@/components/ui/box";
 import { useNavigate } from "react-router";
@@ -28,6 +28,7 @@ import {
 import { useCreateSubAdmin } from "@/hooks/usecreatesubadmin";
 import { toast } from "sonner";
 import { ErrorWithMessage } from "@/configs/axios.config";
+import { useState } from "react";
 
 const formSchema = z
   .object({
@@ -56,6 +57,8 @@ const formSchema = z
 
 export const CreateSubAdmin = () => {
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+
   const { isPending: isCreatePending, mutate: createSubAdminMutate } =
     useCreateSubAdmin();
 
@@ -251,41 +254,63 @@ export const CreateSubAdmin = () => {
                 control={form.control}
                 name="password"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password:</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="bg-white rounded-full placeholder:text-gray-400"
-                        size="lg"
-                        type="password"
-                        placeholder="Enter Password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                  <Box className="relative">
+                    <FormItem>
+                      <FormLabel>Password:</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="bg-white rounded-full placeholder:text-gray-400"
+                          size="lg"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Enter Password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 bottom-1 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+                    >
+                      {showPassword ? (
+                        <IoEyeOff size={20} />
+                      ) : (
+                        <IoEye size={20} />
+                      )}
+                    </button>
+                  </Box>
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirm Password:</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="bg-white rounded-full placeholder:text-gray-400"
-                        size="lg"
-                        type="password"
-                        placeholder="Enter Confirm Password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <Box className="relative">
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm Password:</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="bg-white rounded-full placeholder:text-gray-400"
+                          size="lg"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Enter Confirm Password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 bottom-1 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+                >
+                  {showPassword ? <IoEyeOff size={20} /> : <IoEye size={20} />}
+                </button>
+              </Box>
             </Box>
           </Box>
         </form>

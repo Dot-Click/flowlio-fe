@@ -12,6 +12,7 @@ import { Outlet } from "react-router";
 import { SquareKanban, UserPen } from "lucide-react";
 import { GroupIcon, TaskManagementIcon } from "@/components/customeIcons";
 import { MessageCircleQuestion } from "lucide-react";
+import { useUser } from "@/providers/user.provider";
 
 export const navItems: NavItem[] = [
   {
@@ -76,6 +77,25 @@ export const navItems: NavItem[] = [
 ];
 
 export const DashboardLayout = () => {
+  const { data: userData } = useUser();
+
+  // Filter navigation items based on user role
+  const filteredNavItems = navItems.filter((item) => {
+    if (userData?.user.subadminId) {
+      const restrictedSections = [
+        "/dashboard/user-management",
+        "/dashboard/client-management",
+        "/dashboard/payment-links",
+        "/dashboard/invoice",
+        "/dashboard/support",
+        "/dashboard/settings",
+      ];
+
+      return !restrictedSections.includes(item.url);
+    }
+    return true;
+  });
+
   return (
     <Box className="bg-gradient-to-l from-indigo-50 via-slate-50 to-indigo-50 border-[2px] rounded-none border-white p-1 min-h-screen">
       <SidebarProvider
@@ -86,7 +106,7 @@ export const DashboardLayout = () => {
           } as CSSProperties
         }
       >
-        <AppSidebar navItems={navItems} />
+        <AppSidebar navItems={filteredNavItems} />
         <SidebarInset className="bg-transparent overflow-auto">
           <HorizontalNavbar />
           <Box className="pb-2">

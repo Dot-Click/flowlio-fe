@@ -7,9 +7,12 @@ import { Box } from "@/components/ui/box";
 import { SearchBox } from "./searchbox";
 import { useLocation } from "react-router";
 import { cn } from "@/lib/utils";
+import { useUser } from "@/providers/user.provider";
 
 export const HorizontalNavbar = () => {
   const { pathname } = useLocation();
+  const { data: user } = useUser();
+  console.log(user?.user.subadminId, "check the sub admin id");
 
   return (
     <Box
@@ -22,10 +25,10 @@ export const HorizontalNavbar = () => {
     >
       <SidebarTrigger className="min-md:hidden" />
       <UserProfile
-        label="Hey, will"
+        label={user?.user.name}
         avatarClassName="size-12"
         src="https://github.com/shadcn.png"
-        description="Monday, June 14, 2025"
+        description={user?.user.email}
       />
       {(pathname === "/viewer" || pathname === "/dashboard") && (
         <>

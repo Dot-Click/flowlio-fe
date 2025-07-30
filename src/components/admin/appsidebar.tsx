@@ -66,7 +66,6 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
   const { state, isMobile } = useSidebar();
   const location = useLocation();
   const navigate = useNavigate();
-
   return (
     <Sidebar
       className="**:data-[sidebar=sidebar]:bg-slate-50 **:data-[sidebar=sidebar]:border-4 **:data-[sidebar=sidebar]:border-white"

@@ -27,8 +27,11 @@ type SessionObject = typeof authClient.$Infer.Session;
 export type Role = keyof typeof roles;
 
 type Data = {
-  // Typed role property( Modify as needed )
-  user: SessionObject["user"] & { role: Role };
+  user: SessionObject["user"] & {
+    role: Role;
+    subadminId: string;
+    isSuperAdmin: boolean;
+  };
   session: SessionObject["session"];
 };
 
@@ -36,6 +39,8 @@ interface ContextData {
   refetchUser: () => void;
   isLoading: boolean;
   data: Data | null;
+  isSuperAdmin: boolean;
+  subadminId: string;
 }
 
 interface BeterAuthProviderProps extends PropsWithChildren {
@@ -85,6 +90,11 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
       return;
     }
     if (authData?.user && authData?.session) {
+      // Debug: Log what Better Auth actually returns
+      console.log("Better Auth session data:", authData);
+      console.log("Better Auth user fields:", Object.keys(authData.user));
+      console.log("Better Auth user data:", authData.user);
+
       setData(authData as Data);
       setIsLoading(false);
     } else {
@@ -107,6 +117,8 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
         data,
         isLoading,
         refetchUser,
+        isSuperAdmin: data?.user?.isSuperAdmin || false,
+        subadminId: data?.user?.subadminId || "",
       }}
     >
       {children}

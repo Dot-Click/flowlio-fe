@@ -41,7 +41,9 @@ export const UserProfile = forwardRef<HTMLSpanElement, UserProfileProps>(
             hideMetaInSmallScreens && "max-[950px]:hidden"
           )}
         >
-          <p className={cn("font-medium", labelClassName)}>{label}</p>
+          <p className={cn("font-medium capitalize", labelClassName)}>
+            {label}
+          </p>
           <p className={cn("text-sm", descriptionClassName)}>{description}</p>
         </Stack>
       </Flex>
