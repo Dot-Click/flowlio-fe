@@ -1,5 +1,31 @@
 import type { Role } from "./providers/user.provider";
 
+export interface PlanFeature {
+  maxUsers: number;
+  maxProjects: number;
+  maxStorage: number;
+  aiAssist: boolean;
+  prioritySupport: boolean;
+  customBranding: boolean;
+  apiAccess: boolean;
+  customFeatures?: string[];
+  [key: string]: any;
+}
+export type IPlan<T = {}> = {
+  id: string;
+  name: string;
+  slug?: string;
+  description: string;
+  createdAt: Date;
+  updatedAt: Date;
+  price: number;
+  currency?: string;
+  billingCycle?: string;
+  features: PlanFeature;
+  isActive?: boolean;
+  sortOrder?: number;
+} & T;
+
 export type ISubAdmin<T = {}> = {
   id: string;
   firstName: string;
@@ -79,10 +105,21 @@ export type INotification<T = {}> = {
     | "subadmin_deleted";
 } & T;
 
+export type CreatePlanRequest = {
+  name: string;
+  description: string;
+  price: number;
+  slug?: string;
+  currency: string;
+  billingCycle: string;
+  features: PlanFeature;
+  isActive: boolean;
+  sortOrder: number;
+};
+
 // Sub Admin related types
 export type SubAdminPermission = "Admin" | "Sub Admin" | "User";
 export type SubAdminStatus = "active" | "inactive" | "suspended";
-
 export type CreateSubAdminRequest = {
   firstName: string;
   lastName: string;
@@ -123,8 +160,8 @@ export type SubAdminListResponse = {
 // Permission levels for different user types
 export type PermissionLevel =
   | "superAdmin" // Full system access
-  | "subAdmin" // Limited management
-  | "user"; // Limited management
+  | "subAdmin"
+  | "user";
 
 // API Response types
 export type ApiResponse<T = any> = {

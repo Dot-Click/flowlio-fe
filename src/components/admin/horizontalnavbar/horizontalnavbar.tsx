@@ -12,8 +12,6 @@ import { useUser } from "@/providers/user.provider";
 export const HorizontalNavbar = () => {
   const { pathname } = useLocation();
   const { data: user } = useUser();
-  console.log(user?.user.subadminId, "check the sub admin id");
-
   return (
     <Box
       className={cn(

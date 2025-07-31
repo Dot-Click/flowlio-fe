@@ -3,12 +3,18 @@ import { Box } from "@/components/ui/box";
 import { Input } from "@/components/ui/input";
 import { Stack } from "@/components/ui/stack";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaCheckCircle } from "react-icons/fa";
 import { MdDataSaverOn } from "react-icons/md";
 import { Flex } from "@/components/ui/flex";
 import { IoTrashSharp } from "react-icons/io5";
 import { SubscribtionTabele } from "./subscribtiontabele";
+import { useUpsertPlan } from "@/hooks/useupsertplan";
+import { useDeleteCustomFeatures } from "@/hooks/usedeletecustomfeatures";
+import { toast } from "sonner";
+import { PlanFeature } from "@/types";
+import { useQueryClient } from "@tanstack/react-query";
+import { useFetchPlans } from "@/hooks/usefetchplans";
 
 const PLAN_LIST = [
   { key: "basic", label: "Basic" },
@@ -32,17 +38,66 @@ type PlansState = {
 const initialPlanState: PlanState = {
   subheading: "",
   price: "",
-  features: ["Access to Promote Services"],
+  features: [""],
   newFeature: "",
   adding: false,
 };
 
 export const SubscriptionsHeader = () => {
+  const { data: plansResponse, isLoading, error } = useFetchPlans();
+  const fetchedPlans = plansResponse?.data || [];
+
   const [plans, setPlans] = useState<PlansState>({
     basic: { ...initialPlanState },
     standard: { ...initialPlanState },
     premium: { ...initialPlanState },
   });
+
+  // Add individual loading states for each plan
+  const [savingPlans, setSavingPlans] = useState<Record<PlanKey, boolean>>({
+    basic: false,
+    standard: false,
+    premium: false,
+  });
+
+  // Pre-populate form with fetched plans
+  useEffect(() => {
+    if (fetchedPlans.length > 0) {
+      const updatedPlans = { ...plans };
+
+      fetchedPlans.forEach((plan) => {
+        const planKey = plan.name.toLowerCase() as PlanKey;
+        if (planKey in updatedPlans) {
+          // Convert features object back to string array for UI
+          const featureStrings = [];
+          if (plan.features.aiAssist) featureStrings.push("AI Assist");
+          if (plan.features.prioritySupport)
+            featureStrings.push("Priority Support");
+          if (plan.features.customBranding)
+            featureStrings.push("Custom Branding");
+          if (plan.features.apiAccess) featureStrings.push("API Access");
+
+          // Add custom features if they exist
+          if (
+            plan.features.customFeatures &&
+            plan.features.customFeatures.length > 0
+          ) {
+            featureStrings.push(...plan.features.customFeatures);
+          }
+
+          updatedPlans[planKey] = {
+            subheading: plan.description || "",
+            price: plan.price.toString(),
+            features: featureStrings.length > 0 ? featureStrings : [""],
+            newFeature: "",
+            adding: false,
+          };
+        }
+      });
+
+      setPlans(updatedPlans);
+    }
+  }, [fetchedPlans]);
 
   const handleInputChange = (
     planKey: PlanKey,
@@ -77,7 +132,45 @@ export const SubscriptionsHeader = () => {
     }
   };
 
-  const handleRemoveFeature = (planKey: PlanKey, idx: number) => {
+  const handleRemoveFeature = async (planKey: PlanKey, idx: number) => {
+    const featureToRemove = plans[planKey].features[idx];
+
+    // Check if this is a custom feature (not a predefined one)
+    const predefinedFeatures = [
+      "AI Assist",
+      "Priority Support",
+      "Custom Branding",
+      "API Access",
+      "",
+    ];
+    const isCustomFeature = !predefinedFeatures.includes(featureToRemove);
+
+    if (isCustomFeature) {
+      // Find the plan ID from fetched plans
+      const plan = fetchedPlans.find((p) => p.name.toLowerCase() === planKey);
+
+      if (plan) {
+        try {
+          await deleteCustomFeaturesMutation.mutateAsync({
+            planId: plan.id,
+            featuresToDelete: [featureToRemove],
+          });
+
+          toast.success(
+            `Custom feature "${featureToRemove}" deleted successfully`
+          );
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : "Unknown error";
+          toast.error(
+            `Failed to delete custom feature "${featureToRemove}": ${errorMessage}`
+          );
+          return; // Don't update local state if API call failed
+        }
+      }
+    }
+
+    // Update local state
     setPlans((prev) => {
       const features = prev[planKey].features.filter(
         (_: string, i: number) => i !== idx
@@ -88,6 +181,166 @@ export const SubscriptionsHeader = () => {
       };
     });
   };
+
+  const upsertPlanMutation = useUpsertPlan();
+  const deleteCustomFeaturesMutation = useDeleteCustomFeatures();
+  const queryClient = useQueryClient();
+
+  const validatePlan = (
+    plan: PlanState
+  ): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+
+    if (!plan.subheading.trim()) {
+      errors.push("Subheading is required");
+    }
+
+    if (!plan.price || parseFloat(plan.price) <= 0) {
+      errors.push("Valid price is required");
+    }
+
+    if (plan.features.length === 0) {
+      errors.push("At least one feature is required");
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+    };
+  };
+
+  const handleSavePlan = async (planKey: PlanKey) => {
+    const plan = plans[planKey];
+
+    // Check if any other plan is currently being saved
+    const isAnyPlanSaving = Object.values(savingPlans).some(
+      (isSaving) => isSaving
+    );
+    if (isAnyPlanSaving) {
+      toast.error("Please wait for the current save operation to complete");
+      return;
+    }
+
+    // Set loading state for this specific plan
+    setSavingPlans((prev) => ({ ...prev, [planKey]: true }));
+
+    // Validate the plan
+    const validation = validatePlan(plan);
+    if (!validation.isValid) {
+      toast.error("Validation failed", {
+        description: validation.errors.join(", "),
+      });
+      setSavingPlans((prev) => ({ ...prev, [planKey]: false }));
+      return;
+    }
+
+    // Map dynamic features to API structure
+    const mapFeaturesToApi = (features: string[]) => {
+      const featureMap: PlanFeature = {
+        maxUsers: 1,
+        maxProjects: 1,
+        maxStorage: 1,
+        aiAssist: false,
+        prioritySupport: false,
+        customBranding: false,
+        apiAccess: false,
+        customFeatures: [], // Add custom features array
+      };
+
+      // Map UI features to API features
+      features.forEach((feature) => {
+        const lowerFeature = feature.toLowerCase();
+        if (lowerFeature.includes("ai") || lowerFeature.includes("assist")) {
+          featureMap.aiAssist = true;
+        } else if (
+          lowerFeature.includes("priority") ||
+          lowerFeature.includes("support")
+        ) {
+          featureMap.prioritySupport = true;
+        } else if (
+          lowerFeature.includes("custom") ||
+          lowerFeature.includes("branding")
+        ) {
+          featureMap.customBranding = true;
+        } else if (lowerFeature.includes("api")) {
+          featureMap.apiAccess = true;
+        } else {
+          // Add as custom feature
+          featureMap.customFeatures?.push(feature);
+        }
+      });
+
+      return featureMap;
+    };
+
+    const planData = {
+      name: planKey,
+      description: plan.subheading,
+      price: parseFloat(plan.price),
+      features: mapFeaturesToApi(plan.features),
+      isActive: true,
+      sortOrder: 1,
+      currency: "USD",
+      billingCycle: "monthly" as const,
+      slug: planKey,
+    };
+
+    try {
+      const result = await upsertPlanMutation.mutateAsync(planData);
+      const isUpdate = result.data?.isUpdate;
+      toast.success(
+        `${PLAN_LIST.find((p) => p.key === planKey)?.label} plan ${
+          isUpdate ? "Updated" : "Created"
+        } successfully`
+      );
+      console.log(planData);
+
+      // Invalidate and refetch plans to update the table
+      queryClient.invalidateQueries({ queryKey: ["fetch plans"] });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to create plan";
+      toast.error("Failed to create plan", {
+        description: errorMessage,
+      });
+      console.error("Plan creation error:", error);
+    } finally {
+      // Reset loading state for this specific plan
+      setSavingPlans((prev) => ({ ...prev, [planKey]: false }));
+    }
+  };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <PageWrapper className="mt-6 px-4 py-6">
+        <Stack className="gap-1">
+          <h1 className="text-black text-2xl font-medium max-md:text-lg">
+            Subscription Management
+          </h1>
+          <h1 className="text-gray-500 max-md:text-sm">
+            Loading subscription plans...
+          </h1>
+        </Stack>
+      </PageWrapper>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <PageWrapper className="mt-6 px-4 py-6">
+        <Stack className="gap-1">
+          <h1 className="text-black text-2xl font-medium max-md:text-lg">
+            Subscription Management
+          </h1>
+          <h1 className="text-red-500 max-md:text-sm">
+            Error loading subscription plans: {error.message}
+          </h1>
+        </Stack>
+      </PageWrapper>
+    );
+  }
 
   return (
     <PageWrapper className="mt-6 px-4 py-6">
@@ -148,8 +401,8 @@ export const SubscriptionsHeader = () => {
                   style={{ fontSize: "1.5rem", lineHeight: "2rem" }}
                 />
               </Flex>
-              <div className="mt-4">
-                <div className="font-semibold mb-2">Included</div>
+              <Box className="mt-4">
+                <h1 className="font-semibold mb-2">Included</h1>
                 <Stack className="gap-2">
                   {plans[plan.key as PlanKey].features.map(
                     (feature: string, idx: number) => (
@@ -164,6 +417,7 @@ export const SubscriptionsHeader = () => {
                           onClick={() =>
                             handleRemoveFeature(plan.key as PlanKey, idx)
                           }
+                          disabled={deleteCustomFeaturesMutation.isPending}
                           aria-label="Remove feature"
                         >
                           <Box className="bg-[#e3f2f7] p-2 rounded-full cursor-pointer    ">
@@ -176,6 +430,7 @@ export const SubscriptionsHeader = () => {
                       </div>
                     )
                   )}
+
                   {plans[plan.key as PlanKey].adding ? (
                     <Stack>
                       <Flex className="gap-0">
@@ -221,13 +476,22 @@ export const SubscriptionsHeader = () => {
                       <Button
                         variant="ghost"
                         className="text-primary px-2 mt-1 border rounded-md cursor-pointer"
+                        onClick={() => handleSavePlan(plan.key as PlanKey)}
+                        disabled={
+                          savingPlans[plan.key as PlanKey] ||
+                          Object.values(savingPlans).some(
+                            (isSaving) => isSaving
+                          )
+                        }
                       >
-                        Save
+                        {savingPlans[plan.key as PlanKey]
+                          ? "Saving..."
+                          : "Save"}
                       </Button>
                     </Flex>
                   )}
                 </Stack>
-              </div>
+              </Box>
             </Stack>
           </Stack>
         ))}
@@ -235,7 +499,11 @@ export const SubscriptionsHeader = () => {
 
       <hr className="my-8" />
 
-      <SubscribtionTabele />
+      <SubscribtionTabele
+        fetchedPlans={fetchedPlans}
+        isLoading={isLoading}
+        error={error}
+      />
     </PageWrapper>
   );
 };

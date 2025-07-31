@@ -70,11 +70,14 @@ export const SignInForm: FC = () => {
 
           const user = response.data.user;
 
+          // Debug: Log user data to console
+          console.log("Login response user data:", user);
+
           if (!user.isSuperAdmin) {
             navigate("/superadmin");
             toast.success("Super Admin login successful");
           } else if (user.subadminId) {
-            navigate("/dashboard");
+            navigate("/superadmin");
             toast.success("Sub Admin login successful");
           } else {
             navigate("/dashboard");

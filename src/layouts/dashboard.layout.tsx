@@ -83,15 +83,15 @@ export const DashboardLayout = () => {
   const filteredNavItems = navItems.filter((item) => {
     if (userData?.user.subadminId) {
       const restrictedSections = [
-        "/dashboard/user-management",
-        "/dashboard/client-management",
-        "/dashboard/payment-links",
-        "/dashboard/invoice",
+        "/superadmin/user-management",
+        "/superadmin/client-management",
+        "/superadmin/payment-links",
+        "/superadmin/invoice",
         "/dashboard/support",
         "/dashboard/settings",
       ];
 
-      return !restrictedSections.includes(item.url);
+      return restrictedSections.includes(item.url);
     }
     return true;
   });

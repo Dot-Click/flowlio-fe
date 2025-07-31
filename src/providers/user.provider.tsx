@@ -14,6 +14,7 @@ import {
 } from "better-auth/client/plugins";
 import * as permissions from "@/configs/permission.config";
 import { backendDomain } from "@/configs/axios.config";
+import { useUserProfile } from "@/hooks/useuserprofile";
 
 const { ac, roles } = permissions;
 
@@ -84,23 +85,43 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const refetchUser = refetch;
 
+  // Fetch fresh user profile with subadminId
+  const { data: userProfileData, isLoading: profileLoading } = useUserProfile({
+    enabled: !!authData?.user?.id,
+  });
+
   useEffect(() => {
-    if (isPending) {
+    if (isPending || profileLoading) {
       setIsLoading(true);
       return;
     }
+
     if (authData?.user && authData?.session) {
       // Debug: Log what Better Auth actually returns
       console.log("Better Auth session data:", authData);
-      console.log("Better Auth user fields:", Object.keys(authData.user));
-      console.log("Better Auth user data:", authData.user);
 
-      setData(authData as Data);
+      // Use fresh user profile data if available, otherwise fall back to Better Auth data
+      if (userProfileData?.data) {
+        console.log("Fresh user profile data:", userProfileData.data);
+        const enhancedData = {
+          ...authData,
+          user: {
+            ...authData.user,
+            ...userProfileData.data,
+            subadminId: userProfileData.data.subadminId,
+            isSuperAdmin: userProfileData.data.isSuperAdmin,
+          },
+        };
+        setData(enhancedData as unknown as Data);
+      } else {
+        setData(authData as Data);
+      }
       setIsLoading(false);
     } else {
       setData(null);
       setIsLoading(false);
     }
+
     if (error) {
       onError?.(error);
       if (refetchOnError) {
@@ -109,7 +130,15 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
         }, 1000);
       }
     }
-  }, [authData, isPending, error, onError, refetchOnError]);
+  }, [
+    authData,
+    isPending,
+    error,
+    onError,
+    refetchOnError,
+    userProfileData,
+    profileLoading,
+  ]);
 
   return (
     <UserAuthContext.Provider

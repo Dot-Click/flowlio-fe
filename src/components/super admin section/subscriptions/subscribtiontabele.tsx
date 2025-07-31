@@ -4,7 +4,7 @@ import { Box } from "@/components/ui/box";
 import { ReusableTable } from "@/components/reusable/reusabletable";
 import { Button } from "@/components/ui/button";
 import { Stack } from "@/components/ui/stack";
-import { addDays, format, isWithinInterval } from "date-fns";
+import { format, isWithinInterval } from "date-fns";
 import { Flex } from "@/components/ui/flex";
 import {
   Popover,
@@ -15,6 +15,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "@/components/customeIcons";
 import { useState } from "react";
 import { DateRange } from "react-day-picker";
+import { IPlan } from "@/types";
 
 const data: Data[] = [
   {
@@ -108,6 +109,11 @@ const data: Data[] = [
     subscribtionplan: "Premium",
   },
 ];
+export interface SubscriptionsHeaderProps {
+  fetchedPlans?: IPlan[];
+  isLoading?: boolean;
+  error?: any;
+}
 
 export type Data = {
   id: string;
@@ -250,11 +256,62 @@ export const columns: ColumnDef<Data>[] = [
   },
 ];
 
-export const SubscribtionTabele = () => {
-  const [selected, onSelect] = useState<DateRange>({
-    from: addDays(new Date(), -2),
-    to: addDays(new Date(), 2),
-  });
+export const SubscribtionTabele = ({
+  fetchedPlans = [],
+  isLoading = false,
+  error = null,
+}: SubscriptionsHeaderProps) => {
+  const [date, setDate] = useState<DateRange | undefined>();
+  // const { data: plansResponse, isLoading, error } = useFetchPlans();
+  // console.log(plansResponse);
+
+  const plansData: Data[] =
+    fetchedPlans?.map((plan: IPlan) => ({
+      id: plan.id,
+      amount: parseFloat(plan.price.toString()),
+      status: plan.isActive ? "active" : "inActive",
+      companyName: "N/A", // This would come from organization data
+      lastbilledon: new Date(plan.createdAt),
+      startDate: new Date(plan.createdAt),
+      expiredate: new Date(plan.updatedAt),
+      subscribtionplan: plan.name,
+    })) || [];
+
+  // Use hardcoded data as fallback if no plans are fetched
+  const tableData = plansData.length > 0 ? plansData : data;
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <Box>
+        <Stack className="gap-1 mb-6">
+          <h1 className="text-black text-2xl font-medium max-md:text-lg">
+            Subscription Plans
+          </h1>
+          <h1 className="text-gray-500 max-md:text-sm">
+            Loading subscription plans...
+          </h1>
+        </Stack>
+      </Box>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <Box>
+        <Stack className="gap-1 mb-6">
+          <h1 className="text-black text-2xl font-medium max-md:text-lg">
+            Subscription Plans
+          </h1>
+          <h1 className="text-red-500 max-md:text-sm">
+            Error loading subscription plans: {error.message}
+          </h1>
+        </Stack>
+      </Box>
+    );
+  }
+
   return (
     <Box>
       <Center className="justify-between">
@@ -277,16 +334,16 @@ export const SubscribtionTabele = () => {
           <PopoverContent side="bottom" className="w-[19rem] mr-8">
             <Calendar
               mode="range"
-              selected={selected}
-              onSelect={(r) => r && onSelect(r)}
+              selected={date}
+              onSelect={(r) => r && setDate(r)}
             />
             <Flex className="mt-3 justify-center gap-2 bg-muted px-3 py-1 rounded-sm text-sm font-medium text-primary">
               <span className="text-muted-foreground">
-                {format(selected.from!, "dd LLL")}
+                {date?.from ? format(date.from, "dd LLL") : "Invalid Date"}
               </span>
               <span className="text-accent-foreground">/</span>
               <span className="text-muted-foreground">
-                {format(selected.to!, "dd LLL")}
+                {date?.to ? format(date.to, "dd LLL") : "Invalid Date"}
               </span>
             </Flex>
             <Flex>
@@ -300,7 +357,7 @@ export const SubscribtionTabele = () => {
       </Center>
 
       <ReusableTable
-        data={data}
+        data={tableData}
         columns={columns}
         searchInput={false}
         enablePaymentLinksCalender={false}
