@@ -12,6 +12,7 @@ import {
   SquareKanban,
   User,
 } from "lucide-react";
+import { useUser } from "@/providers/user.provider";
 
 export const navItems: NavItem[] = [
   {
@@ -47,6 +48,24 @@ export const navItems: NavItem[] = [
 ];
 
 export const SuperAdminLayout = () => {
+  const { data: userData } = useUser();
+
+  // Filter navigation items based on user role
+  const filteredNavItems = navItems.filter((item) => {
+    if (userData?.user.subadminId) {
+      const restrictedSections = [
+        "/superadmin",
+        "/superadmin/companies",
+        "/superadmin/subscriptions",
+        "/superadmin/support-tickets",
+        "/superadmin/settings",
+      ];
+
+      return restrictedSections.includes(item.url);
+    }
+    return true;
+  });
+
   return (
     <Box className="bg-gradient-to-l from-indigo-50 via-slate-50 to-indigo-50 border-[2px] rounded-none border-white p-1 min-h-screen">
       <SidebarProvider
@@ -57,7 +76,7 @@ export const SuperAdminLayout = () => {
           } as CSSProperties
         }
       >
-        <AppSidebar navItems={navItems} />
+        <AppSidebar navItems={filteredNavItems} />
         <SidebarInset className="bg-transparent overflow-auto">
           <HorizontalNavbar />
           <Box className="pb-2">

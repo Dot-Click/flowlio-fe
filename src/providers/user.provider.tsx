@@ -118,6 +118,7 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
       }
       setIsLoading(false);
     } else {
+      // Clear all data when user logs out
       setData(null);
       setIsLoading(false);
     }

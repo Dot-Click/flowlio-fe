@@ -29,30 +29,41 @@ import { Form } from "@/components/ui/form"; // or "@/components/ui/form"
 import { useForm } from "react-hook-form";
 import { SupportTicketTable } from "./supportticketstable";
 import { Flex } from "@/components/ui/flex";
+import { useCreateSupportTicket } from "@/hooks/usecreatesupportticket";
+import { toast } from "sonner";
 
 const formSchema = z.object({
-  agent: z.string().min(2, {
-    message: "First Name must be at least 2 characters.",
-  }),
-  priority: z.string().min(2, {
-    message: "Must be amount number.",
-  }),
+  subject: z.string().min(1, "Subject is required"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  priority: z.enum(["High", "Medium", "Low"]),
+  client: z.string().min(1, "Client is required"),
+  assignedto: z.string().min(1, "Assigned to is required"),
 });
 
 export const SupportTicketsHeader: FC = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      agent: "",
-      priority: "",
+      subject: "",
+      description: "",
+      priority: "Medium",
+      client: "",
+      assignedto: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-  }
-
+  const createSupportTicketMutation = useCreateSupportTicket();
   const modalProps = useGeneralModalDisclosure();
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      await createSupportTicketMutation.mutateAsync(values);
+      form.reset();
+      modalProps.onOpenChange(false);
+    } catch {
+      toast.error("Failed to create support ticket");
+    }
+  }
 
   return (
     <PageWrapper className="mt-6">
@@ -79,34 +90,41 @@ export const SupportTicketsHeader: FC = () => {
       <SupportTicketTable />
 
       <GeneralModal {...modalProps}>
-        <h2 className="text-lg font-normal mb-4">Assign Ticket</h2>
+        <h2 className="text-lg font-normal mb-4">Create Support Ticket</h2>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <Box className="bg-white/80 gap-6 grid grid-cols-1">
+            <Box className="bg-white/80 gap-4 grid grid-cols-1">
               <FormField
                 control={form.control}
-                name="agent"
+                name="subject"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Agent</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl className="w-full h-12">
-                        <SelectTrigger
-                          size="lg"
-                          className="bg-gray-100 border border-gray-200 rounded-full w-full h-12 placeholder:text-gray-100"
-                        >
-                          <SelectValue placeholder="Select Agent" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="w-full">
-                        <SelectItem value="agent1">Agent 1</SelectItem>
-                        <SelectItem value="agent2">Agent 2</SelectItem>
-                        <SelectItem value="agent3">Agent 3</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FormLabel>Subject</FormLabel>
+                    <FormControl className="w-full h-12">
+                      <input
+                        {...field}
+                        className="bg-gray-100 border border-gray-200 rounded-full w-full h-12 px-4 placeholder:text-gray-500"
+                        placeholder="Enter ticket subject"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl className="w-full">
+                      <textarea
+                        {...field}
+                        className="bg-gray-100 border border-gray-200 rounded-lg w-full p-4 min-h-[50px] resize-none placeholder:text-gray-500"
+                        placeholder="Describe the issue in detail..."
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -131,11 +149,65 @@ export const SupportTicketsHeader: FC = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="w-full">
-                        <SelectItem value="priority1">Priority 1</SelectItem>
-                        <SelectItem value="priority2">Priority 2</SelectItem>
-                        <SelectItem value="priority3">Priority 3</SelectItem>
+                        <SelectItem value="High">High</SelectItem>
+                        <SelectItem value="Medium">Medium</SelectItem>
+                        <SelectItem value="Low">Low</SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="client"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Client</FormLabel>
+                    <FormControl className="w-full h-12">
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl className="w-full h-12">
+                          <SelectTrigger
+                            size="lg"
+                            className="bg-gray-100 border border-gray-200 rounded-full w-full h-12 placeholder:text-gray-100"
+                          >
+                            <SelectValue placeholder="Select Client" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="w-full">
+                          <SelectItem value="Client 1">Client 1</SelectItem>
+                          <SelectItem value="Client 2">Client 2</SelectItem>
+                          <SelectItem value="Client 3">Client 3</SelectItem>
+                          <SelectItem value="Client 4">Client 4</SelectItem>
+                          <SelectItem value="Client 5">Client 5</SelectItem>
+                          <SelectItem value="Client 6">Client 6</SelectItem>
+                          <SelectItem value="Client 7">Client 7</SelectItem>
+                          <SelectItem value="Client 8">Client 8</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="assignedto"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Assign To</FormLabel>
+                    <FormControl className="w-full h-12">
+                      <input
+                        {...field}
+                        className="bg-gray-100 border border-gray-200 rounded-full w-full h-12 px-4 placeholder:text-gray-500"
+                        placeholder="Enter assignee name"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -145,7 +217,8 @@ export const SupportTicketsHeader: FC = () => {
                 <Button
                   variant="outline"
                   className="bg-[#1797b9]/30 hover:bg-[#1797b9]/80 hover:text-white text-black border border-gray-200 font-normal rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
-                  type="submit"
+                  type="button"
+                  onClick={() => modalProps.onOpenChange(false)}
                 >
                   Cancel
                 </Button>
@@ -153,8 +226,11 @@ export const SupportTicketsHeader: FC = () => {
                   variant="outline"
                   className="bg-[#1797b9] hover:bg-[#1797b9]/80 hover:text-white text-white border border-gray-200 rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
                   type="submit"
+                  disabled={createSupportTicketMutation.isPending}
                 >
-                  Assign
+                  {createSupportTicketMutation.isPending
+                    ? "Creating..."
+                    : "Create Ticket"}
                 </Button>
               </Flex>
             </Box>

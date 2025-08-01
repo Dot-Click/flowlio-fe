@@ -27,7 +27,7 @@ export const useUserProfile = (options?: { enabled?: boolean }) => {
       return response.data;
     },
     retry: 1,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 0, // No caching - always fetch fresh data
     refetchOnWindowFocus: false,
     ...options,
   });

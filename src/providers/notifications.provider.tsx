@@ -38,7 +38,7 @@ const initialNotifications: Notification[] = [
     title: "New message Reported",
     message: "Critical message reported in production environment",
     timestamp: new Date(),
-    isRead: false,
+    isRead: true,
     type: "message",
     sender: "Project Manager",
   },
@@ -47,7 +47,7 @@ const initialNotifications: Notification[] = [
     title: "New message Reported",
     message: "Critical message reported in production environment",
     timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
-    isRead: false,
+    isRead: true,
     type: "message",
     sender: "System Monitor",
   },

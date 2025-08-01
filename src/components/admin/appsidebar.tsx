@@ -327,9 +327,9 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
         <Button
           className="bg-transparent text-black hover:bg-red-50 cursor-pointer border-none flex items-start justify-start gap-2 shadow-none"
           onClick={() => {
+            navigate("/");
             authClient.signOut();
             toast.success("Logged out successfully");
-            navigate("/");
           }}
         >
           <Flex className="gap-2">

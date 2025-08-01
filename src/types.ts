@@ -1,5 +1,31 @@
 import type { Role } from "./providers/user.provider";
 
+export interface CreateSupportTicketRequest {
+  subject: string;
+  description: string;
+  priority: "High" | "Medium" | "Low";
+  client: string;
+  assignedto: string;
+}
+
+export interface SupportTicket {
+  id: string;
+  ticketNumber: string;
+  subject: string;
+  description: string;
+  priority: "High" | "Medium" | "Low";
+  status: "open" | "closed";
+  submittedby: string; // User ID
+  client: string;
+  assignedto: string; // Assignee name (not user ID)
+  createdon: Date;
+  updatedAt: Date;
+  submittedByUser?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}
 export interface PlanFeature {
   maxUsers: number;
   maxProjects: number;

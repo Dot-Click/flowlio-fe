@@ -16,6 +16,7 @@ import { Input } from "../ui/input";
 import { Flex } from "../ui/flex";
 import { useState } from "react";
 import { authClient } from "@/providers/user.provider";
+import { axios } from "@/configs/axios.config";
 import type { FC } from "react";
 import { z } from "zod";
 import { Box } from "../ui/box";
@@ -64,7 +65,7 @@ export const SignInForm: FC = () => {
         onRequest: () => {
           setIsLoading(true);
         },
-        onSuccess: (response) => {
+        onSuccess: async (response) => {
           setIsLoading(false);
           setError(null);
 
@@ -73,15 +74,32 @@ export const SignInForm: FC = () => {
           // Debug: Log user data to console
           console.log("Login response user data:", user);
 
-          if (!user.isSuperAdmin) {
-            navigate("/superadmin");
-            toast.success("Super Admin login successful");
-          } else if (user.subadminId) {
-            navigate("/superadmin");
-            toast.success("Sub Admin login successful");
-          } else {
+          try {
+            // Fetch fresh user profile data directly
+            const profileResponse = await axios.get("/superadmin/profile");
+            const userProfile = profileResponse.data.data;
+
+            console.log("Fresh user profile data:", userProfile);
+
+            // Navigate based on fresh profile data
+            if (userProfile.isSuperAdmin === true) {
+              navigate("/superadmin");
+              toast.success("Super Admin login successful");
+            } else if (userProfile.subadminId) {
+              navigate("/superadmin");
+              toast.success("Sub Admin login successful");
+            } else {
+              navigate("/dashboard");
+              toast.success("User login successful");
+            }
+
+            // Clear any cached data and navigate
+            // The UserProvider will automatically update with fresh data
+          } catch (error) {
+            console.error("Error fetching user profile:", error);
+            // Fallback to basic navigation
             navigate("/dashboard");
-            toast.success("User login successful");
+            toast.success("Login successful");
           }
         },
         onError: (ctx) => {
