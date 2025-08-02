@@ -12,11 +12,17 @@ export interface ApiResponse<T = {}> {
 }
 
 const sanitizeDomain = (domain: string) => {
-  if (domain.at(-1) === "/")
-    throw new Error(
-      "Invalid domain format \n valid domains:\nhttps://www.example.com\nhttp://localhost:3000"
-    );
-  return domain.at(-1) === "/" ? domain.slice(0, -1) + "/api" : domain + "/api";
+  // if (domain.at(-1) === "/")
+  //   throw new Error(
+  //     "Invalid domain format \n valid domains:\nhttps://www.example.com\nhttp://localhost:3000"
+  //   );
+  // return domain.at(-1) === "/" ? domain.slice(0, -1) + "/api" : domain + "/api";
+
+  // Remove trailing slash if present
+  const cleanDomain = domain.endsWith("/") ? domain.slice(0, -1) : domain;
+
+  // Add /api to the domain
+  return cleanDomain + "/api";
 };
 
 export const backendDomain = import.meta.env.VITE_BACKEND_DOMAIN;
