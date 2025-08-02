@@ -24,7 +24,7 @@ const sanitizeDomain = (domain: string) => {
   // Add /api to the domain
   return cleanDomain + "/api";
 };
-
+// deployment issue solving
 export const backendDomain = import.meta.env.VITE_BACKEND_DOMAIN;
 export const url = sanitizeDomain(backendDomain);
 
