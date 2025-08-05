@@ -41,6 +41,7 @@ interface ContextData {
   data: Data | null;
   isSuperAdmin: boolean;
   subadminId: string;
+  role: string;
 }
 
 interface BeterAuthProviderProps extends PropsWithChildren {
@@ -149,6 +150,7 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
       value={{
         data,
         isLoading,
+        role: data?.user?.role || "",
         refetchUser,
         isSuperAdmin: data?.user?.isSuperAdmin || false,
         subadminId: data?.user?.subadminId || "",

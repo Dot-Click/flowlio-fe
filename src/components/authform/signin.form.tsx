@@ -76,19 +76,24 @@ export const SignInForm: FC = () => {
 
           try {
             // Fetch fresh user profile data directly
-            const profileResponse = await axios.get("/superadmin/profile");
+            const profileResponse = await axios.get("/user/profile");
             const userProfile = profileResponse.data.data;
 
             console.log("Fresh user profile data:", userProfile);
 
             // Navigate based on fresh profile data
+            console.log("User profile for navigation:", userProfile);
+
             if (userProfile.isSuperAdmin === true) {
+              console.log("Redirecting to superadmin - isSuperAdmin is true");
               navigate("/superadmin");
               toast.success("Super Admin login successful");
             } else if (userProfile.subadminId) {
+              console.log("Redirecting to superadmin - has subadminId");
               navigate("/superadmin");
               toast.success("Sub Admin login successful");
             } else {
+              console.log("Redirecting to dashboard - regular user");
               navigate("/dashboard");
               toast.success("User login successful");
             }

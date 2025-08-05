@@ -12,7 +12,7 @@ interface UserProfile {
   emailVerified: boolean;
   image: string | null;
   isSuperAdmin: boolean;
-  role: string; // Add role field
+  role: string;
   subadminId: string | null;
   createdAt: string;
   updatedAt: string;
@@ -24,7 +24,7 @@ export const useUserProfile = (options?: { enabled?: boolean }) => {
     queryFn: async () => {
       console.log("Fetching user profile...");
       const response = await axios.get<ApiResponse<UserProfile>>(
-        "/superadmin/profile",
+        "/user/profile",
         {
           headers: {
             "Cache-Control": "no-cache",

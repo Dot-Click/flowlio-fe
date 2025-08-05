@@ -21,6 +21,7 @@ import { useFetchSubAdmins } from "@/hooks/usefetchsubadmins";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { useDeleteSubAdmin } from "@/hooks/usedeletesubadmin";
+import { Flex } from "@/components/ui/flex";
 
 export type SubAdminData = {
   id: string;
@@ -187,7 +188,7 @@ export const SubAdminTable = () => {
       />
 
       {hasNextPage && (
-        <div className="flex justify-center mt-4">
+        <Flex className="justify-center mt-4">
           <Button
             onClick={() => fetchNextPage()}
             variant="outline"
@@ -195,7 +196,7 @@ export const SubAdminTable = () => {
           >
             {isLoading ? "Loading..." : "Load More"}
           </Button>
-        </div>
+        </Flex>
       )}
     </>
   );
