@@ -102,17 +102,21 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
       // Use fresh user profile data if available, otherwise fall back to Better Auth data
       if (userProfileData?.data) {
         console.log("Fresh user profile data:", userProfileData.data);
+        console.log("User role from profile:", userProfileData.data.role);
         const enhancedData = {
           ...authData,
           user: {
             ...authData.user,
             ...userProfileData.data,
+            role: userProfileData.data.role, // Include role from fresh data
             subadminId: userProfileData.data.subadminId,
             isSuperAdmin: userProfileData.data.isSuperAdmin,
           },
         };
+        console.log("Enhanced user data:", enhancedData);
         setData(enhancedData as unknown as Data);
       } else {
+        console.log("No fresh profile data, using Better Auth data:", authData);
         setData(authData as Data);
       }
       setIsLoading(false);
