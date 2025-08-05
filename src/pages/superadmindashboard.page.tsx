@@ -11,8 +11,8 @@ import Img2 from "/dashboard/prostat2.svg";
 import Img3 from "/dashboard/projstat3.svg";
 import { SuperAdminBarChartComponent } from "@/components/super admin section/super admin barchart/barchart";
 import { SuperAdminTable } from "@/components/super admin section/super admin barchart/superadmintable";
-import { useUser } from "@/providers/user.provider";
-import { Badge } from "@/components/ui/badge";
+// import { useUser } from "@/providers/user.provider";
+// import { Badge } from "@/components/ui/badge";
 
 const stats: Stat[] = [
   {
@@ -52,13 +52,13 @@ const data = [
 ];
 
 const SuperAdminDashboardPage = () => {
-  const { data: userData } = useUser();
-  console.log(userData, "check the sub admin id");
+  // const { data: userData } = useUser();
+  // console.log(userData, "check the sub admin id");
 
   return (
     <Stack className="pt-5 gap-3 px-2">
       {/* Debug Section - Remove this after testing */}
-      {userData && (
+      {/* {userData && (
         <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
           <h3 className="text-lg font-semibold mb-2">User Role Debug</h3>
           <div className="flex items-center gap-2 mb-2">
@@ -76,7 +76,7 @@ const SuperAdminDashboardPage = () => {
             <p>Raw user data: {JSON.stringify(userData.user, null, 2)}</p>
           </div>
         </div>
-      )}
+      )} */}
       <Stats
         stats={stats}
         classNameDescription="text-[13px] leading-4"
