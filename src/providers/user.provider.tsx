@@ -19,7 +19,6 @@ import { useUserProfile } from "@/hooks/useuserprofile";
 const { ac, roles } = permissions;
 
 export const authClient = createAuthClient({
-  // plugins: [adminClient({ ac, roles }), emailOTPClient(), twoFactorClient()],
   plugins: [adminClient({ ac, roles }), emailOTPClient(), twoFactorClient()],
   baseURL: backendDomain,
 });

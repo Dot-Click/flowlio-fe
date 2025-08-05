@@ -65,13 +65,13 @@ export const CreateSubAdmin = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      contactNumber: "",
+      firstName: "sub",
+      lastName: "admin",
+      email: "subadmin@gmail.com",
+      contactNumber: "1234567890",
       permission: "Sub Admin",
-      password: "",
-      confirmPassword: "",
+      password: "Sub@11111",
+      confirmPassword: "Sub@11111",
     },
   });
 
