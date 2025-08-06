@@ -31,6 +31,8 @@ import { SupportTicketTable } from "./supportticketstable";
 import { Flex } from "@/components/ui/flex";
 import { useCreateSupportTicket } from "@/hooks/usecreatesupportticket";
 import { toast } from "sonner";
+import { useFetchSupportTickets } from "@/hooks/usefetchsupporttickets";
+import { useDeleteSupportTicket } from "@/hooks/usedeletesupportticket";
 
 const formSchema = z.object({
   subject: z.string().min(1, "Subject is required"),
@@ -54,12 +56,15 @@ export const SupportTicketsHeader: FC = () => {
 
   const createSupportTicketMutation = useCreateSupportTicket();
   const modalProps = useGeneralModalDisclosure();
+  const { data, isLoading, error, refetch } = useFetchSupportTickets();
+  const { mutate: deleteSupportTicket } = useDeleteSupportTicket();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       await createSupportTicketMutation.mutateAsync(values);
       form.reset();
       modalProps.onOpenChange(false);
+      refetch();
     } catch {
       toast.error("Failed to create support ticket");
     }
@@ -87,7 +92,29 @@ export const SupportTicketsHeader: FC = () => {
         </Button>
       </Center>
 
-      <SupportTicketTable />
+      <SupportTicketTable
+        data={data?.data || []}
+        isLoading={isLoading}
+        error={error}
+        refetch={refetch}
+        deleteSupportTicket={(id) =>
+          deleteSupportTicket(
+            { id },
+            {
+              onSuccess: () => {
+                refetch();
+                toast.success("Support Ticket deleted successfully");
+              },
+              onError: (error) => {
+                toast.error(
+                  error.response?.data?.message ||
+                    "Failed to delete support ticket"
+                );
+              },
+            }
+          )
+        }
+      />
 
       <GeneralModal {...modalProps}>
         <h2 className="text-lg font-normal mb-4">Create Support Ticket</h2>

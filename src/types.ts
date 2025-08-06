@@ -7,7 +7,7 @@ export interface CreateSupportTicketRequest {
   client: string;
   assignedto: string;
 }
-
+// Base SupportTicket interface (without relations)
 export interface SupportTicket {
   id: string;
   ticketNumber: string;
@@ -16,16 +16,19 @@ export interface SupportTicket {
   priority: "High" | "Medium" | "Low";
   status: "open" | "closed";
   submittedby: string; // User ID
+  submittedbyName: string; // User name
+  submittedbyRole: string; // User role
   client: string;
   assignedto: string; // Assignee name (not user ID)
   createdon: Date;
   updatedAt: Date;
-  submittedByUser?: {
-    id: string;
-    name: string;
-    email: string;
-  };
 }
+
+// API Response type for support tickets
+export interface GetSupportTicketsResponse extends Partial<ApiResponse> {
+  data: SupportTicket[];
+}
+
 export interface PlanFeature {
   maxUsers: number;
   maxProjects: number;
@@ -117,9 +120,6 @@ export type INotification<T = {}> = {
     // project
     | "project_created"
     | "project_updated"
-    // cost code
-    | "costcode_created"
-    | "costcode_updated"
     // member
     | "member_added"
     | "member_removed"

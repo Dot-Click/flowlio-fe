@@ -1,15 +1,9 @@
-import {
-  axios,
-  type ApiResponse,
-  type ErrorWithMessage,
-} from "@/configs/axios.config";
-import type { SupportTicket } from "@/types";
+import { axios, type ErrorWithMessage } from "@/configs/axios.config";
+import type { GetSupportTicketsResponse } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 
-export type ResponseData = SupportTicket[];
-
 export const useFetchSupportTickets = (options?: { enabled?: boolean }) => {
-  return useQuery<ApiResponse<ResponseData>, ErrorWithMessage>({
+  return useQuery<GetSupportTicketsResponse, ErrorWithMessage>({
     retryDelay: 5000,
     staleTime: 1000 * 10,
     queryKey: ["fetch support tickets"],

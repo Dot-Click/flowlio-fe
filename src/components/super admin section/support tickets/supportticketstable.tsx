@@ -13,43 +13,60 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import CheckSvg from "/super admin/check.svg";
-import { useFetchSupportTickets } from "@/hooks/usefetchsupporttickets";
-import { useDeleteSupportTicket } from "@/hooks/usedeletesupportticket";
+// import { useFetchSupportTickets } from "@/hooks/usefetchsupporttickets";
+// import { useDeleteSupportTicket } from "@/hooks/usedeletesupportticket";
 import { toast } from "sonner";
+import { useState } from "react";
+import { SupportTicketModal } from "./supportticketmodal";
+import type { SupportTicket } from "@/types";
+import { useUpdateSupportTicket } from "@/hooks/useupdatesupportticket";
 
-export type Data = {
-  id: string;
-  ticketNumber: string;
-  priority: "High" | "Medium" | "Low";
-  status: "open" | "closed";
-  submittedby: string;
-  client: string;
-  subject: string;
-  description: string;
-  createdon: string | Date;
-  assignedto: string;
-  updatedAt: string | Date;
-};
+export type Data = SupportTicket;
 
-export const SupportTicketTable = () => {
-  const { data, isLoading, error, refetch } = useFetchSupportTickets();
-  const { mutate: deleteSupportTicket } = useDeleteSupportTicket();
-  console.log(isLoading, error);
+export const SupportTicketTable = ({
+  data,
+  isLoading,
+  error,
+  refetch,
+  deleteSupportTicket,
+}: {
+  data: Data[];
+  isLoading: boolean;
+  error: any;
+  refetch: () => void;
+  deleteSupportTicket: (id: string) => void;
+}) => {
+  const [selectedTicket, setSelectedTicket] = useState<Data | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { mutate: updateSupportTicket } = useUpdateSupportTicket();
 
   const handleDelete = (id: string) => {
     if (
       window.confirm("Are you sure you want to delete this support ticket?")
     ) {
-      deleteSupportTicket(
-        { id },
+      deleteSupportTicket(id);
+      toast.success("Support Ticket deleted successfully");
+      refetch();
+    }
+  };
+
+  const handleViewTicket = (ticket: Data) => {
+    setSelectedTicket(ticket);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseTicket = (id: string) => {
+    if (window.confirm("Are you sure you want to close this support ticket?")) {
+      updateSupportTicket(
+        { id, status: "closed" },
         {
           onSuccess: () => {
+            toast.success("Support Ticket closed successfully");
             refetch();
-            toast.success("Support Ticket deleted successfully");
           },
-          onError: (error) => {
+          onError: (error: any) => {
             toast.error(
-              error.response?.data?.message || "Failed to delete support ticket"
+              error.response?.data?.message || "Failed to close support ticket"
             );
           },
         }
@@ -57,18 +74,10 @@ export const SupportTicketTable = () => {
     }
   };
 
-  const handleViewTicket = (ticket: Data) => {
-    // TODO: Implement view ticket functionality
-    toast.info(`Viewing ticket: ${ticket.ticketNumber}`);
-  };
-
-  const handleCloseTicket = (id: string) => {
-    if (window.confirm("Are you sure you want to close this support ticket?")) {
-      // TODO: Implement close ticket functionality
-      console.log("Closing ticket:", id);
-      toast.success("Support Ticket closed successfully");
-      refetch();
-    }
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedTicket(null);
+    refetch();
   };
 
   const columns: ColumnDef<Data>[] = [
@@ -101,6 +110,7 @@ export const SupportTicketTable = () => {
         <Box className="captialize text-center">{row.original.client}</Box>
       ),
     },
+
     {
       accessorKey: "assignedto",
       header: () => <Box className="text-black text-center">Assigned To</Box>,
@@ -239,39 +249,48 @@ export const SupportTicketTable = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg">Loading support tickets...</div>
-      </div>
+      <Center className="flex items-center justify-center h-64">
+        <Box className="text-lg">Loading support tickets...</Box>
+      </Center>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-red-600">
+      <Center className="h-64">
+        <Box className="text-lg text-red-600">
           Error loading support tickets. Please try again.
-        </div>
-      </div>
+        </Box>
+      </Center>
     );
   }
 
-  if (!data?.data || data.data.length === 0) {
+  if (!data || data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-gray-500">No support tickets found.</div>
-      </div>
+      <Center className="h-64">
+        <Box className="text-lg text-gray-500">No support tickets found.</Box>
+      </Center>
     );
   }
 
   return (
-    <ReusableTable
-      data={data?.data ?? []}
-      columns={columns}
-      searchInput={false}
-      enablePaymentLinksCalender={true}
-      onRowClick={(row) => {
-        handleViewTicket(row.original);
-      }}
-    />
+    <>
+      <ReusableTable
+        data={data ?? []}
+        columns={columns}
+        searchInput={false}
+        enablePaymentLinksCalender={true}
+        onRowClick={(row) => {
+          handleViewTicket(row.original);
+        }}
+      />
+
+      <SupportTicketModal
+        ticket={selectedTicket}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onCloseTicket={handleCloseTicket}
+      />
+    </>
   );
 };
