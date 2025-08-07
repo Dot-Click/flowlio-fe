@@ -353,7 +353,7 @@ export const SubscriptionsHeader = () => {
           subscriptions.
         </h1>
       </Stack>
-      <Flex className="flex-wrap gap-6 mt-6 max-lg:flex-col flex-1">
+      <Flex className="flex-wrap items-start gap-6 mt-6 max-lg:flex-col flex-1">
         {PLAN_LIST.map((plan) => (
           <Stack
             key={plan.key}

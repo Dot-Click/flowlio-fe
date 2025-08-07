@@ -61,6 +61,11 @@ export const navItems: NavItem[] = [
     title: "Invoices",
     icon: <TbInvoice />,
   },
+  {
+    url: "/dashboard/subscription",
+    title: "My Subscriptions",
+    icon: <TbInvoice />,
+  },
 
   {
     url: "/dashboard/support",

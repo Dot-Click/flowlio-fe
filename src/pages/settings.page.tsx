@@ -8,5 +8,4 @@ const SettingPage = () => {
     </Box>
   );
 };
-
 export default SettingPage;

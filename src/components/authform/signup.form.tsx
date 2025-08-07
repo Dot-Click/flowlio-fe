@@ -56,34 +56,48 @@ export const SignUpForm: FC = () => {
     },
   });
 
-  const onSubmit = async ({
-    email,
-    createpassword,
-    username,
-  }: z.infer<typeof formSchema>) => {
-    authClient.signUp.email(
-      {
-        name: username,
-        email,
-        password: createpassword,
-      },
-      {
-        onRequest: () => {
-          setIsLoading(true);
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Create the user account
+      await authClient.signUp.email(
+        {
+          name: data.username,
+          email: data.email,
+          password: data.createpassword,
         },
-        onSuccess: () => {
-          setIsLoading(false);
-          setError(null);
-          navigate("/login");
-          toast.success("Signup successful! Please login to continue.");
-        },
-        onError: (ctx) => {
-          toast.error(ctx.error.message);
-          console.log(ctx.error);
-          setIsLoading(false);
-        },
-      }
-    );
+        {
+          onRequest: () => {
+            setIsLoading(true);
+          },
+          onSuccess: async () => {
+            toast.success(
+              "Account created successfully! Please select a plan."
+            );
+
+            // Redirect to pricing page after successful signup
+            navigate("/pricing", {
+              state: {
+                fromSignup: true,
+              },
+            });
+
+            setIsLoading(false);
+          },
+          onError: (ctx) => {
+            toast.error(ctx.error.message);
+            console.log(ctx.error);
+            setIsLoading(false);
+          },
+        }
+      );
+    } catch (error) {
+      setIsLoading(false);
+      setError("An unexpected error occurred. Please try again.");
+      console.error("Signup error:", error);
+    }
   };
 
   return (
@@ -115,6 +129,7 @@ export const SignUpForm: FC = () => {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="email"
@@ -184,7 +199,7 @@ export const SignUpForm: FC = () => {
             disabled={isLoading}
             className="bg-[#1797B9] text-white rounded-full cursor-pointer hover:bg-[#1797B9]/80 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? "Signing Up..." : "Sign Up"}
+            {isLoading ? "Creating Account..." : "Create Account"}
           </Button>
         </form>
       </Form>

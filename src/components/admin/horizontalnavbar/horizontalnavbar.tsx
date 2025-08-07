@@ -25,7 +25,7 @@ export const HorizontalNavbar = () => {
       <UserProfile
         label={user?.user.name}
         avatarClassName="size-12"
-        src="https://github.com/shadcn.png"
+        src={user?.user.image || "https://github.com/shadcn.png"}
         description={user?.user.email}
       />
       {(pathname === "/viewer" || pathname === "/dashboard") && (

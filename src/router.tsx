@@ -45,6 +45,7 @@ import ClientManagementPage from "./pages/clientmanagement.page";
 import { CreateClient } from "./components/client management/createclient";
 import CheckoutPage from "./pages/checkout.page";
 import SignupPage from "./pages/signup.page";
+import SubscriptionsPage from "./pages/subscriptions.page";
 
 export const Router = () => {
   return (
@@ -69,6 +70,10 @@ export const Router = () => {
 
         {/* Operator dashboard layout */}
         <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route
+            element={<CreateProjectPage />}
+            path="project/create-project"
+          />
           <Route
             element={<CreateProjectPage />}
             path="project/create-project/:id"
@@ -96,6 +101,7 @@ export const Router = () => {
             element={<CreateClient />}
             path="client-management/create-client"
           />
+          <Route element={<SubscriptionsPage />} path="subscription" />
           <Route index element={<DashboardPage />} />
           <Route path="*" element={<NotFound />} />
         </Route>

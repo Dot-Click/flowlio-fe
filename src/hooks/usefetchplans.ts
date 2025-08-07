@@ -21,3 +21,18 @@ export const useFetchPlans = (options?: { enabled?: boolean }) => {
     ...options,
   });
 };
+
+// New hook for fetching public plans (no authentication required)
+export const useFetchPublicPlans = (options?: { enabled?: boolean }) => {
+  return useQuery<ApiResponse<ResponseData>, ErrorWithMessage>({
+    retryDelay: 5000,
+    staleTime: 1000 * 10,
+    queryKey: ["fetch public plans"],
+    queryFn: async () => {
+      const response = await axios.get(`/superadmin/plans/public/getallplans`);
+      return response.data;
+    },
+    refetchOnWindowFocus: false,
+    ...options,
+  });
+};

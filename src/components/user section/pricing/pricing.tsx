@@ -4,50 +4,92 @@ import { Center } from "@/components/ui/center";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Flex } from "@/components/ui/flex";
 import { Stack } from "@/components/ui/stack";
+import { useFetchPublicPlans } from "@/hooks/usefetchplans";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import { FC } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 
 interface PricingProps {
   selectedPlan: number | null;
   setSelectedPlan: (plan: number | null) => void;
 }
 
+const pricingText = [
+  "Choose from multiple secure payment options tailored to your needs.",
+  "Easily manage and update your preferred pricing methods anytime.",
+  "Set default payment modes for faster transactions.",
+  "View detailed breakdowns of charges before confirming payments.",
+  "Enjoy transparent pricing with no hidden fees or surprises.",
+];
+
 export const Pricing: FC<PricingProps> = ({
   selectedPlan,
   setSelectedPlan,
 }) => {
-  const pricingText = [
-    "Choose from multiple secure payment options tailored to your needs.",
-    "Easily manage and update your preferred pricing methods anytime.",
-    "Set default payment modes for faster transactions.",
-    "View detailed breakdowns of charges before confirming payments.",
-    "Enjoy transparent pricing with no hidden fees or surprises.",
-  ];
+  const { data: plansResponse } = useFetchPublicPlans();
+  const navigate = useNavigate();
+  const location = useLocation();
 
+  // Check if user came from signup
+  const fromSignup = location.state?.fromSignup;
+
+  // Compute planDetails inside the component using the fetched data
   const planDetails = [
     {
       title: "Basic Plan (Free)",
-      price: "00",
-      description: "For personal use and small projects",
+      price: plansResponse?.data?.[0]?.price,
+      description: plansResponse?.data?.[0]?.description,
       duration: "7-Days Trial",
+      features: Array.isArray(plansResponse?.data?.[0]?.features)
+        ? plansResponse?.data?.[0]?.features
+        : ["Access to basic features", "Single user", "Email support"],
     },
     {
       title: "Pro Plan",
-      price: "50",
-      description: "For small businesses and teams",
+      price: plansResponse?.data?.[1]?.price,
+      description: plansResponse?.data?.[1]?.description,
       duration: "month",
+      features: Array.isArray(plansResponse?.data?.[1]?.features)
+        ? plansResponse?.data?.[1]?.features
+        : [
+            "All Basic features",
+            "Up to 10 users",
+            "Priority email support",
+            "Advanced analytics",
+          ],
     },
     {
       title: "Enterprise Plan",
-      price: "80",
-      description: "For large businesses and enterprises",
+      price: plansResponse?.data?.[2]?.price,
+      description: plansResponse?.data?.[2]?.description,
       duration: "6 months",
+      features: Array.isArray(plansResponse?.data?.[2]?.features)
+        ? plansResponse?.data?.[2]?.features
+        : [
+            "All Pro features",
+            "Unlimited users",
+            "Dedicated account manager",
+            "Custom integrations",
+          ],
     },
   ];
 
-  const navigate = useNavigate();
+  const handleGetStarted = (planIndex: number) => {
+    if (fromSignup) {
+      // If user came from signup, redirect to checkout with organization creation
+      navigate("/checkout", {
+        state: {
+          selectedPlan: planIndex,
+          fromSignup: true,
+          createOrganization: true,
+        },
+      });
+    } else {
+      // Regular flow - just select the plan
+      setSelectedPlan(selectedPlan === planIndex ? null : planIndex);
+    }
+  };
 
   return (
     <Center className="flex-col max-md:pb-10 ">
@@ -79,9 +121,7 @@ export const Pricing: FC<PricingProps> = ({
         <Stack className="gap-4 relative z-10">
           {planDetails.map((plan, index) => (
             <Flex
-              onClick={() =>
-                setSelectedPlan(selectedPlan === index ? null : index)
-              }
+              onClick={() => handleGetStarted(index)}
               key={index}
               className={`flex-col justify-between items-center px-6 py-8 rounded-xl gap-5 max-sm:p-5 transition-all duration-300 cursor-pointer ${
                 selectedPlan === index
@@ -95,9 +135,7 @@ export const Pricing: FC<PricingProps> = ({
                     <Checkbox
                       className="rounded-full size-4.5 cursor-pointer mb-6"
                       checked={selectedPlan === index}
-                      onChange={() =>
-                        setSelectedPlan(selectedPlan === index ? null : index)
-                      }
+                      onChange={() => handleGetStarted(index)}
                     />
                     <Flex className="flex-col items-start gap-0">
                       <Box
@@ -139,14 +177,10 @@ export const Pricing: FC<PricingProps> = ({
                 )}
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent triggering the parent onClick
-                  if (selectedPlan === index) {
-                    navigate("/checkout", { state: { selectedPlan: index } });
-                  } else {
-                    setSelectedPlan(index);
-                  }
+                  handleGetStarted(index);
                 }}
               >
-                Get Started
+                {fromSignup ? "Continue to Setup" : "Get Started"}
               </Button>
             </Flex>
           ))}
