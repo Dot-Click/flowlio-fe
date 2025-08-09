@@ -6,93 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Stack } from "@/components/ui/stack";
 import { PageWrapper } from "@/components/common/pagewrapper";
 import { IoEye } from "react-icons/io5";
-
-const data: Data[] = [
-  {
-    id: "1",
-    plan: "Enterprice",
-    country: "USA",
-    submittedby: "Abe45",
-    companyname: "Mike Wangi",
-    email: "hello@novatech.com",
-    registrationDate: new Date(),
-  },
-  {
-    id: "2",
-    plan: "Enterprice",
-    country: "USA",
-    submittedby: "Abe45",
-    companyname: "Mike Wangi",
-    email: "hello@novatech.com",
-    registrationDate: new Date(),
-  },
-  {
-    id: "3",
-    plan: "Enterprice",
-    country: "USA",
-    submittedby: "Monserrat44",
-    companyname: "Mike Wangi",
-    email: "hello@novatech.com",
-    registrationDate: new Date(),
-  },
-  {
-    id: "4",
-    plan: "Enterprice",
-    country: "USA",
-    submittedby: "Silas22",
-    companyname: "Mike Wangi",
-    email: "hello@novatech.com",
-    registrationDate: new Date(),
-  },
-  {
-    id: "5",
-    plan: "Enterprice",
-    country: "USA",
-    submittedby: "carmella",
-    companyname: "Mike Wangi",
-    email: "hello@novatech.com",
-    registrationDate: new Date(),
-  },
-  {
-    id: "6",
-    submittedby: "carmella",
-    plan: "Enterprice",
-    country: "USA",
-    companyname: "Mike Wangi",
-    email: "hello@novatech.com",
-    registrationDate: new Date(),
-  },
-  {
-    id: "7",
-    plan: "Enterprice",
-    country: "USA",
-    submittedby: "carmella",
-    companyname: "Mike Wangi",
-    email: "hello@novatech.com",
-    registrationDate: new Date(),
-  },
-  {
-    id: "8",
-    plan: "Enterprice",
-    country: "USA",
-    submittedby: "carmella",
-    companyname: "Mike Wangi",
-    email: "hello@novatech.com",
-    registrationDate: new Date(),
-  },
-  {
-    id: "9",
-    plan: "Enterprice",
-    country: "USA",
-    submittedby: "carmella",
-    companyname: "Mike Wangi",
-    email: "hello@novatech.com",
-    registrationDate: new Date(),
-  },
-];
+import { useFetchAllOrganizations } from "@/hooks/usecreateorganization";
+import { useMemo } from "react";
+import { useNavigate } from "react-router";
 
 export type Data = {
   id: string;
+  slug?: string;
   plan: string;
   submittedby: string;
   country: string;
@@ -101,7 +21,9 @@ export type Data = {
   registrationDate: Date;
 };
 
-export const columns: ColumnDef<Data>[] = [
+const getColumns = (
+  navigate: ReturnType<typeof useNavigate>
+): ColumnDef<Data>[] => [
   {
     accessorKey: "companyname",
     header: () => <Box className="text-black py-3 px-3">Company Name</Box>,
@@ -154,12 +76,20 @@ export const columns: ColumnDef<Data>[] = [
   {
     accessorKey: "actions",
     header: () => <Box className="text-center text-black">Actions</Box>,
-    cell: () => {
+    cell: ({ row }) => {
       return (
         <Center className="space-x-2">
           <Button
             variant="outline"
             className="bg-[#424242] border-none hover:bg-black/80 cursor-pointer rounded-lg h-11 w-12"
+            onClick={() => {
+              const fallback = row.original.companyname
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/(^-|-$)/g, "");
+              const slug = row.original.slug || fallback;
+              navigate(`/superadmin/companies/details/${slug}`);
+            }}
           >
             <IoEye className="size-6 fill-white" />
           </Button>
@@ -170,6 +100,80 @@ export const columns: ColumnDef<Data>[] = [
 ];
 
 export const SuperAdminTable = () => {
+  const {
+    data: allOrganizationsResponse,
+    isLoading,
+    error,
+  } = useFetchAllOrganizations();
+  const navigate = useNavigate();
+
+  const data: Data[] = useMemo(() => {
+    const organizations = Array.isArray(allOrganizationsResponse?.data)
+      ? (allOrganizationsResponse!.data as any[])
+      : [];
+
+    const sorted = [...organizations].sort((a, b) => {
+      const aDate = new Date(a.createdAt).getTime();
+      const bDate = new Date(b.createdAt).getTime();
+      return bDate - aDate;
+    });
+
+    const recent = sorted.slice(0, 10);
+
+    return recent.map((org) => {
+      const ownerEmail = org.userOrganizations?.find(
+        (uo: any) => uo.role === "owner"
+      )?.user?.email;
+      const fallbackEmail = org.userOrganizations?.[0]?.user?.email;
+      const email: string = ownerEmail || fallbackEmail || "N/A";
+
+      return {
+        id: org.id,
+        slug: org.slug,
+        plan: org.subscriptionPlan?.name || "N/A",
+        submittedby: "",
+        country: "N/A",
+        companyname: org.name || "N/A",
+        email,
+        registrationDate: new Date(org.createdAt),
+      } as Data;
+    });
+  }, [allOrganizationsResponse]);
+
+  if (isLoading) {
+    return (
+      <PageWrapper>
+        <Center className="justify-between p-4">
+          <Stack className="gap-1">
+            <h1 className="text-black text-2xl max-sm:text-xl font-medium">
+              Recently Registered Companies
+            </h1>
+          </Stack>
+        </Center>
+        <Box className="min-h-[180px] flex items-center justify-center text-gray-600">
+          Loading...
+        </Box>
+      </PageWrapper>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageWrapper>
+        <Center className="justify-between p-4">
+          <Stack className="gap-1">
+            <h1 className="text-black text-2xl max-sm:text-xl font-medium">
+              Recently Registered Companies
+            </h1>
+          </Stack>
+        </Center>
+        <Box className="min-h-[180px] flex items-center justify-center text-red-600">
+          Failed to load companies
+        </Box>
+      </PageWrapper>
+    );
+  }
+
   return (
     <PageWrapper>
       <Center className="justify-between p-4">
@@ -182,7 +186,7 @@ export const SuperAdminTable = () => {
 
       <ReusableTable
         data={data}
-        columns={columns}
+        columns={getColumns(navigate)}
         searchInput={false}
         enablePaymentLinksCalender={false}
         searchClassName="rounded-full"

@@ -38,6 +38,9 @@ export const HorizontalNavbar = () => {
 
       {pathname === "/superadmin" && <SearchBox />}
 
+      {/* Show subscription status for dashboard routes */}
+      {/* {pathname.startsWith("/dashboard") && <SubscriptionStatus />} */}
+
       <NotificationsDropdown className="max-lg:ml-auto" />
       {/* <FaqDropdown className="max-md:hidden" /> */}
     </Box>

@@ -16,6 +16,7 @@ import { CalendarIcon } from "@/components/customeIcons";
 import { useState } from "react";
 import { DateRange } from "react-day-picker";
 import { IPlan } from "@/types";
+import { useFetchAllOrganizations } from "@/hooks/usecreateorganization";
 
 const data: Data[] = [
   {
@@ -265,20 +266,55 @@ export const SubscribtionTabele = ({
   // const { data: plansResponse, isLoading, error } = useFetchPlans();
   // console.log(plansResponse);
 
+  const { data: allOrganizationsResponse } = useFetchAllOrganizations();
+
   const plansData: Data[] =
     fetchedPlans?.map((plan: IPlan) => ({
       id: plan.id,
       amount: parseFloat(plan.price.toString()),
       status: plan.isActive ? "active" : "inActive",
-      companyName: "N/A", // This would come from organization data
+      companyName: "N/A",
       lastbilledon: new Date(plan.createdAt),
       startDate: new Date(plan.createdAt),
       expiredate: new Date(plan.updatedAt),
       subscribtionplan: plan.name,
     })) || [];
 
-  // Use hardcoded data as fallback if no plans are fetched
-  const tableData = plansData.length > 0 ? plansData : data;
+  const activeOrgSubscriptions: Data[] = Array.isArray(
+    allOrganizationsResponse?.data
+  )
+    ? (allOrganizationsResponse!.data as any[])
+        .filter((org) => org.subscriptionStatus === "active")
+        .map((org) => {
+          const planName = org.subscriptionPlan?.name || "N/A";
+          const planPrice = org.subscriptionPlan?.price;
+          const amount = planPrice ? parseFloat(String(planPrice)) : 0;
+          const start = org.subscriptionStartDate
+            ? new Date(org.subscriptionStartDate)
+            : new Date(org.createdAt);
+          const expire = org.trialEndsAt
+            ? new Date(org.trialEndsAt)
+            : new Date(new Date(start).getTime() + 30 * 24 * 60 * 60 * 1000);
+          return {
+            id: org.id,
+            amount,
+            status: "active",
+            companyName: org.name || "N/A",
+            lastbilledon: start,
+            startDate: start,
+            expiredate: expire,
+            subscribtionplan: planName,
+          } as Data;
+        })
+    : [];
+
+  // Prefer real active subscriptions from organizations; then plans; then mock
+  const tableData =
+    activeOrgSubscriptions.length > 0
+      ? activeOrgSubscriptions
+      : plansData.length > 0
+      ? plansData
+      : data;
 
   // Show loading state
   if (isLoading) {

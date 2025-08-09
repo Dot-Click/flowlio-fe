@@ -11,39 +11,9 @@ import Img2 from "/dashboard/prostat2.svg";
 import Img3 from "/dashboard/projstat3.svg";
 import { SuperAdminBarChartComponent } from "@/components/super admin section/super admin barchart/barchart";
 import { SuperAdminTable } from "@/components/super admin section/super admin barchart/superadmintable";
+import { useFetchAllOrganizations } from "@/hooks/usecreateorganization";
 // import { useUser } from "@/providers/user.provider";
 // import { Badge } from "@/components/ui/badge";
-
-const stats: Stat[] = [
-  {
-    link: "/superadmin",
-    title: "Total Companies",
-    description: "Companies currently on platform",
-    icon: img1,
-    count: "122",
-  },
-  {
-    link: "/superadmin",
-    title: "Total Projects",
-    description: "All projects created by companies",
-    icon: img2,
-    count: "2,240",
-  },
-  {
-    link: "/superadmin",
-    title: "Active Subscriptions",
-    description: "Companies on active paid plans",
-    icon: img3,
-    count: "87",
-  },
-  {
-    link: "/superadmin",
-    title: "Total Invoices",
-    description: "Invoices created via platform",
-    icon: img4,
-    count: "1,240",
-  },
-];
 
 const data = [
   { name: "Projects", value: 65.63, icon: Img1, color: "#3f53b5" },
@@ -54,6 +24,45 @@ const data = [
 const SuperAdminDashboardPage = () => {
   // const { data: userData } = useUser();
   // console.log(userData, "check the sub admin id");
+
+  const { data: allOrganizationsResponse } = useFetchAllOrganizations();
+  const totalCompanies = allOrganizationsResponse?.data?.length ?? 0;
+  const activeSubscriptions = Array.isArray(allOrganizationsResponse?.data)
+    ? allOrganizationsResponse.data.filter(
+        (org: any) => org.subscriptionStatus === "active"
+      ).length
+    : 0;
+
+  const stats: Stat[] = [
+    {
+      link: "/superadmin",
+      title: "Total Companies",
+      description: "Companies currently on platform",
+      icon: img1,
+      count: String(totalCompanies),
+    },
+    {
+      link: "/superadmin",
+      title: "Total Projects",
+      description: "All projects created by companies",
+      icon: img2,
+      count: "0",
+    },
+    {
+      link: "/superadmin",
+      title: "Active Subscriptions",
+      description: "Companies on active paid plans",
+      icon: img3,
+      count: String(activeSubscriptions),
+    },
+    {
+      link: "/superadmin",
+      title: "Total Invoices",
+      description: "Invoices created via platform",
+      icon: img4,
+      count: "0",
+    },
+  ];
 
   return (
     <Stack className="pt-5 gap-3 px-2">

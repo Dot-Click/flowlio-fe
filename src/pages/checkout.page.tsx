@@ -49,37 +49,27 @@ const CheckoutPage = () => {
       price: plansResponse?.data?.[0]?.price,
       description: plansResponse?.data?.[0]?.description,
       duration: "7-Days Trial",
-      features: Array.isArray(plansResponse?.data?.[0]?.features)
-        ? plansResponse?.data?.[0]?.features
-        : ["Access to basic features", "Single user", "Email support"],
+      features:
+        Array.isArray(plansResponse?.data?.[0]?.features) &&
+        plansResponse?.data?.[0]?.features.map((feature: string) => feature),
     },
     {
       title: "Pro Plan",
       price: plansResponse?.data?.[1]?.price,
       description: plansResponse?.data?.[1]?.description,
       duration: "month",
-      features: Array.isArray(plansResponse?.data?.[1]?.features)
-        ? plansResponse?.data?.[1]?.features
-        : [
-            "All Basic features",
-            "Up to 10 users",
-            "Priority email support",
-            "Advanced analytics",
-          ],
+      features:
+        Array.isArray(plansResponse?.data?.[1]?.features) &&
+        plansResponse?.data?.[1]?.features.map((feature: string) => feature),
     },
     {
       title: "Enterprise Plan",
       price: plansResponse?.data?.[2]?.price,
       description: plansResponse?.data?.[2]?.description,
       duration: "6 months",
-      features: Array.isArray(plansResponse?.data?.[2]?.features)
-        ? plansResponse?.data?.[2]?.features
-        : [
-            "All Pro features",
-            "Unlimited users",
-            "Dedicated account manager",
-            "Custom integrations",
-          ],
+      features:
+        Array.isArray(plansResponse?.data?.[2]?.features) &&
+        plansResponse?.data?.[2]?.features.map((feature: string) => feature),
     },
   ];
 
@@ -222,9 +212,10 @@ const CheckoutPage = () => {
               <p className="mb-4">{plan.description}</p>
               <h3 className="font-semibold mb-2">Included Services:</h3>
               <ul className="mb-4 list-disc pl-5">
-                {plan.features?.map((feature: string, idx: number) => (
-                  <li key={idx}>{feature}</li>
-                ))}
+                {plan.features &&
+                  plan.features.map((feature: string, idx: number) => (
+                    <li key={idx}>{feature}</li>
+                  ))}
               </ul>
 
               {/* User Info Display */}

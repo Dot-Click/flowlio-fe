@@ -99,13 +99,25 @@ export const CompaniesTable = () => {
     },
 
     {
-      accessorKey: "website",
-      header: () => <Box className="text-black text-start">Website</Box>,
-      cell: ({ row }) => (
-        <Box className="captialize text-start">
-          {row.original.website || "N/A"}
-        </Box>
-      ),
+      accessorKey: "registeredEmail",
+      header: () => <Box className="text-black text-start">Email</Box>,
+      cell: ({ row }) => {
+        const userOrganizations = row.original.userOrganizations as
+          | Array<{
+              role?: string;
+              user?: { email?: string };
+            }>
+          | undefined;
+
+        const ownerEmail = userOrganizations?.find((uo) => uo.role === "owner")
+          ?.user?.email;
+
+        const fallbackEmail = userOrganizations?.[0]?.user?.email;
+
+        const email = ownerEmail || fallbackEmail || "N/A";
+
+        return <Box className="captialize text-start">{email}</Box>;
+      },
     },
     {
       accessorKey: "createdAt",
@@ -192,9 +204,11 @@ export const CompaniesTable = () => {
                 <TooltipTrigger asChild>
                   <Button
                     onClick={() => {
-                      navigate(
-                        `/superadmin/companies/details/${row.original.id}`
-                      );
+                      const slug = (row.original.name || "")
+                        .toLowerCase()
+                        .replace(/[^a-z0-9]+/g, "-")
+                        .replace(/(^-|-$)/g, "");
+                      navigate(`/superadmin/companies/details/${slug}`);
                     }}
                     variant="outline"
                     className="bg-black border-none w-10 h-9 hover:bg-black cursor-pointer rounded-md "

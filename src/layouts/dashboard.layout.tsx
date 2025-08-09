@@ -12,6 +12,7 @@ import { Outlet } from "react-router";
 import { SquareKanban, UserPen } from "lucide-react";
 import { GroupIcon, TaskManagementIcon } from "@/components/customeIcons";
 import { MessageCircleQuestion } from "lucide-react";
+// import { SubscriptionGuard } from "@/components/common/subscriptionguard";
 
 export const navItems: NavItem[] = [
   {
@@ -82,6 +83,7 @@ export const navItems: NavItem[] = [
 
 export const DashboardLayout = () => {
   return (
+    // <SubscriptionGuard>
     <Box className="bg-gradient-to-l from-indigo-50 via-slate-50 to-indigo-50 border-[2px] rounded-none border-white p-1 min-h-screen">
       <SidebarProvider
         style={
@@ -100,5 +102,6 @@ export const DashboardLayout = () => {
         </SidebarInset>
       </SidebarProvider>
     </Box>
+    // </SubscriptionGuard>
   );
 };

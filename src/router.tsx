@@ -110,7 +110,7 @@ export const Router = () => {
         <Route path="/superadmin" element={<SuperAdminLayout />}>
           <Route path="companies" element={<SuperAdminCompaniesPage />} />
           <Route
-            path="companies/details/:id"
+            path="companies/details/:slug"
             element={<CompanyViewDetailsPage />}
           />
           <Route path="sub-admin" element={<SuperAdminSubAdminPage />} />
