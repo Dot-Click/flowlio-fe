@@ -5,9 +5,18 @@ import { UserManagementTable } from "./usermanagementtable";
 import { Button } from "../ui/button";
 import { CirclePlus } from "lucide-react";
 import { useNavigate } from "react-router";
+import { useGetAllUserMembers } from "@/hooks/usegetallusermembers";
 
 export const UserManagementHeader = () => {
   const navigate = useNavigate();
+  const {
+    data: userMembersData,
+    isLoading,
+    error,
+    refetch,
+  } = useGetAllUserMembers();
+  const userMembers = userMembersData?.data?.userMembers || [];
+
   return (
     <PageWrapper className="mt-6">
       <Center className="justify-between px-4 py-6 max-sm:flex-col max-sm:items-start gap-2">
@@ -32,7 +41,12 @@ export const UserManagementHeader = () => {
         </Button>
       </Center>
 
-      <UserManagementTable />
+      <UserManagementTable
+        userMembers={userMembers}
+        error={error}
+        isLoading={isLoading}
+        refetch={refetch}
+      />
     </PageWrapper>
   );
 };

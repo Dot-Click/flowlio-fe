@@ -30,6 +30,7 @@ import {
 } from "../ui/select";
 import { useCreateUserMember } from "@/hooks/usecreateusermember";
 import { toast } from "sonner";
+import { useGetAllUserMembers } from "@/hooks/usegetallusermembers";
 
 const formSchema = z
   .object({
@@ -81,6 +82,7 @@ export const CreateUserMembers = () => {
   });
 
   const createUserMember = useCreateUserMember();
+  const { refetch } = useGetAllUserMembers();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -124,7 +126,7 @@ export const CreateUserMembers = () => {
       setUploadedFile(null);
       setImagePreview(null);
       setImageError(null);
-
+      refetch();
       // Navigate back or to user list
       navigate(-1);
     } catch (error: any) {

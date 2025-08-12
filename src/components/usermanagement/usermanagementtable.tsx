@@ -13,7 +13,6 @@ import {
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { FaRegTrashAlt } from "react-icons/fa";
-import { useGetAllUserMembers } from "@/hooks/usegetallusermembers";
 import {
   useDeleteUserMember,
   useDeactivateUserMember,
@@ -193,13 +192,17 @@ export const columns: ColumnDef<Data>[] = [
   },
 ];
 
-export const UserManagementTable = () => {
-  // Fetch user members from API
-  const { data: userMembersData, isLoading, error } = useGetAllUserMembers();
-
-  // Extract user members and pagination from API response
-  const userMembers = userMembersData?.data?.userMembers || [];
-
+export const UserManagementTable = ({
+  userMembers,
+  error,
+  isLoading,
+  refetch,
+}: {
+  userMembers: Data[];
+  error: any;
+  isLoading: boolean;
+  refetch: () => void;
+}) => {
   // Delete user member hook
   const deleteUserMember = useDeleteUserMember();
   const deactivateUserMember = useDeactivateUserMember();
@@ -215,6 +218,7 @@ export const UserManagementTable = () => {
       try {
         await deleteUserMember.mutateAsync(id);
         toast.success("User member deleted successfully");
+        refetch();
       } catch (error: any) {
         const errorMessage =
           error?.response?.data?.message || "Failed to delete user member";
@@ -235,10 +239,12 @@ export const UserManagementTable = () => {
         if (isActive) {
           await deactivateUserMember.mutateAsync(id);
           toast.success("User member deactivated successfully");
+          refetch();
         } else {
           await reactivateUserMember.mutateAsync(id);
           toast.success("User member reactivated successfully");
         }
+        refetch();
       } catch (error: any) {
         const errorMessage =
           error?.response?.data?.message || `Failed to ${action} user member`;
