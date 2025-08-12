@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Stack } from "@/components/ui/stack";
 import { PageWrapper } from "@/components/common/pagewrapper";
 import { IoEye } from "react-icons/io5";
-import { useFetchAllOrganizations } from "@/hooks/usecreateorganization";
 import { useMemo } from "react";
 import { useNavigate } from "react-router";
+import { useFetchAllOrganizations } from "@/hooks/usefetchallorganizations";
 
 export type Data = {
   id: string;

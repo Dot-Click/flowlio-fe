@@ -11,7 +11,7 @@ import Img2 from "/dashboard/prostat2.svg";
 import Img3 from "/dashboard/projstat3.svg";
 import { SuperAdminBarChartComponent } from "@/components/super admin section/super admin barchart/barchart";
 import { SuperAdminTable } from "@/components/super admin section/super admin barchart/superadmintable";
-import { useFetchAllOrganizations } from "@/hooks/usecreateorganization";
+import { useFetchAllOrganizations } from "@/hooks/usefetchallorganizations";
 // import { useUser } from "@/providers/user.provider";
 // import { Badge } from "@/components/ui/badge";
 

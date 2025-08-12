@@ -8,9 +8,9 @@ import {
 } from "../ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import PhoneInput from "react-phone-input-2";
-import { useDropzone } from "react-dropzone";
 import { useForm } from "react-hook-form";
-import { useCallback, useState } from "react";
+import { useState, useCallback } from "react";
+import { useDropzone } from "react-dropzone";
 import { Button } from "../ui/button";
 import { Center } from "../ui/center";
 import { Input } from "../ui/input";
@@ -28,6 +28,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { useCreateUserMember } from "@/hooks/usecreateusermember";
+import { toast } from "sonner";
 
 const formSchema = z
   .object({
@@ -42,6 +44,9 @@ const formSchema = z
     }),
     phonenumber: z.string().regex(/^\+?[1-9]\d{1,14}$/, {
       message: "Must be a valid international phone number",
+    }),
+    companyname: z.string().min(2, {
+      message: "Must be Company Name",
     }),
     userrole: z.string().min(2, {
       message: "Must be proper role",
@@ -63,52 +68,98 @@ export const CreateUserMembers = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstname: "",
-      lastname: "",
-      email: "",
-      phonenumber: "",
+      firstname: "Test",
+      lastname: "User",
+      email: "testuser@gmail.com",
+      phonenumber: "+923052095951",
+      companyname: "Test Company",
       userrole: "",
       setpermission: "",
-      password: "",
-      confirmpassword: "",
+      password: "Test@123",
+      confirmpassword: "Test@123",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!uploadedFile) {
-      setImageError("Please upload a profile image.");
-      return;
-    }
-    setImageError("");
-    console.log({ ...values, profileImage: uploadedFile });
-    // Submit logic here
-  }
-  const [togglepass, setTogglepass] = useState(false);
+  const createUserMember = useCreateUserMember();
   const navigate = useNavigate();
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [pdfPreview, setPdfPreview] = useState<string | null>(null);
-  const [imageError, setImageError] = useState<string>("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // File upload state
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append("firstname", values.firstname);
+      formData.append("lastname", values.lastname);
+      formData.append("email", values.email);
+      formData.append("phonenumber", values.phonenumber);
+      formData.append("companyname", values.companyname);
+      formData.append("userrole", values.userrole);
+      formData.append("setpermission", values.setpermission);
+      formData.append("password", values.password);
+
+      // Add profile image if uploaded
+      if (uploadedFile) {
+        formData.append("profileImage", uploadedFile);
+      }
+
+      // Debug: Log what we're sending
+      console.log("🔍 Form values:", values);
+      console.log("🔍 FormData entries:");
+      for (const [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+      }
+
+      await createUserMember.mutateAsync(formData);
+
+      toast.success("User member created successfully!");
+
+      // Reset form and image
+      form.reset();
+      setUploadedFile(null);
+      setImagePreview(null);
+      setImageError(null);
+
+      // Navigate back or to user list
+      navigate(-1);
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.message || "Failed to create user member";
+      toast.error(errorMessage);
+      console.error("Error creating user member:", error);
+    }
+  }
+
+  // File upload functionality
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
-      // Only allow images and check size
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        setImageError("File size must be less than 5MB");
+        return;
+      }
+
+      // Validate file type
       if (!file.type.startsWith("image/")) {
-        setImageError("Only image files are allowed.");
-        setUploadedFile(null);
-        setPdfPreview(null);
+        setImageError("Please select a valid image file");
         return;
       }
-      if (file.size > 2 * 1024 * 1024) {
-        setImageError("Image size must be less than 2MB.");
-        setUploadedFile(null);
-        setPdfPreview(null);
-        return;
-      }
+
       setUploadedFile(file);
-      setImageError("");
-      const fileUrl = URL.createObjectURL(file);
-      setPdfPreview(fileUrl);
+      setImageError(null);
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   }, []);
 
@@ -151,8 +202,9 @@ export const CreateUserMembers = () => {
             variant="outline"
             className="bg-black text-white border border-gray-200 rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer mb-6 absolute top-15 right-5"
             type="submit"
+            disabled={createUserMember.isPending}
           >
-            Save Member
+            {createUserMember.isPending ? "Creating..." : "Save Member"}
           </Button>
           <Box className="bg-white/80 rounded-xl border border-gray-200 p-6 gap-6 grid grid-cols-1">
             <Stack className="gap-0">
@@ -162,69 +214,78 @@ export const CreateUserMembers = () => {
               </h1>
             </Stack>
 
-            {!pdfPreview ? (
-              <Box className="grid grid-cols-1">
-                <p className="text-md mb-2 font-normal">
-                  Upload Profile Picture
-                </p>
-                <Center
-                  className="flex-col border-dashed border-2 border-[#62A1C0] bg-gray-100/50 rounded-lg min-h-40 w-44 max-md:w-full cursor-pointer"
-                  onClick={open}
-                >
+            {/* Profile picture upload section */}
+            <Box className="grid grid-cols-1">
+              <p className="text-md mb-2 font-normal">
+                Profile Picture (Optional)
+              </p>
+              <Center className="flex-col border-dashed border-2 border-gray-300 bg-gray-100/50 rounded-lg min-h-44 w-48 max-md:w-full">
+                {imagePreview ? (
                   <img
-                    src="/dashboard/camera.svg"
-                    alt="task-image"
-                    className="size-14"
+                    src={imagePreview}
+                    alt="profile-preview"
+                    className="w-full h-full object-cover rounded-lg"
                   />
-                  <Stack className="text-center gap-0 mt-4">
-                    <p className="text-gray-800 text-sm font-medium">
-                      Image must be
-                    </p>
-                    <p className="text-gray-800 text-sm font-medium">
-                      500px by 500px
-                    </p>
-                  </Stack>
-                </Center>
-                <input {...getInputProps()} />
-                {imageError && (
-                  <p className="text-red-500 text-sm mt-2">{imageError}</p>
+                ) : (
+                  <>
+                    <img
+                      src="/dashboard/camera.svg"
+                      alt="profile-image"
+                      className="size-14 opacity-50"
+                    />
+                    <Stack className="text-center gap-0 mt-4">
+                      <p className="text-gray-500 text-sm">
+                        Profile picture upload
+                      </p>
+                      <p className="text-gray-500 text-sm">Click to upload</p>
+                    </Stack>
+                  </>
                 )}
-              </Box>
-            ) : (
-              <Box className="border-2 border-[#62A1C0] rounded-lg p-4 relative w-50 h-50">
-                <Stack className="gap-2">
-                  <Box className="flex w-full absolute top-0 right-0 p-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setUploadedFile(null);
-                        setPdfPreview(null);
-                        setImageError("");
-                      }}
-                    >
-                      X
-                    </Button>
-                  </Box>
-                  {pdfPreview && (
-                    <Box className="w-40 h-40 border-dashed border-gray-200 rounded">
-                      <img
-                        src={pdfPreview}
-                        title="Profile Preview"
-                        className="object-contain w-full h-full"
-                        style={{ border: "none" }}
-                        onError={() => {
-                          setImageError("Image preview failed to load.");
-                        }}
-                      />
-                    </Box>
-                  )}
-                  {imageError && (
-                    <p className="text-red-500 text-sm mt-2">{imageError}</p>
-                  )}
-                </Stack>
-              </Box>
-            )}
+
+                {/* Hidden file input */}
+                <input {...getInputProps()} />
+
+                {/* Upload button */}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={open}
+                  className="mt-2"
+                  disabled={createUserMember.isPending}
+                >
+                  {imagePreview ? "Change Image" : "Upload Image"}
+                </Button>
+
+                {/* Remove image button */}
+                {imagePreview && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setUploadedFile(null);
+                      setImagePreview(null);
+                    }}
+                    className="mt-2 text-red-600 border-red-600 hover:bg-red-50"
+                    disabled={createUserMember.isPending}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </Center>
+
+              {/* Error message */}
+              {imageError && (
+                <p className="text-red-500 text-sm mt-2">{imageError}</p>
+              )}
+
+              {/* Help text */}
+              <p className="text-gray-500 text-xs mt-2">
+                Supported formats: PNG, JPG, JPEG, GIF, WebP, SVG, BMP • Max
+                size: 5MB
+              </p>
+            </Box>
 
             <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
               <FormField
@@ -301,6 +362,26 @@ export const CreateUserMembers = () => {
                         inputClass="mt-2 w-full h-14 bg-white border border-gray-300 rounded-full px-4 text-black focus:ring-0 focus:outline-none"
                         buttonClass="border-r h-12 border-gray-300 bg-transparent"
                         dropdownClass="bg-white border border-gray-300"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="companyname"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Company Name:</FormLabel>
+                    <FormControl>
+                      <Input
+                        className="bg-white rounded-full placeholder:text-gray-400"
+                        size="xl"
+                        type="text"
+                        placeholder="Enter Company Name"
                         {...field}
                       />
                     </FormControl>
@@ -399,7 +480,7 @@ export const CreateUserMembers = () => {
                       <Input
                         className="bg-white rounded-full placeholder:text-gray-400"
                         size="xl"
-                        type={togglepass ? "text" : "password"}
+                        type={showPassword ? "text" : "password"}
                         placeholder="Enter Password"
                         {...field}
                       />
@@ -409,9 +490,9 @@ export const CreateUserMembers = () => {
                       <FormMessage />
                       <Box
                         className="ml-auto text-right text-[#1E6EE5] cursor-pointer text-sm"
-                        onClick={() => setTogglepass(!togglepass)}
+                        onClick={() => setShowPassword(!showPassword)}
                       >
-                        {togglepass ? "Hide Password" : "Show Password"}
+                        {showPassword ? "Hide Password" : "Show Password"}
                       </Box>
                     </Box>
                   </FormItem>
@@ -428,7 +509,7 @@ export const CreateUserMembers = () => {
                       <Input
                         className="bg-white rounded-full placeholder:text-gray-400"
                         size="xl"
-                        type={togglepass ? "text" : "password"}
+                        type={showConfirmPassword ? "text" : "password"}
                         placeholder="Enter Confirm Password"
                         {...field}
                       />
@@ -438,9 +519,13 @@ export const CreateUserMembers = () => {
                       <FormMessage />
                       <Box
                         className="ml-auto text-right text-[#1E6EE5] cursor-pointer text-sm"
-                        onClick={() => setTogglepass(!togglepass)}
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
                       >
-                        {togglepass ? "Hide Password" : "Show Password"}
+                        {showConfirmPassword
+                          ? "Hide Password"
+                          : "Show Password"}
                       </Box>
                     </Box>
                   </FormItem>

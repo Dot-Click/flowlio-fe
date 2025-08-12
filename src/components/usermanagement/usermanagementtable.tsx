@@ -13,115 +13,71 @@ import {
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { FaRegTrashAlt } from "react-icons/fa";
-
-const data: Data[] = [
-  {
-    id: "1",
-    role: "Manager",
-    status: "active",
-    projectname: "Mike Wangi",
-    email: "mikewangi@gmail.com",
-    addedon: new Date("2025-03-01T00:00:00"),
-    company: "XYZ Corp",
-  },
-  {
-    id: "2",
-    role: "Manager",
-    projectname: "Mike Wangi",
-    status: "invited",
-    email: "Abe45@gmail.com",
-    addedon: new Date("2025-06-01T00:00:00"),
-    company: "XYZ Corp",
-  },
-  {
-    id: "3",
-    role: "Manager",
-    projectname: "Mike tyson",
-    status: "active",
-    email: "Monserrat44@gmail.com",
-    addedon: new Date("2025-02-01T00:00:00"),
-    company: "XYZ Corp",
-  },
-  {
-    id: "4",
-    role: "Field Engineer",
-    projectname: "Mike Wangi",
-    status: "invited",
-    email: "Silas22@gmail.com",
-    addedon: new Date("2025-06-01T00:00:00"),
-    company: "XYZ Corp",
-  },
-  {
-    id: "5",
-    role: "Field Engineer",
-    projectname: "Mike Wangi",
-    status: "active",
-    email: "carmella@gmail.com",
-    addedon: new Date("2025-04-01T00:00:00"),
-    company: "XYZ Corp",
-  },
-  {
-    id: "6",
-    role: "Field Engineer",
-    projectname: "Mike Wangi",
-    status: "deactivated",
-    email: "carmella@gmail.com",
-    addedon: new Date("2025-05-11T00:00:00"),
-    company: "XYZ Corp",
-  },
-  {
-    id: "7",
-    role: "Sub Contractor",
-    projectname: "Mike Wangi",
-    status: "active",
-    email: "carmella@gmail.com",
-    addedon: new Date("2025-06-01T00:00:00"),
-    company: "XYZ Corp",
-  },
-  {
-    id: "8",
-    role: "Sub Contractor",
-    projectname: "Mike Wangi",
-    status: "invited",
-    email: "carmella@gmail.com",
-    addedon: new Date("2025-06-01T00:00:00"),
-    company: "XYZ Corp",
-  },
-  {
-    id: "9",
-    role: "Sub Contractor",
-    projectname: "Mike Wangi",
-    status: "deactivated",
-    email: "carmella@gmail.com",
-    addedon: new Date("2025-06-01T00:00:00"),
-    company: "XYZ Corp",
-  },
-];
+import { useGetAllUserMembers } from "@/hooks/usegetallusermembers";
+import {
+  useDeleteUserMember,
+  useDeactivateUserMember,
+  useReactivateUserMember,
+} from "@/hooks/usedeleteusermember";
+import { toast } from "sonner";
 
 export type Data = {
   id: string;
-  role: string;
-  status: "active" | "invited" | "deactivated";
+  firstname: string;
+  lastname: string;
   email: string;
-  company: string;
-  projectname: string;
-  addedon: Date;
+  phonenumber: string;
+  userrole: string;
+  companyname: string;
+  setpermission: string;
+  status: string;
+  isActive: boolean;
+  organizationId: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  lastLoginAt: string | null;
+  loginAttempts: number;
+  lockedUntil: string | null;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    image: string | null;
+    emailVerified: boolean;
+    isSuperAdmin: boolean;
+  } | null;
+  userOrganization: {
+    id: string;
+    role: string;
+    permissions: any;
+    status: string;
+    joinedAt: string;
+  } | null;
 };
 
 export const columns: ColumnDef<Data>[] = [
   {
-    accessorKey: "projectname",
+    accessorKey: "firstname",
     header: () => <Box className="text-black pl-4">Name</Box>,
     cell: ({ row }) => (
       <Flex className="capitalize pl-4 w-30 max-sm:w-full">
         <Avatar className="size-8">
-          <AvatarImage src="https://github.com/shadcn.png" />
-          <AvatarFallback>CN</AvatarFallback>
+          <AvatarImage
+            src={row.original.user?.image || "https://github.com/shadcn.png"}
+          />
+          <AvatarFallback>
+            {row.original.firstname.charAt(0)}
+            {row.original.lastname.charAt(0)}
+          </AvatarFallback>
         </Avatar>
 
-        {row.original.projectname.length > 14
-          ? row.original.projectname.slice(0, 14) + "..."
-          : row.original.projectname}
+        <Box className="ml-2">
+          <Box className="font-medium">
+            {`${row.original.firstname} ${row.original.lastname}`}
+          </Box>
+        </Box>
       </Flex>
     ),
   },
@@ -133,89 +89,85 @@ export const columns: ColumnDef<Data>[] = [
       </Box>
     ),
     cell: ({ row }) => (
-      <Flex className="items-start justify-start gap-2  w-26 max-lg:w-full">
-        <Box className="text-sm ">{row.original.email}</Box>
+      <Flex className="items-start justify-start gap-2 w-26 max-lg:w-full">
+        <Box className="text-sm">{row.original.email}</Box>
       </Flex>
     ),
   },
   {
-    accessorKey: "company",
+    accessorKey: "companyname",
     header: () => <Box className="text-black text-center">Company</Box>,
     cell: ({ row }) => (
-      <Box className="captialize text-center">{row.original.company}</Box>
+      <Box className="capitalize text-center">{row.original.companyname}</Box>
     ),
   },
-
   {
-    accessorKey: "role",
+    accessorKey: "userrole",
     header: () => <Box className="text-center text-black">Role</Box>,
     cell: ({ row }) => {
-      return <Center className="text-center">{row.original.role} </Center>;
+      return (
+        <Center className="text-center capitalize">
+          {row.original.userrole}
+        </Center>
+      );
     },
   },
   {
-    accessorKey: "addedon",
+    accessorKey: "createdAt",
     header: () => <Box className="text-center text-black">Added On</Box>,
     cell: ({ row }) => {
-      const addedon = row.original.addedon;
+      const createdAt = new Date(row.original.createdAt);
       try {
         return (
-          <Box className="text-center">{format(addedon, "MMM d, yyyy")}</Box>
+          <Box className="text-center">{format(createdAt, "MMM d, yyyy")}</Box>
         );
-      } catch (error) {
-        console.error("Invalid date:", addedon);
-        console.log(error);
+      } catch {
+        console.error("Invalid date:", createdAt);
         return <Box className="text-center">Invalid Date</Box>;
       }
     },
   },
-
   {
     accessorKey: "status",
     header: () => <Box className="text-center text-black">Status</Box>,
     cell: ({ row }) => {
-      const status = row.original.status as
-        | "active"
-        | "invited"
-        | "deactivated";
+      const isActive = row.original.isActive;
 
-      const statusStyles: Record<typeof status, { text: string; dot: string }> =
-        {
-          active: {
-            text: "text-white bg-[#00A400] border-none rounded-full",
-            dot: "bg-white",
-          },
-          invited: {
-            text: "text-white bg-[#005FA4] border-none rounded-full",
-            dot: "bg-white",
-          },
-          deactivated: {
-            text: "text-white bg-[#A50403] border-none rounded-full",
-            dot: "bg-white",
-          },
-        };
+      const statusStyles: Record<string, { text: string; dot: string }> = {
+        active: {
+          text: "text-white bg-[#00A400] border-none rounded-full",
+          dot: "bg-white",
+        },
+        inactive: {
+          text: "text-white bg-[#A50403] border-none rounded-full",
+          dot: "bg-white",
+        },
+      };
+
+      const currentStatus = isActive ? "active" : "inactive";
 
       return (
         <Center>
           <Flex
-            className={`rounded-md capitalize w-30 h-10 gap-2 border justify-center items-center ${statusStyles[status].text}`}
+            className={`rounded-md capitalize w-30 h-10 gap-2 border justify-center items-center ${statusStyles[currentStatus].text}`}
           >
             <Center className="gap-2">
               <Flex
-                className={`w-2 h-2 items-start rounded-full ${statusStyles[status].dot}`}
+                className={`w-2 h-2 items-start rounded-full ${statusStyles[currentStatus].dot}`}
               />
-              <h1>{status}</h1>
+              <h1>{currentStatus}</h1>
             </Center>
           </Flex>
         </Center>
       );
     },
   },
-
   {
     accessorKey: "actions",
     header: () => <Box className="text-center text-black">Actions</Box>,
-    cell: () => {
+    cell: ({ row }) => {
+      const { id } = row.original;
+
       return (
         <Center className="space-x-2">
           <TooltipProvider>
@@ -223,9 +175,11 @@ export const columns: ColumnDef<Data>[] = [
               <TooltipTrigger asChild>
                 <Button
                   variant="outline"
-                  className="bg-[#A50403] border-none w-9 h-9 hover:bg-[#A50403]/80 cursor-pointer rounded-md "
+                  size="sm"
+                  className="bg-[#A50403] text-white border-none w-9 h-9 hover:bg-[#A50403]/80 cursor-pointer rounded-md"
+                  onClick={() => console.log("Delete user:", id)}
                 >
-                  <FaRegTrashAlt className="text-white fill-white size-4 " />
+                  <FaRegTrashAlt className="text-white size-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="mb-2">
@@ -240,13 +194,148 @@ export const columns: ColumnDef<Data>[] = [
 ];
 
 export const UserManagementTable = () => {
+  // Fetch user members from API
+  const { data: userMembersData, isLoading, error } = useGetAllUserMembers();
+
+  // Extract user members and pagination from API response
+  const userMembers = userMembersData?.data?.userMembers || [];
+
+  // Delete user member hook
+  const deleteUserMember = useDeleteUserMember();
+  const deactivateUserMember = useDeactivateUserMember();
+  const reactivateUserMember = useReactivateUserMember();
+
+  // Handle delete user member
+  const handleDeleteUserMember = async (id: string, email: string) => {
+    if (
+      window.confirm(
+        `Are you sure you want to delete ${email}? This action cannot be undone.`
+      )
+    ) {
+      try {
+        await deleteUserMember.mutateAsync(id);
+        toast.success("User member deleted successfully");
+      } catch (error: any) {
+        const errorMessage =
+          error?.response?.data?.message || "Failed to delete user member";
+        toast.error(errorMessage);
+      }
+    }
+  };
+
+  // Handle deactivate/reactivate user member
+  const handleToggleUserStatus = async (
+    id: string,
+    isActive: boolean,
+    email: string
+  ) => {
+    const action = isActive ? "deactivate" : "reactivate";
+    if (window.confirm(`Are you sure you want to ${action} ${email}?`)) {
+      try {
+        if (isActive) {
+          await deactivateUserMember.mutateAsync(id);
+          toast.success("User member deactivated successfully");
+        } else {
+          await reactivateUserMember.mutateAsync(id);
+          toast.success("User member reactivated successfully");
+        }
+      } catch (error: any) {
+        const errorMessage =
+          error?.response?.data?.message || `Failed to ${action} user member`;
+        toast.error(errorMessage);
+      }
+    }
+  };
+
+  // Update action buttons to use real functions
+  const updatedColumns = columns.map((col) => {
+    if ("accessorKey" in col && col.accessorKey === "actions") {
+      return {
+        ...col,
+        cell: ({ row }: any) => {
+          const { id, isActive, email } = row.original;
+
+          return (
+            <Center className="space-x-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={`text-white border-none w-9 h-9 cursor-pointer rounded-md ${
+                        isActive
+                          ? "bg-red-600 hover:bg-red-700"
+                          : "bg-green-600 hover:bg-green-700"
+                      }`}
+                      onClick={() =>
+                        handleToggleUserStatus(id, isActive, email)
+                      }
+                    >
+                      {isActive ? "🔒" : "✅"}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="mb-2">
+                    <p>{isActive ? "Deactivate" : "Activate"} User</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-[#A50403] text-white border-none w-9 h-9 hover:bg-[#A50403]/80 cursor-pointer rounded-md"
+                      onClick={() => handleDeleteUserMember(id, email)}
+                      disabled={deleteUserMember.isPending}
+                    >
+                      <FaRegTrashAlt className="text-white size-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="mb-2">
+                    <p>Delete User</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </Center>
+          );
+        },
+      };
+    }
+    return col;
+  });
+
+  if (isLoading) {
+    return (
+      <Center className="h-64">
+        <Box className="text-lg">Loading user members...</Box>
+      </Center>
+    );
+  }
+
+  if (error) {
+    return (
+      <Center className="h-64">
+        <Box className="text-lg text-red-600">
+          Error loading user members:{" "}
+          {error?.response?.data?.message || "Unknown error"}
+        </Box>
+      </Center>
+    );
+  }
+
   return (
-    <ReusableTable
-      data={data}
-      columns={columns}
-      searchInput={false}
-      enablePaymentLinksCalender={true}
-      onRowClick={(row) => console.log("Row clicked:", row.original)}
-    />
+    <Box className="space-y-4">
+      {/* User Members Table */}
+      <ReusableTable
+        data={userMembers}
+        columns={updatedColumns}
+        searchInput={false}
+        enablePaymentLinksCalender={false}
+        onRowClick={(row) => console.log("Row clicked:", row.original)}
+      />
+    </Box>
   );
 };

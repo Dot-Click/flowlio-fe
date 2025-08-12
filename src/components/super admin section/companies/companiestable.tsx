@@ -13,10 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { useNavigate } from "react-router";
-import {
-  useFetchUserOrganizations,
-  useFetchAllOrganizations,
-} from "@/hooks/usecreateorganization";
+import { useFetchAllOrganizations } from "@/hooks/usefetchallorganizations";
 
 // Define the actual data structure from the API (userOrganizations with nested organization)
 export type OrganizationData = {
@@ -61,16 +58,17 @@ export type OrganizationData = {
 };
 
 export const CompaniesTable = () => {
+  // const {
+  //   data: organizationsResponse,
+  //   isLoading,
+  //   error,
+  // } = useFetchUserOrganizations();
+
   const {
-    data: organizationsResponse,
+    data: allOrganizationsResponse,
     isLoading,
     error,
-  } = useFetchUserOrganizations();
-
-  const { data: allOrganizationsResponse } = useFetchAllOrganizations();
-
-  console.log("Organizations data:", organizationsResponse);
-  console.log("All organizations data:", allOrganizationsResponse);
+  } = useFetchAllOrganizations();
 
   // The API returns userOrganizations array directly
   const transformedData: OrganizationData[] =

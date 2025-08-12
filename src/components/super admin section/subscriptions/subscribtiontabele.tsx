@@ -16,7 +16,7 @@ import { CalendarIcon } from "@/components/customeIcons";
 import { useState } from "react";
 import { DateRange } from "react-day-picker";
 import { IPlan } from "@/types";
-import { useFetchAllOrganizations } from "@/hooks/usecreateorganization";
+import { useFetchAllOrganizations } from "@/hooks/usefetchallorganizations";
 
 const data: Data[] = [
   {
