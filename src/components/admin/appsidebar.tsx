@@ -33,6 +33,7 @@ import { Center } from "../ui/center";
 import { cn } from "@/lib/utils";
 import { Box } from "../ui/box";
 import { Logo } from "./logo";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface NavItemBase {
   icon: ReactElement;
@@ -66,6 +67,28 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
   const { state, isMobile } = useSidebar();
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const handleLogout = async () => {
+    try {
+      // Clear React Query cache first
+      queryClient.removeQueries({ queryKey: ["user-profile"] });
+      queryClient.removeQueries({ queryKey: ["get-current-org-user-members"] });
+      queryClient.removeQueries({ queryKey: ["get-all-user-members"] });
+
+      // Navigate to home
+      navigate("/");
+
+      // Sign out from Better Auth
+      await authClient.signOut();
+
+      toast.success("Logged out successfully");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Logout failed. Please try again.");
+    }
+  };
+
   return (
     <Sidebar
       className="**:data-[sidebar=sidebar]:bg-slate-50 **:data-[sidebar=sidebar]:border-4 **:data-[sidebar=sidebar]:border-white"
@@ -326,11 +349,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
       <SidebarFooter>
         <Button
           className="bg-transparent text-black hover:bg-red-50 cursor-pointer border-none flex items-start justify-start gap-2 shadow-none"
-          onClick={() => {
-            navigate("/");
-            authClient.signOut();
-            toast.success("Logged out successfully");
-          }}
+          onClick={handleLogout}
         >
           <Flex className="gap-2">
             <LogOut

@@ -15,6 +15,7 @@ import {
 import * as permissions from "@/configs/permission.config";
 import { backendDomain } from "@/configs/axios.config";
 import { useUserProfile } from "@/hooks/useuserprofile";
+import { useQueryClient } from "@tanstack/react-query";
 
 const { ac, roles } = permissions;
 
@@ -31,6 +32,12 @@ type Data = {
     role: Role;
     subadminId: string;
     isSuperAdmin: boolean;
+    organizationId?: string;
+    organization?: {
+      id: string;
+      name: string;
+      slug: string;
+    };
   };
   session: SessionObject["session"];
 };
@@ -83,12 +90,38 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
   const { data: authData, isPending, error, refetch } = authClient.useSession();
   const [data, setData] = useState<ContextData["data"]>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [previousUserId, setPreviousUserId] = useState<string | null>(null);
   const refetchUser = refetch;
+  const queryClient = useQueryClient();
 
   // Fetch fresh user profile with subadminId
-  const { data: userProfileData, isLoading: profileLoading } = useUserProfile({
+  const {
+    data: userProfileData,
+    isLoading: profileLoading,
+    refetch: refetchProfile,
+  } = useUserProfile({
     enabled: !!authData?.user?.id,
   });
+
+  // Clear React Query cache when user changes (login/logout)
+  useEffect(() => {
+    const currentUserId = authData?.user?.id;
+
+    if (previousUserId && currentUserId !== previousUserId) {
+      console.log("🔄 User changed, clearing React Query cache...");
+      console.log("👤 Previous user:", previousUserId);
+      console.log("👤 Current user:", currentUserId);
+
+      // Clear all queries except auth-related ones
+      queryClient.removeQueries({ queryKey: ["user-profile"] });
+      queryClient.removeQueries({ queryKey: ["get-current-org-user-members"] });
+      queryClient.removeQueries({ queryKey: ["get-all-user-members"] });
+
+      console.log("✅ React Query cache cleared for user change");
+    }
+
+    setPreviousUserId(currentUserId || null);
+  }, [authData?.user?.id, previousUserId, queryClient]);
 
   useEffect(() => {
     if (isPending || profileLoading) {
@@ -96,14 +129,29 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
       return;
     }
 
+    // Clear data when no session exists (logout scenario)
+    if (!authData?.user || !authData?.session) {
+      console.log("🔒 No session found - clearing user data (logout scenario)");
+      setData(null);
+      setIsLoading(false);
+
+      // Also clear React Query cache when logging out
+      queryClient.removeQueries({ queryKey: ["user-profile"] });
+      queryClient.removeQueries({ queryKey: ["get-current-org-user-members"] });
+      queryClient.removeQueries({ queryKey: ["get-all-user-members"] });
+
+      return;
+    }
+
+    // User is logged in - process session data
     if (authData?.user && authData?.session) {
-      // Debug: Log what Better Auth actually returns
-      console.log("Better Auth session data:", authData);
+      console.log("🔑 Better Auth session data:", authData);
 
       // Use fresh user profile data if available, otherwise fall back to Better Auth data
       if (userProfileData?.data) {
-        console.log("Fresh user profile data:", userProfileData.data);
-        console.log("User role from profile:", userProfileData.data.role);
+        console.log("📋 Fresh user profile data:", userProfileData.data);
+        console.log("👤 User role from profile:", userProfileData.data.role);
+
         const enhancedData = {
           ...authData,
           user: {
@@ -114,20 +162,20 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
             isSuperAdmin: userProfileData.data.isSuperAdmin,
           },
         };
-        console.log("Enhanced user data:", enhancedData);
+        console.log("✨ Enhanced user data:", enhancedData);
         setData(enhancedData as unknown as Data);
       } else {
-        console.log("No fresh profile data, using Better Auth data:", authData);
+        console.log(
+          "⚠️ No fresh profile data, using Better Auth data:",
+          authData
+        );
         setData(authData as Data);
       }
-      setIsLoading(false);
-    } else {
-      // Clear all data when user logs out
-      setData(null);
       setIsLoading(false);
     }
 
     if (error) {
+      console.error("❌ Better Auth error:", error);
       onError?.(error);
       if (refetchOnError) {
         setTimeout(() => {
@@ -143,7 +191,23 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
     refetchOnError,
     userProfileData,
     profileLoading,
+    refetchUser,
+    queryClient,
   ]);
+
+  // Function to force refresh user data (useful after login/logout)
+  const forceRefreshUser = async () => {
+    console.log("🔄 Force refreshing user data...");
+    setIsLoading(true);
+
+    // Clear current data
+    setData(null);
+
+    // Refetch both Better Auth session and user profile
+    await Promise.all([refetchUser(), refetchProfile()]);
+
+    setIsLoading(false);
+  };
 
   return (
     <UserAuthContext.Provider
@@ -151,7 +215,7 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
         data,
         isLoading,
         role: data?.user?.role || "",
-        refetchUser,
+        refetchUser: forceRefreshUser, // Use our enhanced refresh function
         isSuperAdmin: data?.user?.isSuperAdmin || false,
         subadminId: data?.user?.subadminId || "",
       }}
@@ -175,7 +239,7 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
 export const useUser = () => {
   const context = useContext(UserAuthContext);
   if (!context) {
-    throw new Error("userUser must be used within a UserProvider");
+    throw new Error("useUser must be used within a UserProvider");
   }
   return context;
 };

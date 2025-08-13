@@ -63,6 +63,42 @@ interface GetAllUserMembersParams {
   userrole?: string;
 }
 
+// Hook to get user members for the CURRENTLY LOGGED-IN organization
+export const useGetCurrentOrgUserMembers = (
+  params: GetAllUserMembersParams = {}
+) => {
+  return useQuery<
+    ApiResponse<{
+      userMembers: UserMember[];
+      totalCount: number;
+      organizationId: string;
+    }>,
+    ErrorWithMessage,
+    ApiResponse<{
+      userMembers: UserMember[];
+      totalCount: number;
+      organizationId: string;
+    }>
+  >({
+    queryKey: ["get-current-org-user-members", params],
+    queryFn: async () => {
+      // Use the new endpoint specifically for current organization
+      const response = await axios.get<
+        ApiResponse<{
+          userMembers: UserMember[];
+          totalCount: number;
+          organizationId: string;
+        }>
+      >("/organizations/current-org-user-members");
+
+      return response.data;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  });
+};
+
+// Original hook for getting all user members (kept for backward compatibility)
 export const useGetAllUserMembers = (params: GetAllUserMembersParams = {}) => {
   return useQuery<
     ApiResponse<GetAllUserMembersResponse>,
@@ -90,6 +126,7 @@ export const useGetAllUserMembers = (params: GetAllUserMembersParams = {}) => {
   });
 };
 
+// Hook to get a single user member by ID
 export const useGetUserMemberById = (id: string) => {
   return useQuery<
     ApiResponse<UserMember>,

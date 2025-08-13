@@ -45,9 +45,23 @@ const formSchema = z
     permission: z.enum(["Admin", "Sub Admin", "User"], {
       message: "Please select a valid permission level.",
     }),
-    password: z.string().min(8, {
-      message: "Password must be at least 8 characters.",
-    }),
+    password: z
+      .string()
+      .min(8, {
+        message: "Password must be at least 8 characters.",
+      })
+      .regex(/[A-Z]/, {
+        message: "Password must contain at least one uppercase letter.",
+      })
+      .regex(/[a-z]/, {
+        message: "Password must contain at least one lowercase letter.",
+      })
+      .regex(/[0-9]/, {
+        message: "Password must contain at least one number.",
+      })
+      .regex(/[^A-Za-z0-9]/, {
+        message: "Password must contain at least one special character.",
+      }),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -65,8 +79,8 @@ export const CreateSubAdmin = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: "sub",
-      lastName: "admin",
+      firstName: "Sub",
+      lastName: "Admin",
       email: "subadmin@gmail.com",
       contactNumber: "1234567890",
       permission: "Sub Admin",
@@ -271,7 +285,7 @@ export const CreateSubAdmin = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 bottom-1 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+                      className="absolute right-3 top-11 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
                     >
                       {showPassword ? (
                         <IoEyeOff size={20} />
@@ -279,6 +293,15 @@ export const CreateSubAdmin = () => {
                         <IoEye size={20} />
                       )}
                     </button>
+                    {/* Password requirements helper text */}
+                    <Box className="text-xs text-gray-500 mt-2 space-y-1">
+                      <Box>Password must contain:</Box>
+                      <Box>• At least 8 characters</Box>
+                      <Box>• At least one uppercase letter (A-Z)</Box>
+                      <Box>• At least one lowercase letter (a-z)</Box>
+                      <Box>• At least one number (0-9)</Box>
+                      <Box>• At least one special character (!@#$%^&*)</Box>
+                    </Box>
                   </Box>
                 )}
               />
@@ -306,7 +329,7 @@ export const CreateSubAdmin = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 bottom-1 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+                  className="absolute right-3 top-11 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
                 >
                   {showPassword ? <IoEyeOff size={20} /> : <IoEye size={20} />}
                 </button>

@@ -271,8 +271,8 @@ export const UserManagementTable = ({
                       size="sm"
                       className={`text-white border-none w-9 h-9 cursor-pointer rounded-md ${
                         isActive
-                          ? "bg-red-600 hover:bg-red-700"
-                          : "bg-green-600 hover:bg-green-700"
+                          ? "bg-red-300 hover:bg-red-500"
+                          : "bg-green-300 hover:bg-green-500"
                       }`}
                       onClick={() =>
                         handleToggleUserStatus(id, isActive, email)
