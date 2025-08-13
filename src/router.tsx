@@ -1,147 +1,330 @@
-import PasswordresetsucessPage from "./pages/passwordresetsuccess.page";
-import { AuthenticationLayout } from "./layouts/authentication.layout";
-import { TaskManagementPage } from "./pages/taskmanagement.page";
-import { DashboardLayout } from "./layouts/dashboard.layout";
+import { lazy } from "react";
 import { BrowserRouter, Route, Routes } from "react-router";
-import ResetpasswordPage from "./pages/resetpassword.page";
-import VerifyEmailPage from "./pages/verifyemail.page";
-import VerifyCodePage from "./pages/verifycode.page";
-import { AiAssistPage } from "./pages/aiassist.page";
-import SettingsPage from "./pages/settings.page";
-// import { CommentsPage } from "./pages/comments.page";
-import DashboardPage from "./pages/dashboard.page";
-import { NotFound } from "./pages/notfound.page";
-import SigninPage from "./pages/signin.page";
-import { UserLayout } from "./layouts/user.layout";
-import HomePage from "./pages/home.page";
-import { WorkFlowPage } from "./pages/workflow.page";
-import { InsightsPage } from "./pages/insights.page";
-import { PricingPage } from "./pages/pricing.page";
-import ProjectsPage from "./pages/projects.page";
-import CreateProjectPage from "./pages/createproject.page";
-import CreateTaskPage from "./pages/createtask.page";
-import AddUserMembersPage from "./pages/addusermemebers.page";
-import UserManagementPage from "./pages/usermanagement.page";
-import CalenderPage from "./pages/calender.page";
-import { PaymentLinksPage } from "./pages/paymentlinks.page";
-import InvoicePage from "./pages/invoice.page";
-import SupportPage from "./pages/support.page";
-import { SuperAdminLayout } from "./layouts/superadmin.layout";
-import SuperAdminDashboardPage from "./pages/superadmindashboard.page";
-import SuperAdminCompaniesPage from "./pages/superadmincompanies.page";
-import CompanyViewDetailsPage from "./pages/companyviewdetails.page";
-import SuperAdminSubAdminPage from "./pages/superadminsubadmin.page";
-import { CreateSubAdmin } from "./components/super admin section/sub admin/createsubadmin";
-import { SuperAdminSubscriptionsPage } from "./pages/superadminsubscriptions.page";
-import SuperAdminSupportTicketPage from "./pages/superadminsupportticket.page";
-import SuperAdminSettingsPage from "./pages/superadminsettings.page";
-import { ViewerLayout } from "./layouts/viewer.layout";
-import ViewerDashboardPage from "./pages/viewerdashboard.page";
-import ViewermyProjectsPage from "./pages/viewermyprojects.page";
-import { ViewermyTasksPage } from "./pages/viewermytasks.page";
-import ViewerSupportsPage from "./pages/viewersupports.page";
-import ViewerSettingsPage from "./pages/viewersettings.page";
-import ClientManagementPage from "./pages/clientmanagement.page";
-import { CreateClient } from "./components/client management/createclient";
-import CheckoutPage from "./pages/checkout.page";
-import SignupPage from "./pages/signup.page";
-import SubscriptionsPage from "./pages/subscriptions.page";
+import { LazyWrapper } from "./components/common/LazyWrapper";
+
+// Lazy load all page components
+const PasswordresetsucessPage = lazy(
+  () => import("./pages/passwordresetsuccess.page")
+);
+const AuthenticationLayout = lazy(() =>
+  import("./layouts/authentication.layout").then((module) => ({
+    default: module.AuthenticationLayout,
+  }))
+);
+const TaskManagementPage = lazy(() =>
+  import("./pages/taskmanagement.page").then((module) => ({
+    default: module.TaskManagementPage,
+  }))
+);
+const DashboardLayout = lazy(() =>
+  import("./layouts/dashboard.layout").then((module) => ({
+    default: module.DashboardLayout,
+  }))
+);
+const ResetpasswordPage = lazy(() => import("./pages/resetpassword.page"));
+const VerifyEmailPage = lazy(() => import("./pages/verifyemail.page"));
+const VerifyCodePage = lazy(() => import("./pages/verifycode.page"));
+const AiAssistPage = lazy(() =>
+  import("./pages/aiassist.page").then((module) => ({
+    default: module.AiAssistPage,
+  }))
+);
+const SettingsPage = lazy(() => import("./pages/settings.page"));
+const DashboardPage = lazy(() => import("./pages/dashboard.page"));
+const NotFound = lazy(() =>
+  import("./pages/notfound.page").then((module) => ({
+    default: module.NotFound,
+  }))
+);
+const SigninPage = lazy(() => import("./pages/signin.page"));
+const UserLayout = lazy(() =>
+  import("./layouts/user.layout").then((module) => ({
+    default: module.UserLayout,
+  }))
+);
+const HomePage = lazy(() => import("./pages/home.page"));
+const WorkFlowPage = lazy(() =>
+  import("./pages/workflow.page").then((module) => ({
+    default: module.WorkFlowPage,
+  }))
+);
+const InsightsPage = lazy(() =>
+  import("./pages/insights.page").then((module) => ({
+    default: module.InsightsPage,
+  }))
+);
+const PricingPage = lazy(() =>
+  import("./pages/pricing.page").then((module) => ({
+    default: module.PricingPage,
+  }))
+);
+const ProjectsPage = lazy(() => import("./pages/projects.page"));
+const CreateProjectPage = lazy(() => import("./pages/createproject.page"));
+const CreateTaskPage = lazy(() => import("./pages/createtask.page"));
+const AddUserMembersPage = lazy(() => import("./pages/addusermemebers.page"));
+const UserManagementPage = lazy(() => import("./pages/usermanagement.page"));
+const CalenderPage = lazy(() => import("./pages/calender.page"));
+const PaymentLinksPage = lazy(() =>
+  import("./pages/paymentlinks.page").then((module) => ({
+    default: module.PaymentLinksPage,
+  }))
+);
+const InvoicePage = lazy(() => import("./pages/invoice.page"));
+const SupportPage = lazy(() => import("./pages/support.page"));
+const SuperAdminLayout = lazy(() =>
+  import("./layouts/superadmin.layout").then((module) => ({
+    default: module.SuperAdminLayout,
+  }))
+);
+const SuperAdminDashboardPage = lazy(
+  () => import("./pages/superadmindashboard.page")
+);
+const SuperAdminCompaniesPage = lazy(
+  () => import("./pages/superadmincompanies.page")
+);
+const CompanyViewDetailsPage = lazy(
+  () => import("./pages/companyviewdetails.page")
+);
+const SuperAdminSubAdminPage = lazy(
+  () => import("./pages/superadminsubadmin.page")
+);
+const CreateSubAdmin = lazy(() =>
+  import("./components/super admin section/sub admin/createsubadmin").then(
+    (module) => ({ default: module.CreateSubAdmin })
+  )
+);
+const SuperAdminSubscriptionsPage = lazy(() =>
+  import("./pages/superadminsubscriptions.page").then((module) => ({
+    default: module.SuperAdminSubscriptionsPage,
+  }))
+);
+const SuperAdminSupportTicketPage = lazy(
+  () => import("./pages/superadminsupportticket.page")
+);
+const SuperAdminSettingsPage = lazy(
+  () => import("./pages/superadminsettings.page")
+);
+const ViewerLayout = lazy(() =>
+  import("./layouts/viewer.layout").then((module) => ({
+    default: module.ViewerLayout,
+  }))
+);
+const ViewerDashboardPage = lazy(() => import("./pages/viewerdashboard.page"));
+const ViewermyProjectsPage = lazy(
+  () => import("./pages/viewermyprojects.page")
+);
+const ViewermyTasksPage = lazy(() =>
+  import("./pages/viewermytasks.page").then((module) => ({
+    default: module.ViewermyTasksPage,
+  }))
+);
+const ViewerSupportsPage = lazy(() => import("./pages/viewersupports.page"));
+const ViewerSettingsPage = lazy(() => import("./pages/viewersettings.page"));
+const ClientManagementPage = lazy(
+  () => import("./pages/clientmanagement.page")
+);
+const CreateClient = lazy(() =>
+  import("./components/client management/createclient").then((module) => ({
+    default: module.CreateClient,
+  }))
+);
+const CheckoutPage = lazy(() => import("./pages/checkout.page"));
+const SignupPage = lazy(() => import("./pages/signup.page"));
+const SubscriptionsPage = lazy(() => import("./pages/subscriptions.page"));
 
 export const Router = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<UserLayout />}>
-          <Route index element={<HomePage />} />
-          <Route path="work-flow" element={<WorkFlowPage />} />
-          <Route path="insights" element={<InsightsPage />} />
-          <Route path="pricing" element={<PricingPage />} />
-          <Route path="checkout" element={<CheckoutPage />} />
+        <Route element={<LazyWrapper component={UserLayout} />}>
+          <Route index element={<LazyWrapper component={HomePage} />} />
+          <Route
+            path="work-flow"
+            element={<LazyWrapper component={WorkFlowPage} />}
+          />
+          <Route
+            path="insights"
+            element={<LazyWrapper component={InsightsPage} />}
+          />
+          <Route
+            path="pricing"
+            element={<LazyWrapper component={PricingPage} />}
+          />
+          <Route
+            path="checkout"
+            element={<LazyWrapper component={CheckoutPage} />}
+          />
         </Route>
 
-        <Route element={<AuthenticationLayout />}>
-          <Route path="login" element={<SigninPage />} />
-          <Route path="signup" element={<SignupPage />} />
-          <Route path="verify-code" element={<VerifyCodePage />} />
-          <Route path="verify-email" element={<VerifyEmailPage />} />
-          <Route path="reset-password" element={<ResetpasswordPage />} />
-          <Route path="reset-success" element={<PasswordresetsucessPage />} />
+        <Route element={<LazyWrapper component={AuthenticationLayout} />}>
+          <Route
+            path="login"
+            element={<LazyWrapper component={SigninPage} />}
+          />
+          <Route
+            path="signup"
+            element={<LazyWrapper component={SignupPage} />}
+          />
+          <Route
+            path="verify-code"
+            element={<LazyWrapper component={VerifyCodePage} />}
+          />
+          <Route
+            path="verify-email"
+            element={<LazyWrapper component={VerifyEmailPage} />}
+          />
+          <Route
+            path="reset-password"
+            element={<LazyWrapper component={ResetpasswordPage} />}
+          />
+          <Route
+            path="reset-success"
+            element={<LazyWrapper component={PasswordresetsucessPage} />}
+          />
         </Route>
 
         {/* Operator dashboard layout */}
-        <Route path="/dashboard" element={<DashboardLayout />}>
+        <Route
+          path="/dashboard"
+          element={<LazyWrapper component={DashboardLayout} />}
+        >
           <Route
-            element={<CreateProjectPage />}
+            element={<LazyWrapper component={CreateProjectPage} />}
             path="project/create-project"
           />
           <Route
-            element={<CreateProjectPage />}
+            element={<LazyWrapper component={CreateProjectPage} />}
             path="project/create-project/:id"
           />
           <Route
-            element={<CreateTaskPage />}
+            element={<LazyWrapper component={CreateTaskPage} />}
             path="task-management/create-task"
           />
           <Route
-            element={<AddUserMembersPage />}
+            element={<LazyWrapper component={AddUserMembersPage} />}
             path="user-management/add-user-members"
           />
-          <Route element={<ProjectsPage />} path="project" />
-          <Route element={<TaskManagementPage />} path="task-management" />
-          <Route element={<UserManagementPage />} path="user-management" />
-          <Route element={<CalenderPage />} path="calender" />
-          <Route element={<AiAssistPage />} path="ai-assist" />
-          {/* <Route element={<CommentsPage />} path="comments" /> */}
-          <Route element={<SettingsPage />} path="settings" />
-          <Route element={<PaymentLinksPage />} path="payment-links" />
-          <Route element={<SupportPage />} path="support" />
-          <Route element={<InvoicePage />} path="invoice" />
-          <Route element={<ClientManagementPage />} path="client-management" />
           <Route
-            element={<CreateClient />}
+            element={<LazyWrapper component={ProjectsPage} />}
+            path="project"
+          />
+          <Route
+            element={<LazyWrapper component={TaskManagementPage} />}
+            path="task-management"
+          />
+          <Route
+            element={<LazyWrapper component={UserManagementPage} />}
+            path="user-management"
+          />
+          <Route
+            element={<LazyWrapper component={CalenderPage} />}
+            path="calender"
+          />
+          <Route
+            element={<LazyWrapper component={AiAssistPage} />}
+            path="ai-assist"
+          />
+          <Route
+            element={<LazyWrapper component={SettingsPage} />}
+            path="settings"
+          />
+          <Route
+            element={<LazyWrapper component={PaymentLinksPage} />}
+            path="payment-links"
+          />
+          <Route
+            element={<LazyWrapper component={SupportPage} />}
+            path="support"
+          />
+          <Route
+            element={<LazyWrapper component={InvoicePage} />}
+            path="invoice"
+          />
+          <Route
+            element={<LazyWrapper component={ClientManagementPage} />}
+            path="client-management"
+          />
+          <Route
+            element={<LazyWrapper component={CreateClient} />}
             path="client-management/create-client"
           />
-          <Route element={<SubscriptionsPage />} path="subscription" />
-          <Route index element={<DashboardPage />} />
-          <Route path="*" element={<NotFound />} />
+          <Route
+            element={<LazyWrapper component={SubscriptionsPage} />}
+            path="subscription"
+          />
+          <Route index element={<LazyWrapper component={DashboardPage} />} />
+          <Route path="*" element={<LazyWrapper component={NotFound} />} />
         </Route>
 
         {/* super admin layout */}
-        <Route path="/superadmin" element={<SuperAdminLayout />}>
-          <Route path="companies" element={<SuperAdminCompaniesPage />} />
+        <Route
+          path="/superadmin"
+          element={<LazyWrapper component={SuperAdminLayout} />}
+        >
+          <Route
+            path="companies"
+            element={<LazyWrapper component={SuperAdminCompaniesPage} />}
+          />
           <Route
             path="companies/details/:slug"
-            element={<CompanyViewDetailsPage />}
+            element={<LazyWrapper component={CompanyViewDetailsPage} />}
           />
-          <Route path="sub-admin" element={<SuperAdminSubAdminPage />} />
+          <Route
+            path="sub-admin"
+            element={<LazyWrapper component={SuperAdminSubAdminPage} />}
+          />
           <Route
             path="sub-admin/create-sub-admin"
-            element={<CreateSubAdmin />}
+            element={<LazyWrapper component={CreateSubAdmin} />}
           />
           <Route
             path="subscriptions"
-            element={<SuperAdminSubscriptionsPage />}
+            element={<LazyWrapper component={SuperAdminSubscriptionsPage} />}
           />
           <Route
             path="support-tickets"
-            element={<SuperAdminSupportTicketPage />}
+            element={<LazyWrapper component={SuperAdminSupportTicketPage} />}
           />
-          <Route path="settings" element={<SuperAdminSettingsPage />} />
-          <Route index element={<SuperAdminDashboardPage />} />
-          <Route path="*" element={<NotFound />} />
+          <Route
+            path="settings"
+            element={<LazyWrapper component={SuperAdminSettingsPage} />}
+          />
+          <Route
+            index
+            element={<LazyWrapper component={SuperAdminDashboardPage} />}
+          />
+          <Route path="*" element={<LazyWrapper component={NotFound} />} />
         </Route>
 
         {/* viewer layout */}
-        <Route path="/viewer" element={<ViewerLayout />}>
-          <Route index element={<ViewerDashboardPage />} />
-          <Route path="my-projects" element={<ViewermyProjectsPage />} />
-          <Route path="my-tasks" element={<ViewermyTasksPage />} />
-          <Route path="viewer-support" element={<ViewerSupportsPage />} />
-          <Route path="viewer-settings" element={<ViewerSettingsPage />} />
-          <Route path="*" element={<NotFound />} />
+        <Route
+          path="/viewer"
+          element={<LazyWrapper component={ViewerLayout} />}
+        >
+          <Route
+            index
+            element={<LazyWrapper component={ViewerDashboardPage} />}
+          />
+          <Route
+            path="my-projects"
+            element={<LazyWrapper component={ViewermyProjectsPage} />}
+          />
+          <Route
+            path="my-tasks"
+            element={<LazyWrapper component={ViewermyTasksPage} />}
+          />
+          <Route
+            path="viewer-support"
+            element={<LazyWrapper component={ViewerSupportsPage} />}
+          />
+          <Route
+            path="viewer-settings"
+            element={<LazyWrapper component={ViewerSettingsPage} />}
+          />
+          <Route path="*" element={<LazyWrapper component={NotFound} />} />
         </Route>
 
-        <Route path="*" element={<NotFound />} />
+        <Route path="*" element={<LazyWrapper component={NotFound} />} />
       </Routes>
     </BrowserRouter>
   );
