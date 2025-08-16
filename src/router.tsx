@@ -1,6 +1,12 @@
 import { lazy } from "react";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { LazyWrapper } from "./components/common/LazyWrapper";
+import {
+  ProtectedRoute,
+  SubAdminRoute,
+  UserRoute,
+} from "./components/common/ProtectedRoute";
+import { useRouteGuard } from "./hooks/useRouteGuard";
 
 // Lazy load all page components
 const PasswordresetsucessPage = lazy(
@@ -36,7 +42,13 @@ const NotFound = lazy(() =>
     default: module.NotFound,
   }))
 );
+const ForbiddenPage = lazy(() =>
+  import("./pages/forbidden.page").then((module) => ({
+    default: module.ForbiddenPage,
+  }))
+);
 const SigninPage = lazy(() => import("./pages/signin.page"));
+const SignupPage = lazy(() => import("./pages/signup.page"));
 const UserLayout = lazy(() =>
   import("./layouts/user.layout").then((module) => ({
     default: module.UserLayout,
@@ -128,204 +140,225 @@ const CreateClient = lazy(() =>
     default: module.CreateClient,
   }))
 );
-const CheckoutPage = lazy(() => import("./pages/checkout.page"));
-const SignupPage = lazy(() => import("./pages/signup.page"));
 const SubscriptionsPage = lazy(() => import("./pages/subscriptions.page"));
 
-export const Router = () => {
+// Route guard wrapper component
+const AppWithRouteGuard = () => {
+  useRouteGuard();
+  return (
+    <Routes>
+      {/* Public routes */}
+      <Route path="/" element={<LazyWrapper component={HomePage} />} />
+      <Route
+        path="/pricing"
+        element={<LazyWrapper component={PricingPage} />}
+      />
+      <Route
+        path="/workflow"
+        element={<LazyWrapper component={WorkFlowPage} />}
+      />
+      <Route
+        path="/insights"
+        element={<LazyWrapper component={InsightsPage} />}
+      />
+
+      {/* Authentication routes */}
+      <Route
+        path="/auth"
+        element={<LazyWrapper component={AuthenticationLayout} />}
+      >
+        <Route path="signin" element={<LazyWrapper component={SigninPage} />} />
+        <Route
+          path="verify-email"
+          element={<LazyWrapper component={VerifyEmailPage} />}
+        />
+        <Route
+          path="verify-code"
+          element={<LazyWrapper component={VerifyCodePage} />}
+        />
+        <Route
+          path="reset-password"
+          element={<LazyWrapper component={ResetpasswordPage} />}
+        />
+        <Route
+          path="password-reset-success"
+          element={<LazyWrapper component={PasswordresetsucessPage} />}
+        />
+        <Route path="signup" element={<LazyWrapper component={SignupPage} />} />
+      </Route>
+
+      {/* Dashboard layout - requires authentication */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <LazyWrapper component={DashboardLayout} />
+          </ProtectedRoute>
+        }
+      >
+        <Route
+          element={<LazyWrapper component={TaskManagementPage} />}
+          path="task-management"
+        />
+        <Route
+          element={<LazyWrapper component={CreateTaskPage} />}
+          path="task-management/create-task"
+        />
+        <Route
+          element={<LazyWrapper component={ProjectsPage} />}
+          path="projects"
+        />
+        <Route
+          element={<LazyWrapper component={CreateProjectPage} />}
+          path="projects/create-project"
+        />
+        <Route
+          element={<LazyWrapper component={CalenderPage} />}
+          path="calender"
+        />
+        <Route
+          element={<LazyWrapper component={AiAssistPage} />}
+          path="ai-assist"
+        />
+        <Route
+          element={<LazyWrapper component={SettingsPage} />}
+          path="settings"
+        />
+        <Route element={<LazyWrapper component={UserLayout} />} path="user" />
+        <Route
+          element={<LazyWrapper component={AddUserMembersPage} />}
+          path="add-user-members"
+        />
+        <Route
+          element={<LazyWrapper component={UserManagementPage} />}
+          path="user-management"
+        />
+        <Route
+          element={<LazyWrapper component={PaymentLinksPage} />}
+          path="payment-links"
+        />
+        <Route
+          element={<LazyWrapper component={SupportPage} />}
+          path="support"
+        />
+        <Route
+          element={<LazyWrapper component={InvoicePage} />}
+          path="invoice"
+        />
+        <Route
+          element={
+            <UserRoute>
+              <LazyWrapper component={ClientManagementPage} />
+            </UserRoute>
+          }
+          path="client-management"
+        />
+        <Route
+          element={
+            <UserRoute>
+              <LazyWrapper component={CreateClient} />
+            </UserRoute>
+          }
+          path="client-management/create-client"
+        />
+        <Route
+          element={<LazyWrapper component={SubscriptionsPage} />}
+          path="subscription"
+        />
+        <Route index element={<LazyWrapper component={DashboardPage} />} />
+        <Route path="*" element={<LazyWrapper component={NotFound} />} />
+      </Route>
+
+      {/* Super admin layout - requires subadmin role or higher */}
+      <Route
+        path="/superadmin"
+        element={
+          <SubAdminRoute>
+            <LazyWrapper component={SuperAdminLayout} />
+          </SubAdminRoute>
+        }
+      >
+        <Route
+          path="companies"
+          element={<LazyWrapper component={SuperAdminCompaniesPage} />}
+        />
+        <Route
+          path="companies/details/:slug"
+          element={<LazyWrapper component={CompanyViewDetailsPage} />}
+        />
+        <Route
+          path="sub-admin"
+          element={<LazyWrapper component={SuperAdminSubAdminPage} />}
+        />
+        <Route
+          path="sub-admin/create-sub-admin"
+          element={<LazyWrapper component={CreateSubAdmin} />}
+        />
+        <Route
+          path="subscriptions"
+          element={<LazyWrapper component={SuperAdminSubscriptionsPage} />}
+        />
+        <Route
+          path="support-tickets"
+          element={<LazyWrapper component={SuperAdminSupportTicketPage} />}
+        />
+        <Route
+          path="settings"
+          element={<LazyWrapper component={SuperAdminSettingsPage} />}
+        />
+        <Route
+          index
+          element={<LazyWrapper component={SuperAdminDashboardPage} />}
+        />
+        <Route path="*" element={<LazyWrapper component={NotFound} />} />
+      </Route>
+
+      {/* Viewer layout - requires user role and organization */}
+      <Route
+        path="/viewer"
+        element={
+          <UserRoute>
+            <LazyWrapper component={ViewerLayout} />
+          </UserRoute>
+        }
+      >
+        <Route
+          index
+          element={<LazyWrapper component={ViewerDashboardPage} />}
+        />
+        <Route
+          path="my-projects"
+          element={<LazyWrapper component={ViewermyProjectsPage} />}
+        />
+        <Route
+          path="my-tasks"
+          element={<LazyWrapper component={ViewermyTasksPage} />}
+        />
+        <Route
+          path="viewer-support"
+          element={<LazyWrapper component={ViewerSupportsPage} />}
+        />
+        <Route
+          path="viewer-settings"
+          element={<LazyWrapper component={ViewerSettingsPage} />}
+        />
+        <Route path="*" element={<LazyWrapper component={NotFound} />} />
+      </Route>
+
+      {/* Error pages */}
+      <Route
+        path="/forbidden"
+        element={<LazyWrapper component={ForbiddenPage} />}
+      />
+      <Route path="*" element={<LazyWrapper component={NotFound} />} />
+    </Routes>
+  );
+};
+
+export const AppRouter = () => {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route element={<LazyWrapper component={UserLayout} />}>
-          <Route index element={<LazyWrapper component={HomePage} />} />
-          <Route
-            path="work-flow"
-            element={<LazyWrapper component={WorkFlowPage} />}
-          />
-          <Route
-            path="insights"
-            element={<LazyWrapper component={InsightsPage} />}
-          />
-          <Route
-            path="pricing"
-            element={<LazyWrapper component={PricingPage} />}
-          />
-          <Route
-            path="checkout"
-            element={<LazyWrapper component={CheckoutPage} />}
-          />
-        </Route>
-
-        <Route element={<LazyWrapper component={AuthenticationLayout} />}>
-          <Route
-            path="login"
-            element={<LazyWrapper component={SigninPage} />}
-          />
-          <Route
-            path="signup"
-            element={<LazyWrapper component={SignupPage} />}
-          />
-          <Route
-            path="verify-code"
-            element={<LazyWrapper component={VerifyCodePage} />}
-          />
-          <Route
-            path="verify-email"
-            element={<LazyWrapper component={VerifyEmailPage} />}
-          />
-          <Route
-            path="reset-password"
-            element={<LazyWrapper component={ResetpasswordPage} />}
-          />
-          <Route
-            path="reset-success"
-            element={<LazyWrapper component={PasswordresetsucessPage} />}
-          />
-        </Route>
-
-        {/* Operator dashboard layout */}
-        <Route
-          path="/dashboard"
-          element={<LazyWrapper component={DashboardLayout} />}
-        >
-          <Route
-            element={<LazyWrapper component={CreateProjectPage} />}
-            path="project/create-project"
-          />
-          <Route
-            element={<LazyWrapper component={CreateProjectPage} />}
-            path="project/create-project/:id"
-          />
-          <Route
-            element={<LazyWrapper component={CreateTaskPage} />}
-            path="task-management/create-task"
-          />
-          <Route
-            element={<LazyWrapper component={AddUserMembersPage} />}
-            path="user-management/add-user-members"
-          />
-          <Route
-            element={<LazyWrapper component={ProjectsPage} />}
-            path="project"
-          />
-          <Route
-            element={<LazyWrapper component={TaskManagementPage} />}
-            path="task-management"
-          />
-          <Route
-            element={<LazyWrapper component={UserManagementPage} />}
-            path="user-management"
-          />
-          <Route
-            element={<LazyWrapper component={CalenderPage} />}
-            path="calender"
-          />
-          <Route
-            element={<LazyWrapper component={AiAssistPage} />}
-            path="ai-assist"
-          />
-          <Route
-            element={<LazyWrapper component={SettingsPage} />}
-            path="settings"
-          />
-          <Route
-            element={<LazyWrapper component={PaymentLinksPage} />}
-            path="payment-links"
-          />
-          <Route
-            element={<LazyWrapper component={SupportPage} />}
-            path="support"
-          />
-          <Route
-            element={<LazyWrapper component={InvoicePage} />}
-            path="invoice"
-          />
-          <Route
-            element={<LazyWrapper component={ClientManagementPage} />}
-            path="client-management"
-          />
-          <Route
-            element={<LazyWrapper component={CreateClient} />}
-            path="client-management/create-client"
-          />
-          <Route
-            element={<LazyWrapper component={SubscriptionsPage} />}
-            path="subscription"
-          />
-          <Route index element={<LazyWrapper component={DashboardPage} />} />
-          <Route path="*" element={<LazyWrapper component={NotFound} />} />
-        </Route>
-
-        {/* super admin layout */}
-        <Route
-          path="/superadmin"
-          element={<LazyWrapper component={SuperAdminLayout} />}
-        >
-          <Route
-            path="companies"
-            element={<LazyWrapper component={SuperAdminCompaniesPage} />}
-          />
-          <Route
-            path="companies/details/:slug"
-            element={<LazyWrapper component={CompanyViewDetailsPage} />}
-          />
-          <Route
-            path="sub-admin"
-            element={<LazyWrapper component={SuperAdminSubAdminPage} />}
-          />
-          <Route
-            path="sub-admin/create-sub-admin"
-            element={<LazyWrapper component={CreateSubAdmin} />}
-          />
-          <Route
-            path="subscriptions"
-            element={<LazyWrapper component={SuperAdminSubscriptionsPage} />}
-          />
-          <Route
-            path="support-tickets"
-            element={<LazyWrapper component={SuperAdminSupportTicketPage} />}
-          />
-          <Route
-            path="settings"
-            element={<LazyWrapper component={SuperAdminSettingsPage} />}
-          />
-          <Route
-            index
-            element={<LazyWrapper component={SuperAdminDashboardPage} />}
-          />
-          <Route path="*" element={<LazyWrapper component={NotFound} />} />
-        </Route>
-
-        {/* viewer layout */}
-        <Route
-          path="/viewer"
-          element={<LazyWrapper component={ViewerLayout} />}
-        >
-          <Route
-            index
-            element={<LazyWrapper component={ViewerDashboardPage} />}
-          />
-          <Route
-            path="my-projects"
-            element={<LazyWrapper component={ViewermyProjectsPage} />}
-          />
-          <Route
-            path="my-tasks"
-            element={<LazyWrapper component={ViewermyTasksPage} />}
-          />
-          <Route
-            path="viewer-support"
-            element={<LazyWrapper component={ViewerSupportsPage} />}
-          />
-          <Route
-            path="viewer-settings"
-            element={<LazyWrapper component={ViewerSettingsPage} />}
-          />
-          <Route path="*" element={<LazyWrapper component={NotFound} />} />
-        </Route>
-
-        <Route path="*" element={<LazyWrapper component={NotFound} />} />
-      </Routes>
+      <AppWithRouteGuard />
     </BrowserRouter>
   );
 };

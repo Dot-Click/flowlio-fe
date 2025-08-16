@@ -1,48 +1,41 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  axios,
-  type ApiResponse,
-  type ErrorWithMessage,
-} from "@/configs/axios.config";
+import { axios, type ErrorWithMessage } from "@/configs/axios.config";
 
-type CreateClientData = FormData;
+interface CreateClientData {
+  name: string;
+  email: string;
+  phone?: string;
+  cpfcnpj?: string;
+  businessIndustry?: string;
+  address?: string;
+  status?: string;
+  image?: string | null;
+}
 
 interface CreateClientResponse {
-  user: {
+  success: boolean;
+  message: string;
+  data: {
     id: string;
     name: string;
     email: string;
-    role: string;
     image?: string;
-  };
-  userOrganization: any;
-  clientManagement: {
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    cpfcnpj: string;
-    address: string;
-    industry: string;
+    phone?: string;
+    cpfcnpj?: string;
+    businessIndustry?: string;
+    address?: string;
     status: string;
-    isActive: boolean;
-    organizationId: string;
-    createdBy: string;
-    image?: string;
+    createdAt: string;
   };
 }
 
 export const useCreateClient = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<
-    ApiResponse<CreateClientResponse>,
-    ErrorWithMessage,
-    CreateClientData
-  >({
+  return useMutation<CreateClientResponse, ErrorWithMessage, CreateClientData>({
     mutationFn: async (data: CreateClientData) => {
-      const response = await axios.post<ApiResponse<CreateClientResponse>>(
-        "/organizations/create-client",
+      const response = await axios.post<CreateClientResponse>(
+        "/clients/create",
         data
       );
       return response.data;
@@ -52,9 +45,11 @@ export const useCreateClient = () => {
 
       // Invalidate and refetch relevant queries
       queryClient.invalidateQueries({
-        queryKey: ["fetch client organizations"],
+        queryKey: ["clients"],
       });
-      queryClient.invalidateQueries({ queryKey: ["fetch all organizations"] });
+      queryClient.invalidateQueries({
+        queryKey: ["organization-clients"],
+      });
 
       // You can add more query invalidations here if needed
     },

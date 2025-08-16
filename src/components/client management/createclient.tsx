@@ -21,16 +21,19 @@ import { PageWrapper } from "../common/pagewrapper";
 import { useNavigate } from "react-router";
 import { IoArrowBack } from "react-icons/io5";
 import { Stack } from "../ui/stack";
+import { useCreateClient } from "@/hooks/usecreateclient";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   fullname: z.string().min(2, {
     message: "Full Name must be at least 2 characters.",
   }),
-  email: z.string().min(2, {
-    message: "Must be Email Address.",
+  email: z.string().email({
+    message: "Must be a valid email address.",
   }),
-  phonenumber: z.string().regex(/^\+?[1-9]\d{1,14}$/, {
-    message: "Must be a valid international phone number",
+  phonenumber: z.string().min(1, {
+    message: "Phone number is required.",
   }),
   cpfcnpj: z.string().min(2, {
     message: "Must be a valid CPF/CNPJ",
@@ -44,31 +47,24 @@ const formSchema = z.object({
 });
 
 export const CreateClient = () => {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      fullname: "",
-      email: "",
-      phonenumber: "",
-      cpfcnpj: "",
-      address: "",
-      industry: "",
-    },
-  });
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!uploadedFile) {
-      setImageError("Please upload a profile image.");
-      return;
-    }
-    setImageError("");
-    console.log({ ...values, profileImage: uploadedFile });
-    // Submit logic here
-  }
   const navigate = useNavigate();
+  const { mutate: createClient, isPending } = useCreateClient();
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [pdfPreview, setPdfPreview] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string>("");
+  const [isCompressing, setIsCompressing] = useState(false);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      fullname: "Client Name",
+      email: "client@example.com",
+      phonenumber: "+1234567890",
+      cpfcnpj: "1234567890",
+      address: "123 Main St, Anytown, USA",
+      industry: "Technology",
+    },
+  });
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -80,8 +76,8 @@ export const CreateClient = () => {
         setPdfPreview(null);
         return;
       }
-      if (file.size > 2 * 1024 * 1024) {
-        setImageError("Image size must be less than 2MB.");
+      if (file.size > 10 * 1024 * 1024) {
+        setImageError("Image size must be less than 10MB.");
         setUploadedFile(null);
         setPdfPreview(null);
         return;
@@ -106,6 +102,90 @@ export const CreateClient = () => {
     },
     onDrop,
   });
+
+  // Function to compress image before upload
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d")!;
+      const img = new Image();
+
+      img.onload = () => {
+        // Calculate new dimensions (max 800x800)
+        const maxSize = 800;
+        let { width, height } = img;
+
+        if (width > height) {
+          if (width > maxSize) {
+            height = (height * maxSize) / width;
+            width = maxSize;
+          }
+        } else {
+          if (height > maxSize) {
+            width = (width * maxSize) / height;
+            height = maxSize;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        // Draw and compress
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7); // 70% quality
+
+        resolve(compressedBase64);
+      };
+
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!uploadedFile) {
+      setImageError("Please upload a profile image.");
+      return;
+    }
+    setImageError("");
+
+    // Convert form data to match backend schema
+    const clientData = {
+      name: values.fullname,
+      email: values.email,
+      phone: values.phonenumber,
+      cpfcnpj: values.cpfcnpj,
+      businessIndustry: values.industry,
+      address: values.address,
+      status: "New Lead",
+      image: uploadedFile,
+    };
+
+    // Compress and convert image to base64 for API
+    setIsCompressing(true);
+    toast.info("Compressing image...");
+    compressImage(uploadedFile)
+      .then((compressedBase64) => {
+        setIsCompressing(false);
+        createClient(
+          { ...clientData, image: compressedBase64 },
+          {
+            onSuccess: () => {
+              toast.success("Client created successfully!");
+              navigate(-1); // Go back to previous page
+            },
+            onError: (error) => {
+              console.error("Error creating client:", error);
+              toast.error("Failed to create client. Please try again.");
+            },
+          }
+        );
+      })
+      .catch((error) => {
+        setIsCompressing(false);
+        console.error("Image compression failed:", error);
+        toast.error("Failed to compress image. Please try again.");
+      });
+  }
 
   return (
     <PageWrapper className="mt-6 p-6 relative">
@@ -132,8 +212,21 @@ export const CreateClient = () => {
             variant="outline"
             className="bg-black text-white border border-gray-200 rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer mb-6 absolute top-15 right-5"
             type="submit"
+            disabled={isPending || isCompressing}
           >
-            Save Client
+            {isCompressing ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Compressing...
+              </>
+            ) : isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              "Save Client"
+            )}
           </Button>
           <Box className="bg-white/80 rounded-xl border border-gray-200 p-6 gap-6 grid grid-cols-1">
             <Stack className="gap-0">
@@ -250,9 +343,9 @@ export const CreateClient = () => {
                 name="phonenumber"
                 render={({ field }) => (
                   <FormItem>
+                    <FormLabel>Phone Number:</FormLabel>
                     <FormControl>
                       <PhoneInput
-                        specialLabel="Phone Number:"
                         country={"us"}
                         placeholder="Phone Number:"
                         enableSearch={true}
@@ -277,7 +370,7 @@ export const CreateClient = () => {
                       <Input
                         className="bg-white rounded-full placeholder:text-gray-400"
                         size="xl"
-                        type="number"
+                        type="text"
                         placeholder="Enter CPF/CNPJ"
                         {...field}
                       />

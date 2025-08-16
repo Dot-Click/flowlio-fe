@@ -12,7 +12,7 @@ import {
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { FaRegTrashAlt } from "react-icons/fa";
-import { Ellipsis, Eye, Pencil, User } from "lucide-react";
+import { Ellipsis, Eye, Pencil, User, Loader2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
   GeneralModal,
@@ -20,117 +20,24 @@ import {
 } from "../common/generalmodal";
 import { useState } from "react";
 import { Stack } from "../ui/stack";
+import { useFetchOrganizationClients } from "@/hooks/usefetchclients";
 
-const data: Data[] = [
+// Mock data for fallback (will be replaced by API data)
+const mockData: Data[] = [
   {
     id: "1",
     status: "New Lead",
-    projectname: "Mike Wangi",
-    email: "mikewangi@gmail.com",
-    phonenumber: "+254722000000",
+    name: "use Client",
+    email: "use@example.com",
+    phone: "+1234567890",
     cpfcnpj: "000.000.000-00",
-    address: "123 Main St, Anytown, USA",
-    industry: "Construction",
-    projects: [
-      {
-        id: "p1",
-        name: "Building A",
-        status: "Completed",
-        completionRate: 100,
-        contractFile: "Contract-BuildingA.txt",
-      },
-    ],
-  },
-  {
-    id: "2",
-    projectname: "Mike Wangi",
-    status: "In Negotiation",
-    email: "Abe45@gmail.com",
-    phonenumber: "+254722000000",
-    cpfcnpj: "000.000.000-00",
-    address: "123 Main St, Anytown, USA",
-    industry: "Construction",
-    projects: [
-      {
-        id: "p1",
-        name: "Building A",
-        status: "Completed",
-        completionRate: 100,
-        contractFile: "Contract-BuildingA.txt",
-      },
-    ],
-  },
-  {
-    id: "3",
-    projectname: "Mike tyson",
-    status: "Contract Signed",
-    email: "Monserrat44@gmail.com",
-    phonenumber: "+254722000000",
-    cpfcnpj: "000.000.000-00",
-    address: "123 Main St, Anytown, USA",
-    industry: "Construction",
-  },
-  {
-    id: "4",
-    projectname: "Mike Wangi",
-    status: "Project In Progress",
-    email: "Silas22@gmail.com",
-    phonenumber: "+254722000000",
-    cpfcnpj: "000.000.000-00",
-    address: "123 Main St, Anytown, USA",
-    industry: "Construction",
-  },
-  {
-    id: "5",
-    projectname: "Mike Wangi",
-    status: "Completed",
-    email: "carmella@gmail.com",
-    phonenumber: "+254722000000",
-    cpfcnpj: "000.000.000-00",
-    address: "123 Main St, Anytown, USA",
-    industry: "Construction",
-  },
-  {
-    id: "6",
-    projectname: "Mike Wangi",
-    status: "Inactive Client",
-    email: "carmella@gmail.com",
-    phonenumber: "+254722000000",
-    cpfcnpj: "000.000.000-00",
-    address: "123 Main St, Anytown, USA",
-    industry: "Construction",
-  },
-  {
-    id: "7",
-    projectname: "Mike Wangi",
-    status: "New Lead",
-    email: "carmella@gmail.com",
-    phonenumber: "+254722000000",
-    cpfcnpj: "000.000.000-00",
-    address: "123 Main St, Anytown, USA",
-    industry: "Construction",
-  },
-  {
-    id: "8",
-    projectname: "Mike Wangi",
-    status: "In Negotiation",
-    email: "carmella@gmail.com",
-    phonenumber: "+254722000000",
-    cpfcnpj: "000.000.000-00",
-    address: "123 Main St, Anytown, USA",
-    industry: "Construction",
-  },
-  {
-    id: "9",
-    projectname: "Mike Wangi",
-    status: "Contract Signed",
-    email: "carmella@gmail.com",
-    phonenumber: "+254722000000",
-    cpfcnpj: "000.000.000-00",
-    address: "123 Main St, Anytown, USA",
-    industry: "Construction",
+    address: "USA",
+    businessIndustry: "Technology",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
 ];
+
 export type Project = {
   id: string;
   name: string;
@@ -147,36 +54,37 @@ export type Project = {
 
 export type Data = {
   id: string;
-  status:
-    | "New Lead"
-    | "In Negotiation"
-    | "Contract Signed"
-    | "Project In Progress"
-    | "Completed"
-    | "Inactive Client";
+  status: string; // Updated to match API response
   email: string;
-  phonenumber: string;
-  projectname: string;
-  cpfcnpj: string;
-  address: string;
-  industry: string;
+  phone?: string; // Updated to match API response
+  name: string; // Updated to match API response
+  cpfcnpj?: string;
+  address?: string;
+  businessIndustry?: string; // Updated to match API response
+  image?: string;
+  createdAt: string;
+  updatedAt: string;
   projects?: Project[];
 };
 
 export const columns: ColumnDef<Data>[] = [
   {
-    accessorKey: "projectname",
+    accessorKey: "name",
     header: () => <Box className="text-black pl-4">Name</Box>,
     cell: ({ row }) => (
       <Flex className="capitalize pl-4 w-30 max-sm:w-full">
         <Avatar className="size-8">
-          <AvatarImage src="https://github.com/shadcn.png" />
-          <AvatarFallback>CN</AvatarFallback>
+          <AvatarImage
+            src={row.original.image || "https://github.com/shadcn.png"}
+          />
+          <AvatarFallback>
+            {row.original.name.charAt(0).toUpperCase()}
+          </AvatarFallback>
         </Avatar>
 
-        {row.original.projectname.length > 14
-          ? row.original.projectname.slice(0, 14) + "..."
-          : row.original.projectname}
+        {row.original.name.length > 14
+          ? row.original.name.slice(0, 14) + "..."
+          : row.original.name}
       </Flex>
     ),
   },
@@ -216,17 +124,19 @@ export const columns: ColumnDef<Data>[] = [
           </Box>
           <Box className="mb-1">
             <span className="font-medium">Phone:</span>{" "}
-            {row.original.phonenumber}
+            {row.original.phone || "N/A"}
           </Box>
         </PopoverContent>
       </Popover>
     ),
   },
   {
-    accessorKey: "industry",
+    accessorKey: "businessIndustry",
     header: () => <Box className="text-black text-center">Industry</Box>,
     cell: ({ row }) => (
-      <Box className="captialize text-center">{row.original.industry}</Box>
+      <Box className="captialize text-center">
+        {row.original.businessIndustry || "N/A"}
+      </Box>
     ),
   },
 
@@ -352,10 +262,35 @@ export const columns: ColumnDef<Data>[] = [
 export const ClientManagementTable = () => {
   const props = useGeneralModalDisclosure();
   const [selectedClient, setSelectedClient] = useState<Data | null>(null);
+
+  // Fetch clients from API
+  const {
+    data: clientsData,
+    isLoading,
+    error,
+    refetch,
+  } = useFetchOrganizationClients();
+
   const openViewClientModal = (client: Data) => {
     setSelectedClient(client);
     props.onOpenChange(true);
   };
+
+  // Transform API data to match table format
+  const tableData: Data[] =
+    clientsData?.data?.map((client) => ({
+      id: client.id,
+      status: client.status,
+      email: client.email,
+      phone: client.phone,
+      name: client.name,
+      cpfcnpj: client.cpfcnpj,
+      address: client.address,
+      businessIndustry: client.businessIndustry,
+      image: client.image,
+      createdAt: client.createdAt,
+      updatedAt: client.updatedAt,
+    })) || mockData;
 
   const patchedColumns = columns.map((col) => {
     if ((col as any).accessorKey === "actions") {
@@ -420,10 +355,34 @@ export const ClientManagementTable = () => {
     return col;
   });
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <Center className="py-12">
+        <Stack className="gap-4 items-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <p className="text-gray-600">Loading clients...</p>
+        </Stack>
+      </Center>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <Center className="py-12">
+        <Stack className="gap-4 items-center">
+          <p className="text-red-500">Error loading clients: {error.message}</p>
+          <Button onClick={() => refetch()}>Retry</Button>
+        </Stack>
+      </Center>
+    );
+  }
+
   return (
     <>
       <ReusableTable
-        data={data}
+        data={tableData}
         columns={patchedColumns}
         searchInput={false}
         enablePaymentLinksCalender={true}
@@ -437,7 +396,7 @@ export const ClientManagementTable = () => {
                 <User className="text-blue-400 w-10 h-10" />
               </Box>
               <span className="text-2xl font-bold text-gray-800">
-                {selectedClient.projectname}
+                {selectedClient.name}
               </span>
               <span
                 className="inline-block px-3 py-1 rounded-full text-xs font-semibold mt-1 mb-2"
@@ -508,7 +467,7 @@ export const ClientManagementTable = () => {
                           // Simulate contract download
                           const blob = new Blob(
                             [
-                              `Contract for ${selectedClient.projectname} - ${project.name}`,
+                              `Contract for ${selectedClient.name} - ${project.name}`,
                             ],
                             { type: "text/plain" }
                           );

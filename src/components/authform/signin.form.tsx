@@ -168,10 +168,10 @@ export const SignInForm: FC = () => {
           />
 
           <Flex className="justify-between mb-8 gap-0">
-            <Anchor to="/signup" className="text-sm text-black">
+            <Anchor to="/auth/signup" className="text-sm text-black">
               Don't have an account?
             </Anchor>
-            <Anchor to="/verify-email" className="text-sm text-[#F48E2D]">
+            <Anchor to="/auth/verify-email" className="text-sm text-[#F48E2D]">
               Forgot Password?
             </Anchor>
           </Flex>
