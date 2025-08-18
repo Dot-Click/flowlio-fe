@@ -43,41 +43,74 @@ const CheckoutPage = () => {
   const selectedPlanIndex = location.state?.selectedPlan ?? null;
   const createOrganization = location.state?.createOrganization;
 
+  // Fallback: check URL parameters if navigation state is lost
+  const urlParams = new URLSearchParams(location.search);
+  const fallbackPlanIndex = urlParams.get("plan");
+  const finalPlanIndex =
+    selectedPlanIndex ??
+    (fallbackPlanIndex ? parseInt(fallbackPlanIndex) : null);
+
+  // Get plan details with better fallbacks
   const planDetails = [
     {
       title: "Basic Plan (Free)",
-      price: plansResponse?.data?.[0]?.price,
-      description: plansResponse?.data?.[0]?.description,
+      price: plansResponse?.data?.[0]?.price || "Free",
+      description:
+        plansResponse?.data?.[0]?.description ||
+        "Personal use and small projects",
       duration: "7-Days Trial",
-      features:
-        Array.isArray(plansResponse?.data?.[0]?.features) &&
-        plansResponse?.data?.[0]?.features.map((feature: string) => feature),
+      features: Array.isArray(plansResponse?.data?.[0]?.features)
+        ? plansResponse?.data?.[0]?.features
+        : ["Access to basic features", "Single user", "Email support"],
     },
     {
       title: "Pro Plan",
-      price: plansResponse?.data?.[1]?.price,
-      description: plansResponse?.data?.[1]?.description,
+      price: plansResponse?.data?.[1]?.price || "$29",
+      description:
+        plansResponse?.data?.[1]?.description ||
+        "Professional teams and growing businesses",
       duration: "month",
-      features:
-        Array.isArray(plansResponse?.data?.[1]?.features) &&
-        plansResponse?.data?.[1]?.features.map((feature: string) => feature),
+      features: Array.isArray(plansResponse?.data?.[1]?.features)
+        ? plansResponse?.data?.[1]?.features
+        : [
+            "All Basic features",
+            "Up to 10 users",
+            "Priority support",
+            "Advanced analytics",
+          ],
     },
     {
       title: "Enterprise Plan",
-      price: plansResponse?.data?.[2]?.price,
-      description: plansResponse?.data?.[2]?.description,
+      price: plansResponse?.data?.[2]?.price || "$99",
+      description:
+        plansResponse?.data?.[2]?.description ||
+        "Large organizations with complex needs",
       duration: "6 months",
-      features:
-        Array.isArray(plansResponse?.data?.[2]?.features) &&
-        plansResponse?.data?.[2]?.features.map((feature: string) => feature),
+      features: Array.isArray(plansResponse?.data?.[2]?.features)
+        ? plansResponse?.data?.[2]?.features
+        : [
+            "All Pro features",
+            "Unlimited users",
+            "Dedicated support",
+            "Custom integrations",
+          ],
     },
   ];
 
-  const plan =
-    selectedPlanIndex !== null ? planDetails[selectedPlanIndex] : null;
+  // Get the selected plan with better fallback logic
+  const plan = finalPlanIndex !== null ? planDetails[finalPlanIndex] : null;
   const selectedPlan = plansResponse?.data?.find(
-    (_, index) => index === selectedPlanIndex
+    (_, index) => index === finalPlanIndex
   );
+
+  // Debug logging for plan selection
+  console.log("🔍 Plan selection debug:", {
+    selectedPlanIndex,
+    locationState: location.state,
+    plan,
+    planDetails,
+    plansResponse: plansResponse?.data,
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -106,10 +139,12 @@ const CheckoutPage = () => {
     // If user is not authenticated after loading is complete, redirect to signup
     if (!userData?.user) {
       toast.info("Please sign up or login to complete your purchase");
-      navigate("/signup", {
+      // Redirect to signup with plan information
+      navigate("/auth/signup", {
         state: {
-          selectedPlan: selectedPlanIndex,
+          selectedPlan: finalPlanIndex,
           redirectTo: "checkout",
+          planDetails: plan,
         },
       });
       return;
@@ -121,7 +156,36 @@ const CheckoutPage = () => {
     }
 
     window.scrollTo(0, 0);
-  }, [plan, navigate, userData, userLoading, selectedPlanIndex, form]);
+  }, [plan, navigate, userData, userLoading, finalPlanIndex, form]);
+
+  // Add a separate effect to handle authentication state changes
+  useEffect(() => {
+    // If user becomes authenticated and we have a plan, we can proceed
+    if (userData?.user && plan && !userLoading) {
+      // User is authenticated and we have a plan, pre-fill the form
+      form.setValue("cardholderName", userData.user.name || "");
+    }
+  }, [userData?.user, plan, userLoading, form]);
+
+  // Add debug logging to understand the flow
+  useEffect(() => {
+    console.log("🔍 Checkout page state:", {
+      hasPlan: !!plan,
+      planIndex: finalPlanIndex,
+      userLoading,
+      hasUser: !!userData?.user,
+      userId: userData?.user?.id,
+      userEmail: userData?.user?.email,
+      locationState: window.history.state?.usr,
+    });
+  }, [plan, finalPlanIndex, userLoading, userData]);
+
+  // Log when the component mounts
+  useEffect(() => {
+    console.log("🚀 Checkout page mounted");
+    console.log("📋 Location state:", window.history.state?.usr);
+    console.log("📋 Current URL:", window.location.href);
+  }, []);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     if (!userData?.user || !selectedPlan) {
@@ -205,18 +269,35 @@ const CheckoutPage = () => {
           <Flex className="max-w-5xl mx-auto mt-3 items-start max-md:items-center flex-col md:flex-row gap-6">
             {/* Left: Plan Info */}
             <Box className="max-md:w-full flex-1 bg-gradient-to-r from-indigo-100 to-red-50 rounded-lg shadow p-8">
-              <h2 className="text-2xl font-bold mb-2">{plan.title}</h2>
+              <h2 className="text-2xl font-bold mb-2">
+                {plan?.title || "Plan Details"}
+              </h2>
               <p className="text-lg mb-1">
-                ${plan.price} / {plan.duration}
+                {plan?.price ? `$${plan.price}` : "Free"} /{" "}
+                {plan?.duration || "Trial"}
               </p>
-              <p className="mb-4">{plan.description}</p>
-              <h3 className="font-semibold mb-2">Included Services:</h3>
-              <ul className="mb-4 list-disc pl-5">
-                {plan.features &&
-                  plan.features.map((feature: string, idx: number) => (
-                    <li key={idx}>{feature}</li>
-                  ))}
-              </ul>
+              <p className="mb-4">
+                {plan?.description || "Plan description not available"}
+              </p>
+
+              {plan?.features && plan.features.length > 0 ? (
+                <>
+                  <h3 className="font-semibold mb-2">Included Services:</h3>
+                  <ul className="mb-4 list-disc pl-5">
+                    {plan.features.map((feature: string, idx: number) => (
+                      <li key={idx} className="text-sm">
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                <Box className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                  <p className="text-yellow-700 text-sm">
+                    Features not available for this plan
+                  </p>
+                </Box>
+              )}
 
               {/* User Info Display */}
               {userData?.user && (
@@ -224,6 +305,21 @@ const CheckoutPage = () => {
                   <h4 className="font-semibold mb-2">Purchasing for:</h4>
                   <p className="text-sm text-gray-600">{userData.user.name}</p>
                   <p className="text-sm text-gray-600">{userData.user.email}</p>
+                </Box>
+              )}
+
+              {/* Debug Info (remove in production) */}
+              {process.env.NODE_ENV === "development" && (
+                <Box className="mt-4 p-3 bg-gray-100 border border-gray-300 rounded text-xs">
+                  <p>
+                    <strong>Debug:</strong> Plan Index: {finalPlanIndex}
+                  </p>
+                  <p>
+                    <strong>Plan Title:</strong> {plan?.title}
+                  </p>
+                  <p>
+                    <strong>Plan Price:</strong> {plan?.price}
+                  </p>
                 </Box>
               )}
             </Box>

@@ -21,7 +21,7 @@ export const navItems: NavItem[] = [
     icon: <SquareKanban />,
   },
   {
-    url: "/dashboard/project",
+    url: "/dashboard/projects",
     title: "Projects",
     icon: <GroupIcon />,
   },

@@ -19,19 +19,10 @@ interface ClientsResponse {
   success: boolean;
   message: string;
   data: Client[];
-  pagination: {
-    currentPage: number;
-    totalPages: number;
-    total: number;
-    limit: number;
-    hasNextPage: boolean;
-    hasPrevPage: boolean;
-  };
+  total: number;
 }
 
 interface FetchClientsParams {
-  page?: number;
-  limit?: number;
   search?: string;
   status?: string;
   industry?: string;
@@ -45,8 +36,6 @@ export const useFetchClients = (params: FetchClientsParams = {}) => {
     queryFn: async () => {
       const searchParams = new URLSearchParams();
 
-      if (params.page) searchParams.append("page", params.page.toString());
-      if (params.limit) searchParams.append("limit", params.limit.toString());
       if (params.search) searchParams.append("search", params.search);
       if (params.status) searchParams.append("status", params.status);
       if (params.industry) searchParams.append("industry", params.industry);
@@ -58,20 +47,32 @@ export const useFetchClients = (params: FetchClientsParams = {}) => {
       );
       return response.data;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 0, // No caching - always fetch fresh data
+    gcTime: 0, // No garbage collection delay
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gains focus
   });
 };
 
-export const useFetchOrganizationClients = (organizationId?: string) => {
+export const useFetchOrganizationClients = () => {
   return useQuery<ClientsResponse>({
-    queryKey: ["organization-clients", organizationId],
+    queryKey: ["organization-clients"],
     queryFn: async () => {
-      const response = await axios.get<ClientsResponse>(`/clients`);
-      return response.data;
+      try {
+        console.log("🔍 Fetching organization clients...");
+        const response = await axios.get<ClientsResponse>(`/clients`);
+        console.log("✅ Clients fetched successfully:", response.data);
+        return response.data;
+      } catch (error) {
+        console.error("❌ Error fetching clients:", error);
+        throw error;
+      }
     },
-    enabled: !!organizationId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 0, // No caching - always fetch fresh data
+    gcTime: 0, // No garbage collection delay
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gains focus
+    retry: 0,
+    retryDelay: 0,
   });
 };

@@ -48,6 +48,7 @@ const ForbiddenPage = lazy(() =>
   }))
 );
 const SigninPage = lazy(() => import("./pages/signin.page"));
+const CheckoutPage = lazy(() => import("./pages/checkout.page"));
 const SignupPage = lazy(() => import("./pages/signup.page"));
 const UserLayout = lazy(() =>
   import("./layouts/user.layout").then((module) => ({
@@ -162,7 +163,7 @@ const AppWithRouteGuard = () => {
         element={<LazyWrapper component={InsightsPage} />}
       />
 
-      {/* Authentication routes */}
+      {/* Authentication layout - no authentication required */}
       <Route
         path="/auth"
         element={<LazyWrapper component={AuthenticationLayout} />}
@@ -186,6 +187,12 @@ const AppWithRouteGuard = () => {
         />
         <Route path="signup" element={<LazyWrapper component={SignupPage} />} />
       </Route>
+
+      {/* Checkout page - no auth layout, just the page */}
+      <Route
+        path="/checkout"
+        element={<LazyWrapper component={CheckoutPage} />}
+      />
 
       {/* Dashboard layout - requires authentication */}
       <Route

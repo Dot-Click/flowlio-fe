@@ -21,6 +21,8 @@ import {
 import { useState } from "react";
 import { Stack } from "../ui/stack";
 import { useFetchOrganizationClients } from "@/hooks/usefetchclients";
+import { useDeleteClient } from "@/hooks/usedeleteclient";
+import { toast } from "sonner";
 
 // Mock data for fallback (will be replaced by API data)
 const mockData: Data[] = [
@@ -54,13 +56,13 @@ export type Project = {
 
 export type Data = {
   id: string;
-  status: string; // Updated to match API response
+  status: string;
   email: string;
-  phone?: string; // Updated to match API response
-  name: string; // Updated to match API response
+  phone?: string;
+  name: string;
   cpfcnpj?: string;
   address?: string;
-  businessIndustry?: string; // Updated to match API response
+  businessIndustry?: string;
   image?: string;
   createdAt: string;
   updatedAt: string;
@@ -271,9 +273,30 @@ export const ClientManagementTable = () => {
     refetch,
   } = useFetchOrganizationClients();
 
+  const { mutate: deleteClient, isPending: isDeleting } = useDeleteClient();
+
   const openViewClientModal = (client: Data) => {
     setSelectedClient(client);
     props.onOpenChange(true);
+  };
+
+  // Handle delete client
+  const handleDeleteClient = async (id: string, email: string) => {
+    if (
+      window.confirm(
+        `Are you sure you want to delete ${email}? This action cannot be undone.`
+      )
+    ) {
+      try {
+        deleteClient(id);
+        toast.success("Client deleted successfully");
+        refetch();
+      } catch (error: any) {
+        const errorMessage =
+          error?.response?.data?.message || "Failed to delete client";
+        toast.error(errorMessage);
+      }
+    }
   };
 
   // Transform API data to match table format
@@ -339,8 +362,16 @@ export const ClientManagementTable = () => {
                   <Button
                     variant="outline"
                     className="bg-[#A50403] border-none w-9 h-9 hover:bg-[#A50403]/80 cursor-pointer rounded-md "
+                    onClick={() => {
+                      handleDeleteClient(row.original.id, row.original.name);
+                    }}
+                    disabled={isDeleting}
                   >
-                    <FaRegTrashAlt className="text-white fill-white size-4 " />
+                    {isDeleting ? (
+                      <Loader2 className="text-white fill-white size-4 animate-spin" />
+                    ) : (
+                      <FaRegTrashAlt className="text-white fill-white size-4 " />
+                    )}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="mb-2">

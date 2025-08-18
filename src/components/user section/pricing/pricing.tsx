@@ -81,7 +81,6 @@ export const Pricing: FC<PricingProps> = ({
       navigate("/checkout", {
         state: {
           selectedPlan: planIndex,
-          fromSignup: true,
           createOrganization: true,
         },
       });

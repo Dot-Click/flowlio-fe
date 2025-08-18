@@ -61,6 +61,11 @@ export const SignUpForm: FC = () => {
     setError(null);
 
     try {
+      console.log("🚀 Starting signup process...", {
+        email: data.email,
+        username: data.username,
+      });
+
       // Create the user account
       await authClient.signUp.email(
         {
@@ -70,33 +75,108 @@ export const SignUpForm: FC = () => {
         },
         {
           onRequest: () => {
+            console.log("📤 Signup request sent...");
             setIsLoading(true);
           },
           onSuccess: async () => {
+            console.log("✅ Signup successful!");
             toast.success(
               "Account created successfully! Please select a plan."
             );
 
-            // Redirect to pricing page after successful signup
-            navigate("/pricing", {
-              state: {
-                fromSignup: true,
-              },
-            });
+            // Check if user came from checkout with a plan selection
+            const location = window.location;
+            const urlParams = new URLSearchParams(location.search);
+            const selectedPlan = urlParams.get("plan");
+            const fromCheckout = urlParams.get("fromCheckout");
+
+            // Check if we have plan details in the navigation state
+            const navigationState = window.history.state?.usr;
+            const hasPlanDetails = navigationState?.selectedPlan !== undefined;
+            const redirectTo = navigationState?.redirectTo;
+
+            console.log("🔍 Navigation state:", navigationState);
+            console.log("🔍 Redirect to:", redirectTo);
+            console.log("🔍 Has plan details:", hasPlanDetails);
+            console.log("🔍 URL params:", { selectedPlan, fromCheckout });
+
+            if (redirectTo === "checkout" && hasPlanDetails) {
+              // User came from checkout, redirect back to checkout
+              console.log(
+                "🔄 Redirecting to checkout with plan:",
+                navigationState.selectedPlan
+              );
+              navigate("/checkout", {
+                state: {
+                  selectedPlan: navigationState.selectedPlan,
+                  createOrganization: true,
+                },
+              });
+            } else if (fromCheckout && selectedPlan) {
+              // User came from checkout via URL params, redirect back to checkout
+              console.log(
+                "🔄 Redirecting to checkout with plan from URL:",
+                selectedPlan
+              );
+              navigate("/checkout", {
+                state: {
+                  selectedPlan: parseInt(selectedPlan),
+                  createOrganization: true,
+                },
+              });
+            } else if (navigationState?.selectedPlan !== undefined) {
+              // Fallback: check navigation state directly
+              console.log(
+                "🔄 Redirecting to checkout with plan from navigation state:",
+                navigationState.selectedPlan
+              );
+              navigate("/checkout", {
+                state: {
+                  selectedPlan: navigationState.selectedPlan,
+                  createOrganization: true,
+                },
+              });
+            } else {
+              // Regular signup flow, redirect to pricing
+              console.log("🔄 Redirecting to pricing (regular signup flow)");
+              navigate("/pricing", {
+                state: {
+                  fromSignup: true,
+                },
+              });
+            }
 
             setIsLoading(false);
           },
           onError: (ctx) => {
-            toast.error(ctx.error.message);
-            console.log(ctx.error);
+            console.error("❌ Signup error:", ctx.error);
+            console.error("❌ Error details:", {
+              message: ctx.error.message,
+              code: ctx.error.code,
+              status: ctx.error.status,
+            });
+
+            let errorMessage = "Signup failed. Please try again.";
+
+            if (ctx.error.message) {
+              errorMessage = ctx.error.message;
+            } else if (ctx.error.status === 500) {
+              errorMessage = "Server error. Please try again later.";
+            } else if (ctx.error.status === 400) {
+              errorMessage =
+                "Invalid signup data. Please check your information.";
+            }
+
+            toast.error(errorMessage);
+            setError(errorMessage);
             setIsLoading(false);
           },
         }
       );
     } catch (error) {
+      console.error("💥 Unexpected signup error:", error);
       setIsLoading(false);
       setError("An unexpected error occurred. Please try again.");
-      console.error("Signup error:", error);
     }
   };
 

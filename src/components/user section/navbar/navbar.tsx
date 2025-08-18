@@ -248,13 +248,31 @@ export const Navbar: FC<NavbarProps> = ({
             onClick={() => {
               if (isPricingPage) {
                 if (selectedPlan == null) {
-                  toast.warning("Please select a plan.");
+                  toast.warning(
+                    "Please select a plan first, then sign up to continue."
+                  );
+                  // Redirect to signup when no plan is selected
+                  navigate("/auth/signup");
                 } else {
-                  navigate("/checkout", { state: { selectedPlan } });
+                  // Always redirect to signup when a plan is selected
+                  // This ensures the user is authenticated before checkout
+                  toast.info(
+                    "Please sign up to continue with your selected plan"
+                  );
+                  navigate(
+                    `/auth/signup?fromCheckout=true&plan=${selectedPlan}`,
+                    {
+                      state: {
+                        selectedPlan: selectedPlan,
+                        redirectTo: "checkout",
+                        planDetails: selectedPlan,
+                      },
+                    }
+                  );
                 }
               } else {
                 // For home page and other pages, always go to signup
-                navigate("/signup");
+                navigate("/auth/signup");
               }
             }}
             className={cn(
