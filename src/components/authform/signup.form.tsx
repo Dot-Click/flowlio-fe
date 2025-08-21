@@ -263,7 +263,7 @@ export const SignUpForm: FC = () => {
           />
 
           <Flex className="justify-end gap-0">
-            <Anchor to="/login" className="text-sm text-blue-500">
+            <Anchor to="/auth/signin" className="text-sm text-blue-500">
               Already have an account?
             </Anchor>
           </Flex>

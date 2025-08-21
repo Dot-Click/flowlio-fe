@@ -12,7 +12,7 @@ import {
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { FaRegTrashAlt } from "react-icons/fa";
-import { Ellipsis, Eye, Pencil, User, Loader2 } from "lucide-react";
+import { Ellipsis, Eye, Pencil, Loader2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
   GeneralModal,
@@ -23,6 +23,7 @@ import { Stack } from "../ui/stack";
 import { useFetchOrganizationClients } from "@/hooks/usefetchclients";
 import { useDeleteClient } from "@/hooks/usedeleteclient";
 import { toast } from "sonner";
+import { useNavigate } from "react-router";
 
 // Mock data for fallback (will be replaced by API data)
 const mockData: Data[] = [
@@ -69,93 +70,152 @@ export type Data = {
   projects?: Project[];
 };
 
-export const columns: ColumnDef<Data>[] = [
-  {
-    accessorKey: "name",
-    header: () => <Box className="text-black pl-4">Name</Box>,
-    cell: ({ row }) => (
-      <Flex className="capitalize pl-4 w-30 max-sm:w-full">
-        <Avatar className="size-8">
-          <AvatarImage
-            src={row.original.image || "https://github.com/shadcn.png"}
-          />
-          <AvatarFallback>
-            {row.original.name.charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+export const ClientManagementTable = () => {
+  const props = useGeneralModalDisclosure();
+  const [selectedClient, setSelectedClient] = useState<Data | null>(null);
+  const navigate = useNavigate();
 
-        {row.original.name.length > 14
-          ? row.original.name.slice(0, 14) + "..."
-          : row.original.name}
-      </Flex>
-    ),
-  },
+  // Fetch clients from API
+  const {
+    data: clientsData,
+    isLoading,
+    error,
+    refetch,
+  } = useFetchOrganizationClients();
 
-  {
-    accessorKey: "cpfcnpj",
-    header: () => <Box className="text-black text-center">CPF/CNPJ</Box>,
-    cell: ({ row }) => (
-      <Box className="captialize text-center">{row.original.cpfcnpj}</Box>
-    ),
-  },
-  {
-    accessorKey: "address",
-    header: () => <Box className="text-black text-center">Address</Box>,
-    cell: ({ row }) => (
-      <Box className="captialize text-center">{row.original.address}</Box>
-    ),
-  },
+  // Debug: Log the clients data
+  console.log("🔍 Clients data received:", clientsData);
+  console.log("🔍 First client if exists:", clientsData?.data?.[0]);
+  console.log("🔍 First client ID if exists:", clientsData?.data?.[0]?.id);
 
-  {
-    id: "social",
-    header: () => <Box className="text-center text-black">Social</Box>,
-    cell: ({ row }) => (
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="ghost"
-            className="w-8 h-8 p-0 flex items-center justify-center cursor-pointer"
-          >
-            <Ellipsis className="text-gray-600" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-full">
-          <Box className="text-sm font-semibold mb-2">Social Media</Box>
-          <Box className="mb-1">
-            <span className="font-medium">Email:</span> {row.original.email}
-          </Box>
-          <Box className="mb-1">
-            <span className="font-medium">Phone:</span>{" "}
-            {row.original.phone || "N/A"}
-          </Box>
-        </PopoverContent>
-      </Popover>
-    ),
-  },
-  {
-    accessorKey: "businessIndustry",
-    header: () => <Box className="text-black text-center">Industry</Box>,
-    cell: ({ row }) => (
-      <Box className="captialize text-center">
-        {row.original.businessIndustry || "N/A"}
-      </Box>
-    ),
-  },
+  const { mutate: deleteClient, isPending: isDeleting } = useDeleteClient();
 
-  {
-    accessorKey: "status",
-    header: () => <Box className="text-center text-black">Status</Box>,
-    cell: ({ row }) => {
-      const status = row.original.status as
-        | "New Lead"
-        | "In Negotiation"
-        | "Contract Signed"
-        | "Project In Progress"
-        | "Completed"
-        | "Inactive Client";
+  const openViewClientModal = (client: Data) => {
+    setSelectedClient(client);
+    props.onOpenChange(true);
+  };
 
-      const statusStyles: Record<typeof status, { text: string; dot: string }> =
-        {
+  const openEditClientModal = (client: Data) => {
+    // Redirect to create client page with edit mode
+    navigate("/dashboard/client-management/create-client", {
+      state: {
+        mode: "edit",
+        client: client,
+      },
+    });
+  };
+
+  // Handle delete client
+  const handleDeleteClient = async (id: string, email: string) => {
+    if (
+      window.confirm(
+        `Are you sure you want to delete ${email}? This action cannot be undone.`
+      )
+    ) {
+      try {
+        deleteClient(id);
+        toast.success("Client deleted successfully");
+        refetch();
+      } catch (error: any) {
+        const errorMessage =
+          error?.response?.data?.message || "Failed to delete client";
+        toast.error(errorMessage);
+      }
+    }
+  };
+
+  // Define columns inside the component to access the functions
+  const columns: ColumnDef<Data>[] = [
+    {
+      accessorKey: "name",
+      header: () => <Box className="text-black pl-4">Name</Box>,
+      cell: ({ row }) => (
+        <Flex className="capitalize pl-4 w-30 max-sm:w-full">
+          <Avatar className="size-8">
+            <AvatarImage
+              src={row.original.image || "https://github.com/shadcn.png"}
+            />
+            <AvatarFallback>
+              {row.original.name.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+
+          {row.original.name.length > 14
+            ? row.original.name.slice(0, 14) + "..."
+            : row.original.name}
+        </Flex>
+      ),
+    },
+
+    {
+      accessorKey: "cpfcnpj",
+      header: () => <Box className="text-black text-center">CPF/CNPJ</Box>,
+      cell: ({ row }) => (
+        <Box className="captialize text-center">{row.original.cpfcnpj}</Box>
+      ),
+    },
+
+    {
+      accessorKey: "address",
+      header: () => <Box className="text-black text-center">Address</Box>,
+      cell: ({ row }) => (
+        <Box className="captialize text-center">{row.original.address}</Box>
+      ),
+    },
+
+    {
+      id: "social",
+      header: () => <Box className="text-center text-black">Social</Box>,
+      cell: ({ row }) => (
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="ghost"
+              className="w-8 h-8 p-0 flex items-center justify-center cursor-pointer"
+            >
+              <Ellipsis className="text-gray-600" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-full">
+            <Box className="text-sm font-semibold mb-2">Social Media</Box>
+            <Box className="mb-1">
+              <span className="font-medium">Email:</span> {row.original.email}
+            </Box>
+            <Box className="mb-1">
+              <span className="font-medium">Phone:</span>{" "}
+              {row.original.phone || "N/A"}
+            </Box>
+          </PopoverContent>
+        </Popover>
+      ),
+    },
+
+    {
+      accessorKey: "businessIndustry",
+      header: () => <Box className="text-black text-center">Industry</Box>,
+      cell: ({ row }) => (
+        <Box className="captialize text-center">
+          {row.original.businessIndustry || "N/A"}
+        </Box>
+      ),
+    },
+
+    {
+      accessorKey: "status",
+      header: () => <Box className="text-center text-black">Status</Box>,
+      cell: ({ row }) => {
+        const status = row.original.status as
+          | "New Lead"
+          | "In Negotiation"
+          | "Contract Signed"
+          | "Project In Progress"
+          | "Completed"
+          | "Inactive Client";
+
+        const statusStyles: Record<
+          typeof status,
+          { text: string; dot: string }
+        > = {
           "New Lead": {
             text: "text-white bg-[#00A400] border-none rounded-full",
             dot: "bg-white",
@@ -182,144 +242,28 @@ export const columns: ColumnDef<Data>[] = [
           },
         };
 
-      return (
-        <Center>
-          <Flex
-            className={`rounded-md capitalize w-38 h-10 gap-2 border justify-center items-center ${statusStyles[status].text}`}
-          >
-            <Center className="gap-2">
-              <Flex
-                className={`w-2 h-2 items-start rounded-full ${statusStyles[status].dot}`}
-              />
-              <h1>{status}</h1>
-            </Center>
-          </Flex>
-        </Center>
-      );
+        return (
+          <Center>
+            <Flex
+              className={`rounded-md capitalize w-38 h-10 gap-2 border justify-center items-center ${statusStyles[status].text}`}
+            >
+              <Center className="gap-2">
+                <Flex
+                  className={`w-2 h-2 items-start rounded-full ${statusStyles[status].dot}`}
+                />
+                <h1>{status}</h1>
+              </Center>
+            </Flex>
+          </Center>
+        );
+      },
     },
-  },
 
-  {
-    accessorKey: "actions",
-    header: () => <Box className="text-center text-black">Actions</Box>,
-    cell: () => {
-      return (
-        <Center className="space-x-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="bg-[#23B95D] border-none w-9 h-9 hover:bg-[#23B95D]/80 cursor-pointer rounded-md "
-                >
-                  <Pencil className="text-white size-5 " />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="mb-2">
-                <p>Edit Client</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="bg-[#2358B9] border-none w-9 h-9 hover:bg-[#2358B9]/80 cursor-pointer rounded-md "
-                  onClick={() => {
-                    console.log("View Client");
-                  }}
-                >
-                  <Eye className="text-white size-5 " />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="mb-2">
-                <p>View Client</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="bg-[#A50403] border-none w-9 h-9 hover:bg-[#A50403]/80 cursor-pointer rounded-md "
-                >
-                  <FaRegTrashAlt className="text-white fill-white size-4 " />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="mb-2">
-                <p>Delete Client</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </Center>
-      );
-    },
-  },
-];
-
-export const ClientManagementTable = () => {
-  const props = useGeneralModalDisclosure();
-  const [selectedClient, setSelectedClient] = useState<Data | null>(null);
-
-  // Fetch clients from API
-  const {
-    data: clientsData,
-    isLoading,
-    error,
-    refetch,
-  } = useFetchOrganizationClients();
-
-  const { mutate: deleteClient, isPending: isDeleting } = useDeleteClient();
-
-  const openViewClientModal = (client: Data) => {
-    setSelectedClient(client);
-    props.onOpenChange(true);
-  };
-
-  // Handle delete client
-  const handleDeleteClient = async (id: string, email: string) => {
-    if (
-      window.confirm(
-        `Are you sure you want to delete ${email}? This action cannot be undone.`
-      )
-    ) {
-      try {
-        deleteClient(id);
-        toast.success("Client deleted successfully");
-        refetch();
-      } catch (error: any) {
-        const errorMessage =
-          error?.response?.data?.message || "Failed to delete client";
-        toast.error(errorMessage);
-      }
-    }
-  };
-
-  // Transform API data to match table format
-  const tableData: Data[] =
-    clientsData?.data?.map((client) => ({
-      id: client.id,
-      status: client.status,
-      email: client.email,
-      phone: client.phone,
-      name: client.name,
-      cpfcnpj: client.cpfcnpj,
-      address: client.address,
-      businessIndustry: client.businessIndustry,
-      image: client.image,
-      createdAt: client.createdAt,
-      updatedAt: client.updatedAt,
-    })) || mockData;
-
-  const patchedColumns = columns.map((col) => {
-    if ((col as any).accessorKey === "actions") {
-      return {
-        ...col,
-        cell: ({ row }: any) => (
+    {
+      accessorKey: "actions",
+      header: () => <Box className="text-center text-black">Actions</Box>,
+      cell: ({ row }) => {
+        return (
           <Center className="space-x-2">
             <TooltipProvider>
               <Tooltip>
@@ -327,6 +271,7 @@ export const ClientManagementTable = () => {
                   <Button
                     variant="outline"
                     className="bg-[#23B95D] border-none w-9 h-9 hover:bg-[#23B95D]/80 cursor-pointer rounded-md "
+                    onClick={() => openEditClientModal(row.original)}
                   >
                     <Pencil className="text-white size-5 " />
                   </Button>
@@ -343,9 +288,7 @@ export const ClientManagementTable = () => {
                   <Button
                     variant="outline"
                     className="bg-[#2358B9] border-none w-9 h-9 hover:bg-[#2358B9]/80 cursor-pointer rounded-md "
-                    onClick={() => {
-                      openViewClientModal(row.original);
-                    }}
+                    onClick={() => openViewClientModal(row.original)}
                   >
                     <Eye className="text-white size-5 " />
                   </Button>
@@ -362,9 +305,9 @@ export const ClientManagementTable = () => {
                   <Button
                     variant="outline"
                     className="bg-[#A50403] border-none w-9 h-9 hover:bg-[#A50403]/80 cursor-pointer rounded-md "
-                    onClick={() => {
-                      handleDeleteClient(row.original.id, row.original.name);
-                    }}
+                    onClick={() =>
+                      handleDeleteClient(row.original.id, row.original.name)
+                    }
                     disabled={isDeleting}
                   >
                     {isDeleting ? (
@@ -380,11 +323,26 @@ export const ClientManagementTable = () => {
               </Tooltip>
             </TooltipProvider>
           </Center>
-        ),
-      };
-    }
-    return col;
-  });
+        );
+      },
+    },
+  ];
+
+  // Transform API data to match table format
+  const tableData: Data[] =
+    clientsData?.data?.map((client) => ({
+      id: client.id,
+      status: client.status,
+      email: client.email,
+      phone: client.phone,
+      name: client.name,
+      cpfcnpj: client.cpfcnpj,
+      address: client.address,
+      businessIndustry: client.businessIndustry,
+      image: client.image,
+      createdAt: client.createdAt,
+      updatedAt: client.updatedAt,
+    })) || mockData;
 
   // Show loading state
   if (isLoading) {
@@ -414,19 +372,24 @@ export const ClientManagementTable = () => {
     <>
       <ReusableTable
         data={tableData}
-        columns={patchedColumns}
+        columns={columns}
         searchInput={false}
         enablePaymentLinksCalender={true}
-        onRowClick={(row) => console.log("Row clicked:", row.original)}
       />
-      <GeneralModal {...props} contentProps={{ className: "p-0" }}>
-        {selectedClient ? (
-          <Stack className="w-full bg-white rounded-xl shadow-lg p-6 gap-4">
+
+      {/* Edit Client Modal */}
+      {selectedClient && (
+        <GeneralModal open={props.open} onOpenChange={props.onOpenChange}>
+          <Box className="w-full bg-white rounded-xl shadow-lg p-6 gap-4">
             <Stack className="items-center">
               <Box className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mb-2">
-                <User className="text-blue-400 w-10 h-10" />
+                <img
+                  src={selectedClient.image}
+                  alt="Client"
+                  className="text-blue-400 rounded-full w-20 h-20"
+                />
               </Box>
-              <span className="text-2xl font-bold text-gray-800">
+              <span className="text-2xl font-bold text-gray-800 capitalize">
                 {selectedClient.name}
               </span>
               <span
@@ -517,11 +480,9 @@ export const ClientManagementTable = () => {
                 </Stack>
               )}
             </Box>
-          </Stack>
-        ) : (
-          <Box>No client selected.</Box>
-        )}
-      </GeneralModal>
+          </Box>
+        </GeneralModal>
+      )}
     </>
   );
 };

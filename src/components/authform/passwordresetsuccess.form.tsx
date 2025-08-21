@@ -17,7 +17,7 @@ export const PasswordResetSuccessForm: FC = () => {
       <Button
         className="w-full mt-8 bg-[#1797B9] text-white rounded-full cursor-pointer hover:bg-[#1797B9]/80"
         size="xl"
-        onClick={() => navigate("/login")}
+        onClick={() => navigate("/auth/signin")}
       >
         Back to Login
       </Button>

@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import PhoneInput from "react-phone-input-2";
 import { useDropzone } from "react-dropzone";
 import { useForm } from "react-hook-form";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Center } from "../ui/center";
 import { Input } from "../ui/input";
@@ -18,10 +18,11 @@ import "../usermanagement/phonenumberstyle.css";
 import { Box } from "../ui/box";
 import { z } from "zod";
 import { PageWrapper } from "../common/pagewrapper";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { IoArrowBack } from "react-icons/io5";
 import { Stack } from "../ui/stack";
 import { useCreateClient } from "@/hooks/usecreateclient";
+import { useUpdateClient } from "@/hooks/useupdateclient";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -46,25 +47,69 @@ const formSchema = z.object({
   }),
 });
 
-export const CreateClient = () => {
+interface ClientFormProps {
+  mode: "create" | "edit";
+  client?: {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    cpfcnpj?: string;
+    businessIndustry?: string;
+    address?: string;
+    status: string;
+    image?: string;
+  };
+  onSuccess?: () => void;
+  onClose?: () => void;
+}
+
+export const ClientForm = ({
+  mode,
+  client,
+  onSuccess,
+  onClose,
+}: ClientFormProps) => {
   const navigate = useNavigate();
-  const { mutate: createClient, isPending } = useCreateClient();
+  const { mutate: createClient, isPending: isCreating } = useCreateClient();
+  const { mutate: updateClient, isPending: isUpdating } = useUpdateClient();
+
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [pdfPreview, setPdfPreview] = useState<string | null>(null);
+  const [pdfPreview, setPdfPreview] = useState<string | null>(
+    client?.image || null
+  );
   const [imageError, setImageError] = useState<string>("");
   const [isCompressing, setIsCompressing] = useState(false);
+  const [isImageRemoved, setIsImageRemoved] = useState(false);
+
+  const isPending = isCreating || isUpdating;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullname: "Client Name",
-      email: "client@example.com",
-      phonenumber: "+1234567890",
-      cpfcnpj: "1234567890",
-      address: "123 Main St, Anytown, USA",
-      industry: "Technology",
+      fullname: client?.name || "Client Name",
+      email: client?.email || "client@example.com",
+      phonenumber: client?.phone || "+1234567890",
+      cpfcnpj: client?.cpfcnpj || "1234567890",
+      address: client?.address || "123 Main St, Anytown, USA",
+      industry: client?.businessIndustry || "Technology",
     },
   });
+
+  // Update form when client data changes (for edit mode)
+  useEffect(() => {
+    if (client && mode === "edit") {
+      form.reset({
+        fullname: client.name,
+        email: client.email,
+        phonenumber: client.phone || "+1234567890",
+        cpfcnpj: client.cpfcnpj || "1234567890",
+        address: client.address || "123 Main St, Anytown, USA",
+        industry: client.businessIndustry || "Technology",
+      });
+      setPdfPreview(client.image || null);
+    }
+  }, [client, mode, form]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -84,10 +129,17 @@ export const CreateClient = () => {
       }
       setUploadedFile(file);
       setImageError("");
+      setIsImageRemoved(false);
       const fileUrl = URL.createObjectURL(file);
       setPdfPreview(fileUrl);
     }
   }, []);
+
+  const removeImage = () => {
+    setUploadedFile(null);
+    setPdfPreview(null);
+    setIsImageRemoved(true);
+  };
 
   const { getInputProps, open } = useDropzone({
     maxFiles: 1,
@@ -142,11 +194,17 @@ export const CreateClient = () => {
   };
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!uploadedFile) {
+    // For create mode, require image upload
+    if (mode === "create" && !uploadedFile) {
       setImageError("Please upload a profile image.");
       return;
     }
     setImageError("");
+
+    // Debug: Log the client object and mode
+    console.log("Form submitted with mode:", mode);
+    console.log("Client object:", client);
+    console.log("Client ID:", client?.id);
 
     // Convert form data to match backend schema
     const clientData = {
@@ -156,76 +214,181 @@ export const CreateClient = () => {
       cpfcnpj: values.cpfcnpj,
       businessIndustry: values.industry,
       address: values.address,
-      status: "New Lead",
-      image: uploadedFile,
+      status: mode === "create" ? "New Lead" : client?.status || "New Lead",
     };
 
-    // Compress and convert image to base64 for API
-    setIsCompressing(true);
-    toast.info("Compressing image...");
-    compressImage(uploadedFile)
-      .then((compressedBase64) => {
-        setIsCompressing(false);
-        createClient(
-          { ...clientData, image: compressedBase64 },
+    if (mode === "edit") {
+      // Update mode - handle image updates
+
+      // Ensure we have a valid client ID
+      if (!client?.id) {
+        console.error("No client ID found for edit mode");
+        toast.error("Client ID not found. Cannot update client.");
+        return;
+      }
+
+      if (uploadedFile) {
+        // New image uploaded
+        setIsCompressing(true);
+        toast.info("Compressing image...");
+
+        compressImage(uploadedFile)
+          .then((compressedBase64) => {
+            setIsCompressing(false);
+            console.log("Calling updateClient with ID:", client.id);
+            console.log("Full client object:", client);
+            console.log("Client ID type:", typeof client.id);
+            console.log("Client ID value:", client.id);
+
+            updateClient(
+              {
+                clientId: client.id,
+                data: { ...clientData, image: compressedBase64 },
+              },
+              {
+                onSuccess: () => {
+                  toast.success("Client updated successfully!");
+                  onSuccess?.();
+                  onClose?.();
+                },
+                onError: (error) => {
+                  console.error("Error updating client:", error);
+                  toast.error("Failed to update client. Please try again.");
+                },
+              }
+            );
+          })
+          .catch((error) => {
+            setIsCompressing(false);
+            console.error("Image compression failed:", error);
+            toast.error("Failed to compress image. Please try again.");
+          });
+      } else if (isImageRemoved) {
+        // Image was removed
+        console.log("Calling updateClient with ID:", client.id);
+        console.log("Full client object:", client);
+        console.log("Client ID type:", typeof client.id);
+        console.log("Client ID value:", client.id);
+
+        updateClient(
+          {
+            clientId: client.id,
+            data: { ...clientData, image: "" },
+          },
           {
             onSuccess: () => {
-              toast.success("Client created successfully!");
-              navigate(-1); // Go back to previous page
+              toast.success("Client updated successfully!");
+              onSuccess?.();
+              onClose?.();
             },
             onError: (error) => {
-              console.error("Error creating client:", error);
-              toast.error("Failed to create client. Please try again.");
+              console.error("Error updating client:", error);
+              toast.error("Failed to update client. Please try again.");
             },
           }
         );
-      })
-      .catch((error) => {
-        setIsCompressing(false);
-        console.error("Image compression failed:", error);
-        toast.error("Failed to compress image. Please try again.");
-      });
+      } else {
+        // No image changes
+        console.log("Calling updateClient with ID:", client.id);
+        console.log("Full client object:", client);
+        console.log("Client ID type:", typeof client.id);
+        console.log("Client ID value:", client.id);
+
+        updateClient(
+          {
+            clientId: client.id,
+            data: clientData,
+          },
+          {
+            onSuccess: () => {
+              toast.success("Client updated successfully!");
+              onSuccess?.();
+              onClose?.();
+            },
+            onError: (error) => {
+              console.error("Error updating client:", error);
+              toast.error("Failed to update client. Please try again.");
+            },
+          }
+        );
+      }
+    } else {
+      // Create mode
+      setIsCompressing(true);
+      toast.info("Compressing image...");
+
+      compressImage(uploadedFile!)
+        .then((compressedBase64) => {
+          setIsCompressing(false);
+          createClient(
+            { ...clientData, image: compressedBase64 },
+            {
+              onSuccess: () => {
+                toast.success("Client created successfully!");
+                onSuccess?.();
+                onClose?.();
+              },
+              onError: (error) => {
+                console.error("Error creating client:", error);
+                toast.error("Failed to create client. Please try again.");
+              },
+            }
+          );
+        })
+        .catch((error) => {
+          setIsCompressing(false);
+          console.error("Image compression failed:", error);
+          toast.error("Failed to compress image. Please try again.");
+        });
+    }
   }
 
   return (
     <PageWrapper className="mt-6 p-6 relative">
       <Box
         className="flex items-center gap-2 w-20 cursor-pointer transition-all duration-300  hover:bg-gray-200 rounded-full hover:p-2 "
-        onClick={() => navigate(-1)}
+        onClick={() => {
+          if (mode === "edit") {
+            // In edit mode, go back to client management
+            onClose?.();
+          } else {
+            // In create mode, go back to previous page
+            navigate(-1);
+          }
+        }}
       >
         <IoArrowBack />
         <p className="text-black">Back</p>
       </Box>
 
       <Center className="justify-between mt-4">
-        <Stack className="gap-0">
-          <h1 className="text-black text-xl font-medium">Add New Client</h1>
-          <h1 className="text-gray-500">
-            Fill in the details to create a new client
-          </h1>
-        </Stack>
+        <Box className="text-2xl font-bold text-black">
+          {mode === "edit" ? "Update Client" : "Create Client"}
+        </Box>
       </Center>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8">
           <Button
-            variant="outline"
-            className="bg-black text-white border border-gray-200 rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer mb-6 absolute top-15 right-5"
             type="submit"
             disabled={isPending || isCompressing}
+            // className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            className="bg-black text-white border border-gray-200 rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer mb-6 absolute top-15 right-5"
           >
             {isCompressing ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Compressing...
               </>
             ) : isPending ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Creating...
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {mode === "edit" ? "Updating..." : "Creating..."}
               </>
+            ) : mode === "edit" ? (
+              "Update Client"
             ) : (
-              "Save Client"
+              "Create Client"
             )}
           </Button>
           <Box className="bg-white/80 rounded-xl border border-gray-200 p-6 gap-6 grid grid-cols-1">
@@ -265,15 +428,7 @@ export const CreateClient = () => {
               <Box className="border-2 border-[#62A1C0] rounded-lg p-4 relative w-50 h-50">
                 <Stack className="gap-2">
                   <Box className="flex w-full absolute top-0 right-0 p-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setUploadedFile(null);
-                        setPdfPreview(null);
-                        setImageError("");
-                      }}
-                    >
+                    <Button variant="outline" size="sm" onClick={removeImage}>
                       X
                     </Button>
                   </Box>
@@ -343,7 +498,7 @@ export const CreateClient = () => {
                 name="phonenumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone Number:</FormLabel>
+                    {/* <FormLabel>Phone Number:</FormLabel> */}
                     <FormControl>
                       <PhoneInput
                         country={"us"}
@@ -424,5 +579,47 @@ export const CreateClient = () => {
         </form>
       </Form>
     </PageWrapper>
+  );
+};
+
+// Wrapper component for backward compatibility
+export const CreateClient = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Check if we're in edit mode from navigation state
+  const editMode = location.state?.mode === "edit";
+  const clientData = location.state?.client;
+
+  // Debug: Log the navigation state
+  console.log("Location state:", location.state);
+  console.log("Edit mode:", editMode);
+  console.log("Client data:", clientData);
+  console.log("Client ID from navigation:", clientData?.id);
+
+  return (
+    <ClientForm
+      mode={editMode ? "edit" : "create"}
+      client={editMode ? clientData : undefined}
+      onSuccess={() => {
+        if (editMode) {
+          toast.success("Client updated successfully!");
+          // Navigate back to client management
+          navigate("/dashboard/client-management");
+        } else {
+          // Navigate back after successful creation
+          navigate(-1);
+        }
+      }}
+      onClose={() => {
+        if (editMode) {
+          // Navigate back to client management
+          navigate("/dashboard/client-management");
+        } else {
+          // Navigate back
+          navigate("/dashboard/client-management");
+        }
+      }}
+    />
   );
 };
