@@ -7,7 +7,7 @@ import { Stack } from "../ui/stack";
 import { Button } from "../ui/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import {
   Form,
@@ -32,16 +32,22 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar } from "../ui/calendar";
 import { CalendarIcon } from "../customeIcons";
+import { useCreateProject } from "../../hooks/usecreateproject";
+import { useFetchClients } from "../../hooks/usefetchclients";
+import { useFetchOrganizationUsers } from "../../hooks/usefetchorganizationusers";
+import { useFetchAllOrganizations } from "../../hooks/usefetchallorganizations";
+import { useUser } from "../../providers/user.provider";
+import { toast } from "sonner";
 
 const formSchema = z.object({
-  projectName: z.string().min(2, {
+  name: z.string().min(2, {
     message: "Project Name must be at least 2 characters.",
   }),
   projectNumber: z.string().min(1, {
     message: "Project Number is required.",
   }),
-  clientName: z.string().min(2, {
-    message: "Client Name must be at least 2 characters.",
+  clientId: z.string().min(1, {
+    message: "Please select a client.",
   }),
   startDate: z.string().min(1, {
     message: "Start Date is required.",
@@ -49,10 +55,10 @@ const formSchema = z.object({
   endDate: z.string().min(1, {
     message: "End Date is required.",
   }),
-  assignedProject: z.string().min(1, {
-    message: "Please select a project to assign.",
+  assignedTo: z.string().min(1, {
+    message: "Please select a team member to assign.",
   }),
-  projectDescription: z.string().optional(),
+  description: z.string().optional(),
   address: z.string().min(2, {
     message: "Address must be at least 2 characters.",
   }),
@@ -63,37 +69,135 @@ export const CreateProject = () => {
   const navigate = useNavigate();
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [pdfPreview, setPdfPreview] = useState<string | null>(null);
-  console.log(uploadedFile);
+
+  // Get user authentication data
+  const { data: userData, isLoading: isLoadingUser } = useUser();
+
+  // Get user's organization data
+  const {
+    data: userOrgData,
+    isLoading: isLoadingUserOrg,
+    error: userOrgError,
+  } = useFetchAllOrganizations();
+
+  // Use the custom hooks
+  const {
+    mutate: createProject,
+    isPending: isLoading,
+    error,
+    isSuccess: success,
+  } = useCreateProject();
+
+  // Fetch clients and users for dropdowns
+  const { data: clientsData, isLoading: isLoadingClients } = useFetchClients();
+
+  const {
+    data: usersData,
+    isLoading: isLoadingUsers,
+    error: usersError,
+  } = useFetchOrganizationUsers();
+
+  // Get organization ID from user organization data
+  const organizationId = userOrgData?.data?.[0]?.id;
+
+  // Fallback: Try to get organization ID from user profile or session
+  const fallbackOrgId = userData?.user?.organizationId;
+
+  // Use the first available organization ID
+  const finalOrganizationId = organizationId || fallbackOrgId;
+
+  // TEMPORARY: For testing, use a hardcoded organization ID if none is found
+  const tempOrgId = finalOrganizationId || "temp-org-id-for-testing";
+
+  // Debug logging
+  console.log("🔍 User data:", userData);
+  console.log("🔍 User object:", userData?.user);
+  console.log("🔍 User organizationId:", userData?.user?.organizationId);
+  console.log("🔍 User role:", userData?.user?.role);
+  console.log("🔍 Is super admin:", userData?.user?.isSuperAdmin);
+  console.log("🔍 All organizations data:", userOrgData);
+  console.log("🔍 All organizations data.data:", userOrgData?.data);
+  console.log("🔍 First organization:", userOrgData?.data?.[0]);
+  console.log("🔍 Organization ID from all orgs:", organizationId);
+  console.log("🔍 Fallback org ID:", fallbackOrgId);
+  console.log("🔍 Final organization ID:", finalOrganizationId);
+  console.log("🔍 Clients data:", clientsData);
+  console.log("🔍 Users data:", usersData);
+  console.log("🔍 Users error:", usersError);
+  console.log("🔍 Is authenticated:", !!userData?.user);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      projectName: "",
-      projectNumber: "",
-      clientName: "",
-      startDate: "",
-      endDate: "",
-      assignedProject: "",
-      projectDescription: "",
-      address: "",
+      name: "Test Project",
+      projectNumber: "1234567890",
+      clientId: "",
+      startDate: new Date().toISOString(),
+      endDate: "2025-12-28",
+      assignedTo: "",
+      description: "Test Description",
+      address: "Test Address",
       contractfile: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  // Handle form submission
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      // Check if user has organization ID
+      if (!finalOrganizationId) {
+        console.error("No organization ID found for user");
+        toast.error(
+          "You need to be part of an organization to create projects"
+        );
+        return;
+      }
+
+      // Include file data if uploaded
+      const projectData = {
+        ...values,
+        contractfile: uploadedFile
+          ? await convertFileToBase64(uploadedFile)
+          : undefined,
+        organizationId: tempOrgId,
+      };
+
+      createProject(projectData);
+    } catch (error) {
+      console.error("Error preparing project data:", error);
+      toast.error("Failed to prepare project data");
+    }
   }
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
+  // Convert file to base64 for upload
+  const convertFileToBase64 = async (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  // Reset form on success
+  useEffect(() => {
+    if (success) {
+      form.reset();
+      setUploadedFile(null);
+      setPdfPreview(null);
+      navigate("/dashboard/projects");
+    }
+  }, [success, form]);
+
+  const onDropPdf = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file && file.type) {
-      setUploadedFile(file);
       const fileUrl = URL.createObjectURL(file);
       setPdfPreview(fileUrl);
     }
   }, []);
 
-  const { getInputProps, open } = useDropzone({
+  const { getInputProps: getPdfInputProps, open: openPdf } = useDropzone({
     maxFiles: 1,
     accept: {
       "application/pdf": [".pdf"],
@@ -105,7 +209,7 @@ export const CreateProject = () => {
       "image/svg": [".svg"],
       "image/bmp": [".bmp"],
     },
-    onDrop,
+    onDrop: onDropPdf,
   });
 
   return (
@@ -118,31 +222,85 @@ export const CreateProject = () => {
         <p className="text-black">Back</p>
       </Box>
 
-      <Center className="justify-between mt-6 max-sm:flex-col max-sm:items-start gap-2">
+      <Center className="justify-between mt-6 max-sm:flex-col max-sm:items-start gap-2 relative">
         <Stack className="gap-0">
           <h1 className="text-black text-xl font-medium">Create Project</h1>
           <h1 className="text-gray-500">
             Fill the details to create a new project
           </h1>
         </Stack>
-
-        <Button
-          variant="outline"
-          className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
-          onClick={() => navigate("/dashboard/project")}
-        >
-          Save Project
-        </Button>
       </Center>
 
+      {/* Error and Success Messages */}
+      {error && (
+        <Box className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <p className="text-red-600 text-sm">
+            {error.response?.data?.message ||
+              error.message ||
+              "An error occurred"}
+          </p>
+        </Box>
+      )}
+
+      {success && (
+        <Box className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+          <p className="text-green-600 text-sm">
+            Project created successfully!
+          </p>
+        </Box>
+      )}
+
+      {usersError && (
+        <Box className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <p className="text-red-600 text-sm">
+            Error loading users: {usersError.message}
+          </p>
+        </Box>
+      )}
+
+      {userOrgError && (
+        <Box className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <p className="text-red-600 text-sm">
+            Error loading organization: {userOrgError.message}
+          </p>
+        </Box>
+      )}
+
+      {isLoadingUserOrg && (
+        <Box className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <p className="text-blue-600 text-sm">
+            Loading your organization information...
+          </p>
+        </Box>
+      )}
+
+      {!isLoadingUserOrg && tempOrgId && (
+        <Box className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+          <p className="text-green-600 text-sm">
+            Organization ID: {tempOrgId}{" "}
+            {tempOrgId === "temp-org-id-for-testing"
+              ? "(Temporary for testing)"
+              : ""}
+          </p>
+        </Box>
+      )}
+
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 relative">
+          <Button
+            variant="outline"
+            className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer absolute -top-20 right-0"
+            type="submit"
+            disabled={isLoading || isLoadingUser || isLoadingUserOrg}
+          >
+            {isLoading ? "Creating..." : "Save Project"}
+          </Button>
           <Box className="bg-white/80 rounded-xl border border-gray-200 p-6 gap-4 grid grid-cols-1">
             <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
               <Stack className="flex-1 w-full gap-6">
                 <FormField
                   control={form.control}
-                  name="projectName"
+                  name="name"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
@@ -191,30 +349,29 @@ export const CreateProject = () => {
                 {!pdfPreview ? (
                   <Center
                     className="flex-col border-2 border-[#62A1C0] border-dashed border-spacing-2 bg-[#f5fdfe] rounded-lg min-h-50 w-full cursor-pointer"
-                    onClick={open}
+                    onClick={openPdf}
                   >
                     <img
                       src="/dashboard/upload.svg"
-                      alt="project-image"
+                      alt="pdf-upload"
                       className="size-12"
                     />
                     <p className="text-gray-800 text-lg font-medium underline">
-                      Click to upload PDF
+                      Click to upload Project PDF
                     </p>
                     <p className="text-gray-600 text-sm font-medium">
-                      Overall Project Schedule
+                      PDF files only
                     </p>
-                    <input {...getInputProps()} />
+                    <input {...getPdfInputProps()} />
                   </Center>
                 ) : (
                   <Box className="border-2 border-[#62A1C0] rounded-lg p-4 relative">
                     <Stack className="gap-2">
-                      <Box className="flex  ml-auto w-full absolute top-0 right-0 p-2">
+                      <Box className="flex ml-auto w-full absolute top-0 right-0 p-2">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            setUploadedFile(null);
                             setPdfPreview(null);
                           }}
                         >
@@ -226,7 +383,7 @@ export const CreateProject = () => {
                           <img
                             src={pdfPreview}
                             title="PDF Preview"
-                            className="  object-contain w-full h-full    "
+                            className="object-contain w-full h-full"
                             style={{ border: "none" }}
                             onError={(e) => {
                               console.error("PDF preview failed to load:", e);
@@ -243,7 +400,7 @@ export const CreateProject = () => {
             <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
               <FormField
                 control={form.control}
-                name="projectDescription"
+                name="description"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Project Description:</FormLabel>
@@ -377,7 +534,7 @@ export const CreateProject = () => {
             <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
               <FormField
                 control={form.control}
-                name="clientName"
+                name="clientId"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
@@ -387,19 +544,28 @@ export const CreateProject = () => {
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
+                      disabled={isLoadingClients}
                     >
                       <FormControl className="w-full h-11">
                         <SelectTrigger
                           size="lg"
                           className="bg-white border border-gray-300 rounded-full w-full h-12"
                         >
-                          <SelectValue placeholder="Select Client" />
+                          <SelectValue
+                            placeholder={
+                              isLoadingClients
+                                ? "Loading clients..."
+                                : "Select Client"
+                            }
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="w-full">
-                        <SelectItem value="cl1">Client 1</SelectItem>
-                        <SelectItem value="cl2">Client 2</SelectItem>
-                        <SelectItem value="cl3">Client 3</SelectItem>
+                        {clientsData?.data?.map((client) => (
+                          <SelectItem key={client.id} value={client.id}>
+                            {client.name}
+                          </SelectItem>
+                        )) || []}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -409,51 +575,70 @@ export const CreateProject = () => {
 
               <FormField
                 control={form.control}
-                name="assignedProject"
+                name="assignedTo"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Assign Project:
+                      Assign Team Member:
                       <span className="text-red-500 text-sm">*</span>
                     </FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
+                      disabled={isLoadingUsers}
                     >
                       <FormControl className="w-full h-11">
                         <SelectTrigger
                           size="lg"
                           className="bg-gray-100 border border-gray-100 rounded-full w-full h-11"
                         >
-                          <SelectValue placeholder="Select User" />
+                          <SelectValue
+                            placeholder={
+                              isLoadingUsers
+                                ? "Loading users..."
+                                : "Select User"
+                            }
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="w-full">
-                        <SelectItem value="pro1">User 1</SelectItem>
-                        <SelectItem value="pro2">User 2</SelectItem>
-                        <SelectItem value="pro3">User 3</SelectItem>
-                        <SelectItem value="pro4">User 4</SelectItem>
-                        <SelectItem value="pro5">User 5</SelectItem>
+                        {usersData?.data?.userMembers?.map((user) => (
+                          <SelectItem
+                            key={user.id}
+                            value={user.user?.id || user.id}
+                          >
+                            {user.firstname} {user.lastname}
+                          </SelectItem>
+                        )) || []}
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+            </Box>
 
+            <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
               <FormField
                 control={form.control}
                 name="contractfile"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Upload Contract File:</FormLabel>
+                    <FormLabel>Contract File:</FormLabel>
                     <FormControl>
                       <Input
-                        className="bg-white rounded-full h-11"
+                        className="bg-white rounded-full placeholder:text-gray-400"
                         size="lg"
                         type="file"
-                        placeholder="Upload Contract File"
-                        {...field}
+                        placeholder="Enter Contract File"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setUploadedFile(file);
+                          }
+                          field.onChange(e);
+                        }}
+                        accept=".pdf,.png,.jpeg,.jpg,.gif,.webp,.svg,.bmp"
                       />
                     </FormControl>
                     <FormMessage />

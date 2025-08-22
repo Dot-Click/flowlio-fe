@@ -234,7 +234,7 @@ const AppWithRouteGuard = () => {
         <Route element={<LazyWrapper component={UserLayout} />} path="user" />
         <Route
           element={<LazyWrapper component={AddUserMembersPage} />}
-          path="add-user-members"
+          path="user-management/add-user-members"
         />
         <Route
           element={<LazyWrapper component={UserManagementPage} />}
