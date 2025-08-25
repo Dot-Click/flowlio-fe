@@ -30,7 +30,7 @@ export const Navbar: FC<NavbarProps> = ({
   const navbarRef = useRef<HTMLDivElement>(null);
 
   const isHomePage = isHome || location.pathname === "/";
-  const isWorkflowPage = isWorkflow || location.pathname === "/work-flow";
+  const isWorkflowPage = isWorkflow || location.pathname === "/workflow";
   const isInsightsPage = isInsights || location.pathname === "/insights";
   const isPricingPage = isPricing || location.pathname === "/pricing";
 
@@ -129,7 +129,7 @@ export const Navbar: FC<NavbarProps> = ({
               </Link>
             )}
             <Link
-              to="/work-flow"
+              to="/workflow"
               className={cn(
                 "group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-[16px] font-medium transition-colors hover:bg-gray-100 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-none data-[state=open]:bg-none dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-none max-lg:hidden hover:text-[#F98618]",
                 isHomePage === true && "text-gray-500",
@@ -180,7 +180,7 @@ export const Navbar: FC<NavbarProps> = ({
                     Home
                   </Link>
                   <Link
-                    to="/work-flow"
+                    to="/workflow"
                     className={cn(
                       "flex w-full items-center py-2 text-lg font-semibold",
                       isWorkflowPage && "text-[#F98618]"
