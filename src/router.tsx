@@ -148,7 +148,7 @@ const AppWithRouteGuard = () => {
   useRouteGuard();
   return (
     <Routes>
-      {/* Public routes */}
+      {/* Public routes fixed the workflow route*/}
       <Route path="/" element={<LazyWrapper component={HomePage} />} />
       <Route
         path="/pricing"
