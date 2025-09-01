@@ -8,13 +8,13 @@ import {
 } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormWrapper } from "./formwrapper";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useForm } from "react-hook-form";
 import { Anchor } from "../ui/anchor";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Flex } from "../ui/flex";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { authClient } from "@/providers/user.provider";
 import { axios } from "@/configs/axios.config";
 import type { FC } from "react";
@@ -42,9 +42,20 @@ const formSchema = z.object({
 
 export const SignInForm: FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Check for deactivation message in URL params
+  useEffect(() => {
+    const message = searchParams.get("message");
+    if (message === "deactivated") {
+      toast.error(
+        "Your account has been deactivated. Please contact the administrator for assistance."
+      );
+    }
+  }, [searchParams]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -87,18 +98,24 @@ export const SignInForm: FC = () => {
               navigate("/dashboard");
               toast.success("User login successful");
             }
-
-            // Clear any cached data and navigate
-            // The UserProvider will automatically update with fresh data
           } catch (error) {
             console.error("Error fetching user profile:", error);
-            // Fallback to basic navigation
             navigate("/dashboard");
             toast.success("Login successful");
           }
         },
         onError: (ctx) => {
-          toast.error(ctx.error.message);
+          // Handle specific sub admin deactivation error
+          if (
+            ctx.error?.message?.includes("deactivated") ||
+            ctx.error?.code === "SUBADMIN_DEACTIVATED"
+          ) {
+            toast.error(
+              "Your account has been deactivated. Please contact the administrator for assistance."
+            );
+          } else {
+            toast.error(ctx.error.message || "Login failed");
+          }
           setIsLoading(false);
         },
       }

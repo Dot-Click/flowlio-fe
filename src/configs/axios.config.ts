@@ -32,3 +32,23 @@ export const axios = ax.create({
   baseURL: url,
   withCredentials: true,
 });
+
+// Add response interceptor to handle deactivated sub admin errors
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Handle specific sub admin deactivation error
+    if (
+      error.response?.status === 403 &&
+      error.response?.data?.code === "SUBADMIN_DEACTIVATED"
+    ) {
+      // Force logout if sub admin is deactivated
+      // Clear any stored auth data
+      localStorage.removeItem("auth-token");
+
+      // Redirect to login with specific message
+      window.location.href = "/auth/signin?message=deactivated";
+    }
+    return Promise.reject(error);
+  }
+);

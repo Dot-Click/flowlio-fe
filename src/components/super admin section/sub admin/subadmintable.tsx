@@ -21,6 +21,7 @@ import { useFetchSubAdmins } from "@/hooks/usefetchsubadmins";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { useDeleteSubAdmin } from "@/hooks/usedeletesubadmin";
+import { useUpdateSubAdminPermission } from "@/hooks/useupdatesubadminpermission";
 import { Flex } from "@/components/ui/flex";
 
 export type SubAdminData = {
@@ -38,6 +39,8 @@ export const SubAdminTable = () => {
     useFetchSubAdmins();
 
   const { mutate: deleteSubAdmin } = useDeleteSubAdmin();
+  const { mutate: updateSubAdminPermission, isPending: isUpdatingPermission } =
+    useUpdateSubAdminPermission();
 
   useEffect(() => {
     if (error) {
@@ -56,7 +59,7 @@ export const SubAdminTable = () => {
           lastName: item.lastName || "",
           email: item.email || "",
           contactNumber: item.contactNumber || "",
-          permission: item.permission || "Sub Admin",
+          permission: item.permission || "Active",
           createdAt: item.createdAt || new Date().toISOString(),
         })) || []
     ) || [];
@@ -79,6 +82,28 @@ export const SubAdminTable = () => {
         }
       );
     }
+  };
+
+  const handlePermissionChange = (
+    id: string,
+    newPermission: "Active" | "Deactivated"
+  ) => {
+    updateSubAdminPermission(
+      { id, permission: newPermission },
+      {
+        onSuccess: () => {
+          toast.success("Sub Admin permission updated successfully");
+          refetch();
+        },
+        onError: (error) => {
+          toast.error(
+            error.response?.data?.message ||
+              "Failed to update sub admin permission"
+          );
+          console.error("Failed to update permission:", error);
+        },
+      }
+    );
   };
 
   // Create columns with access to handleDelete function
@@ -120,12 +145,22 @@ export const SubAdminTable = () => {
       cell: ({ row }) => {
         return (
           <Center>
-            <Select defaultValue={row.original.permission}>
+            <Select
+              defaultValue={row.original.permission}
+              onValueChange={(value: "Active" | "Deactivated") =>
+                handlePermissionChange(row.original.id, value)
+              }
+              disabled={isUpdatingPermission}
+            >
               <SelectTrigger className="border rounded-md p-2 text-center bg-white w-32">
-                <SelectValue placeholder="Select" />
+                <SelectValue
+                  placeholder="Select"
+                  defaultValue={row.original.permission}
+                />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Sub Admin">Sub Admin</SelectItem>
+                <SelectItem value="Active">Active</SelectItem>
+                <SelectItem value="Deactivated">Deactivated</SelectItem>
               </SelectContent>
             </Select>
           </Center>

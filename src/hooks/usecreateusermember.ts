@@ -53,6 +53,9 @@ export const useCreateUserMember = () => {
       console.log("User member created successfully:", data);
 
       // Invalidate and refetch relevant queries
+      queryClient.invalidateQueries({
+        queryKey: ["get-current-org-user-members"],
+      });
       queryClient.invalidateQueries({ queryKey: ["fetch user organizations"] });
       queryClient.invalidateQueries({ queryKey: ["fetch all organizations"] });
 

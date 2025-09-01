@@ -116,6 +116,10 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
       queryClient.removeQueries({ queryKey: ["user-profile"] });
       queryClient.removeQueries({ queryKey: ["get-current-org-user-members"] });
       queryClient.removeQueries({ queryKey: ["get-all-user-members"] });
+      queryClient.removeQueries({ queryKey: ["projects"] });
+      queryClient.removeQueries({ queryKey: ["project"] });
+      queryClient.removeQueries({ queryKey: ["organization-clients"] });
+      queryClient.removeQueries({ queryKey: ["organization-users"] });
 
       console.log("✅ React Query cache cleared for user change");
     }
@@ -139,6 +143,10 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
       queryClient.removeQueries({ queryKey: ["user-profile"] });
       queryClient.removeQueries({ queryKey: ["get-current-org-user-members"] });
       queryClient.removeQueries({ queryKey: ["get-all-user-members"] });
+      queryClient.removeQueries({ queryKey: ["projects"] });
+      queryClient.removeQueries({ queryKey: ["project"] });
+      queryClient.removeQueries({ queryKey: ["organization-clients"] });
+      queryClient.removeQueries({ queryKey: ["organization-users"] });
 
       return;
     }

@@ -33,8 +33,8 @@ import { format } from "date-fns";
 import { Calendar } from "../ui/calendar";
 import { CalendarIcon } from "../customeIcons";
 import { useCreateProject } from "../../hooks/usecreateproject";
-import { useFetchClients } from "../../hooks/usefetchclients";
-import { useFetchOrganizationUsers } from "../../hooks/usefetchorganizationusers";
+import { useFetchOrganizationClients } from "../../hooks/usefetchorganizationdata";
+import { useFetchOrganizationUsers } from "../../hooks/usefetchorganizationdata";
 import { useFetchAllOrganizations } from "../../hooks/usefetchallorganizations";
 import { useUser } from "../../providers/user.provider";
 import { toast } from "sonner";
@@ -89,7 +89,8 @@ export const CreateProject = () => {
   } = useCreateProject();
 
   // Fetch clients and users for dropdowns
-  const { data: clientsData, isLoading: isLoadingClients } = useFetchClients();
+  const { data: clientsData, isLoading: isLoadingClients } =
+    useFetchOrganizationClients();
 
   const {
     data: usersData,
@@ -97,34 +98,29 @@ export const CreateProject = () => {
     error: usersError,
   } = useFetchOrganizationUsers();
 
-  // Get organization ID from user organization data
-  const organizationId = userOrgData?.data?.[0]?.id;
+  // Get organization ID from user profile or session (this is the correct one)
+  const userOrgId = userData?.user?.organizationId;
 
-  // Fallback: Try to get organization ID from user profile or session
-  const fallbackOrgId = userData?.user?.organizationId;
+  // Fallback: Try to get organization ID from user organization data
+  const fallbackOrgId = userOrgData?.data?.[0]?.id;
 
-  // Use the first available organization ID
-  const finalOrganizationId = organizationId || fallbackOrgId;
+  // Get organization ID from clients/users data (this should be the correct one from backend)
+  const clientsOrgId = clientsData?.data?.[0]?.organizationId;
+  const usersOrgId = usersData?.data?.[0]?.organizationId;
 
-  // TEMPORARY: For testing, use a hardcoded organization ID if none is found
-  const tempOrgId = finalOrganizationId || "temp-org-id-for-testing";
+  // Use the organization ID from clients/users data first, then fallback to user data
+  const finalOrganizationId =
+    clientsOrgId || usersOrgId || userOrgId || fallbackOrgId;
 
   // Debug logging
   console.log("🔍 User data:", userData);
-  console.log("🔍 User object:", userData?.user);
-  console.log("🔍 User organizationId:", userData?.user?.organizationId);
-  console.log("🔍 User role:", userData?.user?.role);
-  console.log("🔍 Is super admin:", userData?.user?.isSuperAdmin);
-  console.log("🔍 All organizations data:", userOrgData);
-  console.log("🔍 All organizations data.data:", userOrgData?.data);
-  console.log("🔍 First organization:", userOrgData?.data?.[0]);
-  console.log("🔍 Organization ID from all orgs:", organizationId);
-  console.log("🔍 Fallback org ID:", fallbackOrgId);
+  console.log("🔍 User organization ID:", userData?.user?.organizationId);
+  console.log("🔍 User org data:", userOrgData?.data?.[0]?.id);
   console.log("🔍 Final organization ID:", finalOrganizationId);
   console.log("🔍 Clients data:", clientsData);
   console.log("🔍 Users data:", usersData);
-  console.log("🔍 Users error:", usersError);
-  console.log("🔍 Is authenticated:", !!userData?.user);
+  console.log("🔍 Clients organization ID:", clientsOrgId);
+  console.log("🔍 Users organization ID:", usersOrgId);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -159,9 +155,10 @@ export const CreateProject = () => {
         contractfile: uploadedFile
           ? await convertFileToBase64(uploadedFile)
           : undefined,
-        organizationId: tempOrgId,
+        organizationId: finalOrganizationId,
       };
 
+      console.log("🚀 Creating project with data:", projectData);
       createProject(projectData);
     } catch (error) {
       console.error("Error preparing project data:", error);
@@ -270,17 +267,6 @@ export const CreateProject = () => {
         <Box className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <p className="text-blue-600 text-sm">
             Loading your organization information...
-          </p>
-        </Box>
-      )}
-
-      {!isLoadingUserOrg && tempOrgId && (
-        <Box className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-          <p className="text-green-600 text-sm">
-            Organization ID: {tempOrgId}{" "}
-            {tempOrgId === "temp-org-id-for-testing"
-              ? "(Temporary for testing)"
-              : ""}
           </p>
         </Box>
       )}
@@ -602,12 +588,9 @@ export const CreateProject = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="w-full">
-                        {usersData?.data?.userMembers?.map((user) => (
-                          <SelectItem
-                            key={user.id}
-                            value={user.user?.id || user.id}
-                          >
-                            {user.firstname} {user.lastname}
+                        {usersData?.data?.map((user) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user.name}
                           </SelectItem>
                         )) || []}
                       </SelectContent>

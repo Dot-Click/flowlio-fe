@@ -93,8 +93,10 @@ export const useGetCurrentOrgUserMembers = (
 
       return response.data;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 0, // No caching - always fetch fresh data
+    gcTime: 0, // No garbage collection delay
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gains focus
   });
 };
 

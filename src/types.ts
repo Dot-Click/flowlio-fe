@@ -61,7 +61,7 @@ export type ISubAdmin<T = {}> = {
   lastName: string;
   email: string;
   contactNumber?: string;
-  permission: "Admin" | "Sub Admin" | "User";
+  permission: "Active" | "Deactivated";
   password: string;
   logo?: string | null;
   logoPublicId?: string | null;
@@ -144,7 +144,7 @@ export type CreatePlanRequest = {
 };
 
 // Sub Admin related types
-export type SubAdminPermission = "Admin" | "Sub Admin" | "User";
+export type SubAdminPermission = "Active" | "Deactivated";
 export type SubAdminStatus = "active" | "inactive" | "suspended";
 export type CreateSubAdminRequest = {
   firstName: string;

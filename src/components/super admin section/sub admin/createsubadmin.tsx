@@ -42,8 +42,8 @@ const formSchema = z
       message: "Please enter a valid email address.",
     }),
     contactNumber: z.string().optional(),
-    permission: z.enum(["Admin", "Sub Admin", "User"], {
-      message: "Please select a valid permission level.",
+    permission: z.enum(["Active", "Deactivated"], {
+      message: "Please select a valid permission status.",
     }),
     password: z
       .string()
@@ -83,7 +83,7 @@ export const CreateSubAdmin = () => {
       lastName: "Admin",
       email: "subadmin@gmail.com",
       contactNumber: "1234567890",
-      permission: "Sub Admin",
+      permission: "Active",
       password: "Sub@11111",
       confirmPassword: "Sub@11111",
     },
@@ -237,7 +237,7 @@ export const CreateSubAdmin = () => {
                 name="permission"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Permission:</FormLabel>
+                    <FormLabel>Permission Status:</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -247,16 +247,25 @@ export const CreateSubAdmin = () => {
                           size="lg"
                           className="bg-gray-100 border border-gray-300 rounded-full w-full h-12"
                         >
-                          <SelectValue placeholder="Select Permission" />
+                          <SelectValue placeholder="Select Permission Status" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="w-full">
-                        {/* <SelectItem value="Admin">Admin</SelectItem> */}
-                        <SelectItem value="Sub Admin">Sub Admin</SelectItem>
-                        {/* <SelectItem value="User">User</SelectItem> */}
+                        <SelectItem value="Active">Active</SelectItem>
+                        <SelectItem value="Deactivated">Deactivated</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
+                    <Box className="text-xs text-gray-500 mt-1">
+                      <Box>
+                        • <strong>Active:</strong> Sub admin can log in and
+                        access the system
+                      </Box>
+                      <Box>
+                        • <strong>Deactivated:</strong> Sub admin cannot log in
+                        or access the system
+                      </Box>
+                    </Box>
                   </FormItem>
                 )}
               />

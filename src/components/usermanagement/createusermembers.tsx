@@ -109,25 +109,14 @@ export const CreateUserMembers = () => {
       if (uploadedFile) {
         formData.append("profileImage", uploadedFile);
       }
-
-      // Debug: Log what we're sending
-      console.log("🔍 Form values:", values);
-      console.log("🔍 FormData entries:");
-      for (const [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
-      }
-
       await createUserMember.mutateAsync(formData);
 
       toast.success("User member created successfully!");
-
-      // Reset form and image
       form.reset();
+      refetch();
       setUploadedFile(null);
       setImagePreview(null);
       setImageError(null);
-      refetch();
-      // Navigate back or to user list
       navigate(-1);
     } catch (error: any) {
       const errorMessage =

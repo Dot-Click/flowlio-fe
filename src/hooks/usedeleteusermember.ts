@@ -64,6 +64,9 @@ export const useDeleteUserMember = () => {
       console.log("User member deleted successfully:", data);
 
       // Invalidate and refetch relevant queries
+      queryClient.invalidateQueries({
+        queryKey: ["get-current-org-user-members"],
+      });
       queryClient.invalidateQueries({ queryKey: ["get-all-user-members"] });
       queryClient.invalidateQueries({ queryKey: ["fetch user organizations"] });
       queryClient.invalidateQueries({ queryKey: ["fetch all organizations"] });
@@ -95,6 +98,9 @@ export const useDeactivateUserMember = () => {
       console.log("User member deactivated successfully:", data);
 
       // Invalidate and refetch relevant queries
+      queryClient.invalidateQueries({
+        queryKey: ["get-current-org-user-members"],
+      });
       queryClient.invalidateQueries({ queryKey: ["get-all-user-members"] });
       queryClient.invalidateQueries({
         queryKey: ["get-user-member-by-id", id],
@@ -124,6 +130,7 @@ export const useReactivateUserMember = () => {
       console.log("User member reactivated successfully:", data);
 
       // Invalidate and refetch relevant queries
+      queryClient.invalidateQueries({ queryKey: ["get-current-org-user-members"] });
       queryClient.invalidateQueries({ queryKey: ["get-all-user-members"] });
       queryClient.invalidateQueries({
         queryKey: ["get-user-member-by-id", id],

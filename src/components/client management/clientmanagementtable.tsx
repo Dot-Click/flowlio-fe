@@ -242,16 +242,24 @@ export const ClientManagementTable = () => {
           },
         };
 
+        // Default style if status is not found
+        const defaultStyle = {
+          text: "text-white bg-gray-500 border-none rounded-full",
+          dot: "bg-white",
+        };
+
+        const currentStyle = statusStyles[status] || defaultStyle;
+
         return (
           <Center>
             <Flex
-              className={`rounded-md capitalize w-38 h-10 gap-2 border justify-center items-center ${statusStyles[status].text}`}
+              className={`rounded-md capitalize w-38 h-10 gap-2 border justify-center items-center ${currentStyle.text}`}
             >
               <Center className="gap-2">
                 <Flex
-                  className={`w-2 h-2 items-start rounded-full ${statusStyles[status].dot}`}
+                  className={`w-2 h-2 items-start rounded-full ${currentStyle.dot}`}
                 />
-                <h1>{status}</h1>
+                <h1>{status || "Unknown"}</h1>
               </Center>
             </Flex>
           </Center>

@@ -22,121 +22,25 @@ import {
   GeneralModal,
   useGeneralModalDisclosure,
 } from "../common/generalmodal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "../ui/input";
 import { Stack } from "../ui/stack";
 import { useNavigate } from "react-router";
 import { FaRegTrashAlt } from "react-icons/fa";
+import { useFetchProjects, type Project } from "@/hooks/usefetchprojects";
+import { toast } from "sonner";
+import { useDeleteProject } from "@/hooks/usedeleteproject";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
 
-// Updated data structure to match your database schema
-const data: Data[] = [
-  {
-    id: "1",
-    projectNumber: "PRJ-001",
-    projectName: "Foundation Plan",
-    clientName: "Client A",
-    description: "Building foundation planning project",
-    startDate: new Date("2025-02-21T00:00:00"),
-    endDate: new Date("2025-03-01T00:00:00"),
-    assignedProject: "User 1",
-    address: "123 Main St, City",
-    status: "completed",
-    progress: 3,
-    createdBy: "ken99",
-    organizationId: "org1",
-    createdAt: new Date("2025-01-15T00:00:00"),
-    updatedAt: new Date("2025-01-15T00:00:00"),
-  },
-  {
-    id: "2",
-    projectNumber: "PRJ-002",
-    projectName: "Foundation Plan",
-    clientName: "Client B",
-    description: "Foundation planning for commercial building",
-    startDate: new Date("2025-04-09T00:00:00"),
-    endDate: new Date("2025-06-01T00:00:00"),
-    assignedProject: "User 2",
-    address: "456 Business Ave, City",
-    status: "pending",
-    progress: 30,
-    createdBy: "Abe45",
-    organizationId: "org1",
-    createdAt: new Date("2025-01-20T00:00:00"),
-    updatedAt: new Date("2025-01-20T00:00:00"),
-  },
-  {
-    id: "3",
-    projectNumber: "PRJ-003",
-    projectName: "ClientBridge CRM Upgrade",
-    clientName: "Client C",
-    description: "CRM system upgrade and optimization",
-    startDate: new Date("2025-01-14T00:00:00"),
-    endDate: new Date("2025-02-01T00:00:00"),
-    assignedProject: "User 3",
-    address: "789 Tech Blvd, City",
-    status: "completed",
-    progress: 10,
-    createdBy: "Monserrat44",
-    organizationId: "org1",
-    createdAt: new Date("2025-01-10T00:00:00"),
-    updatedAt: new Date("2025-01-10T00:00:00"),
-  },
-  {
-    id: "4",
-    projectNumber: "PRJ-004",
-    projectName: "ClientBridge CRM Upgrade",
-    clientName: "Client D",
-    description: "Phase 2 of CRM upgrade",
-    startDate: new Date("2025-02-12T00:00:00"),
-    endDate: new Date("2025-06-01T00:00:00"),
-    assignedProject: "User 4",
-    address: "321 Innovation Dr, City",
-    status: "pending",
-    progress: 3,
-    createdBy: "Silas22",
-    organizationId: "org1",
-    createdAt: new Date("2025-01-25T00:00:00"),
-    updatedAt: new Date("2025-01-25T00:00:00"),
-  },
-  {
-    id: "5",
-    projectNumber: "PRJ-005",
-    projectName: "ClientBridge CRM Upgrade",
-    clientName: "Client E",
-    description: "Final phase of CRM upgrade",
-    startDate: new Date("2025-03-10T00:00:00"),
-    endDate: new Date("2025-04-01T00:00:00"),
-    assignedProject: "User 5",
-    address: "654 Digital Way, City",
-    status: "completed",
-    progress: 3,
-    createdBy: "carmella",
-    organizationId: "org1",
-    createdAt: new Date("2025-01-30T00:00:00"),
-    updatedAt: new Date("2025-01-30T00:00:00"),
-  },
-];
-
-// Updated type to match your database schema
-export type Data = {
-  id: string;
-  projectNumber: string;
-  projectName: string;
-  clientName: string;
-  description?: string;
-  startDate: Date;
-  endDate: Date;
-  assignedProject: string;
-  address: string;
-  status: "pending" | "completed" | "ongoing";
-  progress: number;
-  createdBy: string;
-  organizationId: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-// Comment interface to match your database schema
+// Use the Project interface from the hook
+export type Data = Project;
 interface ProjectComment {
   id: string;
   projectId: string;
@@ -149,6 +53,24 @@ interface ProjectComment {
 }
 
 export const ProjectTable = () => {
+  // Fetch projects from API
+  const { data: projectsData, isLoading, error } = useFetchProjects();
+
+  // Handle API errors
+  useEffect(() => {
+    if (error) {
+      toast.error("Failed to fetch projects");
+    }
+  }, [error]);
+
+  // Transform API data to match table expectations
+  const transformedData: Data[] =
+    projectsData?.data?.map((project) => ({
+      ...project,
+      startDate: project.startDate ? new Date(project.startDate) : null,
+      endDate: project.endDate ? new Date(project.endDate) : null,
+    })) || [];
+
   // Updated comment state to match database schema
   const [comments, setComments] = useState<Record<string, ProjectComment[]>>(
     {}
@@ -158,6 +80,11 @@ export const ProjectTable = () => {
   const [input, setInput] = useState("");
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   // Add comment handler - now supports nested comments
   const handleAddComment = (parentId?: string) => {
@@ -223,6 +150,34 @@ export const ProjectTable = () => {
     ...comment,
     replies: replies.filter((reply) => reply.parentId === comment.id),
   }));
+  const { mutate: handleDeleteProject, isPending: isDeletingProject } =
+    useDeleteProject();
+
+  // Delete confirmation handler
+  const handleDeleteClick = (project: { id: string; name: string }) => {
+    setProjectToDelete(project);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (projectToDelete) {
+      handleDeleteProject(projectToDelete.id, {
+        onSuccess: () => {
+          toast.success("Project deleted successfully");
+          setDeleteConfirmOpen(false);
+          setProjectToDelete(null);
+        },
+        onError: (error) => {
+          toast.error(error.message || "Failed to delete project");
+        },
+      });
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteConfirmOpen(false);
+    setProjectToDelete(null);
+  };
 
   const columns: ColumnDef<Data>[] = [
     {
@@ -250,6 +205,15 @@ export const ProjectTable = () => {
         <Box className="captialize text-center">{row.original.clientName}</Box>
       ),
     },
+    {
+      accessorKey: "assignedProject",
+      header: () => <Box className="text-black text-center">Assigned To</Box>,
+      cell: ({ row }) => (
+        <Box className="captialize text-center">
+          {row.original.assignedProject}
+        </Box>
+      ),
+    },
 
     {
       accessorKey: "startDate",
@@ -259,7 +223,7 @@ export const ProjectTable = () => {
         try {
           return (
             <Box className="text-center">
-              {format(startDate, "MMM d, yyyy")}
+              {startDate ? format(startDate, "MMM d, yyyy") : "Not set"}
             </Box>
           );
         } catch (error) {
@@ -274,6 +238,7 @@ export const ProjectTable = () => {
           if (!from || !to) return true;
           const startDate = row.original.startDate;
           const endDate = row.original.endDate;
+          if (!startDate || !endDate) return false;
           return (
             isWithinInterval(startDate, { start: from, end: to }) ||
             isWithinInterval(endDate, { start: from, end: to }) ||
@@ -293,7 +258,9 @@ export const ProjectTable = () => {
         const endDate = row.original.endDate;
         try {
           return (
-            <Box className="text-center">{format(endDate, "MMM d, yyyy")}</Box>
+            <Box className="text-center">
+              {endDate ? format(endDate, "MMM d, yyyy") : "Not set"}
+            </Box>
           );
         } catch (error) {
           console.error("Invalid date:", endDate);
@@ -423,16 +390,19 @@ export const ProjectTable = () => {
                   <Button
                     variant="outline"
                     className="bg-[#A50403] border-none w-9 h-9 hover:bg-[#A50403]/80 cursor-pointer rounded-md "
-                    // onClick={() =>
-                    //   handleDeleteClient(row.original.id, row.original.name)
-                    // }
-                    // disabled={isDeleting}
+                    onClick={() =>
+                      handleDeleteClick({
+                        id: row.original.id,
+                        name: row.original.projectName,
+                      })
+                    }
+                    disabled={isDeletingProject}
                   >
                     <FaRegTrashAlt className="text-white fill-white size-4 " />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="mb-2">
-                  <p>Delete Client</p>
+                  <p>Delete Project</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -444,15 +414,24 @@ export const ProjectTable = () => {
 
   return (
     <>
-      <ReusableTable
-        data={data}
-        columns={columns}
-        searchInput={false}
-        enablePaymentLinksCalender={true}
-        onRowClick={(row) => {
-          console.log("Row clicked:", row.original);
-        }}
-      />
+      {isLoading ? (
+        <Box className="flex items-center justify-center p-8">
+          <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
+          <Box className="ml-2">Loading projects...</Box>
+        </Box>
+      ) : (
+        <>
+          <ReusableTable
+            data={transformedData}
+            columns={columns}
+            searchInput={false}
+            enablePaymentLinksCalender={true}
+            onRowClick={(row) => {
+              console.log("Row clicked:", row.original);
+            }}
+          />
+        </>
+      )}
 
       <GeneralModal
         {...props}
@@ -614,6 +593,36 @@ export const ProjectTable = () => {
           </Flex>
         </Box>
       </GeneralModal>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Delete Project</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete the project "
+              {projectToDelete?.name}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={handleCancelDelete}
+              disabled={isDeletingProject}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              disabled={isDeletingProject}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeletingProject ? "Deleting..." : "Delete Project"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
