@@ -202,14 +202,14 @@ export const ProjectTable = () => {
       accessorKey: "clientName",
       header: () => <Box className="text-black text-center">Client</Box>,
       cell: ({ row }) => (
-        <Box className="captialize text-center">{row.original.clientName}</Box>
+        <Box className="capitalize text-center">{row.original.clientName}</Box>
       ),
     },
     {
       accessorKey: "assignedProject",
       header: () => <Box className="text-black text-center">Assigned To</Box>,
       cell: ({ row }) => (
-        <Box className="captialize text-center">
+        <Box className="capitalize text-center">
           {row.original.assignedProject}
         </Box>
       ),
@@ -338,6 +338,9 @@ export const ProjectTable = () => {
                   <Button
                     variant="outline"
                     className="bg-black border-none w-10 h-9 hover:bg-black cursor-pointer rounded-md "
+                    onClick={() => {
+                      navigate(`/dashboard/projects/view/${row.original.id}`);
+                    }}
                   >
                     <Eye className="fill-white size-7 " />
                   </Button>
@@ -355,9 +358,7 @@ export const ProjectTable = () => {
                     variant="outline"
                     className="bg-[#23B95D] hover:bg-[#23B95D]/80 rounded-md border-none cursor-pointer"
                     onClick={() => {
-                      navigate(
-                        `/dashboard/project/create-project/${row.original.id}`
-                      );
+                      navigate(`/dashboard/projects/edit/${row.original.id}`);
                     }}
                   >
                     <PencilLine className="fill-white text-white" />

@@ -1,7 +1,7 @@
 import { IoArrowBack } from "react-icons/io5";
 import { PageWrapper } from "../common/pagewrapper";
 import { Box } from "../ui/box";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { Center } from "../ui/center";
 import { Stack } from "../ui/stack";
 import { Button } from "../ui/button";
@@ -33,6 +33,8 @@ import { format } from "date-fns";
 import { Calendar } from "../ui/calendar";
 import { CalendarIcon } from "../customeIcons";
 import { useCreateProject } from "../../hooks/usecreateproject";
+import { useUpdateProject } from "../../hooks/useupdateproject";
+import { useFetchProjectById } from "../../hooks/usefetchprojects";
 import { useFetchOrganizationClients } from "../../hooks/usefetchorganizationdata";
 import { useFetchOrganizationUsers } from "../../hooks/usefetchorganizationdata";
 import { useFetchAllOrganizations } from "../../hooks/usefetchallorganizations";
@@ -63,12 +65,32 @@ const formSchema = z.object({
     message: "Address must be at least 2 characters.",
   }),
   contractfile: z.string().optional(),
+  projectFiles: z
+    .array(
+      z.object({
+        file: z.string(),
+        type: z.string(),
+        name: z.string(),
+      })
+    )
+    .optional(),
 });
 
 export const CreateProject = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const isEditMode = Boolean(id);
+
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [pdfPreview, setPdfPreview] = useState<string | null>(null);
+  const [projectFiles, setProjectFiles] = useState<
+    Array<{
+      file: File;
+      type: string;
+      name: string;
+      preview: string;
+    }>
+  >([]);
 
   // Get user authentication data
   const { data: userData, isLoading: isLoadingUser } = useUser();
@@ -80,13 +102,27 @@ export const CreateProject = () => {
     error: userOrgError,
   } = useFetchAllOrganizations();
 
+  // Fetch project data if in edit mode
+  const {
+    data: projectData,
+    isLoading: isLoadingProject,
+    error: projectError,
+  } = useFetchProjectById(id || "");
+
   // Use the custom hooks
   const {
     mutate: createProject,
-    isPending: isLoading,
-    error,
-    isSuccess: success,
+    isPending: isCreating,
+    error: createError,
+    isSuccess: createSuccess,
   } = useCreateProject();
+
+  const {
+    mutate: updateProject,
+    isPending: isUpdating,
+    error: updateError,
+    isSuccess: updateSuccess,
+  } = useUpdateProject();
 
   // Fetch clients and users for dropdowns
   const { data: clientsData, isLoading: isLoadingClients } =
@@ -113,29 +149,43 @@ export const CreateProject = () => {
     clientsOrgId || usersOrgId || userOrgId || fallbackOrgId;
 
   // Debug logging
-  console.log("🔍 User data:", userData);
-  console.log("🔍 User organization ID:", userData?.user?.organizationId);
-  console.log("🔍 User org data:", userOrgData?.data?.[0]?.id);
-  console.log("🔍 Final organization ID:", finalOrganizationId);
-  console.log("🔍 Clients data:", clientsData);
-  console.log("🔍 Users data:", usersData);
-  console.log("🔍 Clients organization ID:", clientsOrgId);
-  console.log("🔍 Users organization ID:", usersOrgId);
+  console.log("🔍 User data:", userData, clientsData, projectData);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "Test Project",
-      projectNumber: "1234567890",
+      name: "",
+      projectNumber: "",
       clientId: "",
       startDate: new Date().toISOString(),
-      endDate: "2025-12-28",
+      endDate: "",
       assignedTo: "",
-      description: "Test Description",
-      address: "Test Address",
+      description: "",
+      address: "",
       contractfile: "",
+      projectFiles: [],
     },
   });
+
+  // Populate form with project data when in edit mode
+  useEffect(() => {
+    if (isEditMode && projectData?.data) {
+      const project = projectData.data;
+      form.reset({
+        name: project.projectName || "",
+        projectNumber: project.projectNumber || "",
+        clientId: project.clientId || "",
+        startDate: project.startDate
+          ? new Date(project.startDate).toISOString()
+          : new Date().toISOString(),
+        endDate: project.endDate ? new Date(project.endDate).toISOString() : "",
+        assignedTo: project.assignedTo || "",
+        description: project.description || "",
+        address: project.address || "",
+        contractfile: project.contractfile || "",
+      });
+    }
+  }, [isEditMode, projectData, form]);
 
   // Handle form submission
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -149,17 +199,41 @@ export const CreateProject = () => {
         return;
       }
 
+      // Check file size before processing
+      if (uploadedFile && uploadedFile.size > 10 * 1024 * 1024) {
+        toast.error(
+          "File size must be less than 10MB. Please choose a smaller file."
+        );
+        return;
+      }
+
+      // Convert project files to base64
+      const convertedProjectFiles = await Promise.all(
+        projectFiles.map(async (fileData) => ({
+          file: await convertFileToBase64(fileData.file),
+          type: fileData.type,
+          name: fileData.name,
+        }))
+      );
+
       // Include file data if uploaded
       const projectData = {
         ...values,
         contractfile: uploadedFile
           ? await convertFileToBase64(uploadedFile)
           : undefined,
+        projectFiles:
+          convertedProjectFiles.length > 0 ? convertedProjectFiles : undefined,
         organizationId: finalOrganizationId,
       };
 
-      console.log("🚀 Creating project with data:", projectData);
-      createProject(projectData);
+      console.log("🚀 Submitting project with data:", projectData);
+
+      if (isEditMode && id) {
+        updateProject({ id, data: projectData });
+      } else {
+        createProject(projectData);
+      }
     } catch (error) {
       console.error("Error preparing project data:", error);
       toast.error("Failed to prepare project data");
@@ -170,43 +244,89 @@ export const CreateProject = () => {
   const convertFileToBase64 = async (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
+
+      // Add progress tracking for large files
+      reader.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = (event.loaded / event.total) * 100;
+          console.log(`File upload progress: ${percentComplete.toFixed(2)}%`);
+        }
+      };
+
       reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
+      reader.onload = () => {
+        const result = reader.result as string;
+        console.log(
+          `File converted to base64. Size: ${(
+            result.length /
+            1024 /
+            1024
+          ).toFixed(2)}MB`
+        );
+        resolve(result);
+      };
+      reader.onerror = (error) => {
+        console.error("Error reading file:", error);
+        reject(error);
+      };
     });
   };
 
   // Reset form on success
   useEffect(() => {
-    if (success) {
+    if (createSuccess || updateSuccess) {
       form.reset();
       setUploadedFile(null);
       setPdfPreview(null);
+      setProjectFiles([]);
       navigate("/dashboard/projects");
     }
-  }, [success, form]);
+  }, [createSuccess, updateSuccess, form, navigate]);
 
   const onDropPdf = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file && file.type) {
       const fileUrl = URL.createObjectURL(file);
       setPdfPreview(fileUrl);
+
+      // Add to projectFiles state for project PDF
+      const newFile = {
+        file,
+        type: "projectPdf",
+        name: file.name,
+        preview: fileUrl,
+      };
+      setProjectFiles((prev) => [
+        ...prev.filter((f) => f.type !== "projectPdf"),
+        newFile,
+      ]);
     }
   }, []);
 
   const { getInputProps: getPdfInputProps, open: openPdf } = useDropzone({
     maxFiles: 1,
+    maxSize: 10 * 1024 * 1024, // 10MB limit
     accept: {
       "application/pdf": [".pdf"],
       "image/png": [".png"],
       "image/jpeg": [".jpeg"],
       "image/jpg": [".jpg"],
-      "image/gif": [".gif"],
-      "image/webp": [".webp"],
       "image/svg": [".svg"],
-      "image/bmp": [".bmp"],
     },
     onDrop: onDropPdf,
+    onDropRejected: (fileRejections) => {
+      fileRejections.forEach(({ file, errors }) => {
+        errors.forEach((error) => {
+          if (error.code === "file-too-large") {
+            toast.error(
+              `File "${file.name}" is too large. Maximum size is 10MB.`
+            );
+          } else {
+            toast.error(`Error with file "${file.name}": ${error.message}`);
+          }
+        });
+      });
+    },
   });
 
   return (
@@ -221,28 +341,32 @@ export const CreateProject = () => {
 
       <Center className="justify-between mt-6 max-sm:flex-col max-sm:items-start gap-2 relative">
         <Stack className="gap-0">
-          <h1 className="text-black text-xl font-medium">Create Project</h1>
+          <h1 className="text-black text-xl font-medium">
+            {isEditMode ? "Edit Project" : "Create Project"}
+          </h1>
           <h1 className="text-gray-500">
-            Fill the details to create a new project
+            {isEditMode
+              ? "Update the project details below"
+              : "Fill the details to create a new project"}
           </h1>
         </Stack>
       </Center>
 
       {/* Error and Success Messages */}
-      {error && (
+      {(createError || updateError || projectError) && (
         <Box className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
           <p className="text-red-600 text-sm">
-            {error.response?.data?.message ||
-              error.message ||
+            {(createError || updateError || projectError)?.name ||
+              (createError || updateError || projectError)?.message ||
               "An error occurred"}
           </p>
         </Box>
       )}
 
-      {success && (
+      {(createSuccess || updateSuccess) && (
         <Box className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
           <p className="text-green-600 text-sm">
-            Project created successfully!
+            Project {isEditMode ? "updated" : "created"} successfully!
           </p>
         </Box>
       )}
@@ -271,15 +395,35 @@ export const CreateProject = () => {
         </Box>
       )}
 
+      {isLoadingProject && (
+        <Box className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <p className="text-blue-600 text-sm">
+            Loading project information...
+          </p>
+        </Box>
+      )}
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 relative">
           <Button
             variant="outline"
             className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer absolute -top-20 right-0"
             type="submit"
-            disabled={isLoading || isLoadingUser || isLoadingUserOrg}
+            disabled={
+              isCreating ||
+              isUpdating ||
+              isLoadingUser ||
+              isLoadingUserOrg ||
+              isLoadingProject
+            }
           >
-            {isLoading ? "Creating..." : "Save Project"}
+            {isCreating || isUpdating
+              ? isEditMode
+                ? "Updating..."
+                : "Creating..."
+              : isEditMode
+              ? "Update Project"
+              : "Save Project"}
           </Button>
           <Box className="bg-white/80 rounded-xl border border-gray-200 p-6 gap-4 grid grid-cols-1">
             <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
@@ -377,6 +521,38 @@ export const CreateProject = () => {
                           />
                         </Box>
                       )}
+
+                      {/* File Information */}
+                      {projectFiles.find((f) => f.type === "projectPdf") && (
+                        <Box className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded">
+                          <Box className="flex items-center justify-between text-sm">
+                            <span className="font-medium text-blue-900">
+                              {
+                                projectFiles.find(
+                                  (f) => f.type === "projectPdf"
+                                )?.name
+                              }
+                            </span>
+                            <span className="text-blue-700">
+                              {(
+                                (projectFiles.find(
+                                  (f) => f.type === "projectPdf"
+                                )?.file.size || 0) /
+                                102 /
+                                1024
+                              ).toFixed(2)}{" "}
+                              MB
+                            </span>
+                          </Box>
+                          {(projectFiles.find((f) => f.type === "projectPdf")
+                            ?.file.size || 0) >
+                            10 * 1024 * 1024 && (
+                            <Box className="mt-1 text-xs text-red-600">
+                              ⚠️ File is too large. Maximum size is 10MB.
+                            </Box>
+                          )}
+                        </Box>
+                      )}
                     </Stack>
                   </Box>
                 )}
@@ -448,7 +624,7 @@ export const CreateProject = () => {
                           >
                             <CalendarIcon className="size-5" fill="#62A1C0" />
                             {field.value ? (
-                              format(field.value, "PPP")
+                              format(new Date(field.value), "PPP")
                             ) : (
                               <span>Pick a date</span>
                             )}
@@ -462,7 +638,11 @@ export const CreateProject = () => {
                           selected={
                             field.value ? new Date(field.value) : undefined
                           }
-                          onSelect={field.onChange}
+                          onSelect={(date) => {
+                            if (date) {
+                              field.onChange(date.toISOString());
+                            }
+                          }}
                           initialFocus
                         />
                       </PopoverContent>
@@ -492,7 +672,7 @@ export const CreateProject = () => {
                             {/* <CalendarRange className="size-5" /> */}
                             <CalendarIcon className="size-5" fill="#62A1C0" />
                             {field.value ? (
-                              format(field.value, "PPP")
+                              format(new Date(field.value), "PPP")
                             ) : (
                               <span>Pick a date</span>
                             )}
@@ -506,7 +686,11 @@ export const CreateProject = () => {
                           selected={
                             field.value ? new Date(field.value) : undefined
                           }
-                          onSelect={field.onChange}
+                          onSelect={(date) => {
+                            if (date) {
+                              field.onChange(date.toISOString());
+                            }
+                          }}
                           initialFocus
                         />
                       </PopoverContent>
@@ -529,7 +713,7 @@ export const CreateProject = () => {
                     </FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value}
                       disabled={isLoadingClients}
                     >
                       <FormControl className="w-full h-11">
@@ -570,7 +754,7 @@ export const CreateProject = () => {
                     </FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value}
                       disabled={isLoadingUsers}
                     >
                       <FormControl className="w-full h-11">

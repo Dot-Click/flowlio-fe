@@ -73,6 +73,11 @@ const PricingPage = lazy(() =>
 );
 const ProjectsPage = lazy(() => import("./pages/projects.page"));
 const CreateProjectPage = lazy(() => import("./pages/createproject.page"));
+const ProjectViewPage = lazy(() =>
+  import("./pages/projectview.page").then((module) => ({
+    default: module.ProjectViewPage,
+  }))
+);
 const CreateTaskPage = lazy(() => import("./pages/createtask.page"));
 const AddUserMembersPage = lazy(() => import("./pages/addusermemebers.page"));
 const UserManagementPage = lazy(() => import("./pages/usermanagement.page"));
@@ -218,6 +223,14 @@ const AppWithRouteGuard = () => {
         <Route
           element={<LazyWrapper component={CreateProjectPage} />}
           path="projects/create-project"
+        />
+        <Route
+          element={<LazyWrapper component={CreateProjectPage} />}
+          path="projects/edit/:id"
+        />
+        <Route
+          element={<LazyWrapper component={ProjectViewPage} />}
+          path="projects/view/:id"
         />
         <Route
           element={<LazyWrapper component={CalenderPage} />}

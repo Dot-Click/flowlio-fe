@@ -20,6 +20,14 @@ export interface Project {
   clientId?: string;
   assignedTo?: string;
   contractfile?: string;
+  projectFiles?: {
+    projectPdf?: {
+      url: string;
+      publicId: string;
+      name: string;
+      type: string;
+    };
+  };
 }
 
 export interface ProjectsResponse {
