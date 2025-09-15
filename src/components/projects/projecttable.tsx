@@ -30,6 +30,11 @@ import { FaRegTrashAlt } from "react-icons/fa";
 import { useFetchProjects, type Project } from "@/hooks/usefetchprojects";
 import { toast } from "sonner";
 import { useDeleteProject } from "@/hooks/usedeleteproject";
+import { useQueryClient } from "@tanstack/react-query";
+import { axios } from "@/configs/axios.config";
+import { useFetchProjectComments } from "@/hooks/usefetchprojectcomments";
+import { useCreateProjectComment } from "@/hooks/usecreateprojectcomment";
+import { useDeleteProjectComment } from "@/hooks/usedeleteprojectcomment";
 import {
   Dialog,
   DialogContent,
@@ -41,20 +46,11 @@ import {
 
 // Use the Project interface from the hook
 export type Data = Project;
-interface ProjectComment {
-  id: string;
-  projectId: string;
-  userId: string;
-  userName: string;
-  content: string;
-  parentId?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 export const ProjectTable = () => {
   // Fetch projects from API
   const { data: projectsData, isLoading, error } = useFetchProjects();
+  const queryClient = useQueryClient();
 
   // Handle API errors
   useEffect(() => {
@@ -71,10 +67,6 @@ export const ProjectTable = () => {
       endDate: project.endDate ? new Date(project.endDate) : null,
     })) || [];
 
-  // Updated comment state to match database schema
-  const [comments, setComments] = useState<Record<string, ProjectComment[]>>(
-    {}
-  );
   const props = useGeneralModalDisclosure();
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [input, setInput] = useState("");
@@ -86,25 +78,24 @@ export const ProjectTable = () => {
     name: string;
   } | null>(null);
 
+  // API hooks for comments
+  const { data: commentsData, isLoading: commentsLoading } =
+    useFetchProjectComments(activeProjectId || "");
+  const { mutate: createComment, isPending: isCreatingComment } =
+    useCreateProjectComment();
+  const { mutate: deleteComment, isPending: isDeletingComment } =
+    useDeleteProjectComment();
+
   // Add comment handler - now supports nested comments
   const handleAddComment = (parentId?: string) => {
     if (!activeProjectId || !input.trim()) return;
 
-    const newComment: ProjectComment = {
-      id: Math.random().toString(36).slice(2),
+    createComment({
       projectId: activeProjectId,
-      userId: "current-user-id", // This should come from your auth context
-      userName: "Current User", // This should come from your auth context
       content: input.trim(),
       parentId: parentId || undefined,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    });
 
-    setComments((prev) => ({
-      ...prev,
-      [activeProjectId]: [...(prev[activeProjectId] || []), newComment],
-    }));
     setInput("");
     setReplyTo(null);
     setReplyContent("");
@@ -113,18 +104,20 @@ export const ProjectTable = () => {
   // Add reply handler
   const handleAddReply = () => {
     if (!activeProjectId || !replyTo || !replyContent.trim()) return;
-    handleAddComment(replyTo);
+
+    createComment({
+      projectId: activeProjectId,
+      content: replyContent.trim(),
+      parentId: replyTo,
+    });
+
+    setReplyTo(null);
+    setReplyContent("");
   };
 
   // Delete comment handler
   const handleDeleteComment = (commentId: string) => {
-    if (!activeProjectId) return;
-    setComments((prev) => ({
-      ...prev,
-      [activeProjectId]: (prev[activeProjectId] || []).filter(
-        (c) => c.id !== commentId
-      ),
-    }));
+    deleteComment(commentId);
   };
 
   // Open comment modal for a project
@@ -138,18 +131,24 @@ export const ProjectTable = () => {
 
   const navigate = useNavigate();
 
-  // Get comments for the active project
-  const activeComments = activeProjectId ? comments[activeProjectId] || [] : [];
-  const topLevelComments = activeComments.filter(
-    (comment) => !comment.parentId
-  );
-  const replies = activeComments.filter((comment) => comment.parentId);
+  // Prefetch project data on hover
+  const prefetchProject = (projectId: string) => {
+    queryClient.prefetchQuery({
+      queryKey: ["project", projectId],
+      queryFn: async () => {
+        const response = await axios.get<{
+          success: boolean;
+          message: string;
+          data: Project;
+        }>(`/projects/${projectId}`);
+        return response.data;
+      },
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    });
+  };
 
-  // Attach replies to their parent comments
-  const commentsWithReplies = topLevelComments.map((comment) => ({
-    ...comment,
-    replies: replies.filter((reply) => reply.parentId === comment.id),
-  }));
+  // Get comments for the active project from API
+  const commentsWithReplies = commentsData?.data || [];
   const { mutate: handleDeleteProject, isPending: isDeletingProject } =
     useDeleteProject();
 
@@ -341,6 +340,7 @@ export const ProjectTable = () => {
                     onClick={() => {
                       navigate(`/dashboard/projects/view/${row.original.id}`);
                     }}
+                    onMouseEnter={() => prefetchProject(row.original.id)}
                   >
                     <Eye className="fill-white size-7 " />
                   </Button>
@@ -443,7 +443,11 @@ export const ProjectTable = () => {
 
           {/* Comments list with nested replies */}
           <Box className="flex flex-col gap-3 max-h-64 overflow-y-auto mb-4 bg-gray-50 p-3 rounded">
-            {activeProjectId && commentsWithReplies.length === 0 ? (
+            {commentsLoading ? (
+              <Box className="text-gray-400 text-center py-4">
+                Loading comments...
+              </Box>
+            ) : activeProjectId && commentsWithReplies.length === 0 ? (
               <Box className="text-gray-400 text-center py-4">
                 No comments yet.
               </Box>
@@ -454,40 +458,33 @@ export const ProjectTable = () => {
                   <Box className="flex items-start gap-2 group">
                     <Flex className="flex-1 items-start justify-between bg-white p-3 rounded shadow-sm text-sm">
                       <Stack className="flex-1">
-                        <Box className="flex items-center gap-2 mb-1">
-                          <span className="font-medium text-xs text-gray-900">
-                            {comment.userName}
-                          </span>
-                          <span className="text-xs text-gray-400">
-                            {format(
-                              new Date(comment.createdAt),
-                              "MMM d, yyyy hh:mm a"
-                            )}
-                          </span>
-                        </Box>
+                        <Flex className="justify-between">
+                          <Box className="flex items-center gap-2 mb-1">
+                            <span className="font-medium text-xs text-gray-900">
+                              {comment.userName}
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              {format(
+                                new Date(comment.createdAt),
+                                "MMM d, yyyy hh:mm a"
+                              )}
+                            </span>
+                          </Box>
+
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-red-500 cursor-pointer p-1 h-auto text-xs"
+                            onClick={() => handleDeleteComment(comment.id)}
+                            disabled={isDeletingComment}
+                            title="Delete"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </Flex>
+
                         <Box className="w-full max-sm:w-48 overflow-hidden break-words whitespace-pre-line">
                           {comment.content}
-                        </Box>
-                        <Box className="flex items-center gap-2 mt-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-blue-600 hover:text-blue-700 p-1 h-auto text-xs"
-                            onClick={() => setReplyTo(comment.id)}
-                          >
-                            Reply
-                          </Button>
-                          {comment.userId === "current-user-id" && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="text-red-500 cursor-pointer p-1 h-auto text-xs"
-                              onClick={() => handleDeleteComment(comment.id)}
-                              title="Delete"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          )}
                         </Box>
                       </Stack>
                     </Flex>
@@ -509,10 +506,10 @@ export const ProjectTable = () => {
                         <Button
                           size="sm"
                           onClick={handleAddReply}
-                          disabled={!replyContent.trim()}
+                          disabled={!replyContent.trim() || isCreatingComment}
                           className="bg-blue-600 hover:bg-blue-700 text-xs"
                         >
-                          Reply
+                          {isCreatingComment ? "Adding..." : "Reply"}
                         </Button>
                         <Button
                           variant="outline"
@@ -550,17 +547,16 @@ export const ProjectTable = () => {
                               <Box className="w-full max-sm:w-40 overflow-hidden break-words whitespace-pre-line">
                                 {reply.content}
                               </Box>
-                              {reply.userId === "current-user-id" && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="text-red-500 cursor-pointer p-1 h-auto text-xs mt-1"
-                                  onClick={() => handleDeleteComment(reply.id)}
-                                  title="Delete"
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </Button>
-                              )}
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-red-500 cursor-pointer p-1 h-auto text-xs mt-1"
+                                onClick={() => handleDeleteComment(reply.id)}
+                                disabled={isDeletingComment}
+                                title="Delete"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
                             </Stack>
                           </Flex>
                         </Box>
@@ -586,10 +582,10 @@ export const ProjectTable = () => {
 
             <Button
               onClick={() => handleAddComment()}
-              disabled={!input.trim()}
+              disabled={!input.trim() || isCreatingComment}
               className="rounded-full h-11 cursor-pointer"
             >
-              Send
+              {isCreatingComment ? "Sending..." : "Send"}
             </Button>
           </Flex>
         </Box>

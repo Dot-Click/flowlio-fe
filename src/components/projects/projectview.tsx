@@ -28,13 +28,21 @@ import { Badge } from "../ui/badge";
 import { Progress } from "../ui/progress";
 import { Separator } from "../ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import {
   GeneralModal,
   useGeneralModalDisclosure,
 } from "../common/generalmodal";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Flex } from "../ui/flex";
+import { Input } from "../ui/input";
+import { Stack } from "../ui/stack";
+import { Trash2 } from "lucide-react";
+import { useFetchProjectComments } from "@/hooks/usefetchprojectcomments";
+import { useCreateProjectComment } from "@/hooks/usecreateprojectcomment";
+import { useDeleteProjectComment } from "@/hooks/usedeleteprojectcomment";
+import { Skeleton } from "../ui/skeleton";
 
 export const ProjectView = () => {
   const navigate = useNavigate();
@@ -45,12 +53,111 @@ export const ProjectView = () => {
 
   const { open, onOpenChange } = useGeneralModalDisclosure();
 
+  // Comment state management
+  const [input, setInput] = useState("");
+  const [replyTo, setReplyTo] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState("");
+
+  // API hooks for comments
+  const { data: commentsData, isLoading: commentsLoading } =
+    useFetchProjectComments(id || "");
+  const { mutate: createComment, isPending: isCreatingComment } =
+    useCreateProjectComment();
+  const { mutate: deleteComment, isPending: isDeletingComment } =
+    useDeleteProjectComment();
+
   if (isLoading) {
     return (
       <PageWrapper className="mt-6 p-6">
-        <Center className="h-96">
-          <Box className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></Box>
-        </Center>
+        {/* Header Skeleton */}
+        <Box className="flex items-center justify-between mb-6">
+          <Box className="flex items-center gap-4">
+            <Skeleton className="h-8 w-20" />
+            <Skeleton className="h-4 w-32" />
+          </Box>
+        </Box>
+
+        {/* Project Header Card Skeleton */}
+        <Card className="mb-6 border-0 shadow-xl">
+          <CardHeader className="pb-6">
+            <Box className="flex items-start justify-between">
+              <Box className="flex-1">
+                <Skeleton className="h-8 w-64 mb-3" />
+                <Box className="flex items-center gap-6 mb-6">
+                  <Skeleton className="h-8 w-24" />
+                  <Skeleton className="h-8 w-32" />
+                  <Skeleton className="h-8 w-28" />
+                </Box>
+                <Skeleton className="h-3 w-full" />
+              </Box>
+              <Skeleton className="h-8 w-20" />
+            </Box>
+          </CardHeader>
+        </Card>
+
+        {/* Main Content Grid Skeleton */}
+        <Box className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column Skeleton */}
+          <Box className="lg:col-span-2 space-y-6">
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <Skeleton className="h-6 w-48" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-20 w-full" />
+                </Box>
+                <Skeleton className="h-32 w-full" />
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <Skeleton className="h-6 w-56" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-96 w-full" />
+              </CardContent>
+            </Card>
+          </Box>
+
+          {/* Right Column Skeleton */}
+          <Box className="space-y-6">
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <Skeleton className="h-6 w-40" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-20 w-full" />
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <Skeleton className="h-6 w-36" />
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-16 w-full" />
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <Skeleton className="h-6 w-32" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </CardContent>
+            </Card>
+          </Box>
+        </Box>
       </PageWrapper>
     );
   }
@@ -127,6 +234,49 @@ export const ProjectView = () => {
     window.open(url, "_blank");
   };
 
+  // Comment handling functions
+  const handleAddComment = (parentId?: string) => {
+    if (!id || !input.trim()) return;
+
+    createComment({
+      projectId: id,
+      content: input.trim(),
+      parentId: parentId || undefined,
+    });
+
+    setInput("");
+    setReplyTo(null);
+    setReplyContent("");
+  };
+
+  const handleAddReply = () => {
+    if (!id || !replyTo || !replyContent.trim()) return;
+
+    createComment({
+      projectId: id,
+      content: replyContent.trim(),
+      parentId: replyTo,
+    });
+
+    setReplyTo(null);
+    setReplyContent("");
+  };
+
+  const handleDeleteComment = (commentId: string) => {
+    deleteComment(commentId);
+  };
+
+  const openCommentModal = () => {
+    onOpenChange(true);
+    setInput("");
+    setReplyTo(null);
+    setReplyContent("");
+  };
+
+  // Get comments for the current project from API
+  const commentsWithReplies = commentsData?.data || [];
+  const projectComments = commentsData?.data || [];
+
   return (
     <PageWrapper className="mt-6 p-6">
       {/* Header */}
@@ -160,7 +310,7 @@ export const ProjectView = () => {
       {/* Project Header Card */}
       <Card className="mb-6 border-0 shadow-xl bg-gradient-to-r from-blue-50 via-white to-purple-50">
         <CardHeader className="pb-6">
-          <Box className="flex items-start justify-between">
+          <Box className="flex items-start justify-between max-sm:flex-col-reverse max-sm:gap-4">
             <Box className="flex-1">
               <CardTitle className="text-3xl font-bold text-gray-900 mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
                 {project.projectName || "Untitled Project"}
@@ -197,7 +347,7 @@ export const ProjectView = () => {
                 <Box className="absolute inset-0 bg-gradient-to-r from-blue-300 to-purple-300 rounded-full opacity-20"></Box>
               </Box>
             </Box>
-            <Box className="flex flex-col gap-3">
+            <Box className="flex flex-col gap-3 ">
               {project.contractfile && (
                 <Button
                   variant="outline"
@@ -338,7 +488,7 @@ export const ProjectView = () => {
                               {project.projectName || "Project"}-Contract.pdf
                             </span>
                           </Box>
-                          <Box className="flex items-center gap-2">
+                          <Flex className="max-sm:flex-col">
                             <Button
                               variant="outline"
                               size="sm"
@@ -362,7 +512,7 @@ export const ProjectView = () => {
                               <EyeIcon className="h-4 w-4" />
                               Open in New Tab
                             </Button>
-                          </Box>
+                          </Flex>
                         </Box>
                       </Box>
 
@@ -466,12 +616,16 @@ export const ProjectView = () => {
             <CardContent className="p-4">
               <Box className="flex items-center gap-4 p-4 bg-white/70 rounded-lg border border-green-100">
                 <Avatar className="h-12 w-12 bg-gradient-to-r from-green-500 to-emerald-500">
+                  <AvatarImage
+                    src={project.clientImage}
+                    alt={project.clientName}
+                  />
                   <AvatarFallback className="text-white font-semibold">
                     {project.clientName?.charAt(0) || "C"}
                   </AvatarFallback>
                 </Avatar>
                 <Box>
-                  <p className="font-semibold text-gray-900 text-lg">
+                  <p className="font-semibold text-gray-900 text-lg capitalize">
                     {project.clientName || "Unknown Client"}
                   </p>
                   <p className="text-sm text-gray-600 bg-green-100 px-2 py-1 rounded-full inline-block">
@@ -561,7 +715,7 @@ export const ProjectView = () => {
             <CardContent className="space-y-4 p-6">
               <Button
                 variant="outline"
-                className="w-full justify-start bg-white hover:bg-purple-50 border-purple-200 text-purple-700"
+                className="w-full justify-start bg-white hover:bg-purple-50 border-purple-200 text-purple-700 cursor-pointer"
                 onClick={handleEdit}
               >
                 <Edit className="h-4 w-4 mr-2" />
@@ -570,14 +724,11 @@ export const ProjectView = () => {
 
               <Button
                 variant="outline"
-                className="w-full justify-start bg-white hover:bg-blue-50 border-blue-200 text-blue-700"
-                onClick={() => {
-                  // TODO: Implement comments
-                  toast.info("Comments feature coming soon!");
-                }}
+                className="w-full justify-start bg-white hover:bg-blue-50 border-blue-200 text-blue-700 cursor-pointer"
+                onClick={openCommentModal}
               >
                 <MessageCircle className="h-4 w-4 mr-2" />
-                View Comments
+                View Comments ({projectComments.length})
               </Button>
             </CardContent>
           </Card>
@@ -624,7 +775,7 @@ export const ProjectView = () => {
                               project.projectFiles?.projectPdf?.url || ""
                             )
                           }
-                          className="flex items-center gap-1 bg-white hover:bg-blue-50"
+                          className="flex items-center gap-1 bg-white hover:bg-blue-50 cursor-pointer"
                         >
                           <EyeIcon className="h-4 w-4" />
                           View PDF
@@ -644,7 +795,7 @@ export const ProjectView = () => {
                             document.body.removeChild(link);
                             toast.success("Project PDF downloaded!");
                           }}
-                          className="flex items-center gap-1 bg-white hover:bg-blue-50"
+                          className="flex items-center gap-1 bg-white hover:bg-blue-50 cursor-pointer"
                         >
                           <Download className="h-4 w-4" />
                           Download
@@ -671,8 +822,13 @@ export const ProjectView = () => {
         contentProps={{
           className: "max-w-full p-2 overflow-hidden",
         }}
-        open={open}
-        onOpenChange={onOpenChange}
+        open={open && selectedImage !== null}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setSelectedImage(null);
+          }
+          onOpenChange(isOpen);
+        }}
       >
         {selectedImage && (
           <Box className="w-full h-[90vh] flex flex-col">
@@ -715,6 +871,181 @@ export const ProjectView = () => {
             </Box>
           </Box>
         )}
+      </GeneralModal>
+
+      {/* Comments Modal */}
+      <GeneralModal
+        {...{ open: open && selectedImage === null, onOpenChange }}
+        contentProps={{ className: "overflow-hidden max-sm:p-3" }}
+      >
+        <Box>
+          <Box className="mb-4 text-lg font-semibold">
+            Project Comments - {project.projectName}
+          </Box>
+
+          {/* Comments list with nested replies */}
+          <Box className="flex flex-col gap-3 max-h-64 overflow-y-auto mb-4 bg-gray-50 p-3 rounded">
+            {commentsLoading ? (
+              <Box className="text-gray-400 text-center py-4">
+                Loading comments...
+              </Box>
+            ) : commentsWithReplies.length === 0 ? (
+              <Box className="text-gray-400 text-center py-4">
+                No comments yet. Be the first to add a comment!
+              </Box>
+            ) : (
+              commentsWithReplies.map((comment) => (
+                <Box key={comment.id} className="space-y-2">
+                  {/* Main comment */}
+                  <Box className="flex items-start gap-2 group">
+                    <Flex className="flex-1 items-start justify-between bg-white p-3 rounded shadow-sm text-sm">
+                      <Stack className="flex-1">
+                        <Flex className="justify-between">
+                          <Box className="flex items-center gap-2 mb-1">
+                            <span className="font-medium text-xs text-gray-900">
+                              {comment.userName}
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              {format(
+                                new Date(comment.createdAt),
+                                "MMM d, yyyy hh:mm a"
+                              )}
+                            </span>
+                          </Box>
+
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-red-500 cursor-pointer p-1 h-auto text-xs"
+                            onClick={() => handleDeleteComment(comment.id)}
+                            disabled={isDeletingComment}
+                            title="Delete"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </Flex>
+
+                        <Box className="w-full max-sm:w-48 overflow-hidden break-words whitespace-pre-line">
+                          {comment.content}
+                        </Box>
+
+                        {/* Reply button */}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-blue-600 cursor-pointer p-1 h-auto text-xs mt-2 hidden"
+                          onClick={() => {
+                            setReplyTo(
+                              replyTo === comment.id ? null : comment.id
+                            );
+                            setReplyContent("");
+                          }}
+                        >
+                          {replyTo === comment.id ? "Cancel Reply" : "Reply"}
+                        </Button>
+                      </Stack>
+                    </Flex>
+                  </Box>
+
+                  {/* Reply input for this comment */}
+                  {replyTo === comment.id && (
+                    <Box className="ml-6 bg-white p-2 rounded border">
+                      <Input
+                        value={replyContent}
+                        onChange={(e) => setReplyContent(e.target.value)}
+                        placeholder="Write a reply..."
+                        className="mb-2"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleAddReply();
+                        }}
+                      />
+                      <Box className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          onClick={handleAddReply}
+                          disabled={!replyContent.trim() || isCreatingComment}
+                          className="bg-blue-600 hover:bg-blue-700 text-xs"
+                        >
+                          {isCreatingComment ? "Adding..." : "Reply"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setReplyTo(null);
+                            setReplyContent("");
+                          }}
+                          className="text-xs"
+                        >
+                          Cancel
+                        </Button>
+                      </Box>
+                    </Box>
+                  )}
+
+                  {/* Render replies */}
+                  {comment.replies && comment.replies.length > 0 && (
+                    <Box className="ml-6 space-y-2">
+                      {comment.replies.map((reply) => (
+                        <Box key={reply.id} className="flex items-start gap-2">
+                          <Flex className="flex-1 items-start justify-between bg-white p-2 rounded shadow-sm text-sm border-l-2 border-blue-200">
+                            <Stack className="flex-1">
+                              <Box className="flex items-center gap-2 mb-1">
+                                <span className="font-medium text-xs text-gray-900">
+                                  {reply.userName}
+                                </span>
+                                <span className="text-xs text-gray-400">
+                                  {format(
+                                    new Date(reply.createdAt),
+                                    "MMM d, yyyy hh:mm a"
+                                  )}
+                                </span>
+                              </Box>
+                              <Box className="w-full max-sm:w-40 overflow-hidden break-words whitespace-pre-line">
+                                {reply.content}
+                              </Box>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-red-500 cursor-pointer p-1 h-auto text-xs mt-1"
+                                onClick={() => handleDeleteComment(reply.id)}
+                                disabled={isDeletingComment}
+                                title="Delete"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </Stack>
+                          </Flex>
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
+                </Box>
+              ))
+            )}
+          </Box>
+
+          {/* Add new comment */}
+          <Flex className="items-center justify-between">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type a comment..."
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleAddComment();
+              }}
+              className="bg-white rounded-full placeholder:text-gray-400 h-11 border border-gray-400"
+            />
+
+            <Button
+              onClick={() => handleAddComment()}
+              disabled={!input.trim() || isCreatingComment}
+              className="rounded-full h-11 cursor-pointer"
+            >
+              {isCreatingComment ? "Sending..." : "Send"}
+            </Button>
+          </Flex>
+        </Box>
       </GeneralModal>
     </PageWrapper>
   );

@@ -6,6 +6,7 @@ export interface Project {
   projectNumber: string;
   projectName: string;
   clientName: string;
+  clientImage?: string;
   description?: string;
   startDate: Date | null;
   endDate: Date | null;
@@ -85,9 +86,11 @@ export const useFetchProjectById = (projectId: string) => {
       return response.data;
     },
     enabled: !!projectId,
-    staleTime: 0, // No caching - always fetch fresh data
-    gcTime: 0, // No garbage collection delay
-    refetchOnMount: true, // Always refetch when component mounts
-    refetchOnWindowFocus: true, // Refetch when window gains focus
+    staleTime: 5 * 60 * 1000, // 5 minutes - data is fresh for 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes - keep in cache for 10 minutes
+    refetchOnMount: false, // Don't refetch if data is fresh
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    retry: 2, // Retry failed requests 2 times
+    retryDelay: 1000, // Wait 1 second between retries
   });
 };

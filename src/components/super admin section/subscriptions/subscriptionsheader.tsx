@@ -70,12 +70,6 @@ export const SubscriptionsHeader = () => {
         if (planKey in updatedPlans) {
           // Convert features object back to string array for UI
           const featureStrings = [];
-          if (plan.features.aiAssist) featureStrings.push("AI Assist");
-          if (plan.features.prioritySupport)
-            featureStrings.push("Priority Support");
-          if (plan.features.customBranding)
-            featureStrings.push("Custom Branding");
-          if (plan.features.apiAccess) featureStrings.push("API Access");
 
           // Add custom features if they exist
           if (
@@ -244,31 +238,31 @@ export const SubscriptionsHeader = () => {
         prioritySupport: false,
         customBranding: false,
         apiAccess: false,
-        customFeatures: [], // Add custom features array
+        customFeatures: [], // Initialize custom features array
       };
 
-      // Map UI features to API features
-      features.forEach((feature) => {
-        const lowerFeature = feature.toLowerCase();
-        if (lowerFeature.includes("ai") || lowerFeature.includes("assist")) {
-          featureMap.aiAssist = true;
-        } else if (
-          lowerFeature.includes("priority") ||
-          lowerFeature.includes("support")
-        ) {
-          featureMap.prioritySupport = true;
-        } else if (
-          lowerFeature.includes("custom") ||
-          lowerFeature.includes("branding")
-        ) {
-          featureMap.customBranding = true;
-        } else if (lowerFeature.includes("api")) {
-          featureMap.apiAccess = true;
-        } else {
-          // Add as custom feature
-          featureMap.customFeatures?.push(feature);
+      // Filter out empty strings and duplicates
+      const validFeatures = features.filter((feature) => feature.trim() !== "");
+      const uniqueFeatures = [...new Set(validFeatures)];
+
+      // Add all features as custom features (no automatic mapping)
+      uniqueFeatures.forEach((feature) => {
+        // Add as custom feature (only if it's not empty)
+        if (feature.trim() !== "") {
+          featureMap.customFeatures?.push(feature.trim());
         }
       });
+
+      // Ensure customFeatures is always an array
+      if (!featureMap.customFeatures) {
+        featureMap.customFeatures = [];
+      }
+
+      // Debug: Log the mapped features
+      console.log("Mapped Features:", featureMap);
+      console.log("Original Features:", features);
+      console.log("Valid Features:", validFeatures);
+      console.log("Unique Features:", uniqueFeatures);
 
       return featureMap;
     };

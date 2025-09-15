@@ -25,7 +25,8 @@ const sanitizeDomain = (domain: string) => {
   return cleanDomain + "/api";
 };
 // deployment issue solving
-export const backendDomain = import.meta.env.VITE_BACKEND_DOMAIN;
+export const backendDomain =
+  import.meta.env.VITE_BACKEND_DOMAIN || "http://localhost:3000";
 export const url = sanitizeDomain(backendDomain);
 
 export const axios = ax.create({

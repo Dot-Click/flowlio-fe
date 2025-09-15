@@ -40,6 +40,15 @@ export interface PlanFeature {
   customFeatures?: string[];
   [key: string]: any;
 }
+export type ProjectComment = {
+  projectId: string;
+  userId: string;
+  content: string;
+  parentId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export type IPlan<T = {}> = {
   id: string;
   name: string;

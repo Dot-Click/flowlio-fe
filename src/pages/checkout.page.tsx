@@ -21,6 +21,23 @@ import {
   FormControl,
 } from "@/components/ui/form";
 
+// Function to convert database features to display format
+const formatPlanFeatures = (planFeatures: any) => {
+  if (!planFeatures) return [];
+
+  const features = [];
+
+  // Add custom features from database
+  if (
+    planFeatures.customFeatures &&
+    Array.isArray(planFeatures.customFeatures)
+  ) {
+    features.push(...planFeatures.customFeatures);
+  }
+
+  return features;
+};
+
 const formSchema = z.object({
   organizationName: z
     .string()
@@ -50,50 +67,34 @@ const CheckoutPage = () => {
     selectedPlanIndex ??
     (fallbackPlanIndex ? parseInt(fallbackPlanIndex) : null);
 
-  // Get plan details with better fallbacks
+  // Get plan details with dynamic features from database
   const planDetails = [
     {
-      title: "Basic Plan (Free)",
+      title: plansResponse?.data?.[0]?.name || "Basic Plan (Free)",
       price: plansResponse?.data?.[0]?.price || "Free",
       description:
         plansResponse?.data?.[0]?.description ||
         "Personal use and small projects",
       duration: "7-Days Trial",
-      features: Array.isArray(plansResponse?.data?.[0]?.features)
-        ? plansResponse?.data?.[0]?.features
-        : ["Access to basic features", "Single user", "Email support"],
+      features: formatPlanFeatures(plansResponse?.data?.[0]?.features),
     },
     {
-      title: "Pro Plan",
+      title: plansResponse?.data?.[1]?.name || "Pro Plan",
       price: plansResponse?.data?.[1]?.price || "$29",
       description:
         plansResponse?.data?.[1]?.description ||
         "Professional teams and growing businesses",
       duration: "month",
-      features: Array.isArray(plansResponse?.data?.[1]?.features)
-        ? plansResponse?.data?.[1]?.features
-        : [
-            "All Basic features",
-            "Up to 10 users",
-            "Priority support",
-            "Advanced analytics",
-          ],
+      features: formatPlanFeatures(plansResponse?.data?.[1]?.features),
     },
     {
-      title: "Enterprise Plan",
+      title: plansResponse?.data?.[2]?.name || "Enterprise Plan",
       price: plansResponse?.data?.[2]?.price || "$99",
       description:
         plansResponse?.data?.[2]?.description ||
         "Large organizations with complex needs",
       duration: "6 months",
-      features: Array.isArray(plansResponse?.data?.[2]?.features)
-        ? plansResponse?.data?.[2]?.features
-        : [
-            "All Pro features",
-            "Unlimited users",
-            "Dedicated support",
-            "Custom integrations",
-          ],
+      features: formatPlanFeatures(plansResponse?.data?.[2]?.features),
     },
   ];
 

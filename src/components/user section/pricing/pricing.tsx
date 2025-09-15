@@ -7,7 +7,7 @@ import { Stack } from "@/components/ui/stack";
 import { useFetchPublicPlans } from "@/hooks/usefetchplans";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
-import { FC } from "react";
+import { FC, useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
 
 interface PricingProps {
@@ -15,13 +15,49 @@ interface PricingProps {
   setSelectedPlan: (plan: number | null) => void;
 }
 
-const pricingText = [
-  "Choose from multiple secure payment options tailored to your needs.",
-  "Easily manage and update your preferred pricing methods anytime.",
-  "Set default payment modes for faster transactions.",
-  "View detailed breakdowns of charges before confirming payments.",
-  "Enjoy transparent pricing with no hidden fees or surprises.",
+// Default features when no plan is selected
+const defaultFeatures = [
+  {
+    icon: Check,
+    text: "Choose from multiple secure payment options tailored to your needs.",
+  },
+  {
+    icon: Check,
+    text: "Easily manage and update your preferred pricing methods anytime.",
+  },
+  { icon: Check, text: "Set default payment modes for faster transactions." },
+  {
+    icon: Check,
+    text: "View detailed breakdowns of charges before confirming payments.",
+  },
+  {
+    icon: Check,
+    text: "Enjoy transparent pricing with no hidden fees or surprises.",
+  },
 ];
+
+// Function to convert database features to display format
+const formatPlanFeatures = (planFeatures: any) => {
+  if (!planFeatures) return [];
+
+  const features = [];
+
+  // Debug: Log the planFeatures to see what we're getting
+  console.log("Plan Features:", planFeatures);
+
+  // Add custom features from database
+  if (
+    planFeatures.customFeatures &&
+    Array.isArray(planFeatures.customFeatures)
+  ) {
+    features.push(...planFeatures.customFeatures);
+  }
+
+  // Debug: Log the formatted features
+  console.log("Formatted Features:", features);
+
+  return features;
+};
 
 export const Pricing: FC<PricingProps> = ({
   selectedPlan,
@@ -30,9 +66,22 @@ export const Pricing: FC<PricingProps> = ({
   const { data: plansResponse } = useFetchPublicPlans();
   const navigate = useNavigate();
   const location = useLocation();
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  // Debug: Log the plans response
+  console.log("Plans Response:", plansResponse);
 
   // Check if user came from signup
   const fromSignup = location.state?.fromSignup;
+
+  // Animation effect when plan changes
+  useEffect(() => {
+    if (selectedPlan !== null) {
+      setIsAnimating(true);
+      const timer = setTimeout(() => setIsAnimating(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedPlan]);
 
   // Compute planDetails inside the component using the fetched data
   const planDetails = [
@@ -43,7 +92,7 @@ export const Pricing: FC<PricingProps> = ({
       duration: "7-Days Trial",
       features: Array.isArray(plansResponse?.data?.[0]?.features)
         ? plansResponse?.data?.[0]?.features
-        : ["Access to basic features", "Single user", "Email support"],
+        : [""],
     },
     {
       title: "Pro Plan",
@@ -52,12 +101,7 @@ export const Pricing: FC<PricingProps> = ({
       duration: "month",
       features: Array.isArray(plansResponse?.data?.[1]?.features)
         ? plansResponse?.data?.[1]?.features
-        : [
-            "All Basic features",
-            "Up to 10 users",
-            "Priority email support",
-            "Advanced analytics",
-          ],
+        : [""],
     },
     {
       title: "Enterprise Plan",
@@ -66,12 +110,7 @@ export const Pricing: FC<PricingProps> = ({
       duration: "6 months",
       features: Array.isArray(plansResponse?.data?.[2]?.features)
         ? plansResponse?.data?.[2]?.features
-        : [
-            "All Pro features",
-            "Unlimited users",
-            "Dedicated account manager",
-            "Custom integrations",
-          ],
+        : [""],
     },
   ];
 
@@ -105,16 +144,68 @@ export const Pricing: FC<PricingProps> = ({
       </Stack>
 
       <Flex className="p-2 gap-6 max-lg:flex-col mt-5">
-        <Stack className="justify-center items-start border-2 py-12 px-10 border-gray-100 rounded-xl max-w-[28rem] max-sm:w-full bg-gradient-to-r from-indigo-50 to-white gap-3 relative z-0">
-          {pricingText.map((text, index) => (
-            <Flex key={index} className="gap-4">
-              <Box>
-                <Check className="size-4" />
+        <Stack className="justify-start items-start border-2 py-12 px-10 border-gray-100 rounded-xl max-w-[28rem] min-h-[23rem] max-sm:w-full bg-gradient-to-r from-indigo-50 to-white gap-3 relative z-0 overflow-hidden">
+          {/* Dynamic Features Section */}
+          <Box className="w-full flex items-start">
+            {selectedPlan !== null ? (
+              <Box
+                className={cn(
+                  "transition-all duration-300 ease-in-out",
+                  isAnimating
+                    ? "opacity-0 transform translate-y-2"
+                    : "opacity-100 transform translate-y-0"
+                )}
+              >
+                <Box className="text-lg font-semibold text-indigo-600 mb-4 text-center capitalize">
+                  {plansResponse?.data?.[selectedPlan]?.name} Features
+                </Box>
+                <Stack className="gap-3">
+                  {formatPlanFeatures(
+                    plansResponse?.data?.[selectedPlan]?.features
+                  ).map((feature, index) => (
+                    <Flex
+                      key={index}
+                      className={cn(
+                        "gap-4 transition-all duration-200",
+                        `animate-in slide-in-from-left-${(index + 1) * 100}`
+                      )}
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
+                      <Box>
+                        <Check className="size-4" />
+                      </Box>
+                      <h1 className="text-black text-[15px]">{feature}</h1>
+                    </Flex>
+                  ))}
+                </Stack>
               </Box>
-
-              <h1 className="text-black text-[15px]">{text}</h1>
-            </Flex>
-          ))}
+            ) : (
+              <Box
+                className={cn(
+                  "transition-all duration-300 ease-in-out",
+                  isAnimating
+                    ? "opacity-0 transform translate-y-2"
+                    : "opacity-100 transform translate-y-0"
+                )}
+              >
+                <Stack className="gap-3">
+                  {defaultFeatures.map((feature, index) => {
+                    const IconComponent = feature.icon;
+                    return (
+                      <Flex key={index} className="gap-4">
+                        <Box className="flex items-center justify-center w-6 h-6 rounded-full  text-gray-600">
+                          <IconComponent className="size-4" />
+                        </Box>
+                        <h1 className="text-black text-[15px]">
+                          {feature.text}
+                        </h1>
+                      </Flex>
+                    );
+                  })}
+                </Stack>
+              </Box>
+            )}
+          </Box>
         </Stack>
 
         <Stack className="gap-4 relative z-10">
