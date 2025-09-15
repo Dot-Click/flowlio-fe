@@ -128,6 +128,7 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
   }, [authData?.user?.id, previousUserId, queryClient]);
 
   useEffect(() => {
+    // Show loading while any authentication process is running
     if (isPending || profileLoading) {
       setIsLoading(true);
       return;
@@ -179,7 +180,11 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
         );
         setData(authData as Data);
       }
-      setIsLoading(false);
+
+      // Add a small delay to ensure all data is processed
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 100);
     }
 
     if (error) {

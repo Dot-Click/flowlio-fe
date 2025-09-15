@@ -20,7 +20,7 @@ export const useRouteGuard = () => {
       lastRedirect: lastRedirectRef.current,
     });
 
-    // Don't check while loading
+    // Don't check while loading - this is crucial to prevent white screen
     if (isLoading) {
       console.log("Route Guard: Still loading, skipping check");
       return;
@@ -32,31 +32,37 @@ export const useRouteGuard = () => {
       currentPath === "/pricing" ||
       currentPath === "/workflow" ||
       currentPath === "/insights" ||
-      currentPath.startsWith("/auth/")
+      currentPath.startsWith("/auth/") ||
+      currentPath === "/checkout"
     ) {
       console.log("Route Guard: Public route, skipping check");
       lastRedirectRef.current = null; // Reset redirect flag for public routes
       return;
     }
 
-    // Check if user is authenticated
-    if (!userData?.user) {
-      // Only redirect if we haven't already redirected to this path
-      if (lastRedirectRef.current !== currentPath) {
-        console.log("Route Guard: No user, redirecting to signin");
-        lastRedirectRef.current = currentPath;
-        toast.error("Authentication required");
-        navigate("/auth/signin", {
-          replace: true,
-          state: { from: currentPath },
-        });
+    // Add a small delay before checking authentication to prevent race conditions
+    const timeoutId = setTimeout(() => {
+      // Check if user is authenticated
+      if (!userData?.user) {
+        // Only redirect if we haven't already redirected to this path
+        if (lastRedirectRef.current !== currentPath) {
+          console.log("Route Guard: No user, redirecting to signin");
+          lastRedirectRef.current = currentPath;
+          toast.error("Authentication required");
+          navigate("/auth/signin", {
+            replace: true,
+            state: { from: currentPath },
+          });
+        }
+        return;
       }
-      return;
-    }
 
-    // User is authenticated, reset redirect flag
-    lastRedirectRef.current = null;
-    console.log("Route Guard: User authenticated, access granted");
+      // User is authenticated, reset redirect flag
+      lastRedirectRef.current = null;
+      console.log("Route Guard: User authenticated, access granted");
+    }, 50); // Small delay to prevent race conditions
+
+    return () => clearTimeout(timeoutId);
   }, [userData, isLoading, location.pathname, navigate]);
 
   return { user: userData?.user, isLoading };
