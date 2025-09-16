@@ -23,7 +23,7 @@ export const ProjectHeader = () => {
         <Button
           variant="outline"
           className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
-          onClick={() => navigate("/dashboard/projects/create-project")}
+          onClick={() => navigate("/dashboard/project/create-project")}
         >
           <CirclePlus className="fill-white text-black size-5" />
           Create New Project

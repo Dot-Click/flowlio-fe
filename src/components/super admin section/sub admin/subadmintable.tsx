@@ -218,7 +218,7 @@ export const SubAdminTable = () => {
       <ReusableTable
         data={transformedData}
         columns={tableColumns}
-        searchInput={true}
+        enableGlobalFilter={true}
         enablePaymentLinksCalender={false}
       />
 

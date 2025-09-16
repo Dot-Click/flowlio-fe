@@ -49,6 +49,72 @@ export type ProjectComment = {
   updatedAt: Date;
 };
 
+// Task related types
+export type TaskStatus =
+  | "todo"
+  | "in_progress"
+  | "completed"
+  | "updated"
+  | "delay"
+  | "changes";
+
+export interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  status: TaskStatus;
+  endDate?: string;
+  startDate?: string;
+  estimatedHours?: number;
+  actualHours?: number;
+  attachments?: Array<{
+    id: string;
+    name: string;
+    url: string;
+    size: number;
+    type: string;
+  }>;
+  createdAt: string;
+  updatedAt: string;
+  // Project data
+  projectId: string;
+  projectName: string;
+  projectNumber: string;
+  // Assignee data
+  assigneeId?: string;
+  assigneeName?: string;
+  assigneeEmail?: string;
+  assigneeImage?: string;
+  // Creator data
+  creatorId: string;
+  creatorName: string;
+  creatorEmail: string;
+  // Client data
+  clientId?: string;
+  clientName?: string;
+  clientEmail?: string;
+  clientImage?: string;
+}
+
+export interface CreateTaskRequest {
+  title: string;
+  description?: string;
+  projectId: string;
+  assignedTo?: string;
+  startDate?: string;
+  endDate?: string;
+  estimatedHours?: number;
+  actualHours?: number;
+  attachments?: Array<{
+    id: string;
+    file: string;
+    name: string;
+    url: string;
+    size: number;
+    type: string;
+  }>;
+}
+
 export type IPlan<T = {}> = {
   id: string;
   name: string;

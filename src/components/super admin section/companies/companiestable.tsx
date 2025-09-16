@@ -268,7 +268,7 @@ export const CompaniesTable = () => {
     <ReusableTable
       data={transformedData}
       columns={getColumns(navigate)}
-      searchInput={false}
+      // searchInput={false}
       enablePaymentLinksCalender={true}
       onRowClick={(row) => console.log("Row clicked:", row.original)}
     />

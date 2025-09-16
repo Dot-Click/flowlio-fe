@@ -187,7 +187,7 @@ export const SuperAdminTable = () => {
       <ReusableTable
         data={data}
         columns={getColumns(navigate)}
-        searchInput={false}
+        // searchInput={false}
         enablePaymentLinksCalender={false}
         searchClassName="rounded-full"
         filterClassName="rounded-full"

@@ -395,7 +395,7 @@ export const SubscribtionTabele = ({
       <ReusableTable
         data={tableData}
         columns={columns}
-        searchInput={false}
+        // searchInput={false}
         enablePaymentLinksCalender={false}
         searchClassName="rounded-full"
         filterClassName="rounded-full"

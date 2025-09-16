@@ -177,7 +177,7 @@ export const InvoiceTable = () => {
     <ReusableTable
       data={data}
       columns={columns}
-      searchInput={false}
+      // searchInput={false}
       enablePaymentLinksCalender={false}
       searchClassName="rounded-full"
       filterClassName="rounded-full"

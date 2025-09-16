@@ -85,19 +85,11 @@ export const SignInForm: FC = () => {
             const profileResponse = await axios.get("/user/profile");
             const userProfile = profileResponse.data.data;
 
-            if (userProfile.isSuperAdmin === true) {
-              console.log("Redirecting to superadmin - isSuperAdmin is true");
-              navigate("/superadmin");
-              toast.success("Super Admin login successful");
-            } else if (userProfile.subadminId) {
-              console.log("Redirecting to superadmin - has subadminId");
-              navigate("/superadmin");
-              toast.success("Sub Admin login successful");
-            } else {
-              console.log("Redirecting to dashboard - regular user");
-              navigate("/dashboard");
-              toast.success("User login successful");
-            }
+            console.log("User profile:", userProfile);
+
+            // Redirect all users to dashboard - role-based navigation will handle the appropriate interface
+            navigate("/dashboard");
+            toast.success("Login successful");
           } catch (error) {
             console.error("Error fetching user profile:", error);
             navigate("/dashboard");

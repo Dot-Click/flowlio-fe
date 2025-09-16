@@ -175,7 +175,7 @@ export const MyProjectsTable = () => {
     <ReusableTable
       data={data}
       columns={columns}
-      searchInput={false}
+      // searchInput={false}
       enablePaymentLinksCalender={true}
       onRowClick={(row) => console.log("Row clicked:", row.original)}
     />

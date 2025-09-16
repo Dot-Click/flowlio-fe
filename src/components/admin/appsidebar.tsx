@@ -79,13 +79,28 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
       queryClient.removeQueries({ queryKey: ["project"] });
       queryClient.removeQueries({ queryKey: ["organization-clients"] });
       queryClient.removeQueries({ queryKey: ["organization-users"] });
+      queryClient.removeQueries({ queryKey: ["tasks"] });
+      queryClient.removeQueries({ queryKey: ["sub-admins"] });
 
+      // Clear all cached data
+      queryClient.clear();
+
+      // Clear any localStorage items (if any)
+      localStorage.removeItem("auth-token");
+      localStorage.removeItem("user-session");
+
+      // Sign out from Better Auth (this handles server-side session cleanup)
       await authClient.signOut();
-      navigate("/auth/signin");
+
+      // Navigate to sign-in page
+      navigate("/auth/signin", { replace: true });
       toast.success("Logged out successfully");
     } catch (error) {
       console.error("Logout error:", error);
       toast.error("Logout failed. Please try again.");
+
+      // Force redirect even if logout fails
+      navigate("/auth/signin", { replace: true });
     }
   };
 

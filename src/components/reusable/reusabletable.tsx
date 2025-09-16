@@ -38,7 +38,6 @@ import { CalendarComponent } from "../ui/calendercomp";
 // Define the props interface for the reusable table
 export interface ReusableTableProps<TData> {
   data: TData[];
-  searchInput?: boolean;
   enableSorting?: boolean;
   searchClassName?: string;
   filterClassName?: string;
@@ -59,7 +58,6 @@ export interface ReusableTableProps<TData> {
 export const ReusableTable = <TData,>({
   data,
   columns,
-  searchInput = true,
   enablePaymentLinksCalender = false,
   enableGlobalFilter = true,
   enableSuperAdminTable = false,
@@ -138,8 +136,8 @@ export const ReusableTable = <TData,>({
     >
       <Stack className="gap-4">
         {enableGlobalFilter && (
-          <Flex className="justify-between max-sm:items-start flex-col lg:flex-row items-center w-full">
-            <Flex className={cn("relative", searchInput && "md:ml-auto")}>
+          <Flex className="justify-between max-sm:items-start flex-col lg:flex-row items-center w-full gap-4">
+            <Flex className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5.5 w-5.5 text-gray-300 font-light" />
               <Input
                 type="search"
@@ -164,7 +162,7 @@ export const ReusableTable = <TData,>({
                     variant="ghost"
                     aria-haspopup="dialog"
                     className={cn(
-                      "ml-auto cursor-pointer bg-white border border-gray-200 h-10 text-black shadow-none",
+                      "cursor-pointer bg-white border border-gray-200 h-10 text-black shadow-none",
                       filterClassName
                     )}
                   >

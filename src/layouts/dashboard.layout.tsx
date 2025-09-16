@@ -1,87 +1,46 @@
 import { HorizontalNavbar } from "@/components/admin/horizontalnavbar/horizontalnavbar";
 import { AppSidebar, type NavItem } from "@/components/admin/appsidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { IoCalendarOutline } from "react-icons/io5";
-import { IoSettingsOutline } from "react-icons/io5";
-import { LuWandSparkles } from "react-icons/lu";
-import { TbInvoice, TbReportSearch } from "react-icons/tb";
 import type { CSSProperties } from "react";
 import { Box } from "@/components/ui/box";
-import { LuUsers } from "react-icons/lu";
-import { Outlet } from "react-router";
-import { SquareKanban, UserPen } from "lucide-react";
-import { GroupIcon, TaskManagementIcon } from "@/components/customeIcons";
-import { MessageCircleQuestion } from "lucide-react";
+import { Outlet, useNavigate } from "react-router";
+import { getNavigationItemsByRole } from "@/utils/role-based-navigation";
+import { useUser } from "@/providers/user.provider";
+import { useEffect, useState } from "react";
 // import { SubscriptionGuard } from "@/components/common/subscriptionguard";
 
-export const navItems: NavItem[] = [
-  {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: <SquareKanban />,
-  },
-  {
-    url: "/dashboard/projects",
-    title: "Projects",
-    icon: <GroupIcon />,
-  },
-
-  {
-    url: "/dashboard/task-management",
-    title: "Task Management",
-    icon: <TaskManagementIcon />,
-  },
-  {
-    url: "/dashboard/user-management",
-    title: "User Management",
-    icon: <LuUsers />,
-  },
-  {
-    url: "/dashboard/client-management",
-    title: "Client Management",
-    icon: <UserPen />,
-  },
-  {
-    url: "/dashboard/calender",
-    title: "Calender",
-    icon: <IoCalendarOutline />,
-  },
-  {
-    url: "/dashboard/ai-assist",
-    title: "AI Assistance",
-    icon: <LuWandSparkles />,
-  },
-  {
-    url: "/dashboard/payment-links",
-    title: "Payment Links",
-    icon: <TbReportSearch />,
-  },
-
-  {
-    url: "/dashboard/invoice",
-    title: "Invoices",
-    icon: <TbInvoice />,
-  },
-  {
-    url: "/dashboard/subscription",
-    title: "My Subscriptions",
-    icon: <TbInvoice />,
-  },
-
-  {
-    url: "/dashboard/support",
-    title: "Support",
-    icon: <MessageCircleQuestion />,
-  },
-
-  {
-    url: "/dashboard/settings",
-    title: "Settings",
-    icon: <IoSettingsOutline />,
-  },
-];
-
 export const DashboardLayout = () => {
+  const { data: userData } = useUser();
+  const [navItems, setNavItems] = useState<NavItem[]>([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (userData?.user) {
+      const user = userData.user;
+
+      // Redirect super admins and sub admins to super admin interface
+      if (
+        user.isSuperAdmin === true ||
+        user.subadminId ||
+        user.role === "subadmin"
+      ) {
+        navigate("/superadmin", { replace: true });
+        return;
+      }
+
+      // Redirect viewers to viewer interface
+      if (user.role === "viewer") {
+        navigate("/viewer", { replace: true });
+        return;
+      }
+
+      // For all other users (operators, regular users), stay in dashboard
+      const userRole = user.role || "user";
+      const roleBasedNavItems = getNavigationItemsByRole(userRole);
+      setNavItems(roleBasedNavItems);
+    }
+  }, [userData, navigate]);
+
   return (
     // <SubscriptionGuard>
     <Box className="bg-gradient-to-l from-indigo-50 via-slate-50 to-indigo-50 border-[2px] rounded-none border-white p-1 min-h-screen">

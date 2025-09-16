@@ -381,7 +381,7 @@ export const ClientManagementTable = () => {
       <ReusableTable
         data={tableData}
         columns={columns}
-        searchInput={false}
+        // searchInput={false}
         enablePaymentLinksCalender={true}
       />
 

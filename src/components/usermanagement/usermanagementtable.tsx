@@ -338,7 +338,7 @@ export const UserManagementTable = ({
       <ReusableTable
         data={userMembers}
         columns={updatedColumns}
-        searchInput={false}
+        // searchInput={false}
         enablePaymentLinksCalender={false}
         onRowClick={(row) => console.log("Row clicked:", row.original)}
       />

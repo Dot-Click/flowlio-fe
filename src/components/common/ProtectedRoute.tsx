@@ -5,14 +5,16 @@ import { toast } from "sonner";
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  requiredRole?: "superadmin" | "subadmin" | "user";
+  requiredRole?: "superadmin" | "subadmin" | "operator" | "viewer" | "user";
   requiredOrganization?: boolean;
 }
 
 const ROLE_HIERARCHY: Record<string, number> = {
   user: 1,
-  subadmin: 2,
-  superadmin: 3,
+  viewer: 2,
+  operator: 3,
+  subadmin: 4,
+  superadmin: 5,
 };
 
 const hasRole = (userRole: string, requiredRole: string): boolean => {
@@ -103,6 +105,14 @@ export const SuperAdminRoute = ({ children }: { children: ReactNode }) => (
 
 export const SubAdminRoute = ({ children }: { children: ReactNode }) => (
   <ProtectedRoute requiredRole="subadmin">{children}</ProtectedRoute>
+);
+
+export const OperatorRoute = ({ children }: { children: ReactNode }) => (
+  <ProtectedRoute requiredRole="operator">{children}</ProtectedRoute>
+);
+
+export const ViewerRoute = ({ children }: { children: ReactNode }) => (
+  <ProtectedRoute requiredRole="viewer">{children}</ProtectedRoute>
 );
 
 export const UserRoute = ({ children }: { children: ReactNode }) => (

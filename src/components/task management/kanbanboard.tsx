@@ -9,15 +9,29 @@ import { TooltipContent } from "../ui/tooltip";
 import { Tooltip, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { GripVertical, MessageCircleMore } from "lucide-react";
 import { format } from "date-fns";
+import { useFetchProjectComments } from "@/hooks/usefetchprojectcomments";
 
 // Task type
 export type Task = {
   id: string;
   title: string;
   project: string;
+  projectId?: string; // Add projectId for fetching comments
   dueDate: string;
   status: StatusType;
   comments?: { id: string; text: string; timestamp: Date }[];
+  // Additional fields for modal
+  description?: string;
+  assigneeName?: string;
+  assigneeImage?: string;
+  creatorName?: string;
+  attachments?: Array<{
+    id: string;
+    name: string;
+    url: string;
+    size: number;
+    type: string;
+  }>;
 };
 
 export const initialTasks: Task[] = [
@@ -209,19 +223,42 @@ const STATUS_COLUMNS: StatusType[] = [
 ];
 
 // Draggable Task Card
-function DraggableTask({ task }: { task: Task }) {
+function DraggableTask({
+  task,
+  onTaskClick,
+}: {
+  task: Task;
+  onTaskClick?: (task: Task) => void;
+}) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: task.id,
     });
 
   const [showComments, setShowComments] = useState(false);
+
+  // Fetch project comments if projectId is available
+  const { data: commentsResponse } = useFetchProjectComments(
+    task.projectId || ""
+  );
+
+  // Map project comments to task comments format
+  const projectComments =
+    commentsResponse?.data?.map((comment) => ({
+      id: comment.id,
+      text: comment.content,
+      timestamp: new Date(comment.createdAt),
+    })) || [];
+
+  // Use project comments if available, otherwise use task comments
+  const displayComments =
+    projectComments.length > 0 ? projectComments : task.comments || [];
   return (
     <Box className="relative">
       <Box
         className={cn(
           "bg-[#F6F6F6] rounded-lg border border-gray-200 p-4  min-w-[240px] mb-3 mx-2 transition-all duration-200",
-          "hover:shadow-md hover:border-gray-300",
+          "hover:shadow-md hover:border-gray-300 cursor-pointer",
           isDragging && "opacity-50 shadow-lg scale-105"
         )}
         style={{
@@ -230,6 +267,12 @@ function DraggableTask({ task }: { task: Task }) {
             : undefined,
         }}
         ref={setNodeRef}
+        onClick={(e) => {
+          // Don't open modal if dragging or clicking on drag handle
+          if (!isDragging && !e.defaultPrevented && onTaskClick) {
+            onTaskClick(task);
+          }
+        }}
       >
         <Flex className="flex-col w-full items-start gap-2">
           <Flex className="w-full justify-between items-center">
@@ -313,8 +356,8 @@ function DraggableTask({ task }: { task: Task }) {
             Close Comments
           </Button>
           <Box className="flex-1 flex flex-col gap-2 max-h-70 overflow-y-auto bg-gray-50 p-2 rounded">
-            {task.comments && task.comments.length > 0 ? (
-              task.comments.map((comment) => (
+            {displayComments && displayComments.length > 0 ? (
+              displayComments.map((comment) => (
                 <Box
                   key={comment.id}
                   className="bg-white p-2 rounded shadow text-sm"
@@ -372,12 +415,16 @@ interface KanbanBoardProps {
   tasks: Task[];
   setTasks: (tasks: Task[]) => void;
   filteredTasks: Task[];
+  onStatusUpdate?: (taskId: string, status: string) => void;
+  onTaskClick?: (task: Task) => void;
 }
 
 export default function KanbanBoard({
   tasks,
   setTasks,
   filteredTasks,
+  onStatusUpdate,
+  onTaskClick,
 }: KanbanBoardProps) {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
 
@@ -392,12 +439,33 @@ export default function KanbanBoard({
     const overStatus = STATUS_COLUMNS.find((col) => col === over.id);
 
     if (overStatus) {
+      // Update local state immediately for better UX
       setTasks(
         tasks.map((task: Task) =>
           task.id === active.id ? { ...task, status: overStatus } : task
         )
       );
+
+      // Call API to update status
+      if (onStatusUpdate) {
+        // Convert KanbanBoard status back to API status
+        const apiStatus = mapKanbanToApiStatus(overStatus);
+        onStatusUpdate(active.id as string, apiStatus);
+      }
     }
+  };
+
+  // Helper function to map KanbanBoard status to API status
+  const mapKanbanToApiStatus = (kanbanStatus: string) => {
+    const statusMap: Record<string, string> = {
+      "To Do": "todo",
+      "In Progress": "in_progress",
+      Updated: "updated",
+      Delay: "delay",
+      Changes: "changes",
+      Completed: "completed",
+    };
+    return statusMap[kanbanStatus] || "todo";
   };
 
   return (
@@ -417,7 +485,11 @@ export default function KanbanBoard({
               {filteredTasks
                 .filter((task) => task.status === status)
                 .map((task) => (
-                  <DraggableTask key={task.id} task={task} />
+                  <DraggableTask
+                    key={task.id}
+                    task={task}
+                    onTaskClick={onTaskClick}
+                  />
                 ))}
             </DroppableColumn>
           ))}

@@ -3,35 +3,113 @@ import { PageWrapper } from "../common/pagewrapper";
 import { Button } from "../ui/button";
 import { Center } from "../ui/center";
 import { Stack } from "../ui/stack";
-import KanbanBoard, { initialTasks, Task } from "./kanbanboard";
+import KanbanBoard, { initialTasks, Task as KanbanTask } from "./kanbanboard";
 import { Flex } from "../ui/flex";
 import { cn } from "@/lib/utils";
 import { Search } from "lucide-react";
 import { Input } from "../ui/input";
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { DropdownMenu } from "../ui/dropdown-menu";
-import { DropdownMenuTrigger } from "../ui/dropdown-menu";
-import { DropdownMenuContent } from "../ui/dropdown-menu";
-import { DropdownMenuCheckboxItem } from "../ui/dropdown-menu";
+import { CustomDropdown, CustomDropdownItem } from "../ui/custom-dropdown";
+import { useFetchTasks } from "@/hooks/usefetchtasks";
+import { useFetchOrganizationUsers } from "@/hooks/usefetchorganizationusers";
+import { useUpdateTaskStatus } from "@/hooks/useupdatetask";
+import { format } from "date-fns";
+import { TaskDetailsModal } from "./taskdetailsmodal";
 
 export const TaskManagementHeader = () => {
-  // const [globalFilter, setGlobalFilter] = useState("");
   const navigate = useNavigate();
-  // const [range, setRange] = useState<DateRange | undefined>({
-  //   from: new Date(),
-  //   to: new Date(),
-  // });
-
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
-
   const [search, setSearch] = useState("");
-  // Filter tasks by search query (task name or project name)
-  const filteredTasks = tasks.filter(
-    (task) =>
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [selectedTask, setSelectedTask] = useState<KanbanTask | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Fetch real data
+  const { data: tasksResponse } = useFetchTasks();
+  const { data: usersResponse } = useFetchOrganizationUsers();
+  const updateTaskStatus = useUpdateTaskStatus();
+
+  const realTasks = tasksResponse?.data || [];
+  const users = usersResponse?.data?.userMembers || [];
+
+  // Helper function to map API status to KanbanBoard status
+  const mapStatusToKanban = (apiStatus: string) => {
+    const statusMap: Record<string, string> = {
+      todo: "To Do",
+      in_progress: "In Progress",
+      updated: "Updated",
+      delay: "Delay",
+      changes: "Changes",
+      completed: "Completed",
+    };
+    return statusMap[apiStatus] || "To Do";
+  };
+
+  // Map real tasks to KanbanBoard format, or use initial tasks
+  const tasks: KanbanTask[] =
+    realTasks.length > 0
+      ? realTasks.map((task) => ({
+          id: task.id,
+          title: task.title,
+          project: task.projectName || "Unknown Project",
+          projectId: task.projectId, // Include projectId for fetching comments
+          dueDate: task.endDate
+            ? format(new Date(task.endDate), "dd MMM, yyyy")
+            : "No due date",
+          status: mapStatusToKanban(task.status) as any,
+          comments: [], // Will be populated with project comments
+          // Additional data for modal
+          description: task.description,
+          assigneeName: task.assigneeName,
+          assigneeImage: task.assigneeImage,
+          creatorName: task.creatorName,
+          attachments: task.attachments,
+        }))
+      : initialTasks;
+  const setTasks = () => {}; // No-op since we're using real data
+
+  // Filter tasks by search query and selected users
+  const filteredTasks = tasks.filter((task) => {
+    const matchesSearch =
       task.title.toLowerCase().includes(search.toLowerCase()) ||
-      task.project.toLowerCase().includes(search.toLowerCase())
-  );
+      task.project.toLowerCase().includes(search.toLowerCase());
+
+    // For real tasks, we need to check the original data for assigneeId
+    const realTask = realTasks.find((rt) => rt.id === task.id);
+    const matchesUser =
+      selectedUsers.length === 0 ||
+      (realTask && selectedUsers.includes(realTask.assigneeId || ""));
+
+    return matchesSearch && matchesUser;
+  });
+
+  const handleUserToggle = (userId: string) => {
+    setSelectedUsers((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  // Handle task status update from drag and drop
+  const handleStatusUpdate = (taskId: string, status: string) => {
+    updateTaskStatus.mutate({
+      taskId,
+      status: status as any,
+    });
+  };
+
+  // Handle task click to open modal
+  const handleTaskClick = (task: KanbanTask) => {
+    setSelectedTask(task);
+    setIsModalOpen(true);
+  };
+
+  // Close modal
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedTask(null);
+  };
 
   return (
     <PageWrapper className="mt-6 p-4">
@@ -63,8 +141,6 @@ export const TaskManagementHeader = () => {
             <Input
               type="search"
               placeholder="Search Project"
-              // value={globalFilter}
-              // onChange={(event) => setGlobalFilter(event.target.value)}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full md:w-115 lg:w-80 xl:w-[400px] py-4 pl-10 bg-white h-10  placeholder:text-black  placeholder:text-[15px] border border-gray-100 rounded-md focus:outline-none active:border-gray-200 focus:ring-0 focus:ring-offset-0"
@@ -77,30 +153,45 @@ export const TaskManagementHeader = () => {
               setRange={(range) => setRange(range as DateRange)}
             /> */}
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            <CustomDropdown
+              align="end"
+              className="w-56"
+              trigger={
                 <Button
                   variant="ghost"
                   aria-haspopup="dialog"
                   className={cn(
-                    "ml-auto cursor-pointer bg-white border border-gray-200 rounded-full h-10 w-32 text-black shadow-none flex p-3 gap-8"
+                    "ml-auto cursor-pointer bg-white border border-gray-200 rounded-full h-10 w-32 text-black shadow-none flex p-3 gap-8 overflow-hidden"
                   )}
                 >
                   <ChevronDown />
-                  Users
+                  {selectedUsers.length > 0
+                    ? selectedUsers
+                        .map(
+                          (user) =>
+                            users.find((u) => u.user?.id === user)?.firstname
+                        )
+                        .join(", ")
+                    : "Users"}
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuCheckboxItem>User 1</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>User 2</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>User 3</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>User 4</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>User 5</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>User 6</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>User 7</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>User 8</DropdownMenuCheckboxItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              }
+            >
+              <CustomDropdownItem
+                checked={selectedUsers.length === 0}
+                onClick={() => setSelectedUsers([])}
+              >
+                All Users
+              </CustomDropdownItem>
+              {users.map((user) => (
+                <CustomDropdownItem
+                  key={user.id}
+                  checked={selectedUsers.includes(user.user?.id || user.id)}
+                  onClick={() => handleUserToggle(user.user?.id || user.id)}
+                >
+                  {user.firstname} {user.lastname}
+                </CustomDropdownItem>
+              ))}
+            </CustomDropdown>
           </Flex>
         </Flex>
       </Stack>
@@ -108,10 +199,31 @@ export const TaskManagementHeader = () => {
       <KanbanBoard
         tasks={tasks}
         setTasks={setTasks}
-        // search={search}
-        // setSearch={setSearch}
         filteredTasks={filteredTasks}
+        onStatusUpdate={handleStatusUpdate}
+        onTaskClick={handleTaskClick}
       />
+
+      {/* Task Details Modal */}
+      {selectedTask && (
+        <TaskDetailsModal
+          task={{
+            id: selectedTask.id,
+            title: selectedTask.title,
+            description: selectedTask.description,
+            project: selectedTask.project,
+            projectId: selectedTask.projectId,
+            dueDate: selectedTask.dueDate,
+            status: selectedTask.status,
+            assigneeName: selectedTask.assigneeName,
+            assigneeImage: selectedTask.assigneeImage,
+            creatorName: selectedTask.creatorName,
+            attachments: selectedTask.attachments,
+          }}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+        />
+      )}
     </PageWrapper>
   );
 };

@@ -3,10 +3,10 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import { LazyWrapper } from "./components/common/LazyWrapper";
 import {
   ProtectedRoute,
+  SuperAdminRoute,
   SubAdminRoute,
-  UserRoute,
+  ViewerRoute,
 } from "./components/common/ProtectedRoute";
-import { useRouteGuard } from "./hooks/useRouteGuard";
 
 // Lazy load all page components
 const PasswordresetsucessPage = lazy(
@@ -148,9 +148,8 @@ const CreateClient = lazy(() =>
 );
 const SubscriptionsPage = lazy(() => import("./pages/subscriptions.page"));
 
-// Route guard wrapper component
-const AppWithRouteGuard = () => {
-  useRouteGuard();
+// Main app routes component
+const AppRoutes = () => {
   return (
     <Routes>
       {/* Public routes fixed the workflow route*/}
@@ -199,7 +198,7 @@ const AppWithRouteGuard = () => {
         element={<LazyWrapper component={CheckoutPage} />}
       />
 
-      {/* Dashboard layout - requires authentication */}
+      {/* Dashboard layout - requires authentication and role-based access */}
       <Route
         path="/dashboard"
         element={
@@ -218,19 +217,19 @@ const AppWithRouteGuard = () => {
         />
         <Route
           element={<LazyWrapper component={ProjectsPage} />}
-          path="projects"
+          path="project"
         />
         <Route
           element={<LazyWrapper component={CreateProjectPage} />}
-          path="projects/create-project"
+          path="project/create-project"
         />
         <Route
           element={<LazyWrapper component={CreateProjectPage} />}
-          path="projects/edit/:id"
+          path="project/edit/:id"
         />
         <Route
           element={<LazyWrapper component={ProjectViewPage} />}
-          path="projects/view/:id"
+          path="project/view/:id"
         />
         <Route
           element={<LazyWrapper component={CalenderPage} />}
@@ -266,19 +265,11 @@ const AppWithRouteGuard = () => {
           path="invoice"
         />
         <Route
-          element={
-            <UserRoute>
-              <LazyWrapper component={ClientManagementPage} />
-            </UserRoute>
-          }
+          element={<LazyWrapper component={ClientManagementPage} />}
           path="client-management"
         />
         <Route
-          element={
-            <UserRoute>
-              <LazyWrapper component={CreateClient} />
-            </UserRoute>
-          }
+          element={<LazyWrapper component={CreateClient} />}
           path="client-management/create-client"
         />
         <Route
@@ -312,7 +303,11 @@ const AppWithRouteGuard = () => {
         />
         <Route
           path="sub-admin/create-sub-admin"
-          element={<LazyWrapper component={CreateSubAdmin} />}
+          element={
+            <SuperAdminRoute>
+              <LazyWrapper component={CreateSubAdmin} />
+            </SuperAdminRoute>
+          }
         />
         <Route
           path="subscriptions"
@@ -333,13 +328,13 @@ const AppWithRouteGuard = () => {
         <Route path="*" element={<LazyWrapper component={NotFound} />} />
       </Route>
 
-      {/* Viewer layout - requires user role and organization */}
+      {/* Viewer layout - requires viewer role */}
       <Route
         path="/viewer"
         element={
-          <UserRoute>
+          <ViewerRoute>
             <LazyWrapper component={ViewerLayout} />
-          </UserRoute>
+          </ViewerRoute>
         }
       >
         <Route
@@ -378,7 +373,7 @@ const AppWithRouteGuard = () => {
 export const AppRouter = () => {
   return (
     <BrowserRouter>
-      <AppWithRouteGuard />
+      <AppRoutes />
     </BrowserRouter>
   );
 };

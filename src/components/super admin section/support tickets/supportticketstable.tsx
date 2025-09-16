@@ -278,7 +278,7 @@ export const SupportTicketTable = ({
       <ReusableTable
         data={data ?? []}
         columns={columns}
-        searchInput={false}
+        // searchInput={false}
         enablePaymentLinksCalender={true}
         onRowClick={(row) => {
           handleViewTicket(row.original);

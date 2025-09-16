@@ -411,10 +411,7 @@ export const CreateUserMembers = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="w-full">
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="user">User</SelectItem>
                         <SelectItem value="viewer">Viewer</SelectItem>
-                        <SelectItem value="editor">Editor</SelectItem>
                         <SelectItem value="operator">Operator</SelectItem>
                       </SelectContent>
                     </Select>
@@ -444,7 +441,6 @@ export const CreateUserMembers = () => {
                       <SelectContent className="w-full">
                         <SelectItem value="view">View</SelectItem>
                         <SelectItem value="edit">Edit</SelectItem>
-                        <SelectItem value="delete">Delete</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

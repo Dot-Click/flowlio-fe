@@ -34,22 +34,46 @@ export const axios = ax.create({
   withCredentials: true,
 });
 
-// Add response interceptor to handle deactivated sub admin errors
+// Add response interceptor to handle authentication errors
 axios.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Skip interceptor for logout requests to prevent page reload
+    if (
+      error.config?.url?.includes("/auth/sign-out") ||
+      error.config?.url?.includes("/auth/signout")
+    ) {
+      return Promise.reject(error);
+    }
+
     // Handle specific sub admin deactivation error
     if (
       error.response?.status === 403 &&
       error.response?.data?.code === "SUBADMIN_DEACTIVATED"
     ) {
       // Force logout if sub admin is deactivated
-      // Clear any stored auth data
       localStorage.removeItem("auth-token");
+      localStorage.removeItem("user-session");
 
       // Redirect to login with specific message
       window.location.href = "/auth/signin?message=deactivated";
     }
+
+    // Handle unauthorized access (401) - session expired or invalid
+    // But only if it's not a logout request
+    if (
+      error.response?.status === 401 &&
+      !error.config?.url?.includes("/auth/sign-out") &&
+      !error.config?.url?.includes("/auth/signout")
+    ) {
+      // Clear any stored auth data
+      localStorage.removeItem("auth-token");
+      localStorage.removeItem("user-session");
+
+      // Redirect to login
+      // window.location.href = "/auth/signin?message=session_expired";
+    }
+
     return Promise.reject(error);
   }
 );
