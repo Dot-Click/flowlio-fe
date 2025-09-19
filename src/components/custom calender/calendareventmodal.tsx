@@ -29,6 +29,7 @@ interface EventModalProps {
 
 interface EventFormData {
   title: string;
+  description: string;
   date: Date;
   startHour: number;
   endHour: number;
@@ -142,6 +143,7 @@ export const EventModal: React.FC<EventModalProps> = ({
   } = useForm<EventFormData>({
     defaultValues: {
       title: eventToEdit?.title || "",
+      description: eventToEdit?.description || "",
       date: eventToEdit ? new Date(eventToEdit.date) : new Date(),
       startHour: eventToEdit?.startHour ?? 8,
       endHour: eventToEdit?.endHour ?? 13,
@@ -165,6 +167,7 @@ export const EventModal: React.FC<EventModalProps> = ({
     if (eventToEdit) {
       reset({
         ...eventToEdit,
+        description: eventToEdit.description || "",
         date: eventToEdit.date ? new Date(eventToEdit.date) : new Date(),
         startHour:
           typeof eventToEdit.startHour === "number" ? eventToEdit.startHour : 8,
@@ -174,6 +177,7 @@ export const EventModal: React.FC<EventModalProps> = ({
     } else {
       reset({
         title: "",
+        description: "",
         date: new Date(),
         startHour: 8,
         endHour: 13,
@@ -184,7 +188,6 @@ export const EventModal: React.FC<EventModalProps> = ({
         outlookEvent: "",
       });
     }
-    // eslint-disable-next-line
   }, [eventToEdit, reset, modalProps.open]);
 
   if (!modalProps.open) return null;
@@ -214,6 +217,7 @@ export const EventModal: React.FC<EventModalProps> = ({
             const weekStart = getStartOfWeek(localDate).toISOString();
             onSave({
               title: data.title,
+              description: data.description || "",
               date: localDate.toISOString(),
               day: localDate.getDay(),
               startHour: Number(data.startHour),
@@ -256,6 +260,7 @@ export const EventModal: React.FC<EventModalProps> = ({
               <span className="text-red-500 text-xs">Title is required.</span>
             )}
           </Flex>
+
           <Flex className="relative mt-3 flex-col items-start">
             <Popover>
               <PopoverTrigger asChild>
@@ -341,7 +346,7 @@ export const EventModal: React.FC<EventModalProps> = ({
           )}
           <Input
             size="lg"
-            // {...register("description")}
+            {...register("description")}
             placeholder="Description"
             className="bg-white rounded-full placeholder:text-gray-400 mt-3 font-light"
           />

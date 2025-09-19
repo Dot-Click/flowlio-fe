@@ -1,74 +1,58 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Box } from "@/components/ui/box";
 import { Flex } from "@/components/ui/flex";
-import { Stack } from "@/components/ui/stack";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Pencil,
-  Plus,
-} from "lucide-react";
-import { Center } from "../ui/center";
-import { cn } from "@/lib/utils";
 import { EventModal } from "./calendareventmodal";
 import { useGeneralModalDisclosure } from "../common/generalmodal";
+import { getStartOfWeek, getWeekDates, CustomEvent } from "./calendarUtils";
 import {
-  getStartOfWeek,
-  getWeekDates,
-  platformColors,
-  daysShort,
-  formatHour,
-  CustomEvent,
-} from "./calendarUtils";
-import GoogleMeetIcon from "/dashboard/google-meet.svg";
-import WhatsappIcon from "/dashboard/whatsapp-icon.svg";
-import OutlookIcon from "/dashboard/google-drive.svg";
-import WhatsAppCheckBoxIcon from "/dashboard/whatsappcheckbox.svg";
-import EducationCheckBoxIcon from "/dashboard/educationcheckbox.svg";
-import PersolCheckBoxIcon from "/dashboard/personalicon.svg";
-import CheckBox from "/dashboard/checkbox.svg";
-import { useCalendarEventsStore } from "@/store/calendarEvents.store";
+  useFetchCalendarEvents,
+  CalendarEvent,
+} from "@/hooks/usefetchcalendarevents";
+import { useCreateCalendarEvent } from "@/hooks/usecreatecalendarevent";
+import { useUpdateCalendarEvent } from "@/hooks/useupdatecalendarevent";
+import { useDeleteCalendarEvent } from "@/hooks/usedeletecalendarevent";
 import { EventDetailsPopup } from "./eventdetailspopup";
+import { CalendarHeader } from "./CalendarHeader";
+import { CalendarSidebar } from "./CalendarSidebar";
+import { DayView } from "./DayView";
+import { WeekView } from "./WeekView";
+import { MonthView } from "./MonthView";
 
 const hours = Array.from({ length: 24 }, (_, i) => i); // 0-23 (24 hours)
-const MyCalendars = [
-  {
-    name: "Work",
-    image: WhatsAppCheckBoxIcon,
-  },
-  {
-    name: "Education",
-    image: EducationCheckBoxIcon,
-  },
-  {
-    name: "Personal",
-    image: PersolCheckBoxIcon,
-  },
-];
-const platformsImages = [
-  {
-    name: "google_meet",
-    image: GoogleMeetIcon,
-    checkbox: CheckBox,
-  },
-  {
-    name: "whatsapp",
-    image: WhatsappIcon,
-    checkbox: CheckBox,
-  },
-  {
-    name: "outlook",
-    image: OutlookIcon,
-    checkbox: CheckBox,
-  },
-];
 
 export const CustomCalendarHeader = () => {
-  const { events, addEvent, updateEvent } = useCalendarEventsStore();
   const [currentWeek, setCurrentWeek] = useState(getStartOfWeek(new Date()));
+
+  // API hooks
+  const createEventMutation = useCreateCalendarEvent();
+  const updateEventMutation = useUpdateCalendarEvent();
+  const deleteEventMutation = useDeleteCalendarEvent();
+
+  // Calculate date range for the current week
+  const startOfWeek = getStartOfWeek(currentWeek);
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(endOfWeek.getDate() + 6);
+  endOfWeek.setHours(23, 59, 59, 999);
+
+  // Fetch events for the current week
+  const { data: eventsResponse } = useFetchCalendarEvents({
+    startDate: startOfWeek.toISOString(),
+    endDate: endOfWeek.toISOString(),
+  });
+
+  const apiEvents = eventsResponse?.data || [];
+
+  // Transform API events to UI format
+  const events = apiEvents.map((event: CalendarEvent) => {
+    const eventDate = new Date(event.date);
+    const weekStart = getStartOfWeek(eventDate).toISOString();
+
+    return {
+      ...event,
+      day: eventDate.getDay(),
+      weekStart,
+    };
+  });
   const [miniCalRange, setMiniCalRange] = useState<{ from?: Date }>({});
   const [viewMode, setViewMode] = useState<"day" | "week" | "month">("week");
   const [selectedEvent, setSelectedEvent] = useState<CustomEvent | null>(null);
@@ -99,389 +83,166 @@ export const CustomCalendarHeader = () => {
   const weekDates = getWeekDates(currentWeek);
 
   // Navigation handlers
-  const goToToday = () => setCurrentWeek(getStartOfWeek(new Date()));
+  const goToToday = () => {
+    if (viewMode === "day") {
+      setCurrentWeek(new Date());
+    } else {
+      setCurrentWeek(getStartOfWeek(new Date()));
+    }
+  };
+
   const goToPrev = () => {
     const prev = new Date(currentWeek);
-    prev.setDate(prev.getDate() - 7);
-    setCurrentWeek(getStartOfWeek(prev));
+    if (viewMode === "day") {
+      prev.setDate(prev.getDate() - 1);
+    } else if (viewMode === "week") {
+      prev.setDate(prev.getDate() - 7);
+    } else if (viewMode === "month") {
+      prev.setMonth(prev.getMonth() - 1);
+    }
+    setCurrentWeek(prev);
   };
+
   const goToNext = () => {
     const next = new Date(currentWeek);
-    next.setDate(next.getDate() + 7);
-    setCurrentWeek(getStartOfWeek(next));
+    if (viewMode === "day") {
+      next.setDate(next.getDate() + 1);
+    } else if (viewMode === "week") {
+      next.setDate(next.getDate() + 7);
+    } else if (viewMode === "month") {
+      next.setMonth(next.getMonth() + 1);
+    }
+    setCurrentWeek(next);
   };
-  // Filter events for this week
+  // Filter events based on view mode
   const weekKey = currentWeek.toISOString();
-  const weekEvents = events.filter((e) => e.weekStart === weekKey);
+  const weekEvents = events.filter((e: any) => e.weekStart === weekKey);
+
+  // Day view events
+  const dayEvents = events.filter((event: any) => {
+    const eventDate = new Date(event.date);
+    const currentDate = new Date(currentWeek);
+    return eventDate.toDateString() === currentDate.toDateString();
+  });
+
+  // Month view events
+  const monthEvents = events.filter((event: any) => {
+    const eventDate = new Date(event.date);
+    const currentDate = new Date(currentWeek);
+    return (
+      eventDate.getMonth() === currentDate.getMonth() &&
+      eventDate.getFullYear() === currentDate.getFullYear()
+    );
+  });
+
+  // Get all meetings (events with platform other than "none")
+  const allMeetings = events.filter((event: any) => event.platform !== "none");
+
+  // Function to navigate to a meeting's week
+  const navigateToMeetingWeek = (meeting: any) => {
+    const meetingDate = new Date(meeting.date);
+    setCurrentWeek(getStartOfWeek(meetingDate));
+  };
 
   return (
     <>
       <Box className="mt-6 rounded-lg border border-gray-200">
         <Flex className="rounded-lg items-start overflow-hidden max-md:overflow-x-scroll gap-0">
           {/* Sidebar */}
-          <Flex className="w-[290px] bg-white flex-col gap-6 items-start h-[127rem]">
-            {/* Mini Calendar */}
-            <Stack className="w-full p-3">
-              <Button
-                className="w-full bg-[#1797B9] hover:bg-[#1797B9]/80 hover:text-white text-white rounded-full h-11 cursor-pointer "
-                size="lg"
-                onClick={() => {
-                  setEditEvent(null);
-                  newEventModalProps.onOpenChange(true);
-                }}
-              >
-                New Event <Plus className="size-5 text-white" />
-              </Button>
-              <Calendar
-                className="w-full p-0 overflow-hidden mt-4"
-                mode="single"
-                selected={miniCalRange.from}
-                classNameforCustomCalendar="bg-[#1797B9] text-white size-6"
-                onSelect={(date) => setMiniCalRange({ from: date })}
-              />
-            </Stack>
-
-            {/* My Calendars */}
-            <Stack className="w-full p-3">
-              <Flex className="items-center justify-between">
-                <span className="font-semibold">My Calendars</span>
-                <Flex className="items-center gap-2">
-                  <Plus className="size-4 cursor-pointer text-gray-500" />
-                  <ChevronDown className="size-4 cursor-pointer text-gray-500" />
-                </Flex>
-              </Flex>
-              <Flex className="flex-col items-start gap-2">
-                {MyCalendars.map((calendar) => (
-                  <Center className="gap-4 cursor-pointer">
-                    <img
-                      src={calendar.image}
-                      alt={calendar.name}
-                      className="size-4"
-                    />
-                    <span className="text-sm font-normal">{calendar.name}</span>
-                  </Center>
-                ))}
-              </Flex>
-            </Stack>
-
-            {/* Platforms */}
-            <Stack className="w-full p-3">
-              <Flex className="items-center justify-between">
-                <Box className="font-semibold mb-4">Platforms</Box>
-
-                <Flex className="items-center">
-                  <Plus className="size-4 cursor-pointer text-gray-500" />
-                  <ChevronDown className="size-4 cursor-pointer text-gray-500" />
-                </Flex>
-              </Flex>
-
-              <Flex className="flex-col gap-4 items-start">
-                {platformsImages.map((platform) => (
-                  <Center className="gap-4 cursor-pointer">
-                    <img
-                      src={platform.checkbox}
-                      alt="CheckBox"
-                      className="size-4"
-                    />
-                    <img
-                      src={platform.image}
-                      alt={platform.name}
-                      className="size-4"
-                    />
-                  </Center>
-                ))}
-              </Flex>
-            </Stack>
-          </Flex>
+          <CalendarSidebar
+            onNewEvent={() => {
+              setEditEvent(null);
+              newEventModalProps.onOpenChange(true);
+            }}
+            miniCalRange={miniCalRange}
+            setMiniCalRange={setMiniCalRange}
+            allMeetings={allMeetings}
+            navigateToMeetingWeek={navigateToMeetingWeek}
+          />
 
           {/* Main Calendar Area */}
           <Box className="flex-1 bg-[#F8FAFC]" style={{ flex: 1 }}>
             {/* Calendar Header */}
-            <Flex className="items-center justify-between px-6 pt-6 pb-2">
-              {/* Navigation */}
-              <Flex className="items-center gap-2">
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={goToPrev}
-                  className="cursor-pointer"
-                >
-                  <ChevronLeft />
-                </Button>
+            <CalendarHeader
+              viewMode={viewMode}
+              currentWeek={currentWeek}
+              weekDates={weekDates}
+              onPrev={goToPrev}
+              onNext={goToNext}
+              onToday={goToToday}
+              onViewModeChange={setViewMode}
+            />
 
-                <Box className="text-lg font-semibold">
-                  {weekDates[0].toLocaleString("default", {
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </Box>
+            {/* Calendar Views */}
+            {viewMode === "day" ? (
+              <DayView
+                currentDate={currentWeek}
+                dayEvents={dayEvents}
+                hours={hours}
+                hoveredEventId={hoveredEventId}
+                gridContainerRef={gridContainerRef}
+                setHoveredEventId={setHoveredEventId}
+                setHoveredGridTime={setHoveredGridTime}
+                setSelectedEvent={setSelectedEvent}
+                setPopupPosition={setPopupPosition}
+                setEditEvent={setEditEvent}
+                editEventModalProps={editEventModalProps}
+                hidePopupTimeout={hidePopupTimeout}
+              />
+            ) : viewMode === "week" ? (
+              <WeekView
+                weekDates={weekDates}
+                weekEvents={weekEvents}
+                hours={hours}
+                hoveredEventId={hoveredEventId}
+                hoveredGridTime={hoveredGridTime}
+                gridContainerRef={gridContainerRef}
+                setHoveredEventId={setHoveredEventId}
+                setHoveredGridTime={setHoveredGridTime}
+                setSelectedEvent={setSelectedEvent}
+                setPopupPosition={setPopupPosition}
+                setEditEvent={setEditEvent}
+                editEventModalProps={editEventModalProps}
+                hidePopupTimeout={hidePopupTimeout}
+              />
+            ) : (
+              <MonthView
+                currentDate={currentWeek}
+                monthEvents={monthEvents}
+                setSelectedEvent={setSelectedEvent}
+                setPopupPosition={setPopupPosition}
+                gridContainerRef={gridContainerRef}
+              />
+            )}
 
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={goToNext}
-                  className="cursor-pointer"
-                >
-                  <ChevronRight />
-                </Button>
-              </Flex>
+            {/* Horizontal line indicator */}
+            {hoveredGridTime.visible && viewMode !== "month" && (
+              <Box
+                className="absolute h-0.5 bg-[#90d7eb] z-[998] pointer-events-none"
+                style={{
+                  top: hoveredGridTime.y + 235,
+                  left: +305, // Start after the time column
+                  right: 10, // Extend to the end of the calendar
+                }}
+              />
+            )}
 
-              {/* Date Range Title */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="bg-white w-24 h-9 border cursor-pointer"
-                onClick={goToToday}
+            {/* Floating time indicator */}
+            {hoveredGridTime.visible && viewMode !== "month" && (
+              <Box
+                className="absolute w-20 bg-[#1797B9] text-white p-2 rounded-sm font-normal text-sm z-[999] shadow-md text-right pointer-events-none"
+                style={{
+                  top: hoveredGridTime.y + 218, // Center vertically with the line
+                  left: +305, // Align with the left edge
+                }}
               >
-                Today
-              </Button>
-
-              {/* View Mode Toggle */}
-              <Flex className="gap-0 bg-[#F2F3F7] p-1 rounded-lg">
-                {["day", "week", "month"].map((mode) => (
-                  <button
-                    key={mode}
-                    onClick={() => setViewMode(mode as typeof viewMode)}
-                    className={`px-6 py-1.5 rounded-lg font-normal transition-colors duration-150
-                    ${
-                      viewMode === mode
-                        ? "bg-white text-[#1797B9] font-semibold"
-                        : "bg-transparent text-[#323334]/80 hover:text-[#1797B9] hover:bg-white"
-                    }
-                  `}
-                    style={{
-                      outline: "none",
-                      border: "none",
-                      cursor: "pointer",
-                    }}
-                    type="button"
-                  >
-                    {mode.charAt(0).toUpperCase() + mode.slice(1)}
-                  </button>
-                ))}
-              </Flex>
-            </Flex>
-
-            {/* Date Row */}
-            <Box className="grid grid-cols-[80px_repeat(7,1fr)] bg-[#F8FAFC] border-b border-[#E5E7EB] mt-6">
-              <Box></Box>
-              {weekDates.map((d, i) => (
-                <Center
-                  key={i}
-                  className={cn(
-                    "gap-1 text-center text-sm font-normal text-[#323334] rounded-lg w-17 h-8 m-auto mb-3",
-                    d.toDateString() === new Date().toDateString() &&
-                      "text-white bg-[#1797B9]",
-                    d.getDay() === 0 && "bg-[#FFE5E5] text-[#D32F2F]" // Sunday as day off
-                  )}
-                  style={{
-                    padding: "12px 0 8px 0",
-                  }}
-                >
-                  <Box>{daysShort[d.getDay()]}</Box>
-                  <Box>{d.getDate()}</Box>
-                </Center>
-              ))}
-            </Box>
-
-            {/* Time grid */}
-            <Box
-              className="grid grid-cols-[80px_repeat(7,1fr)] ml-2 rounded-lg"
-              style={{ position: "relative" }}
-              ref={gridContainerRef}
-            >
-              {hours.map((hour) => (
-                <React.Fragment key={hour}>
-                  <Box className="text-right p-3 bg-white font-normal text-[#888] text-sm">
-                    {formatHour(hour)}
-                  </Box>
-                  {weekDates.map((_, dayIdx) => {
-                    // Find event that spans this hour slot
-                    const event = weekEvents.find(
-                      (e) =>
-                        e.day === dayIdx &&
-                        hour >= e.startHour &&
-                        hour < e.endHour
-                    );
-                    // Only render the event block at the start hour
-                    const isEventStart = event && event.startHour === hour;
-                    // Unique event id for hover
-                    const eventId = event
-                      ? `${event.date}-${event.startHour}`
-                      : undefined;
-                    return (
-                      <Box
-                        className="text-center p-0 border border-gray-200 min-h-[79px] min-w-[86px] relative bg-white"
-                        key={dayIdx}
-                        style={{
-                          border: "0.5px solid #eee",
-                          cursor: event ? "pointer" : "default",
-                        }}
-                        onMouseMove={(e) => {
-                          const gridRect =
-                            gridContainerRef.current?.getBoundingClientRect();
-                          const cellRect =
-                            e.currentTarget.getBoundingClientRect();
-                          const relativeY = e.clientY - cellRect.top;
-                          const minute = Math.floor(
-                            (relativeY / cellRect.height) * 60
-                          );
-                          let y = 0;
-                          if (gridRect) {
-                            y = e.clientY - gridRect.top;
-                          }
-                          setHoveredGridTime({
-                            hour,
-                            minute,
-                            y,
-                            visible: true,
-                          });
-                        }}
-                        onMouseLeave={() => {
-                          setHoveredEventId(null);
-                          setHoveredGridTime((prev) => ({
-                            ...prev,
-                            visible: false,
-                          }));
-                          // Delay hiding the popup
-                          hidePopupTimeout.current = setTimeout(() => {
-                            setSelectedEvent(null);
-                            setPopupPosition(null);
-                          }, 100);
-                        }}
-                        onMouseEnter={() => {
-                          if (eventId) setHoveredEventId(eventId);
-                          // Cancel hide if mouse re-enters
-                          if (hidePopupTimeout.current) {
-                            clearTimeout(hidePopupTimeout.current);
-                            hidePopupTimeout.current = null;
-                          }
-                        }}
-                      >
-                        {event && isEventStart && (
-                          <Flex
-                            className={cn(
-                              "absolute top-0.5 left-0.5 gap-0 bottom-0.5 right-0.5 rounded-md items-start flex-col z-[2] p-2 cursor-pointer border border-[#b2ebf2] transition-all duration-300"
-                            )}
-                            style={{
-                              height: `${
-                                (event.endHour - event.startHour) * 80 - 10
-                              }px`,
-                              background:
-                                platformColors[event.platform || "none"].bg,
-                              color:
-                                platformColors[event.platform || "none"].text,
-                              boxShadow:
-                                hoveredEventId === eventId
-                                  ? "0 4px 16px rgba(23,151,185,0.12)"
-                                  : undefined,
-                            }}
-                            onMouseEnter={(e) => {
-                              setSelectedEvent(event);
-                              // Get bounding rect for popup position
-                              const rect = (
-                                e.currentTarget as HTMLElement
-                              ).getBoundingClientRect();
-                              const gridRect =
-                                gridContainerRef.current?.getBoundingClientRect();
-                              if (gridRect) {
-                                setPopupPosition({
-                                  top: rect.top - gridRect.top + rect.height,
-                                  left: rect.left - gridRect.left + 40,
-                                });
-                              } else {
-                                setPopupPosition({
-                                  top: rect.top + rect.height,
-                                  left: rect.left,
-                                });
-                              }
-                              // Cancel hide if popup is being opened
-                              if (hidePopupTimeout.current) {
-                                clearTimeout(hidePopupTimeout.current);
-                                hidePopupTimeout.current = null;
-                              }
-                            }}
-                          >
-                            {/* Event header with platform icon and calendar type */}
-                            <Flex className="items-start text-start gap-0 w-full flex-col">
-                              {/* Platform icon */}
-                              {event.platform === "google_meet" ? (
-                                <img
-                                  src={GoogleMeetIcon}
-                                  alt="Google Meet"
-                                  className="size-5"
-                                />
-                              ) : event.platform === "whatsapp" ? (
-                                <img
-                                  src={WhatsappIcon}
-                                  alt="WhatsApp"
-                                  className="size-5"
-                                />
-                              ) : (
-                                <img
-                                  src={OutlookIcon}
-                                  alt="Outlook"
-                                  className="size-5"
-                                />
-                              )}
-
-                              {/* Event title */}
-                              <Box className="text-sm font-medium w-full capitalize">
-                                {event.title.length > 7
-                                  ? event.title.slice(0, 7) + "..."
-                                  : event.title}
-                              </Box>
-                            </Flex>
-
-                            {/* Event time */}
-                            <span className={cn("text-xs text-black/80")}>
-                              {formatHour(event.startHour)} -{" "}
-                              {formatHour(event.endHour)}
-                            </span>
-
-                            {/* Edit icon on hover */}
-                            {hoveredEventId === eventId && (
-                              <Button
-                                className="absolute top-0 right-0 bg-transparent border-none rounded-full p-4 cursor-pointer z-30"
-                                variant="ghost"
-                                size="icon"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  console.log(
-                                    "Edit button clicked for event:",
-                                    event
-                                  );
-                                  setEditEvent(event);
-                                  editEventModalProps.onOpenChange(true);
-                                }}
-                                title="Edit"
-                              >
-                                <Pencil />
-                              </Button>
-                            )}
-                          </Flex>
-                        )}
-                      </Box>
-                    );
-                  })}
-                </React.Fragment>
-              ))}
-              {/* Floating time indicator aligned with time column */}
-              {hoveredGridTime.visible && (
-                <Box
-                  className="absolute left-0 top-0 w-20 bg-[#1797B9] text-white p-2 rounded-sm font-normal text-sm z-[999] shadow-md text-right pointer-events-none"
-                  style={{
-                    top: hoveredGridTime.y - 12, // center the indicator",
-                  }}
-                >
-                  {`${hoveredGridTime.hour
-                    .toString()
-                    .padStart(2, "0")}:${hoveredGridTime.minute
-                    .toString()
-                    .padStart(2, "0")}`}
-                </Box>
-              )}
-            </Box>
+                {`${hoveredGridTime.hour
+                  .toString()
+                  .padStart(2, "0")}:${hoveredGridTime.minute
+                  .toString()
+                  .padStart(2, "0")}`}
+              </Box>
+            )}
           </Box>
         </Flex>
       </Box>
@@ -490,7 +251,18 @@ export const CustomCalendarHeader = () => {
       <EventModal
         modalProps={newEventModalProps}
         onSave={(newEvent: CustomEvent) => {
-          addEvent(newEvent);
+          createEventMutation.mutate({
+            title: newEvent.title,
+            description: newEvent.description,
+            date: newEvent.date,
+            startHour: newEvent.startHour,
+            endHour: newEvent.endHour,
+            calendarType: newEvent.calendarType,
+            platform: newEvent.platform || "none",
+            meetLink: newEvent.meetLink,
+            whatsappNumber: newEvent.whatsappNumber,
+            outlookEvent: newEvent.outlookEvent,
+          });
           newEventModalProps.onOpenChange(false);
         }}
         onClose={() => newEventModalProps.onOpenChange(false)}
@@ -517,6 +289,13 @@ export const CustomCalendarHeader = () => {
             }, 100);
           }}
           position={popupPosition}
+          onDelete={() => {
+            if (selectedEvent?.id) {
+              deleteEventMutation.mutate(selectedEvent.id);
+              setSelectedEvent(null);
+              setPopupPosition(null);
+            }
+          }}
         />
       )}
 
@@ -525,7 +304,23 @@ export const CustomCalendarHeader = () => {
         modalProps={editEventModalProps}
         eventToEdit={editEvent}
         onSave={(updatedEvent: CustomEvent) => {
-          updateEvent(updatedEvent);
+          if (editEvent?.id) {
+            updateEventMutation.mutate({
+              id: editEvent.id,
+              data: {
+                title: updatedEvent.title,
+                description: updatedEvent.description,
+                date: updatedEvent.date,
+                startHour: updatedEvent.startHour,
+                endHour: updatedEvent.endHour,
+                calendarType: updatedEvent.calendarType,
+                platform: updatedEvent.platform || "none",
+                meetLink: updatedEvent.meetLink,
+                whatsappNumber: updatedEvent.whatsappNumber,
+                outlookEvent: updatedEvent.outlookEvent,
+              },
+            });
+          }
           setEditEvent(null);
           editEventModalProps.onOpenChange(false);
         }}

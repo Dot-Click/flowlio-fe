@@ -34,12 +34,19 @@ export const ProtectedRoute = ({
     if (isLoading) return;
 
     if (!userData?.user) {
-      toast.error("Authentication required");
-      navigate("/auth/signin", {
-        replace: true,
-        state: { from: location.pathname },
-      });
-      return;
+      // Only show error if we're sure there's no session (not just loading)
+      // Add a small delay to prevent race conditions during login
+      const timeoutId = setTimeout(() => {
+        if (!userData?.user) {
+          toast.error("Authentication required");
+          navigate("/auth/signin", {
+            replace: true,
+            state: { from: location.pathname },
+          });
+        }
+      }, 1000); // 1 second delay
+
+      return () => clearTimeout(timeoutId);
     }
 
     const user = userData.user;

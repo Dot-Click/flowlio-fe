@@ -1,17 +1,23 @@
 // Shared types and utilities for custom calendar components
 
 export type CustomEvent = {
+  id?: string; // Optional for new events, required for existing events
   title: string;
+  description?: string;
   date: string; // ISO date string
-  day: number;
+  day?: number; // Calculated field for UI
   startHour: number;
   endHour: number;
-  weekStart: string;
+  weekStart?: string; // Calculated field for UI
   calendarType: "work" | "education" | "personal";
   platform?: "google_meet" | "whatsapp" | "outlook" | "none";
   meetLink?: string;
   whatsappNumber?: string;
   outlookEvent?: string;
+  organizationId?: string;
+  userId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export const initialEvents: CustomEvent[] = [];

@@ -81,19 +81,27 @@ export const SignInForm: FC = () => {
           setError(null);
 
           try {
+            // Wait a moment for Better Auth session to be fully established
+            await new Promise((resolve) => setTimeout(resolve, 500));
+
             // Fetch fresh user profile data directly
             const profileResponse = await axios.get("/user/profile");
             const userProfile = profileResponse.data.data;
 
             console.log("User profile:", userProfile);
 
+            // Show success message
+            toast.success("Login successful");
+
             // Redirect all users to dashboard - role-based navigation will handle the appropriate interface
             navigate("/dashboard");
-            toast.success("Login successful");
           } catch (error) {
             console.error("Error fetching user profile:", error);
+            // Still redirect but show warning
+            toast.warning(
+              "Login successful, but some data may not be available yet"
+            );
             navigate("/dashboard");
-            toast.success("Login successful");
           }
         },
         onError: (ctx) => {

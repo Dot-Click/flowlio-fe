@@ -173,18 +173,18 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
         };
         console.log("✨ Enhanced user data:", enhancedData);
         setData(enhancedData as unknown as Data);
+        setIsLoading(false);
       } else {
         console.log(
           "⚠️ No fresh profile data, using Better Auth data:",
           authData
         );
         setData(authData as Data);
-      }
 
-      // Add a small delay to ensure all data is processed
-      setTimeout(() => {
+        // If we have Better Auth data but no profile data, still set loading to false
+        // The profile data will be fetched in the background
         setIsLoading(false);
-      }, 100);
+      }
     }
 
     if (error) {

@@ -16,12 +16,14 @@ export const EventDetailsPopup = ({
   onMouseEnter,
   onMouseLeave,
   position,
+  onDelete,
 }: {
   event: CustomEvent;
   onClose: () => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   position: { top: number; left: number };
+  onDelete?: () => void;
 }) => {
   const [copied, setCopied] = useState(false);
   const [copiedNumber, setCopiedNumber] = useState(false);
@@ -88,6 +90,7 @@ export const EventDetailsPopup = ({
               variant="ghost"
               size="icon"
               title="Delete"
+              onClick={onDelete}
             >
               <Trash2 className="size-4 text-red-500" />
             </Button>
@@ -135,7 +138,21 @@ export const EventDetailsPopup = ({
           {formatHour(event.startHour)} - {formatHour(event.endHour)}
         </Box>
 
-        {/* Google Meet Join Button and Copy Link */}
+        {/* Description */}
+        {event.description && (
+          <>
+            <p className="text-sm text-gray-700 leading-relaxed">
+              Description:
+            </p>
+            <Box className="mb-3 p-2 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-700 leading-relaxed">
+                {event.description}
+              </p>
+            </Box>
+          </>
+        )}
+
+        {/* Google Meet Copy Link */}
         {event.platform === "google_meet" && event.meetLink ? (
           <Flex className="mb-4 flex-col gap-2 items-start">
             <Flex className="gap-2 items-center justify-between w-full">

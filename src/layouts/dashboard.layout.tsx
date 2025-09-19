@@ -10,11 +10,14 @@ import { useEffect, useState } from "react";
 // import { SubscriptionGuard } from "@/components/common/subscriptionguard";
 
 export const DashboardLayout = () => {
-  const { data: userData } = useUser();
+  const { data: userData, isLoading } = useUser();
   const [navItems, setNavItems] = useState<NavItem[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Don't redirect while still loading user data
+    if (isLoading) return;
+
     if (userData?.user) {
       const user = userData.user;
 
@@ -39,7 +42,7 @@ export const DashboardLayout = () => {
       const roleBasedNavItems = getNavigationItemsByRole(userRole);
       setNavItems(roleBasedNavItems);
     }
-  }, [userData, navigate]);
+  }, [userData, isLoading, navigate]);
 
   return (
     // <SubscriptionGuard>
