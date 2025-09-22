@@ -5,82 +5,61 @@ import { ReusableTable } from "../reusable/reusabletable";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { Flex } from "../ui/flex";
-import { CircleCheck } from "lucide-react";
-import { IoMdDownload } from "react-icons/io";
+import { CircleCheck, FileText, Download, Trash2 } from "lucide-react";
+import { useFetchInvoices, Invoice } from "@/hooks/usefetchinvoices";
+import { useDeleteInvoice } from "@/hooks/usedeleteinvoice";
+import { useGenerateInvoicePDF } from "@/hooks/usegenerateinvoicepdf";
 
-const data: Data[] = [
-  {
-    id: "1",
-    status: "Paid",
-    datepaid: new Date(),
-    amount: 150.0,
-    clientname: "Mike Wangi",
-  },
-  {
-    id: "2",
-    status: "Paid",
-    datepaid: new Date(),
-    amount: 150.0,
-    clientname: "Mike Wangi",
-  },
-  {
-    id: "3",
-    status: "Paid",
-    datepaid: new Date(),
-    amount: 150.0,
-    clientname: "Mike Wangi",
-  },
-  {
-    id: "4",
-    status: "Paid",
-    datepaid: new Date(),
-    amount: 150.0,
-    clientname: "Mike Wangi",
-  },
-  {
-    id: "5",
-    status: "Paid",
-    datepaid: new Date(),
-    amount: 150.0,
-    clientname: "Mike Wangi",
-  },
-  {
-    id: "6",
-    status: "Paid",
-    datepaid: new Date(),
-    amount: 150.0,
-    clientname: "Mike Wangi",
-  },
-  {
-    id: "7",
-    status: "Paid",
-    datepaid: new Date(),
-    amount: 150.0,
-    clientname: "Mike Wangi",
-  },
-  {
-    id: "8",
-    status: "Paid",
-    datepaid: new Date(),
-    amount: 150.0,
-    clientname: "Mike Wangi",
-  },
-  {
-    id: "9",
-    status: "Paid",
-    datepaid: new Date(),
-    amount: 150.0,
-    clientname: "Mike Wangi",
-  },
-];
+// Actions component to properly use hooks
+const InvoiceActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
+  const deleteInvoiceMutation = useDeleteInvoice();
+  const generatePDFMutation = useGenerateInvoicePDF();
 
-export type Data = {
-  id: string;
-  status: string;
-  amount: number;
-  datepaid: Date;
-  clientname: string;
+  const handleDelete = () => {
+    if (confirm("Are you sure you want to delete this invoice?")) {
+      deleteInvoiceMutation.mutate(invoice.id);
+    }
+  };
+
+  const handleDownloadPDF = () => {
+    if (invoice.pdfUrl) {
+      // Open existing PDF
+      window.open(invoice.pdfUrl, "_blank");
+    } else {
+      // Generate new PDF
+      generatePDFMutation.mutate(invoice.id);
+    }
+  };
+
+  return (
+    <Center className="space-x-2">
+      <Button
+        onClick={handleDownloadPDF}
+        className="bg-[#1797b9] border-none hover:bg-[#1797b9]/80 cursor-pointer rounded-full space-x-2 text-white"
+        disabled={generatePDFMutation.isPending}
+      >
+        {invoice.pdfUrl ? (
+          <Download className="size-4 text-white" />
+        ) : (
+          <FileText className="size-4 text-white" />
+        )}
+        {invoice.pdfUrl ? "Download" : "Generate PDF"}
+      </Button>
+
+      <Button
+        onClick={handleDelete}
+        variant="outline"
+        className="border-red-500 text-red-500 hover:bg-red-50 cursor-pointer rounded-full space-x-2"
+        disabled={deleteInvoiceMutation.isPending}
+      >
+        <Trash2 className="size-4" />
+        Delete
+      </Button>
+    </Center>
+  );
 };
+
+export type Data = Invoice;
 
 export const columns: ColumnDef<Data>[] = [
   {
@@ -131,11 +110,13 @@ export const columns: ColumnDef<Data>[] = [
     header: () => <Box className="text-black text-center">Date Paid</Box>,
     cell: ({ row }) => (
       <Box className="captialize text-center">
-        {row.original.datepaid.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })}
+        {row.original.datepaid
+          ? new Date(row.original.datepaid).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })
+          : "Not paid"}
       </Box>
     ),
   },
@@ -144,10 +125,17 @@ export const columns: ColumnDef<Data>[] = [
     accessorKey: "status",
     header: () => <Box className="text-center text-black">Status</Box>,
     cell: ({ row }) => {
+      const status = row.original.status.toLowerCase();
+      const isPaid = status === "paid";
+
       return (
         <Center className="text-center space-x-2">
-          <CircleCheck className="text-green-500 size-5" />
-          <Box className="text-center text-[15px]">{row.original.status}</Box>
+          <CircleCheck
+            className={`size-5 ${isPaid ? "text-green-500" : "text-gray-400"}`}
+          />
+          <Box className="text-center text-[15px] capitalize">
+            {row.original.status}
+          </Box>
         </Center>
       );
     },
@@ -156,28 +144,37 @@ export const columns: ColumnDef<Data>[] = [
   {
     accessorKey: "actions",
     header: () => <Box className="text-center text-black">Actions</Box>,
-    cell: () => {
-      return (
-        <Center className="space-x-2">
-          <Button
-            // variant="outline"
-            className="bg-[#1797b9] border-none hover:bg-[#1797b9]/80 cursor-pointer rounded-full border-2 border-red-500 space-x-2 text-white"
-          >
-            <IoMdDownload className="size-5 text-white" />
-            Download
-          </Button>
-        </Center>
-      );
-    },
+    cell: ({ row }) => <InvoiceActions invoice={row.original} />,
   },
 ];
 
 export const InvoiceTable = () => {
+  const { data: invoicesData, isLoading, error } = useFetchInvoices();
+
+  if (isLoading) {
+    return (
+      <Center className="py-8">
+        <Box className="text-gray-500">Loading invoices...</Box>
+      </Center>
+    );
+  }
+
+  if (error) {
+    return (
+      <Center className="py-8">
+        <Box className="text-red-500">
+          Error loading invoices: {error.message}
+        </Box>
+      </Center>
+    );
+  }
+
+  const data = invoicesData?.data || [];
+
   return (
     <ReusableTable
       data={data}
       columns={columns}
-      // searchInput={false}
       enablePaymentLinksCalender={false}
       searchClassName="rounded-full"
       filterClassName="rounded-full"

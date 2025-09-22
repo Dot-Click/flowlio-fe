@@ -30,34 +30,46 @@ import {
 import { Form } from "../ui/form"; // or "@/components/ui/form"
 import { useForm } from "react-hook-form";
 import { Textarea } from "../ui/textarea";
+import { useCreatePaymentLink } from "@/hooks/usecreatepaymentlink";
+import { useFetchClients } from "@/hooks/usefetchclients";
+import { useFetchProjects } from "@/hooks/usefetchprojects";
 
 const formSchema = z.object({
-  clientname: z.string().min(2, {
-    message: "First Name must be at least 2 characters.",
+  clientId: z.string().min(1, {
+    message: "Client is required.",
   }),
-  projects: z.string().min(2, {
-    message: "Last Name must be at least 2 characters.",
+  projectId: z.string().min(1, {
+    message: "Project is required.",
   }),
-  amount: z.string().min(2, {
-    message: "Must be amount number.",
+  amount: z.number().min(0.01, {
+    message: "Amount must be greater than 0.",
   }),
-  description: z.string().min(2, {
-    message: "Must be proper description",
+  description: z.string().min(1, {
+    message: "Description is required",
   }),
 });
 const PaymentLinksHeader: FC = () => {
+  const createPaymentLinkMutation = useCreatePaymentLink();
+  const { data: clientsData } = useFetchClients();
+  const { data: projectsData } = useFetchProjects();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      clientname: "",
-      projects: "",
-      amount: "",
+      clientId: "",
+      projectId: "",
+      amount: 0,
       description: "",
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    createPaymentLinkMutation.mutate(values, {
+      onSuccess: () => {
+        form.reset();
+        modalProps.onOpenChange(false);
+      },
+    });
   }
 
   const modalProps = useGeneralModalDisclosure();
@@ -93,7 +105,7 @@ const PaymentLinksHeader: FC = () => {
             <Box className="bg-white/80 gap-4 grid grid-cols-1">
               <FormField
                 control={form.control}
-                name="clientname"
+                name="clientId"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Client</FormLabel>
@@ -110,9 +122,11 @@ const PaymentLinksHeader: FC = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="w-full">
-                        <SelectItem value="client1">Client 1</SelectItem>
-                        <SelectItem value="client2">Client 2</SelectItem>
-                        <SelectItem value="client3">Client 3</SelectItem>
+                        {clientsData?.data?.map((client) => (
+                          <SelectItem key={client.id} value={client.id}>
+                            {client.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -122,7 +136,7 @@ const PaymentLinksHeader: FC = () => {
 
               <FormField
                 control={form.control}
-                name="projects"
+                name="projectId"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Project</FormLabel>
@@ -139,9 +153,11 @@ const PaymentLinksHeader: FC = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="w-full">
-                        <SelectItem value="project1">Project 1</SelectItem>
-                        <SelectItem value="project2">Project 2</SelectItem>
-                        <SelectItem value="project3">Project 3</SelectItem>
+                        {projectsData?.data?.map((project) => (
+                          <SelectItem key={project.id} value={project.id}>
+                            {project.projectName}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -160,8 +176,12 @@ const PaymentLinksHeader: FC = () => {
                         className="bg-white rounded-full placeholder:text-gray-400"
                         size="lg"
                         type="number"
+                        step="0.01"
                         placeholder="$ 0"
                         {...field}
+                        onChange={(e) =>
+                          field.onChange(parseFloat(e.target.value) || 0)
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -193,8 +213,9 @@ const PaymentLinksHeader: FC = () => {
                 variant="outline"
                 className="bg-[#1797b9] hover:bg-[#1797b9]/80 hover:text-white text-white border border-gray-200 rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
                 type="submit"
+                disabled={createPaymentLinkMutation.isPending}
               >
-                Save
+                {createPaymentLinkMutation.isPending ? "Creating..." : "Save"}
               </Button>
             </Box>
           </form>
