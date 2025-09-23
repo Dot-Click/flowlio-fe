@@ -279,7 +279,7 @@ export const CreateProject = () => {
       setUploadedFile(null);
       setPdfPreview(null);
       setProjectFiles([]);
-      navigate("/dashboard/projects");
+      navigate("/dashboard/project");
     }
   }, [createSuccess, updateSuccess, form, navigate]);
 

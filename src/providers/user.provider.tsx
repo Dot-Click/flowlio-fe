@@ -160,13 +160,18 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
       if (userProfileData?.data) {
         console.log("📋 Fresh user profile data:", userProfileData.data);
         console.log("👤 User role from profile:", userProfileData.data.role);
+        console.log("🔑 Better Auth role:", authData.user.role);
+        console.log(
+          "🎯 Final role used:",
+          authData.user.role || userProfileData.data.role
+        );
 
         const enhancedData = {
           ...authData,
           user: {
             ...authData.user,
             ...userProfileData.data,
-            role: userProfileData.data.role, // Include role from fresh data
+            role: authData.user.role || userProfileData.data.role, // Use Better Auth role first, fallback to profile
             subadminId: userProfileData.data.subadminId,
             isSuperAdmin: userProfileData.data.isSuperAdmin,
           },

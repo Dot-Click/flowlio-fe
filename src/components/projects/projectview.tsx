@@ -208,7 +208,7 @@ export const ProjectView = () => {
   };
 
   const handleEdit = () => {
-    navigate(`/dashboard/projects/edit/${project.id}`);
+    navigate(`/dashboard/project/edit/${project.id}`);
   };
 
   const handleDownload = () => {
@@ -295,7 +295,7 @@ export const ProjectView = () => {
             <Button
               variant="link"
               className="p-0 h-auto text-gray-600 hover:text-gray-900"
-              onClick={() => navigate("/dashboard/projects")}
+              onClick={() => navigate("/dashboard/project")}
             >
               Projects
             </Button>

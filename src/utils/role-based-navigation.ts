@@ -54,7 +54,7 @@ const operatorNavItems: NavItem[] = [
     icon: React.createElement(SquareKanban),
   },
   {
-    url: "/dashboard/projects",
+    url: "/dashboard/project",
     title: "Projects",
     icon: React.createElement(GroupIcon),
   },

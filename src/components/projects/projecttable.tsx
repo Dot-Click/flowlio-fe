@@ -338,7 +338,7 @@ export const ProjectTable = () => {
                     variant="outline"
                     className="bg-black border-none w-10 h-9 hover:bg-black cursor-pointer rounded-md "
                     onClick={() => {
-                      navigate(`/dashboard/projects/view/${row.original.id}`);
+                      navigate(`/dashboard/project/view/${row.original.id}`);
                     }}
                     onMouseEnter={() => prefetchProject(row.original.id)}
                   >
@@ -358,7 +358,7 @@ export const ProjectTable = () => {
                     variant="outline"
                     className="bg-[#23B95D] hover:bg-[#23B95D]/80 rounded-md border-none cursor-pointer"
                     onClick={() => {
-                      navigate(`/dashboard/projects/edit/${row.original.id}`);
+                      navigate(`/dashboard/project/edit/${row.original.id}`);
                     }}
                   >
                     <PencilLine className="fill-white text-white" />
