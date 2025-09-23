@@ -9,11 +9,12 @@ import { CircleCheck, FileText, Download, Trash2 } from "lucide-react";
 import { useFetchInvoices, Invoice } from "@/hooks/usefetchinvoices";
 import { useDeleteInvoice } from "@/hooks/usedeleteinvoice";
 import { useGenerateInvoicePDF } from "@/hooks/usegenerateinvoicepdf";
+import { useCallback } from "react";
 
 // Actions component to properly use hooks
 const InvoiceActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
   const deleteInvoiceMutation = useDeleteInvoice();
-  const generatePDFMutation = useGenerateInvoicePDF();
+  const { generatePDF } = useGenerateInvoicePDF();
 
   const handleDelete = () => {
     if (confirm("Are you sure you want to delete this invoice?")) {
@@ -27,7 +28,7 @@ const InvoiceActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
       window.open(invoice.pdfUrl, "_blank");
     } else {
       // Generate new PDF
-      generatePDFMutation.mutate(invoice.id);
+      generatePDF({ invoices: [invoice], exportType: "selected" });
     }
   };
 
@@ -36,7 +37,7 @@ const InvoiceActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
       <Button
         onClick={handleDownloadPDF}
         className="bg-[#1797b9] border-none hover:bg-[#1797b9]/80 cursor-pointer rounded-full space-x-2 text-white"
-        disabled={generatePDFMutation.isPending}
+        disabled={false}
       >
         {invoice.pdfUrl ? (
           <Download className="size-4 text-white" />
@@ -84,7 +85,7 @@ export const columns: ColumnDef<Data>[] = [
           onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="Select row"
         />
-        <Box className="text-center">S1-123-{row.index + 346}</Box>
+        <Box className="text-center">{row.original.invoiceNumber}</Box>
       </Flex>
     ),
     enableSorting: false,
@@ -106,17 +107,17 @@ export const columns: ColumnDef<Data>[] = [
     },
   },
   {
-    accessorKey: "datepaid",
-    header: () => <Box className="text-black text-center">Date Paid</Box>,
+    accessorKey: "dueDate",
+    header: () => <Box className="text-black text-center">Due Date</Box>,
     cell: ({ row }) => (
       <Box className="captialize text-center">
-        {row.original.datepaid
-          ? new Date(row.original.datepaid).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
+        {row.original.dueDate
+          ? new Date(row.original.dueDate).toLocaleDateString("en-US", {
+              month: "short",
               day: "numeric",
+              year: "numeric",
             })
-          : "Not paid"}
+          : "Not due"}
       </Box>
     ),
   },
@@ -148,8 +149,37 @@ export const columns: ColumnDef<Data>[] = [
   },
 ];
 
-export const InvoiceTable = () => {
+interface InvoiceTableProps {
+  onTableStateChange?: (state: {
+    selectedRows: Invoice[];
+    currentPageRows: Invoice[];
+    selectedRowIds: string[];
+  }) => void;
+}
+
+export const InvoiceTable = ({ onTableStateChange }: InvoiceTableProps) => {
   const { data: invoicesData, isLoading, error } = useFetchInvoices();
+
+  // Memoize the callback to prevent infinite loops
+  const handleTableStateChange = useCallback(
+    (state: { rowSelection: Record<string, boolean> }) => {
+      const data = invoicesData?.data || [];
+      const selectedRows = data.filter((_, index) => state.rowSelection[index]);
+      const selectedRowIds = selectedRows.map((row) => row.id);
+
+      const newTableState = {
+        selectedRows,
+        currentPageRows: data, // For now, we'll use all data as current page
+        selectedRowIds,
+      };
+
+      // Call the parent callback with the new state
+      if (onTableStateChange) {
+        onTableStateChange(newTableState);
+      }
+    },
+    [invoicesData?.data, onTableStateChange]
+  );
 
   if (isLoading) {
     return (
@@ -179,6 +209,7 @@ export const InvoiceTable = () => {
       searchClassName="rounded-full"
       filterClassName="rounded-full"
       onRowClick={(row) => console.log("Row clicked:", row.original)}
+      onTableStateChange={handleTableStateChange}
     />
   );
 };

@@ -134,48 +134,42 @@ export const InvoiceCreationModal: React.FC<InvoiceCreationModalProps> = ({
       contentProps={{ className: "h-[600px] overflow-y-auto" }}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <Flex className="justify-between">
-          {/* Client Selection */}
-          <Box className="w-full">
-            <label className="text-sm font-medium text-gray-700">
-              Client *
-            </label>
-            <Select
-              value={watch("clientId")}
-              onValueChange={(value) => setValue("clientId", value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a client" />
-              </SelectTrigger>
-              <SelectContent>
-                {clientsData?.data?.map((client) => (
-                  <SelectItem key={client.id} value={client.id}>
-                    {client.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.clientId && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.clientId.message}
-              </p>
-            )}
-          </Box>
-
-          {/* Due Date */}
-          <Box className="w-full">
-            <label className="block text-sm font-medium text-gray-700">
-              Due Date
-            </label>
-            <Input type="date" {...register("dueDate")} />
-            {errors.dueDate && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.dueDate.message}
-              </p>
-            )}
-          </Box>
-        </Flex>
-
+        {/* Client Selection */}
+        <Box className="w-full">
+          <label className="text-sm font-medium text-gray-700">Client *</label>
+          <Select
+            value={watch("clientId")}
+            onValueChange={(value) => setValue("clientId", value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a client" />
+            </SelectTrigger>
+            <SelectContent>
+              {clientsData?.data?.map((client) => (
+                <SelectItem key={client.id} value={client.id}>
+                  {client.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.clientId && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.clientId.message}
+            </p>
+          )}
+        </Box>
+        {/* Due Date */}
+        <Box className="">
+          <label className="block text-sm font-medium text-gray-700">
+            Due Date
+          </label>
+          <Input type="date" {...register("dueDate")} />
+          {errors.dueDate && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.dueDate.message}
+            </p>
+          )}
+        </Box>
         {/* Amount */}
         <Box>
           <label className="block text-sm font-medium text-gray-700 mb-2">

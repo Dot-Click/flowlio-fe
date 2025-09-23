@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useState, useCallback } from "react";
 import { PageWrapper } from "../common/pagewrapper";
 import { Center } from "../ui/center";
 import { Stack } from "../ui/stack";
@@ -12,12 +12,74 @@ import {
 import { ChevronDown, CirclePlus } from "lucide-react";
 import { Button } from "../ui/button";
 import { InvoiceCreationModal } from "./invoicecreationmodal";
+import { Invoice } from "@/hooks/usefetchinvoices";
+import { toast } from "sonner";
+import { useGenerateInvoicePDF } from "@/hooks/usegenerateinvoicepdf";
 
 export const InvoiceHeader: FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [tableState, setTableState] = useState<{
+    selectedRows: Invoice[];
+    currentPageRows: Invoice[];
+    selectedRowIds: string[];
+  }>({
+    selectedRows: [],
+    currentPageRows: [],
+    selectedRowIds: [],
+  });
+
+  const { generatePDF } = useGenerateInvoicePDF();
+
+  // Memoize the table state change handler to prevent infinite loops
+  const handleTableStateChange = useCallback(
+    (state: {
+      selectedRows: Invoice[];
+      currentPageRows: Invoice[];
+      selectedRowIds: string[];
+    }) => {
+      setTableState(state);
+    },
+    []
+  );
 
   const handleCreateInvoice = () => {
     setIsCreateModalOpen(true);
+  };
+
+  const handleExportSelected = async () => {
+    if (tableState.selectedRows.length === 0) {
+      toast.error("Please select at least one invoice to export");
+      return;
+    }
+
+    const result = await generatePDF({
+      invoices: tableState.selectedRows,
+      exportType: "selected",
+    });
+
+    if (result.success) {
+      toast.success(result.message);
+    } else {
+      toast.error(result.message);
+    }
+  };
+
+  const handleExportCurrentPage = async () => {
+    if (tableState.currentPageRows.length === 0) {
+      toast.error("No invoices on current page to export");
+      return;
+    }
+
+    const result = await generatePDF({
+      invoices: tableState.currentPageRows,
+      exportType: "currentPage",
+    });
+
+    if (result.success) {
+      toast.success(result.message);
+    } else {
+      toast.error(result.message);
+    }
   };
 
   return (
@@ -35,7 +97,7 @@ export const InvoiceHeader: FC = () => {
         <Center className="gap-3">
           <Button
             onClick={handleCreateInvoice}
-            className="bg-[#1797b9] hover:bg-[#1797b9]/80 text-white rounded-full px-6 py-2 flex items-center gap-2"
+            className="bg-[#1797b9] hover:bg-[#1797b9]/80 text-white rounded-full px-6 py-4 flex items-center gap-2"
           >
             <CirclePlus className="w-4 h-4" />
             Create Invoice
@@ -51,18 +113,26 @@ export const InvoiceHeader: FC = () => {
               </Center>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="p-1">
-              <DropdownMenuCheckboxItem className="p-2 cursor-pointer">
-                Export Selected
+              <DropdownMenuCheckboxItem
+                className="p-2 cursor-pointer"
+                onClick={handleExportSelected}
+                disabled={tableState.selectedRows.length === 0}
+              >
+                Export Selected ({tableState.selectedRows.length})
               </DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem className="p-2 cursor-pointer">
-                Export Current Page
+              <DropdownMenuCheckboxItem
+                className="p-2 cursor-pointer"
+                onClick={handleExportCurrentPage}
+                disabled={tableState.currentPageRows.length === 0}
+              >
+                Export Current Page ({tableState.currentPageRows.length})
               </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </Center>
       </Center>
 
-      <InvoiceTable />
+      <InvoiceTable onTableStateChange={handleTableStateChange} />
 
       <InvoiceCreationModal
         isOpen={isCreateModalOpen}

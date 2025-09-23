@@ -12,6 +12,7 @@ export interface Invoice {
   pdfUrl?: string;
   pdfFileName?: string;
   pdfFileSize?: number;
+  dueDate?: string;
 }
 
 interface FetchInvoicesResponse {

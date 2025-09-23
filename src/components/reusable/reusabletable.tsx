@@ -51,6 +51,9 @@ export interface ReusableTableProps<TData> {
   defaultSorting?: SortingState;
   enablePaymentLinksCalender?: boolean;
   onRowClick?: (row: Row<TData>) => void;
+  onTableStateChange?: (state: {
+    rowSelection: Record<string, boolean>;
+  }) => void;
   defaultColumnVisibility?: VisibilityState;
   defaultColumnFilters?: ColumnFiltersState;
 }
@@ -66,6 +69,7 @@ export const ReusableTable = <TData,>({
   enableMyTaskTable = false,
   searchClassName,
   filterClassName,
+  onTableStateChange,
   // onRowClick,
   defaultColumnVisibility = {},
   defaultSorting = [],
@@ -110,6 +114,13 @@ export const ReusableTable = <TData,>({
     },
     enableRowSelection: true,
   });
+
+  // Call onTableStateChange when row selection changes
+  React.useEffect(() => {
+    if (onTableStateChange) {
+      onTableStateChange({ rowSelection });
+    }
+  }, [rowSelection, onTableStateChange]);
 
   const [range, setRange] = React.useState<{ from?: Date; to?: Date }>({});
   React.useEffect(() => {
