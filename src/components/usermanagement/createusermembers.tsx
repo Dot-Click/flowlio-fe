@@ -412,7 +412,7 @@ export const CreateUserMembers = () => {
                       </FormControl>
                       <SelectContent className="w-full">
                         <SelectItem value="viewer">Viewer</SelectItem>
-                        <SelectItem value="operator">Operator</SelectItem>
+                        {/* <SelectItem value="operator">Operator</SelectItem> */}
                       </SelectContent>
                     </Select>
                     <FormMessage />

@@ -10,7 +10,11 @@ import { Input } from "@/components/ui/input";
 import { IoMdLock, IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { Box } from "@/components/ui/box";
 import { Switch } from "@/components/ui/switch";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import { useUser } from "@/providers/user.provider";
+import { useUpdateUserProfile } from "@/hooks/useupdateuserprofile";
+import { useUpdateProfileImage } from "@/hooks/useupdateprofileimage";
+import { toast } from "sonner";
 
 const settingsSchema = z
   .object({
@@ -47,16 +51,21 @@ const settingsSchema = z
   });
 
 export const SettingsHeader = () => {
+  const { data: userData } = useUser();
+  const updateProfileMutation = useUpdateUserProfile();
+  const updateProfileImageMutation = useUpdateProfileImage();
+
   const [avatarPreview, setAvatarPreview] = useState<string | undefined>(
     undefined
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
+
   const form = useForm<z.infer<typeof settingsSchema>>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
       avatar: undefined,
       fullName: "",
-      email: "william@gmail.com",
+      email: "",
       currentpassword: "",
       newpassword: "",
       confirmpassword: "",
@@ -74,13 +83,41 @@ export const SettingsHeader = () => {
     formState: { errors },
   } = form;
 
+  // Update form with user data when available
+  useEffect(() => {
+    if (userData?.user) {
+      setValue("fullName", userData.user.name || "");
+      setValue("email", userData.user.email || "");
+      if (userData.user.image) {
+        setAvatarPreview(userData.user.image);
+      }
+    }
+  }, [userData, setValue]);
+
   // Password visibility states
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  function onSubmit(values: z.infer<typeof settingsSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof settingsSchema>) {
+    try {
+      // Update profile image if a new one was selected
+      if (values.avatar && values.avatar instanceof File) {
+        await updateProfileImageMutation.mutateAsync({ image: values.avatar });
+        toast.success("Profile image updated successfully!");
+      }
+
+      // Update profile information (name and email)
+      await updateProfileMutation.mutateAsync({
+        name: values.fullName,
+        email: values.email,
+      });
+
+      toast.success("Profile updated successfully!");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("Failed to update profile. Please try again.");
+    }
   }
 
   // Handle file selection
@@ -119,9 +156,16 @@ export const SettingsHeader = () => {
           <Button
             type="submit"
             variant="outline"
-            className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer h-11"
+            className="bg-black text-white border border-gray-200 rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer h-11"
+            disabled={
+              updateProfileMutation.isPending ||
+              updateProfileImageMutation.isPending
+            }
           >
-            Save Changes
+            {updateProfileMutation.isPending ||
+            updateProfileImageMutation.isPending
+              ? "Saving..."
+              : "Save Changes"}
           </Button>
         </Center>
 
@@ -131,7 +175,9 @@ export const SettingsHeader = () => {
 
             <Flex className="justify-between w-xs max-sm:w-full">
               <img
-                src={avatarPreview || "/dashboard/1.svg"}
+                src={
+                  avatarPreview || userData?.user?.image || "/dashboard/1.svg"
+                }
                 alt="Profile"
                 className="rounded-full bg-cover bg-center w-26 h-26 border-2 border-dashed border-gray-600"
               />
@@ -141,8 +187,11 @@ export const SettingsHeader = () => {
                   type="button"
                   className="bg-black text-white rounded-full flex items-center gap-2 cursor-pointer h-10 w-30 hover:bg-black/80"
                   onClick={handleChooseFile}
+                  disabled={updateProfileImageMutation.isPending}
                 >
-                  Choose File
+                  {updateProfileImageMutation.isPending
+                    ? "Uploading..."
+                    : "Choose File"}
                 </Button>
                 <input
                   type="file"
@@ -155,7 +204,9 @@ export const SettingsHeader = () => {
                   type="button"
                   className="bg-[#DDDDDD] text-black rounded-full flex items-center gap-2 cursor-pointer h-10 w-30 hover:bg-[#DDDDDD]/80 hover:text-white"
                   onClick={handleRemove}
-                  disabled={!avatarPreview}
+                  disabled={
+                    !avatarPreview || updateProfileImageMutation.isPending
+                  }
                 >
                   Remove
                 </Button>

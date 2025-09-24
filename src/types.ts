@@ -1,5 +1,6 @@
 import type { Role } from "./providers/user.provider";
 
+// Admin Support Ticket Request (for super admin)
 export interface CreateSupportTicketRequest {
   subject: string;
   description: string;
@@ -7,6 +8,16 @@ export interface CreateSupportTicketRequest {
   client: string;
   assignedto: string;
 }
+
+// User Support Ticket Request (for regular users)
+export interface CreateUserSupportTicketRequest {
+  subject: string;
+  description: string;
+  priority: "High" | "Medium" | "Low";
+  client?: string;
+  assignedTo: string;
+}
+
 // Base SupportTicket interface (without relations)
 export interface SupportTicket {
   id: string;
@@ -22,11 +33,68 @@ export interface SupportTicket {
   assignedto: string; // Assignee name (not user ID)
   createdon: Date;
   updatedAt: Date;
+  // Optional user details for enriched responses
+  assignedToUser?: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+  };
+  submittedByUser?: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+  };
 }
 
 // API Response type for support tickets
 export interface GetSupportTicketsResponse extends Partial<ApiResponse> {
   data: SupportTicket[];
+}
+
+// User Support Ticket Response Types
+export interface UserSupportTicketResponse extends Partial<ApiResponse> {
+  data: SupportTicket;
+}
+
+export interface UserSupportTicketsResponse extends Partial<ApiResponse> {
+  data: {
+    tickets: SupportTicket[];
+    summary: {
+      totalTickets: number;
+      openTickets: number;
+      closedTickets: number;
+      highPriority: number;
+      mediumPriority: number;
+      lowPriority: number;
+    };
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      role: string;
+    };
+  };
+}
+
+export interface UserRecentTicketsResponse extends Partial<ApiResponse> {
+  data: {
+    submittedTickets: SupportTicket[];
+    assignedTickets: SupportTicket[];
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      role: string;
+    };
+    summary: {
+      totalSubmitted: number;
+      totalAssigned: number;
+      openSubmitted: number;
+      openAssigned: number;
+    };
+  };
 }
 
 export interface PlanFeature {
