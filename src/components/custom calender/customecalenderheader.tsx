@@ -48,21 +48,29 @@ export const CustomCalendarHeader = () => {
 
   // Transform API events to UI format
   const events = apiEvents.map((event: CalendarEvent) => {
+    // Parse the date string and create a proper Date object
     const eventDate = new Date(event.date);
-    const weekStart = getStartOfWeek(eventDate).toISOString();
+
+    // Get the start of the week for this event date
+    const weekStart = getStartOfWeek(eventDate);
+
+    // Convert to ISO string for comparison
+    const weekStartISO = weekStart.toISOString();
 
     console.log("🔍 Event Debug:", {
       title: event.title,
-      date: event.date,
+      originalDate: event.date,
       eventDate: eventDate.toISOString(),
-      weekStart,
+      eventDateLocal: eventDate.toLocaleDateString(),
+      weekStart: weekStartISO,
+      weekStartLocal: weekStart.toLocaleDateString(),
       day: eventDate.getDay(),
     });
 
     return {
       ...event,
       day: eventDate.getDay(),
-      weekStart,
+      weekStart: weekStartISO,
     };
   });
   const [miniCalRange, setMiniCalRange] = useState<{ from?: Date }>({});
@@ -132,12 +140,16 @@ export const CustomCalendarHeader = () => {
 
   console.log("🔍 Week Filter Debug:", {
     currentWeek: currentWeek.toISOString(),
+    currentWeekLocal: currentWeek.toLocaleDateString(),
     weekKey,
+    weekKeyLocal: new Date(weekKey).toLocaleDateString(),
     totalEvents: events.length,
     weekEvents: weekEvents.length,
     eventWeekStarts: events.map((e) => ({
       title: e.title,
       weekStart: e.weekStart,
+      weekStartLocal: new Date(e.weekStart).toLocaleDateString(),
+      matches: e.weekStart === weekKey,
     })),
     startOfWeek: startOfWeek.toISOString(),
     endOfWeek: endOfWeek.toISOString(),
