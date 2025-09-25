@@ -7,6 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Center } from "@/components/ui/center";
 import { Plus, ChevronDown } from "lucide-react";
 import { CustomEvent } from "./calendarUtils";
+import { GoogleCalendarIntegration } from "./GoogleCalendarIntegration";
 import GoogleMeetIcon from "/dashboard/google-meet.svg";
 import WhatsappIcon from "/dashboard/whatsapp-icon.svg";
 import OutlookIcon from "/dashboard/google-drive.svg";
@@ -74,6 +75,9 @@ export const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
           onSelect={(date) => setMiniCalRange({ from: date })}
         />
       </Stack>
+
+      {/* Google Calendar Integration */}
+      <GoogleCalendarIntegration />
 
       {/* My Calendars */}
       <Stack className="w-full p-3">

@@ -48,18 +48,50 @@ export const useUpdateCalendarEvent = () => {
       id: string;
       data: UpdateCalendarEventRequest;
     }): Promise<UpdateCalendarEventResponse> => {
-      const response = await axios.put(`/calendar-events/${id}`, data);
-      return response.data;
+      console.log("🚀🚀🚀 UPDATE CALENDAR EVENT MUTATION CALLED 🚀🚀🚀");
+      console.log("Event ID:", id);
+      console.log("Update data:", data);
+      console.log("API URL:", `/calendar-events/${id}`);
+      console.log("Axios base URL:", axios.defaults.baseURL);
+      console.log(
+        "Full URL will be:",
+        `${axios.defaults.baseURL}/calendar-events/${id}`
+      );
+
+      try {
+        console.log("Making PUT request to update calendar event...");
+        const response = await axios.put(`/calendar-events/${id}`, data);
+        console.log(
+          "✅ PUT request successful:",
+          response.status,
+          response.data
+        );
+        return response.data;
+      } catch (error) {
+        console.error("❌ PUT request failed:", error);
+        console.error("Error details:", {
+          message: error instanceof Error ? error.message : "Unknown error",
+          status: (error as any)?.response?.status,
+          statusText: (error as any)?.response?.statusText,
+          data: (error as any)?.response?.data,
+          url: (error as any)?.config?.url,
+          method: (error as any)?.config?.method,
+        });
+        throw error;
+      }
     },
     onSuccess: (data) => {
-      console.log("Invalidate and refetch calendar events!", data);
+      console.log("🎉 UPDATE CALENDAR EVENT SUCCESS:", data);
+      console.log("Invalidating and refetching calendar events...");
       // Invalidate and refetch calendar events
       queryClient.invalidateQueries({ queryKey: ["calendar-events"] });
 
       toast.success("Calendar event updated successfully!");
     },
     onError: (error: any) => {
-      console.error("Error updating calendar event:", error);
+      console.error("💥 UPDATE CALENDAR EVENT ERROR:", error);
+      console.error("Error response:", error.response);
+      console.error("Error config:", error.config);
       const errorMessage =
         error.response?.data?.message || "Failed to update calendar event";
       toast.error(errorMessage);

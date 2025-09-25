@@ -29,20 +29,31 @@ import { Form } from "@/components/ui/form"; // or "@/components/ui/form"
 import { useForm } from "react-hook-form";
 import { SupportTicketTable } from "./supportticketstable";
 import { Flex } from "@/components/ui/flex";
-import { useCreateSupportTicket } from "@/hooks/usecreatesupportticket";
+import {
+  useCreateUniversalSupportTicket,
+  useUniversalSupportTickets,
+  useDeleteUniversalSupportTicket,
+  useAssignmentOptions,
+  type CreateUniversalSupportTicketRequest,
+} from "@/hooks/useUniversalSupportTickets";
 import { toast } from "sonner";
-import { useFetchSupportTickets } from "@/hooks/usefetchsupporttickets";
-import { useDeleteSupportTicket } from "@/hooks/usedeletesupportticket";
+import { useState } from "react";
 
 const formSchema = z.object({
   subject: z.string().min(1, "Subject is required"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   priority: z.enum(["High", "Medium", "Low"]),
-  client: z.string().min(1, "Client is required"),
-  assignedto: z.string().min(1, "Assigned to is required"),
+  client: z.string().optional(),
+  assignedTo: z.string().optional(),
+  assignedToOrganization: z.string().optional(),
+  assignedToUser: z.string().optional(),
 });
 
 export const SupportTicketsHeader: FC = () => {
+  const [assignmentType, setAssignmentType] = useState<
+    "organization" | "user" | "none"
+  >("none");
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -50,19 +61,33 @@ export const SupportTicketsHeader: FC = () => {
       description: "",
       priority: "Medium",
       client: "",
-      assignedto: "",
+      assignedTo: "",
+      assignedToOrganization: "",
+      assignedToUser: "",
     },
   });
 
-  const createSupportTicketMutation = useCreateSupportTicket();
+  const createSupportTicketMutation = useCreateUniversalSupportTicket();
   const modalProps = useGeneralModalDisclosure();
-  const { data, isLoading, error, refetch } = useFetchSupportTickets();
-  const { mutate: deleteSupportTicket } = useDeleteSupportTicket();
+  const { data, isLoading, error, refetch } = useUniversalSupportTickets();
+  const { mutate: deleteSupportTicket } = useDeleteUniversalSupportTicket();
+  const { data: assignmentOptions } = useAssignmentOptions();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await createSupportTicketMutation.mutateAsync(values);
+      const ticketData: CreateUniversalSupportTicketRequest = {
+        subject: values.subject,
+        description: values.description,
+        priority: values.priority,
+        client: values.client,
+        assignedTo: values.assignedTo,
+        assignedToOrganization: values.assignedToOrganization,
+        assignedToUser: values.assignedToUser,
+      };
+
+      await createSupportTicketMutation.mutateAsync(ticketData);
       form.reset();
+      setAssignmentType("none");
       modalProps.onOpenChange(false);
       refetch();
     } catch {
@@ -191,8 +216,59 @@ export const SupportTicketsHeader: FC = () => {
                 name="client"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Client</FormLabel>
+                    <FormLabel>Client (Optional)</FormLabel>
                     <FormControl className="w-full h-12">
+                      <input
+                        {...field}
+                        className="bg-gray-100 border border-gray-200 rounded-full w-full h-12 px-4 placeholder:text-gray-500"
+                        placeholder="Enter client name (optional)"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Assignment Type Selection */}
+              <FormItem>
+                <FormLabel>Assignment Type</FormLabel>
+                <Select
+                  value={assignmentType}
+                  onValueChange={(value: "organization" | "user" | "none") => {
+                    setAssignmentType(value);
+                    form.setValue("assignedToOrganization", "");
+                    form.setValue("assignedToUser", "");
+                    form.setValue("assignedTo", "");
+                  }}
+                >
+                  <FormControl className="w-full h-12">
+                    <SelectTrigger
+                      size="lg"
+                      className="bg-gray-100 border border-gray-200 rounded-full w-full h-12 placeholder:text-gray-100"
+                    >
+                      <SelectValue placeholder="Select Assignment Type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="w-full">
+                    <SelectItem value="none">No Assignment</SelectItem>
+                    <SelectItem value="organization">
+                      Assign to Organization
+                    </SelectItem>
+                    <SelectItem value="user">
+                      Assign to Specific User
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormItem>
+
+              {/* Organization Assignment */}
+              {assignmentType === "organization" && (
+                <FormField
+                  control={form.control}
+                  name="assignedToOrganization"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Select Organization</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -202,43 +278,60 @@ export const SupportTicketsHeader: FC = () => {
                             size="lg"
                             className="bg-gray-100 border border-gray-200 rounded-full w-full h-12 placeholder:text-gray-100"
                           >
-                            <SelectValue placeholder="Select Client" />
+                            <SelectValue placeholder="Select Organization" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="w-full">
-                          <SelectItem value="Client 1">Client 1</SelectItem>
-                          <SelectItem value="Client 2">Client 2</SelectItem>
-                          <SelectItem value="Client 3">Client 3</SelectItem>
-                          <SelectItem value="Client 4">Client 4</SelectItem>
-                          <SelectItem value="Client 5">Client 5</SelectItem>
-                          <SelectItem value="Client 6">Client 6</SelectItem>
-                          <SelectItem value="Client 7">Client 7</SelectItem>
-                          <SelectItem value="Client 8">Client 8</SelectItem>
+                          {assignmentOptions?.data?.organizations?.map(
+                            (org) => (
+                              <SelectItem key={org.id} value={org.id}>
+                                {org.name}
+                              </SelectItem>
+                            )
+                          )}
                         </SelectContent>
                       </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
-              <FormField
-                control={form.control}
-                name="assignedto"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Assign To</FormLabel>
-                    <FormControl className="w-full h-12">
-                      <input
-                        {...field}
-                        className="bg-gray-100 border border-gray-200 rounded-full w-full h-12 px-4 placeholder:text-gray-500"
-                        placeholder="Enter assignee name"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* User Assignment */}
+              {assignmentType === "user" && (
+                <FormField
+                  control={form.control}
+                  name="assignedTo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Select User</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl className="w-full h-12">
+                          <SelectTrigger
+                            size="lg"
+                            className="bg-gray-100 border border-gray-200 rounded-full w-full h-12 placeholder:text-gray-100"
+                          >
+                            <SelectValue placeholder="Select User" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="w-full">
+                          {assignmentOptions?.data?.users?.map((user) => (
+                            <SelectItem key={user.id} value={user.id}>
+                              {user.name} ({user.email}) -{" "}
+                              {user.userOrganizations?.[0]?.organization
+                                ?.name || "No Organization"}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <Flex className="justify-end ">
                 <Button

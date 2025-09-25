@@ -23,6 +23,14 @@ export type CustomEvent = {
 export const initialEvents: CustomEvent[] = [];
 
 export function formatHour(hour: number) {
+  // Handle hours 1-24 (Google Calendar format)
+  if (hour >= 1 && hour <= 12) {
+    return `${hour} AM`;
+  } else if (hour >= 13 && hour <= 24) {
+    const displayHour = hour - 12;
+    return `${displayHour} PM`;
+  }
+  // Fallback for any edge cases
   const h = hour % 12 === 0 ? 12 : hour % 12;
   const ampm = hour < 12 ? "AM" : "PM";
   return `${h} ${ampm}`;

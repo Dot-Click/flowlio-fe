@@ -85,7 +85,7 @@ export const WeekView: React.FC<WeekViewProps> = ({
       >
         {hours.map((hour) => (
           <React.Fragment key={hour}>
-            <Box className="text-right p-3 bg-white font-normal text-[#888] text-sm">
+            <Box className="text-center p-0 bg-white font-normal text-[#888] text-sm flex items-start justify-center">
               {formatHour(hour)}
             </Box>
             {weekDates.map((_, dayIdx) => {

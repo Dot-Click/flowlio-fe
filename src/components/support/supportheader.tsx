@@ -34,11 +34,13 @@ import { z } from "zod";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import {
-  useSupportTickets,
+  useUniversalSupportTickets,
   getPriorityColor,
   getStatusColor,
   formatTicketDate,
-} from "@/hooks/useSupportTickets";
+  useCreateUniversalSupportTicket,
+  type CreateUniversalSupportTicketRequest,
+} from "@/hooks/useUniversalSupportTickets";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import axios from "axios";
@@ -66,17 +68,20 @@ const SupportHeader = () => {
   });
 
   const {
-    createTicket,
-    createLoading,
-    fetchSubmittedTickets,
-    submittedLoading,
-    submittedData,
-    submittedError,
-    fetchRecentTickets,
-    recentLoading,
-    recentData,
-    recentError,
-  } = useSupportTickets();
+    data: submittedData,
+    isLoading: submittedLoading,
+    error: submittedError,
+    refetch: refetchSubmitted,
+  } = useUniversalSupportTickets({ status: "open" });
+
+  const {
+    data: recentData,
+    isLoading: recentLoading,
+    error: recentError,
+    refetch: refetchRecent,
+  } = useUniversalSupportTickets();
+
+  const createTicketMutation = useCreateUniversalSupportTicket();
 
   const modalProps = useGeneralModalDisclosure();
   const [activeTab, setActiveTab] = useState<"submitted" | "recent">(
@@ -89,12 +94,12 @@ const SupportHeader = () => {
     console.log("useEffect triggered, activeTab:", activeTab);
     if (activeTab === "submitted") {
       console.log("Fetching submitted tickets...");
-      fetchSubmittedTickets();
+      refetchSubmitted();
     } else if (activeTab === "recent") {
       console.log("Fetching recent tickets...");
-      fetchRecentTickets();
+      refetchRecent();
     }
-  }, [activeTab]);
+  }, [activeTab, refetchSubmitted, refetchRecent]);
 
   // Fetch organization members when modal opens
   useEffect(() => {
@@ -152,14 +157,22 @@ const SupportHeader = () => {
     console.log("organizationMembers:", organizationMembers);
 
     try {
-      await createTicket(values);
+      const ticketData: CreateUniversalSupportTicketRequest = {
+        subject: values.subject,
+        description: values.description,
+        priority: values.priority,
+        client: values.client,
+        assignedTo: values.assignedTo,
+      };
+
+      await createTicketMutation.mutateAsync(ticketData);
       form.reset();
       modalProps.onOpenChange(false);
       // Refresh the appropriate tab
       if (activeTab === "submitted") {
-        fetchSubmittedTickets();
+        refetchSubmitted();
       } else {
-        fetchRecentTickets();
+        refetchRecent();
       }
       toast.success("Support ticket created successfully!");
     } catch (error) {
@@ -184,8 +197,10 @@ const SupportHeader = () => {
         <Box>
           <h1 className="text-md font-medium capitalize">Your Tickets</h1>
           <p className="text-gray-500 mt-0 max-md:text-sm">
-            {submittedData?.summary.totalTickets || 0} total tickets,{" "}
-            {submittedData?.summary.openTickets || 0} open
+            {submittedData?.data?.length || 0} total tickets,{" "}
+            {submittedData?.data?.filter((ticket) => ticket.status === "open")
+              .length || 0}{" "}
+            open
           </p>
         </Box>
 
@@ -240,20 +255,21 @@ const SupportHeader = () => {
               <p className="text-gray-500">Loading your tickets...</p>
             ) : submittedError ? (
               <p className="text-red-500">
-                Error loading tickets: {submittedError}
+                Error loading tickets:{" "}
+                {submittedError?.message || "Unknown error"}
               </p>
-            ) : submittedData?.tickets.length === 0 ? (
+            ) : submittedData?.data?.length === 0 ? (
               <p className="text-gray-500">No tickets submitted yet.</p>
             ) : (
               <Accordion type="single" collapsible className="w-full">
-                {submittedData?.tickets.map((ticket: any, index: number) => (
+                {submittedData?.data?.map((ticket: any, index: number) => (
                   <AccordionItem key={ticket.id} value={`submitted-${index}`}>
-                    <AccordionTrigger className="cursor-pointer">
-                      <Stack>
+            <AccordionTrigger className="cursor-pointer">
+              <Stack>
                         <Flex className="items-center gap-2">
-                          <h1 className="font-normal hover:underline text-[18px]">
+                <h1 className="font-normal hover:underline text-[18px]">
                             {ticket.subject}
-                          </h1>
+                </h1>
                           <span
                             className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
                               ticket.status
@@ -269,27 +285,24 @@ const SupportHeader = () => {
                             {ticket.priority}
                           </span>
                         </Flex>
-                        <p className="text-[#7184b4] text-sm font-normal">
+                <p className="text-[#7184b4] text-sm font-normal">
                           Ticket #{ticket.ticketNumber} •{" "}
                           {formatTicketDate(ticket.createdon)}
-                          {ticket.assignedToUser && (
-                            <span>
-                              {" "}
-                              • Assigned to: {ticket.assignedToUser.name}
-                            </span>
+                          {ticket.assignedto && (
+                            <span> • Assigned to: {ticket.assignedto}</span>
                           )}
-                        </p>
-                      </Stack>
-                    </AccordionTrigger>
-                    <AccordionContent className="flex flex-col gap-4 text-balance">
+                </p>
+              </Stack>
+            </AccordionTrigger>
+            <AccordionContent className="flex flex-col gap-4 text-balance">
                       <p>{ticket.description}</p>
                       {ticket.client && (
                         <p className="text-sm text-gray-600">
                           <strong>Client:</strong> {ticket.client}
                         </p>
                       )}
-                    </AccordionContent>
-                  </AccordionItem>
+            </AccordionContent>
+          </AccordionItem>
                 ))}
               </Accordion>
             )}
@@ -302,24 +315,21 @@ const SupportHeader = () => {
               <p className="text-gray-500">Loading recent activity...</p>
             ) : recentError ? (
               <p className="text-red-500">
-                Error loading recent activity: {recentError}
+                Error loading recent activity:{" "}
+                {recentError?.message || "Unknown error"}
               </p>
-            ) : recentData?.submittedTickets.length === 0 &&
-              recentData?.assignedTickets.length === 0 ? (
+            ) : recentData?.data?.length === 0 ? (
               <p className="text-gray-500">No recent activity.</p>
             ) : (
               <Accordion type="single" collapsible className="w-full">
-                {[
-                  ...(recentData?.submittedTickets || []),
-                  ...(recentData?.assignedTickets || []),
-                ].map((ticket: any, index: number) => (
+                {recentData?.data?.map((ticket: any, index: number) => (
                   <AccordionItem key={ticket.id} value={`recent-${index}`}>
-                    <AccordionTrigger className="cursor-pointer">
-                      <Stack>
+            <AccordionTrigger className="cursor-pointer">
+              <Stack>
                         <Flex className="items-center gap-2">
-                          <h1 className="font-normal hover:underline text-[18px]">
+                <h1 className="font-normal hover:underline text-[18px]">
                             {ticket.subject}
-                          </h1>
+                </h1>
                           <span
                             className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
                               ticket.status
@@ -335,29 +345,29 @@ const SupportHeader = () => {
                             {ticket.priority}
                           </span>
                         </Flex>
-                        <p className="text-[#7184b4] text-sm font-normal">
+                <p className="text-[#7184b4] text-sm font-normal">
                           Ticket #{ticket.ticketNumber} •{" "}
                           {formatTicketDate(ticket.createdon)}
-                          {ticket.submittedByUser && (
-                            <span> • From: {ticket.submittedByUser.name}</span>
+                          {ticket.submittedbyName && (
+                            <span> • From: {ticket.submittedbyName}</span>
                           )}
-                          {ticket.assignedToUser && (
-                            <span> • To: {ticket.assignedToUser.name}</span>
+                          {ticket.assignedto && (
+                            <span> • Assigned to: {ticket.assignedto}</span>
                           )}
-                        </p>
-                      </Stack>
-                    </AccordionTrigger>
-                    <AccordionContent className="flex flex-col gap-4 text-balance">
+                </p>
+              </Stack>
+            </AccordionTrigger>
+            <AccordionContent className="flex flex-col gap-4 text-balance">
                       <p>{ticket.description}</p>
                       {ticket.client && (
                         <p className="text-sm text-gray-600">
                           <strong>Client:</strong> {ticket.client}
                         </p>
                       )}
-                    </AccordionContent>
-                  </AccordionItem>
+            </AccordionContent>
+          </AccordionItem>
                 ))}
-              </Accordion>
+        </Accordion>
             )}
           </>
         )}
@@ -513,9 +523,11 @@ const SupportHeader = () => {
                 variant="outline"
                 className="bg-[#1797b9] hover:bg-[#1797b9]/80 hover:text-white text-white border border-gray-200 rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
                 type="submit"
-                disabled={createLoading}
+                disabled={createTicketMutation.isPending}
               >
-                {createLoading ? "Creating..." : "Create Ticket"}
+                {createTicketMutation.isPending
+                  ? "Creating..."
+                  : "Create Ticket"}
               </Button>
             </Box>
           </form>

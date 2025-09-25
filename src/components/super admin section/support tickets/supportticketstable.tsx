@@ -18,10 +18,10 @@ import CheckSvg from "/super admin/check.svg";
 import { toast } from "sonner";
 import { useState } from "react";
 import { SupportTicketModal } from "./supportticketmodal";
-import type { SupportTicket } from "@/types";
-import { useUpdateSupportTicket } from "@/hooks/useupdatesupportticket";
+import type { UniversalSupportTicket } from "@/hooks/useUniversalSupportTickets";
+import { useUpdateUniversalSupportTicket } from "@/hooks/useUniversalSupportTickets";
 
-export type Data = SupportTicket;
+export type Data = UniversalSupportTicket;
 
 export const SupportTicketTable = ({
   data,
@@ -30,7 +30,7 @@ export const SupportTicketTable = ({
   refetch,
   deleteSupportTicket,
 }: {
-  data: Data[];
+  data: UniversalSupportTicket[];
   isLoading: boolean;
   error: any;
   refetch: () => void;
@@ -38,7 +38,7 @@ export const SupportTicketTable = ({
 }) => {
   const [selectedTicket, setSelectedTicket] = useState<Data | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { mutate: updateSupportTicket } = useUpdateSupportTicket();
+  const { mutate: updateSupportTicket } = useUpdateUniversalSupportTicket();
 
   const handleDelete = (id: string) => {
     if (
@@ -58,7 +58,7 @@ export const SupportTicketTable = ({
   const handleCloseTicket = (id: string) => {
     if (window.confirm("Are you sure you want to close this support ticket?")) {
       updateSupportTicket(
-        { id, status: "closed" },
+        { id, data: { status: "closed" } },
         {
           onSuccess: () => {
             toast.success("Support Ticket closed successfully");

@@ -18,11 +18,11 @@ import {
   Star,
   MessageSquare,
 } from "lucide-react";
-import type { SupportTicket } from "@/types";
+import type { UniversalSupportTicket } from "@/hooks/useUniversalSupportTickets";
 import { GeneralModal } from "@/components/common/generalmodal";
 
 interface SupportTicketModalProps {
-  ticket: SupportTicket | null;
+  ticket: UniversalSupportTicket | null;
   isOpen: boolean;
   onClose: () => void;
   onCloseTicket?: (id: string) => void;

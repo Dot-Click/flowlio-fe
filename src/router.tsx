@@ -89,6 +89,8 @@ const PaymentLinksPage = lazy(() =>
 );
 const InvoicePage = lazy(() => import("./pages/invoice.page"));
 const SupportPage = lazy(() => import("./pages/support.page"));
+const PrivacyPolicyPage = lazy(() => import("./pages/privacypolicy.page"));
+const TermsOfServicePage = lazy(() => import("./pages/termsofservice.page"));
 const SuperAdminLayout = lazy(() =>
   import("./layouts/superadmin.layout").then((module) => ({
     default: module.SuperAdminLayout,
@@ -165,6 +167,14 @@ const AppRoutes = () => {
       <Route
         path="/insights"
         element={<LazyWrapper component={InsightsPage} />}
+      />
+      <Route
+        path="/privacy-policy"
+        element={<LazyWrapper component={PrivacyPolicyPage} />}
+      />
+      <Route
+        path="/terms-of-service"
+        element={<LazyWrapper component={TermsOfServicePage} />}
       />
 
       {/* Authentication layout - no authentication required */}

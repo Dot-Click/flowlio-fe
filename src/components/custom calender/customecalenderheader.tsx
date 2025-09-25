@@ -18,7 +18,7 @@ import { DayView } from "./DayView";
 import { WeekView } from "./WeekView";
 import { MonthView } from "./MonthView";
 
-const hours = Array.from({ length: 24 }, (_, i) => i); // 0-23 (24 hours)
+const hours = Array.from({ length: 24 }, (_, i) => i + 1); // 1-24 (24 hours) to match Google Calendar
 
 export const CustomCalendarHeader = () => {
   const [currentWeek, setCurrentWeek] = useState(getStartOfWeek(new Date()));
@@ -304,7 +304,15 @@ export const CustomCalendarHeader = () => {
         modalProps={editEventModalProps}
         eventToEdit={editEvent}
         onSave={(updatedEvent: CustomEvent) => {
+          console.log("🎯 EVENT MODAL SAVE TRIGGERED");
+          console.log("Edit event:", editEvent);
+          console.log("Updated event data:", updatedEvent);
+
           if (editEvent?.id) {
+            console.log(
+              "✅ Event has ID, calling update mutation:",
+              editEvent.id
+            );
             updateEventMutation.mutate({
               id: editEvent.id,
               data: {
@@ -320,6 +328,9 @@ export const CustomCalendarHeader = () => {
                 outlookEvent: updatedEvent.outlookEvent,
               },
             });
+          } else {
+            console.error("❌ No event ID found, cannot update event");
+            console.error("Edit event:", editEvent);
           }
           setEditEvent(null);
           editEventModalProps.onOpenChange(false);
