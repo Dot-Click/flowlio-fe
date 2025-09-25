@@ -64,7 +64,7 @@ export const ViewerSupportHeader = () => {
         </Box>
       </Flex>
 
-      <Flex className="justify-between max-md:flex-col max-md:items-start bg-white rounded-none bg-transparent border-b-2 border-gray-200 py-8 mt-10">
+      <Flex className="justify-between max-md:flex-col max-md:items-start rounded-none bg-transparent border-b-2 border-gray-200 py-8 mt-10">
         <Box>
           <h1 className="text-md font-medium capitalize">Your Ticket</h1>
           <p className="text-gray-500 mt-0 max-md:text-sm">
