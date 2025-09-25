@@ -51,6 +51,14 @@ export const CustomCalendarHeader = () => {
     const eventDate = new Date(event.date);
     const weekStart = getStartOfWeek(eventDate).toISOString();
 
+    console.log("🔍 Event Debug:", {
+      title: event.title,
+      date: event.date,
+      eventDate: eventDate.toISOString(),
+      weekStart,
+      day: eventDate.getDay(),
+    });
+
     return {
       ...event,
       day: eventDate.getDay(),
@@ -121,6 +129,13 @@ export const CustomCalendarHeader = () => {
   // Filter events based on view mode
   const weekKey = currentWeek.toISOString();
   const weekEvents = events.filter((e: any) => e.weekStart === weekKey);
+  
+  console.log("🔍 Week Filter Debug:", {
+    weekKey,
+    totalEvents: events.length,
+    weekEvents: weekEvents.length,
+    eventWeekStarts: events.map(e => ({ title: e.title, weekStart: e.weekStart }))
+  });
 
   // Day view events
   const dayEvents = events.filter((event: any) => {
