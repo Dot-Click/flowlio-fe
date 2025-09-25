@@ -127,14 +127,20 @@ export const CustomCalendarHeader = () => {
     setCurrentWeek(next);
   };
   // Filter events based on view mode
-  const weekKey = currentWeek.toISOString();
+  const weekKey = getStartOfWeek(currentWeek).toISOString();
   const weekEvents = events.filter((e: any) => e.weekStart === weekKey);
-  
+
   console.log("🔍 Week Filter Debug:", {
+    currentWeek: currentWeek.toISOString(),
     weekKey,
     totalEvents: events.length,
     weekEvents: weekEvents.length,
-    eventWeekStarts: events.map(e => ({ title: e.title, weekStart: e.weekStart }))
+    eventWeekStarts: events.map((e) => ({
+      title: e.title,
+      weekStart: e.weekStart,
+    })),
+    startOfWeek: startOfWeek.toISOString(),
+    endOfWeek: endOfWeek.toISOString(),
   });
 
   // Day view events
