@@ -17,11 +17,15 @@ import { CalendarSidebar } from "./CalendarSidebar";
 import { DayView } from "./DayView";
 import { WeekView } from "./WeekView";
 import { MonthView } from "./MonthView";
+import { useTimezone } from "@/hooks/useTimezone";
 
 const hours = Array.from({ length: 24 }, (_, i) => i + 1); // 1-24 (24 hours) to match Google Calendar
 
 export const CustomCalendarHeader = () => {
   const [currentWeek, setCurrentWeek] = useState(getStartOfWeek(new Date()));
+
+  // Timezone hook - automatically detects and updates user timezone
+  useTimezone();
 
   // API hooks
   const createEventMutation = useCreateCalendarEvent();
