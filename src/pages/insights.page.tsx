@@ -5,8 +5,13 @@ import { InsightsCards } from "@/components/user section/insights/insightscards"
 import { InsightsHero } from "@/components/user section/insights/insightshero";
 import { Navbar } from "@/components/user section/navbar/navbar";
 import { SubscribeTo } from "@/components/user section/subscribeto";
+import { useEffect } from "react";
 
 export const InsightsPage = () => {
+  useEffect(() => {
+    scrollTo(0, 0);
+    document.title = "Insights - Flowlio";
+  }, []);
   return (
     <>
       <Navbar />

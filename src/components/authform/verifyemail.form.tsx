@@ -14,7 +14,7 @@ import { ArrowLeft } from "lucide-react";
 import { Anchor } from "../ui/anchor";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import type { FC } from "react";
+import { useEffect, type FC } from "react";
 import { z } from "zod";
 import { Flex } from "../ui/flex";
 
@@ -27,6 +27,10 @@ const formSchema = z.object({
 });
 
 export const VerifyEmailForm: FC = () => {
+  useEffect(() => {
+    scrollTo(0, 0);
+    document.title = "Verify Email - Flowlio";
+  }, []);
   const navigate = useNavigate();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

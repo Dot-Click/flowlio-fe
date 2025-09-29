@@ -16,7 +16,7 @@ import { Button } from "../ui/button";
 import { Stack } from "../ui/stack";
 import { Input } from "../ui/input";
 import { Flex } from "../ui/flex";
-import type { FC } from "react";
+import { useEffect, type FC } from "react";
 import { z } from "zod";
 
 const formSchema = z
@@ -40,6 +40,10 @@ const formSchema = z
   });
 
 export const ResetPasswordForm: FC = () => {
+  useEffect(() => {
+    scrollTo(0, 0);
+    document.title = "Reset Password - Flowlio";
+  }, []);
   const navigate = useNavigate();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

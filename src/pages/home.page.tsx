@@ -8,8 +8,14 @@ import { Navbar } from "@/components/user section/navbar/navbar";
 import { SubscribeTo } from "@/components/user section/subscribeto";
 import { Superchared } from "@/components/user section/superchared";
 import { TeamMember2 } from "@/components/user section/teammember2";
+import { useEffect } from "react";
 
 const HomePage = () => {
+  useEffect(() => {
+    scrollTo(0, 0);
+    document.title = "Home - Flowlio";
+  }, []);
+
   return (
     <>
       <Navbar />

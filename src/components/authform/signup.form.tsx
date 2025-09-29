@@ -12,7 +12,7 @@ import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { authClient } from "@/providers/user.provider";
 import type { FC } from "react";
 import { z } from "zod";
@@ -41,6 +41,10 @@ const formSchema = z.object({
 });
 
 export const SignUpForm: FC = () => {
+  useEffect(() => {
+    scrollTo(0, 0);
+    document.title = "Sign Up - Flowlio";
+  }, []);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

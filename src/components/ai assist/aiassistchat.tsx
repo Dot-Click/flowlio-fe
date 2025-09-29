@@ -1,41 +1,44 @@
 import {
   Brain,
-  Image,
   Headset,
-  CirclePlus,
   MessageSquareText,
   Send,
+  Upload,
+  FileText,
+  Image as ImageIcon,
+  X,
 } from "lucide-react";
 import { Box } from "../ui/box";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Flex } from "../ui/flex";
 import { Stack } from "../ui/stack";
-import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Center } from "../ui/center";
 import React from "react";
 import { useAiAssistChatStore } from "@/store/aiassistchat.store";
+import { useUser } from "@/providers/user.provider";
+import { useEffect } from "react";
 
 const content = [
   {
     iconStyleBox: "bg-blue-100 p-1 rounded-full w-fit",
-    titleChild: "Get real-time answers to queries",
+    titleChild: "Ask me anything - from general knowledge to trivia!",
     iconStyle: "text-blue-500 p-1",
-    title: "Smart Chat Support",
+    title: "General Questions",
     Icon: MessageSquareText,
   },
   {
-    titleChild: "Quickly assign, track, and manage tasks.",
-    iconStyleBox: "bg-red-100 p-1 rounded-full w-fit",
-    iconStyle: "text-red-500 p-1",
-    title: "Smart Chat Support",
+    titleChild: "Brainstorm ideas, write content, and solve problems.",
+    iconStyleBox: "bg-purple-100 p-1 rounded-full w-fit",
+    iconStyle: "text-purple-500 p-1",
+    title: "Creative Writing",
     Icon: Headset,
   },
   {
-    titleChild: "AI-powered suggestions to improve efficiency.",
-    iconStyleBox: "bg-yellow-100 p-1 rounded-full w-fit",
-    iconStyle: "text-yellow-500 p-1",
-    title: "Automated Responses",
+    titleChild: "Get help with productivity, organization, and planning.",
+    iconStyleBox: "bg-green-100 p-1 rounded-full w-fit",
+    iconStyle: "text-green-500 p-1",
+    title: "Productivity",
     Icon: Brain,
   },
 ];
@@ -43,31 +46,53 @@ const content = [
 export const AiAssistChat: React.FC<{ withoutWelcomeGrids?: boolean }> = ({
   withoutWelcomeGrids = false,
 }) => {
-  const { chats, activeChatId, addChat, addMessage, setActiveChat } =
-    useAiAssistChatStore();
+  const {
+    chats,
+    activeChatId,
+    addChat,
+    setActiveChat,
+    loadUserChats,
+    sendAIRequest,
+    isLoading,
+    userId,
+  } = useAiAssistChatStore();
   const activeChat = chats.find((c) => c.id === activeChatId);
+  const { data: session } = useUser();
+
+  // Load user chats when component mounts
+  useEffect(() => {
+    if (session?.user?.id && !userId) {
+      loadUserChats(session.user.id);
+    }
+  }, [session?.user?.id, userId, loadUserChats]);
 
   // Only show welcome grid if there are no messages and not explicitly hidden
   const showWelcome =
     !withoutWelcomeGrids && (!activeChat || activeChat.messages.length === 0);
 
   // Handler to send a message
-  const handleSend = (input: string, setInput: (v: string) => void) => {
-    if (!input.trim()) return;
+  const handleSend = async (
+    input: string,
+    setInput: (v: string) => void,
+    attachments?: File[]
+  ) => {
+    if (
+      (!input.trim() && (!attachments || attachments.length === 0)) ||
+      isLoading
+    )
+      return;
+
     let chatId = activeChatId;
     // If no active chat, create one
     if (!chatId) {
       chatId = addChat({ title: "New Chat", messages: [] });
       setActiveChat(chatId);
     }
-    addMessage(chatId, { role: "user", text: input });
+
     setInput("");
-    setTimeout(() => {
-      addMessage(chatId!, {
-        role: "ai",
-        text: `AI: You said, "${input}". (This is a demo response.)`,
-      });
-    }, 600);
+
+    // Send AI request with attachments
+    await sendAIRequest(input, chatId, attachments);
   };
 
   return (
@@ -91,7 +116,12 @@ const WelcomeContent = () => {
         className="size-20"
       />
       <h2 className="text-gray-500 text-sm mt-6">Hi there, 👋</h2>
-      <h2 className="text-xl">How can I help?</h2>
+      <h2 className="text-xl">What would you like to explore today?</h2>
+      <p className="text-gray-600 text-sm text-center max-w-md">
+        I'm Flowlio AI, your intelligent assistant. I can help you with
+        absolutely anything - from answering questions and solving problems to
+        creative writing and brainstorming ideas!
+      </p>
       <Flex className="flex-wrap w-full gap-2 justify-center max-sm:flex-col overflow-hidden">
         {content.map((a, i) => (
           <Stack
@@ -111,11 +141,24 @@ const WelcomeContent = () => {
 };
 
 const ChatBox: React.FC<{
-  messages: { role: "user" | "ai"; text: string }[];
-  onSend: (input: string, setInput: (v: string) => void) => void;
+  messages: {
+    role: "user" | "ai";
+    text: string;
+    isLoading?: boolean;
+    timestamp?: Date;
+    attachments?: File[];
+  }[];
+  onSend: (
+    input: string,
+    setInput: (v: string) => void,
+    attachments?: File[]
+  ) => void;
   showWelcome: boolean;
 }> = ({ messages, onSend, showWelcome }) => {
   const [input, setInput] = useState("");
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const chatRef = React.useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when messages change
@@ -125,9 +168,56 @@ const ChatBox: React.FC<{
     }
   }, [messages]);
 
-  const handleSendClick = () => onSend(input, setInput);
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") handleSendClick();
+  // File handling functions
+  const handleFileSelect = (files: FileList | null) => {
+    if (files) {
+      const newFiles = Array.from(files).slice(0, 5); // Limit to 5 files
+      setAttachments((prev) => [...prev, ...newFiles]);
+    }
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    handleFileSelect(e.dataTransfer.files);
+  };
+
+  const handleSendClick = () => {
+    if (input.trim() || attachments.length > 0) {
+      onSend(input, setInput, attachments);
+      setAttachments([]);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendClick();
+    }
+    // Shift+Enter allows new lines (default behavior)
+
+    // Auto-resize on input
+    if (e.key === "Enter" && e.shiftKey) {
+      setTimeout(() => {
+        const target = e.target as HTMLTextAreaElement;
+        target.style.height = "auto";
+        target.style.height = Math.min(target.scrollHeight, 128) + "px";
+      }, 0);
+    }
   };
   return (
     <Center
@@ -167,10 +257,44 @@ const ChatBox: React.FC<{
                       : "bg-gray-100 text-gray-800 rounded-xl px-4 py-2 m-1 max-w-[70%]"
                   }
                 >
-                  <h1 className="text-sm w-full max-sm:w-36 overflow-hidden break-words whitespace-pre-line">
-                    {msg.text}
-                  </h1>
-                  {/* <h1>{new Date().toLocaleTimeString()}</h1> */}
+                  {msg.isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                      <span className="text-sm text-gray-500">
+                        AI is thinking...
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="w-full">
+                      <div className="text-sm w-full max-sm:w-36 overflow-hidden break-words whitespace-pre-wrap">
+                        {msg.text}
+                      </div>
+                      {msg.attachments && msg.attachments.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {msg.attachments.map((file, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-center gap-1 bg-gray-200 rounded px-2 py-1 text-xs"
+                            >
+                              {file.type.startsWith("image/") ? (
+                                <ImageIcon className="w-3 h-3" />
+                              ) : (
+                                <FileText className="w-3 h-3" />
+                              )}
+                              <span className="truncate max-w-20">
+                                {file.name}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {msg.timestamp && (
+                    <p className="text-xs text-gray-400 mt-1">
+                      {new Date(msg.timestamp).toLocaleTimeString()}
+                    </p>
+                  )}
                 </Box>
               </Flex>
             ))
@@ -179,47 +303,98 @@ const ChatBox: React.FC<{
       )}
 
       {/* Input area */}
-      <Stack className="w-full max-w-3xl mx-auto p-2 mb-4 rounded-md border border-gray-300 sticky bottom-0 bg-white">
-        <Input
-          size="lg"
+      <Stack
+        className={`w-full max-w-3xl mx-auto p-2 mb-4 rounded-md border sticky bottom-0 bg-white ${
+          dragOver ? "border-blue-400 bg-blue-50" : "border-gray-300"
+        }`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        {/* Attachments preview */}
+        {attachments.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-2">
+            {attachments.map((file, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-1 bg-gray-100 rounded px-2 py-1 text-xs"
+              >
+                {file.type.startsWith("image/") ? (
+                  <ImageIcon className="w-3 h-3" />
+                ) : (
+                  <FileText className="w-3 h-3" />
+                )}
+                <span className="truncate max-w-20">{file.name}</span>
+                <button
+                  onClick={() => removeAttachment(index)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <textarea
           value={input}
-          placeholder="Ask me anything..."
+          placeholder="Ask me anything... (Shift+Enter for new line)"
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="bg-white border-none outline-none focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:outline-none shadow-none"
+          className="w-full p-3 bg-white border-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none shadow-none resize-none min-h-[44px] max-h-32 rounded-md transition-all duration-200 focus:ring-2 focus:ring-blue-200"
           style={{
             boxShadow: "none !important",
             outline: "none !important",
             border: "none !important",
+            fontFamily: "inherit",
+            fontSize: "14px",
+            lineHeight: "1.4",
+          }}
+          rows={1}
+          onInput={(e) => {
+            const target = e.target as HTMLTextAreaElement;
+            target.style.height = "auto";
+            target.style.height = Math.min(target.scrollHeight, 128) + "px";
           }}
         />
+
         <Flex className="gap-0 flex-wrap">
-          <Button variant={"ghost"} className="text-sm gap-1 text-gray-400">
-            <CirclePlus className="size-4" />
-            Upload Document
-          </Button>
-          <Button variant={"ghost"} className="text-sm gap-1 text-gray-400">
-            <Image className="size-4" />
-            Use Image
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*,.pdf,.doc,.docx,.txt,.csv,.xlsx"
+            onChange={(e) => handleFileSelect(e.target.files)}
+            className="hidden"
+          />
+          <Button
+            variant={"ghost"}
+            className="text-sm gap-1 text-gray-400"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Upload className="size-4" />
+            Upload Files
           </Button>
           <Button
             size="lg"
             className="ml-auto bg-[#0c89af] rounded-full h-9 w-9 cursor-pointer"
             onClick={handleSendClick}
             aria-label="Send"
+            disabled={!input.trim() && attachments.length === 0}
           >
             <Send className="text-white" />
           </Button>
         </Flex>
       </Stack>
 
-      <p className="text-sm text-black text-center w-full">
-        Check our
-        <span className="text-blue-500 cursor-pointer underline">
-          {" "}
-          Help Center{" "}
-        </span>
-        contact support for assistance.
+      <p className="text-sm text-gray-500 text-center w-full">
+        Press{" "}
+        <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">
+          Shift + Enter
+        </kbd>{" "}
+        for new line,{" "}
+        <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Enter</kbd> to
+        send
       </p>
     </Center>
   );

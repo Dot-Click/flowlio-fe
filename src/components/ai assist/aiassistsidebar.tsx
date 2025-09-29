@@ -18,6 +18,7 @@ import { Stack } from "../ui/stack";
 import { Pencil, Trash, EllipsisVertical } from "lucide-react";
 import { useState } from "react";
 import { useAiAssistChatStore } from "@/store/aiassistchat.store";
+import { useUser } from "@/providers/user.provider";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -30,8 +31,15 @@ export const AiAssitSidebar: React.FC<{ className?: string }> = ({
   className,
 }) => {
   const { state } = useSidebar();
-  const { chats, activeChatId, setActiveChat, deleteChat, editChatTitle } =
-    useAiAssistChatStore();
+  const {
+    chats,
+    activeChatId,
+    setActiveChat,
+    deleteChat,
+    editChatTitle,
+    clearAllChats,
+  } = useAiAssistChatStore();
+  const { data: session } = useUser();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
 
@@ -87,6 +95,11 @@ export const AiAssitSidebar: React.FC<{ className?: string }> = ({
           <h1 className="text-xs font-light text-white/90 max-md:text-black">
             Your Smart Virtual Assistant
           </h1>
+          {session?.user && (
+            <h1 className="text-xs font-light text-white/70 max-md:text-black mt-1">
+              Welcome, {session.user.name || session.user.email}
+            </h1>
+          )}
         </Stack>
         <hr className="border border-gray-700/70 mt-2" />
       </SidebarHeader>
@@ -113,70 +126,101 @@ export const AiAssitSidebar: React.FC<{ className?: string }> = ({
                     No chats yet.
                   </p>
                 ) : (
-                  chats.map((chat) => (
-                    <Flex key={chat.id} className="items-center w-full group">
-                      <SidebarMenuButton
-                        asChild
-                        className={cn(
-                          "flex-1 text-black cursor-pointer hover:bg-white/30 hover:text-white max-sm:hover:text-black my-1 py-1 px-2 rounded-lg",
-                          chat.id === activeChatId &&
-                            " text-black font-semibold",
-                          state === "collapsed" && "hidden"
-                        )}
-                        tooltip={{ children: chat.title }}
-                        onClick={() => setActiveChat(chat.id)}
+                  <>
+                    {state !== "collapsed" && chats.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        className="w-full text-xs text-gray-300 hover:text-red-700 hover:bg-red-50 mt-2 cursor-pointer"
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              "Are you sure you want to clear all chat history?"
+                            )
+                          ) {
+                            clearAllChats();
+                          }
+                        }}
                       >
-                        {editingId === chat.id ? (
-                          <form
-                            onSubmit={(e) => {
-                              e.preventDefault();
-                              handleEditSave(chat.id);
-                            }}
-                            className="flex items-center w-full"
-                          >
-                            <input
-                              className="bg-white/80 text-black rounded px-2 py-1 w-full text-xs outline-none"
-                              value={editValue}
-                              autoFocus
-                              onChange={(e) => setEditValue(e.target.value)}
-                              onBlur={() => handleEditSave(chat.id)}
-                              onKeyDown={(e) => {
-                                if (e.key === "Escape") handleEditCancel();
+                        Clear All Chats
+                      </Button>
+                    )}
+                    {chats.map((chat) => (
+                      <Flex key={chat.id} className="items-center w-full group">
+                        <SidebarMenuButton
+                          asChild
+                          className={cn(
+                            "flex-1 cursor-pointer hover:bg-white/30 max-sm:hover:text-black my-1 py-1 px-2 rounded-lg capitalize",
+                            chat.id === activeChatId &&
+                              " text-white font-semibold",
+                            state === "collapsed" && "hidden"
+                          )}
+                          tooltip={{ children: chat.title }}
+                          onClick={() => setActiveChat(chat.id)}
+                        >
+                          {editingId === chat.id ? (
+                            <form
+                              onSubmit={(e) => {
+                                e.preventDefault();
+                                handleEditSave(chat.id);
                               }}
-                            />
-                          </form>
-                        ) : (
-                          <span className="truncate text-xs">{chat.title}</span>
+                              className="flex items-center w-full"
+                            >
+                              <input
+                                className="bg-white/80 text-black rounded px-2 py-1 w-full text-xs outline-none"
+                                value={editValue}
+                                autoFocus
+                                onChange={(e) => setEditValue(e.target.value)}
+                                onBlur={() => handleEditSave(chat.id)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Escape") handleEditCancel();
+                                }}
+                              />
+                            </form>
+                          ) : (
+                            <span className="truncate text-xs">
+                              {chat.title}
+                            </span>
+                          )}
+                        </SidebarMenuButton>
+                        {state !== "collapsed" && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                className="hover:bg-white/30 rounded p-1 ml-1 cursor-pointer"
+                                title="More actions"
+                              >
+                                <EllipsisVertical className="size-4 text-black" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                className="cursor-pointer"
+                                onClick={() => handleEdit(chat.id, chat.title)}
+                              >
+                                <Pencil className="size-4 mr-2" /> Rename
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="cursor-pointer"
+                                onClick={() => {
+                                  if (
+                                    window.confirm(
+                                      `Are you sure you want to delete "${chat.title}"? This action cannot be undone.`
+                                    )
+                                  ) {
+                                    deleteChat(chat.id);
+                                  }
+                                }}
+                                variant="destructive"
+                              >
+                                <Trash className="size-4 mr-2" /> Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         )}
-                      </SidebarMenuButton>
-                      {state !== "collapsed" && (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              className="hover:bg-white/30 rounded p-1 ml-1"
-                              title="More actions"
-                            >
-                              <EllipsisVertical className="size-4 text-black" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => handleEdit(chat.id, chat.title)}
-                            >
-                              <Pencil className="size-4 mr-2" /> Rename
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => deleteChat(chat.id)}
-                              variant="destructive"
-                            >
-                              <Trash className="size-4 mr-2" /> Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      )}
-                    </Flex>
-                  ))
+                      </Flex>
+                    ))}
+                  </>
                 )}
               </SidebarMenuItem>
             </SidebarMenu>

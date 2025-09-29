@@ -3,9 +3,14 @@ import { Center } from "@/components/ui/center";
 import { Stack } from "@/components/ui/stack";
 import { Flex } from "@/components/ui/flex";
 import { useNavigate } from "react-router";
+import { useEffect } from "react";
 
 export const NotFound = () => {
   const navigate = useNavigate();
+  useEffect(() => {
+    scrollTo(0, 0);
+    document.title = "Not Found - Flowlio";
+  }, []);
 
   return (
     <Flex className="gap-0 h-screen items-stretch">

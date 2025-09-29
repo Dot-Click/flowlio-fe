@@ -16,19 +16,48 @@ import { Stack } from "@/components/ui/stack";
 import { Flex } from "@/components/ui/flex";
 import { CSSProperties } from "react";
 import { useAiAssistChatStore } from "@/store/aiassistchat.store";
+import { useUser } from "@/providers/user.provider";
+import { useEffect } from "react";
 import { Box } from "@/components/ui/box";
 import { cn } from "@/lib/utils";
 
 export const AiAssistPage = () => {
   const modalProps = useGeneralModalDisclosure();
-  const { addChat, setActiveChat } = useAiAssistChatStore();
+  const {
+    addChat,
+    setActiveChat,
+    clearAllChats,
+    setUserId,
+    loadUserChats,
+    userId,
+  } = useAiAssistChatStore();
+  const { data: session } = useUser();
+  const { state } = useSidebar();
+
+  // Load user chats when component mounts
+  useEffect(() => {
+    if (session?.user?.id && !userId) {
+      setUserId(session.user.id);
+      loadUserChats(session.user.id);
+    }
+  }, [session?.user?.id, userId, setUserId, loadUserChats]);
 
   // Handler for New Chat button
   const handleNewChat = () => {
     const newId = addChat({ title: "New Chat", messages: [] });
     setActiveChat(newId);
   };
-  const { state } = useSidebar();
+
+  // Handler for Clear All Chats
+  const handleClearAllChats = () => {
+    if (
+      window.confirm(
+        "Are you sure you want to clear all chat history? This action cannot be undone."
+      )
+    ) {
+      clearAllChats();
+    }
+  };
 
   return (
     <>
@@ -59,6 +88,14 @@ export const AiAssistPage = () => {
                       className="size-4"
                     />
                     <span>New Chat</span>
+                  </Button>
+
+                  <Button
+                    className="rounded-full h-11 sm:w-32 min-w-0 bg-red-500 hover:bg-red-600"
+                    size={"lg"}
+                    onClick={handleClearAllChats}
+                  >
+                    <span>Clear History</span>
                   </Button>
 
                   <SidebarTrigger

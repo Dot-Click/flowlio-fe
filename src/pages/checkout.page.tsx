@@ -50,6 +50,10 @@ const formSchema = z.object({
 });
 
 const CheckoutPage = () => {
+  useEffect(() => {
+    scrollTo(0, 0);
+    document.title = "Checkout - Flowlio";
+  }, []);
   const location = useLocation();
   const navigate = useNavigate();
   const { data: userData, isLoading: userLoading } = useUser();

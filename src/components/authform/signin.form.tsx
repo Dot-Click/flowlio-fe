@@ -41,6 +41,10 @@ const formSchema = z.object({
 });
 
 export const SignInForm: FC = () => {
+  useEffect(() => {
+    scrollTo(0, 0);
+    document.title = "Sign In - Flowlio";
+  }, []);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);

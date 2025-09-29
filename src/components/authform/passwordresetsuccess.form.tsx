@@ -1,10 +1,14 @@
 import { FormWrapper } from "./formwrapper";
 import { useNavigate } from "react-router";
 import { Button } from "../ui/button";
-import type { FC } from "react";
+import { useEffect, type FC } from "react";
 import { Center } from "../ui/center";
 
 export const PasswordResetSuccessForm: FC = () => {
+  useEffect(() => {
+    scrollTo(0, 0);
+    document.title = "Password Reset Success - Flowlio";
+  }, []);
   const navigate = useNavigate();
 
   return (
