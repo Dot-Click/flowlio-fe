@@ -29,18 +29,24 @@ export const AiAssistPage = () => {
     clearAllChats,
     setUserId,
     loadUserChats,
-    userId,
+
+    clearUserSession,
   } = useAiAssistChatStore();
   const { data: session } = useUser();
   const { state } = useSidebar();
 
-  // Load user chats when component mounts
+  // Load user chats when component mounts or user changes
   useEffect(() => {
-    if (session?.user?.id && !userId) {
+    if (session?.user?.id) {
+      // Always set user ID and load chats for the current user
+      // This ensures we load the correct user's chats when switching users
       setUserId(session.user.id);
       loadUserChats(session.user.id);
+    } else {
+      // If no session, clear the chats
+      clearUserSession();
     }
-  }, [session?.user?.id, userId, setUserId, loadUserChats]);
+  }, [session?.user?.id, setUserId, loadUserChats, clearUserSession]);
 
   // Handler for New Chat button
   const handleNewChat = () => {

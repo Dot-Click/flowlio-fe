@@ -36,6 +36,7 @@ interface AiAssistChatState {
     attachments?: File[]
   ) => Promise<void>;
   clearAllChats: () => void;
+  clearUserSession: () => void;
 }
 
 export const useAiAssistChatStore = create<AiAssistChatState>((set, get) => ({
@@ -118,9 +119,15 @@ export const useAiAssistChatStore = create<AiAssistChatState>((set, get) => ({
 
   // Load user's chat history from backend
   loadUserChats: async (userId) => {
-    if (!userId) return;
+    if (!userId) {
+      // Clear chats if no userId provided
+      set({ chats: [], activeChatId: null, userId: null });
+      return;
+    }
 
-    set({ isLoading: true, userId });
+    // Always clear existing chats when loading chats for any user
+    // This ensures no cross-user data leakage
+    set({ chats: [], activeChatId: null, isLoading: true, userId });
 
     try {
       // For now, we'll use localStorage but in production this should be API call
@@ -144,6 +151,8 @@ export const useAiAssistChatStore = create<AiAssistChatState>((set, get) => ({
       }
     } catch (error) {
       console.error("Error loading user chats:", error);
+      // Clear chats on error to prevent showing corrupted data
+      set({ chats: [], activeChatId: null });
     } finally {
       set({ isLoading: false });
     }
@@ -248,5 +257,10 @@ export const useAiAssistChatStore = create<AiAssistChatState>((set, get) => ({
     if (userId) {
       localStorage.removeItem(`ai_chats_${userId}`);
     }
+  },
+
+  // Clear chats when user logs out
+  clearUserSession: () => {
+    set({ chats: [], activeChatId: null, userId: null });
   },
 }));
