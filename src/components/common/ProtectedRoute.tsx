@@ -2,6 +2,10 @@ import { ReactNode, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useUser } from "@/providers/user.provider";
 import { toast } from "sonner";
+import {
+  storeRedirectFrom,
+  storeLastVisitedPage,
+} from "@/utils/sessionPersistence.util";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -34,6 +38,9 @@ export const ProtectedRoute = ({
     if (isLoading) return;
 
     if (!userData?.user) {
+      // Store the current page for redirect after login
+      storeRedirectFrom(location.pathname);
+
       // Only show error if we're sure there's no session (not just loading)
       // Add a small delay to prevent race conditions during login
       const timeoutId = setTimeout(() => {
@@ -47,6 +54,9 @@ export const ProtectedRoute = ({
       }, 1000); // 1 second delay
 
       return () => clearTimeout(timeoutId);
+    } else {
+      // User is authenticated - store this as last visited page
+      storeLastVisitedPage(location.pathname);
     }
 
     const user = userData.user;

@@ -18,6 +18,7 @@ import React from "react";
 import { useAiAssistChatStore } from "@/store/aiassistchat.store";
 import { useUser } from "@/providers/user.provider";
 import { useEffect } from "react";
+import { ImageGenerationModal } from "./ImageGenerationModal";
 
 const content = [
   {
@@ -54,8 +55,8 @@ export const AiAssistChat: React.FC<{ withoutWelcomeGrids?: boolean }> = ({
     loadUserChats,
     sendAIRequest,
     isLoading,
-
     clearUserSession,
+    generateImage,
   } = useAiAssistChatStore();
   const activeChat = chats.find((c) => c.id === activeChatId);
   const { data: session } = useUser();
@@ -104,10 +105,46 @@ export const AiAssistChat: React.FC<{ withoutWelcomeGrids?: boolean }> = ({
   return (
     <Center className="flex-col h-full min-h-[300px] w-full max-w-full p-2">
       {showWelcome ? <WelcomeContent /> : null}
+
+      {/* New Chat Button - only show when not in welcome mode */}
+      {/* {!showWelcome && activeChatId && (
+        <Flex className="w-full justify-between items-center mb-4">
+          <Button
+            onClick={() => {
+              const newChatId = addChat({ title: "New Chat", messages: [] });
+              setActiveChat(newChatId);
+            }}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              />
+            </svg>
+            New Chat
+          </Button>
+          <div className="text-sm text-gray-500">
+            {activeChat?.messages?.length || 0} messages
+          </div>
+        </Flex>
+      )} */}
+
       <ChatBox
         messages={activeChat?.messages || []}
         onSend={handleSend}
         showWelcome={showWelcome}
+        activeChatId={activeChatId}
+        generateImage={generateImage}
+        isLoading={isLoading}
       />
     </Center>
   );
@@ -124,9 +161,9 @@ const WelcomeContent = () => {
       <h2 className="text-gray-500 text-sm mt-6">Hi there, 👋</h2>
       <h2 className="text-xl">What would you like to explore today?</h2>
       <p className="text-gray-600 text-sm text-center max-w-md">
-        I'm Flowlio AI, your intelligent assistant. I can help you with
-        absolutely anything - from answering questions and solving problems to
-        creative writing and brainstorming ideas!
+        I'm Flowlio AI, powered by GPT-5! I can help you with absolutely
+        anything - answer questions, analyze files (PDFs, images, documents),
+        generate images with DALL-E. What would you like to explore today?
       </p>
       <Flex className="flex-wrap w-full gap-2 justify-center max-sm:flex-col overflow-hidden">
         {content.map((a, i) => (
@@ -153,6 +190,7 @@ const ChatBox: React.FC<{
     isLoading?: boolean;
     timestamp?: Date;
     attachments?: File[];
+    imageUrl?: string;
   }[];
   onSend: (
     input: string,
@@ -160,10 +198,24 @@ const ChatBox: React.FC<{
     attachments?: File[]
   ) => void;
   showWelcome: boolean;
-}> = ({ messages, onSend, showWelcome }) => {
+  activeChatId: string | null;
+  generateImage: (prompt: string, chatId: string) => void;
+  isLoading: boolean;
+}> = ({
+  messages,
+  onSend,
+  showWelcome,
+  activeChatId,
+  generateImage,
+  isLoading: storeIsLoading,
+}) => {
   const [input, setInput] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
   const [dragOver, setDragOver] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [generatedImageUrl, setGeneratedImageUrl] = useState<
+    string | undefined
+  >();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatRef = React.useRef<HTMLDivElement>(null);
 
@@ -225,6 +277,23 @@ const ChatBox: React.FC<{
       }, 0);
     }
   };
+
+  const handleImageGenerate = async (prompt: string) => {
+    if (!activeChatId) return;
+
+    try {
+      await generateImage(prompt, activeChatId);
+      // The generated image URL will be handled by the store and displayed in the chat
+      setIsImageModalOpen(false);
+    } catch (error) {
+      console.error("Failed to generate image:", error);
+    }
+  };
+
+  const handleImageModalClose = () => {
+    setIsImageModalOpen(false);
+    setGeneratedImageUrl(undefined);
+  };
   return (
     <Center
       className={`flex-col w-full max-w-3xl mx-auto mb-4 max-md:p-2 ${
@@ -264,17 +333,92 @@ const ChatBox: React.FC<{
                   }
                 >
                   {msg.isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
-                      <span className="text-sm text-gray-500">
-                        AI is thinking...
-                      </span>
+                    <div className="flex items-center gap-3">
+                      {msg.text === "Generating image..." ? (
+                        <>
+                          <div className="relative">
+                            <div className="animate-spin rounded-full h-5 w-5 border-2 border-purple-200"></div>
+                            <div className="animate-spin rounded-full h-5 w-5 border-2 border-purple-600 border-t-transparent absolute top-0 left-0"></div>
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm text-purple-600 font-medium">
+                              🎨 Creating your image...
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              This may take 10-15 seconds
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                          <span className="text-sm text-gray-500">
+                            AI is thinking...
+                          </span>
+                        </>
+                      )}
                     </div>
                   ) : (
                     <div className="w-full">
                       <div className="text-sm w-full max-sm:w-36 overflow-hidden break-words whitespace-pre-wrap">
                         {msg.text}
                       </div>
+                      {msg.imageUrl && (
+                        <div className="mt-2">
+                          <div className="relative">
+                            <img
+                              src={msg.imageUrl}
+                              alt="Generated image"
+                              className="max-w-full h-auto rounded-lg border border-gray-200"
+                              style={{ maxHeight: "400px" }}
+                            />
+                            <button
+                              onClick={async () => {
+                                try {
+                                  // Fetch the image as a blob
+                                  const response = await fetch(msg.imageUrl!);
+                                  const blob = await response.blob();
+
+                                  // Create a blob URL
+                                  const blobUrl = URL.createObjectURL(blob);
+
+                                  // Create download link
+                                  const link = document.createElement("a");
+                                  link.href = blobUrl;
+                                  link.download = `generated-image-${Date.now()}.png`;
+                                  document.body.appendChild(link);
+                                  link.click();
+                                  document.body.removeChild(link);
+
+                                  // Clean up blob URL
+                                  URL.revokeObjectURL(blobUrl);
+                                } catch (error) {
+                                  console.error("Download failed:", error);
+                                  // Fallback: open in new tab
+                                  window.open(msg.imageUrl!, "_blank");
+                                }
+                              }}
+                              className="absolute top-1 right-1 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-1.5 rounded-full shadow-lg border border-gray-200 transition-all duration-200 cursor-pointer"
+                              title="Download image"
+                            >
+                              <svg
+                                className="w-3 h-3"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      )}
                       {msg.attachments && msg.attachments.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-1">
                           {msg.attachments.map((file, idx) => (
@@ -282,13 +426,13 @@ const ChatBox: React.FC<{
                               key={idx}
                               className="flex items-center gap-1 bg-gray-200 rounded px-2 py-1 text-xs"
                             >
-                              {file.type.startsWith("image/") ? (
+                              {file.type && file.type.startsWith("image/") ? (
                                 <ImageIcon className="w-3 h-3" />
                               ) : (
                                 <FileText className="w-3 h-3" />
                               )}
                               <span className="truncate max-w-20">
-                                {file.name}
+                                {file.name || "Unknown file"}
                               </span>
                             </div>
                           ))}
@@ -325,12 +469,14 @@ const ChatBox: React.FC<{
                 key={index}
                 className="flex items-center gap-1 bg-gray-100 rounded px-2 py-1 text-xs"
               >
-                {file.type.startsWith("image/") ? (
+                {file.type && file.type.startsWith("image/") ? (
                   <ImageIcon className="w-3 h-3" />
                 ) : (
                   <FileText className="w-3 h-3" />
                 )}
-                <span className="truncate max-w-20">{file.name}</span>
+                <span className="truncate max-w-20">
+                  {file.name || "Unknown file"}
+                </span>
                 <button
                   onClick={() => removeAttachment(index)}
                   className="text-red-500 hover:text-red-700"
@@ -382,6 +528,14 @@ const ChatBox: React.FC<{
             Upload Files
           </Button>
           <Button
+            variant={"ghost"}
+            className="text-sm gap-1 text-gray-400"
+            onClick={() => setIsImageModalOpen(true)}
+          >
+            <ImageIcon className="size-4" />
+            Generate Image
+          </Button>
+          <Button
             size="lg"
             className="ml-auto bg-[#0c89af] rounded-full h-9 w-9 cursor-pointer"
             onClick={handleSendClick}
@@ -402,6 +556,15 @@ const ChatBox: React.FC<{
         <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Enter</kbd> to
         send
       </p>
+
+      {/* Image Generation Modal */}
+      <ImageGenerationModal
+        isOpen={isImageModalOpen}
+        onClose={handleImageModalClose}
+        onGenerate={handleImageGenerate}
+        isLoading={storeIsLoading}
+        generatedImage={generatedImageUrl}
+      />
     </Center>
   );
 };

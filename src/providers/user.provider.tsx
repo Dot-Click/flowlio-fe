@@ -16,6 +16,7 @@ import * as permissions from "@/configs/permission.config";
 import { backendDomain } from "@/configs/axios.config";
 import { useUserProfile } from "@/hooks/useuserprofile";
 import { useQueryClient } from "@tanstack/react-query";
+import { clearLastVisitedPage } from "@/utils/sessionPersistence.util";
 
 const { ac, roles } = permissions;
 
@@ -139,6 +140,9 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
       console.log("🔒 No session found - clearing user data (logout scenario)");
       setData(null);
       setIsLoading(false);
+
+      // Clear session persistence data on logout
+      clearLastVisitedPage();
 
       // Also clear React Query cache when logging out
       queryClient.removeQueries({ queryKey: ["user-profile"] });

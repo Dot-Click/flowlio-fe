@@ -7,6 +7,10 @@ import {
   SubAdminRoute,
   ViewerRoute,
 } from "./components/common/ProtectedRoute";
+import {
+  useSessionPersistence,
+  useSessionRestoration,
+} from "./hooks/useSessionPersistence";
 
 // Lazy load all page components
 const PasswordresetsucessPage = lazy(
@@ -152,6 +156,12 @@ const SubscriptionsPage = lazy(() => import("./pages/subscriptions.page"));
 
 // Main app routes component
 const AppRoutes = () => {
+  // Track page visits for session persistence
+  useSessionPersistence();
+
+  // Handle session restoration for active users
+  useSessionRestoration();
+
   return (
     <Routes>
       {/* Public routes fixed the workflow route*/}

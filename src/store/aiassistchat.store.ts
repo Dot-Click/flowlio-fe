@@ -7,6 +7,7 @@ export type ChatMessage = {
   timestamp?: Date;
   isLoading?: boolean;
   attachments?: File[];
+  imageUrl?: string; // Added for generated images
 };
 
 export type Chat = {
@@ -37,6 +38,7 @@ interface AiAssistChatState {
   ) => Promise<void>;
   clearAllChats: () => void;
   clearUserSession: () => void;
+  generateImage: (prompt: string, chatId: string) => Promise<void>;
 }
 
 export const useAiAssistChatStore = create<AiAssistChatState>((set, get) => ({
@@ -180,27 +182,36 @@ export const useAiAssistChatStore = create<AiAssistChatState>((set, get) => ({
     get().addMessage(chatId, { role: "ai", text: "", isLoading: true });
 
     try {
-      // For now, we'll handle attachments by describing them in the message
-      // In a full implementation, you'd upload files to a service and include file references
-      const messageWithAttachments =
-        attachments && attachments.length > 0
-          ? `${message}\n\nAttached files: ${attachments
-              .map((f) => f.name)
-              .join(", ")}`
-          : message;
+      // Prepare FormData for file uploads
+      const formData = new FormData();
+      formData.append("userInput", message);
 
-      // Make AI request to backend
-      const response = await axios.post("/ai/suggestions", {
-        userInput: messageWithAttachments,
-        includeSuggestions: false,
+      // Add conversation history for context
+      const activeChat = get().chats.find((c) => c.id === chatId);
+      if (activeChat && activeChat.messages.length > 2) {
+        const history = activeChat.messages
+          .slice(-10, -1) // Last 10 messages excluding the current one
+          .map((msg) => ({ role: msg.role, content: msg.text }));
+        formData.append("conversationHistory", JSON.stringify(history));
+      }
+
+      // Add attachments if any
+      if (attachments && attachments.length > 0) {
+        attachments.forEach((file) => {
+          formData.append("files", file);
+        });
+      }
+
+      // Use the new advanced conversation endpoint
+      const response = await axios.post("/ai/conversation", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
-      const suggestion = response.data.data?.suggestion;
-      const aiResponse = suggestion?.isConversational
-        ? suggestion.eventDescription
-        : suggestion?.eventDescription ||
-          suggestion?.eventTitle ||
-          "Hello! I'm Flowlio AI, your intelligent assistant. I can help you with absolutely anything - from answering questions and solving problems to creative writing and brainstorming ideas. What would you like to explore or work on today?";
+      const aiResponse =
+        response.data.data?.response ||
+        "Hello! I'm Flowlio AI, your intelligent assistant. I can help you with absolutely anything - from answering questions and solving problems to creative writing and brainstorming ideas. What would you like to explore or work on today?";
 
       // Update loading message with AI response
       set((state) => ({
@@ -262,5 +273,88 @@ export const useAiAssistChatStore = create<AiAssistChatState>((set, get) => ({
   // Clear chats when user logs out
   clearUserSession: () => {
     set({ chats: [], activeChatId: null, userId: null });
+  },
+
+  // Generate image using DALL-E
+  generateImage: async (prompt: string, chatId: string) => {
+    const { userId } = get();
+    if (!userId || !prompt.trim()) return;
+
+    set({ isLoading: true });
+
+    // Add user message
+    get().addMessage(chatId, {
+      role: "user",
+      text: `Generate image: ${prompt}`,
+    });
+
+    // Add loading AI message
+    get().addMessage(chatId, {
+      role: "ai",
+      text: "Generating image...",
+      isLoading: true,
+    });
+
+    try {
+      const response = await axios.post("/ai/generate-image", {
+        prompt,
+        size: "1024x1024",
+      });
+
+      const imageUrl = response.data.data?.imageUrl;
+
+      if (imageUrl) {
+        // Update the loading message with the image
+        set((state) => ({
+          chats: state.chats.map((c) =>
+            c.id === chatId
+              ? {
+                  ...c,
+                  messages: c.messages.map((msg, index) =>
+                    index === c.messages.length - 1 && msg.isLoading
+                      ? {
+                          role: "ai",
+                          text: `Here's your generated image:`,
+                          imageUrl: imageUrl,
+                          timestamp: new Date(),
+                        }
+                      : msg
+                  ),
+                  updatedAt: new Date(),
+                }
+              : c
+          ),
+        }));
+      } else {
+        throw new Error("No image URL received");
+      }
+    } catch (error) {
+      console.error("Image generation failed:", error);
+      // Update the loading message with error
+      set((state) => ({
+        chats: state.chats.map((c) =>
+          c.id === chatId
+            ? {
+                ...c,
+                messages: c.messages.map((msg, index) =>
+                  index === c.messages.length - 1 && msg.isLoading
+                    ? {
+                        role: "ai",
+                        text: "I'm sorry, I couldn't generate the image. Please try again later.",
+                        timestamp: new Date(),
+                      }
+                    : msg
+                ),
+                updatedAt: new Date(),
+              }
+            : c
+        ),
+      }));
+    } finally {
+      set({ isLoading: false });
+      // Save to localStorage
+      const updatedChats = get().chats;
+      localStorage.setItem(`ai_chats_${userId}`, JSON.stringify(updatedChats));
+    }
   },
 }));

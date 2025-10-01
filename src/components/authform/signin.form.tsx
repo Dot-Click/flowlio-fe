@@ -22,6 +22,7 @@ import { z } from "zod";
 import { Box } from "../ui/box";
 import { toast } from "sonner";
 import { IoEye, IoEyeOff } from "react-icons/io5";
+import { getRedirectPathAfterLogin } from "@/utils/sessionPersistence.util";
 
 const formSchema = z.object({
   password: z
@@ -97,15 +98,22 @@ export const SignInForm: FC = () => {
             // Show success message
             toast.success("Login successful");
 
-            // Redirect all users to dashboard - role-based navigation will handle the appropriate interface
-            navigate("/dashboard");
+            // Get the appropriate redirect path (last visited page or dashboard)
+            const redirectPath = getRedirectPathAfterLogin();
+            console.log("🎯 Redirecting to:", redirectPath);
+
+            // Redirect to the appropriate page
+            navigate(redirectPath, { replace: true });
           } catch (error) {
             console.error("Error fetching user profile:", error);
             // Still redirect but show warning
             toast.warning(
               "Login successful, but some data may not be available yet"
             );
-            navigate("/dashboard");
+
+            // Get the appropriate redirect path even on error
+            const redirectPath = getRedirectPathAfterLogin();
+            navigate(redirectPath, { replace: true });
           }
         },
         onError: (ctx) => {
