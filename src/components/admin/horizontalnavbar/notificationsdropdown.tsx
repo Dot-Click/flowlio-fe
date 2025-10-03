@@ -11,10 +11,15 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import { useGlobalNotifications } from "@/providers/notifications.provider";
+import {
+  useNotifications,
+  useUnreadNotificationsCount,
+  useMarkNotificationAsRead,
+  useDeleteAllNotifications,
+} from "@/hooks/useNotifications";
 import { IoChatboxEllipsesOutline } from "react-icons/io5";
 import { Link, useNavigate } from "react-router";
-import { Bell, InboxIcon } from "lucide-react";
+import { Bell, InboxIcon, Ticket, Users, AlertCircle } from "lucide-react";
 import { Button } from "../../ui/button";
 import { Center } from "../../ui/center";
 import { Badge } from "../../ui/badge";
@@ -22,18 +27,32 @@ import { Flex } from "../../ui/flex";
 import { Box } from "../../ui/box";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useUser } from "@/providers/user.provider";
 
 export const NotificationsDropdown: React.FC<{ className?: string }> = ({
   className,
 }) => {
-  const { notifications, markAsRead } = useGlobalNotifications();
+  const { data: user } = useUser(); // Used in handleNotificationClick and Link components
+  const { data: notificationsData, isLoading } = useNotifications({ limit: 5 });
+  const { data: unreadCount = 0 } = useUnreadNotificationsCount();
+  const markAsReadMutation = useMarkNotificationAsRead();
+  const deleteAllMutation = useDeleteAllNotifications();
   const navigate = useNavigate();
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+
+  const notifications = notificationsData?.data?.notifications || [];
 
   const getTypeIcon = (type: string) => {
     switch (type) {
+      case "support_ticket_assigned":
+      case "support_ticket_organization":
+      case "support_ticket_created":
+        return <Ticket className="h-4 w-4" />;
       case "message":
         return <IoChatboxEllipsesOutline className="h-4 w-4" />;
+      case "system":
+        return <AlertCircle className="h-4 w-4" />;
+      case "organization":
+        return <Users className="h-4 w-4" />;
       default:
         return <InboxIcon className="h-4 w-4" />;
     }
@@ -41,16 +60,38 @@ export const NotificationsDropdown: React.FC<{ className?: string }> = ({
 
   const getTypeColor = (type: string) => {
     switch (type) {
+      case "support_ticket_assigned":
+      case "support_ticket_organization":
+      case "support_ticket_created":
+        return "bg-blue-500";
       case "message":
         return "bg-green-500";
+      case "system":
+        return "bg-orange-500";
+      case "organization":
+        return "bg-purple-500";
       default:
         return "bg-gray-500";
     }
   };
 
-  const handleNotificationClick = (id: string) => {
-    markAsRead(id);
-    navigate("/dashboard/support");
+  const handleNotificationClick = (notification: any) => {
+    // Mark as read if not already read
+    if (!notification.read) {
+      markAsReadMutation.mutate(notification.id);
+    }
+
+    // Navigate based on notification type and user role
+    if (notification.type.includes("support_ticket")) {
+      // Redirect viewers to viewer support page, others to regular support
+      if (user?.user.role === "viewer") {
+        navigate("/viewer/viewer-support");
+      } else {
+        navigate("/dashboard/support");
+      }
+    } else {
+      navigate("/dashboard");
+    }
   };
 
   return (
@@ -69,7 +110,7 @@ export const NotificationsDropdown: React.FC<{ className?: string }> = ({
                 <Bell className="font-extralight" />
                 {unreadCount > 0 && (
                   <Badge className="absolute -top-2 left-5.5 size-6 rounded-full bg-red-500 text-white text-[9px] font-medium border-2 border-gray-100">
-                    {unreadCount}
+                    {unreadCount > 99 ? "99+" : unreadCount}
                   </Badge>
                 )}
               </Button>
@@ -88,52 +129,77 @@ export const NotificationsDropdown: React.FC<{ className?: string }> = ({
         <DropdownMenuLabel className="mb-2">
           <Flex className="justify-between items-center">
             <span className="text-lg font-medium">Notifications</span>
-            <Link
-              to="/dashboard/support"
-              className="text-sm text-blue-600 hover:text-blue-800"
-            >
-              View All
-            </Link>
+            <Flex className="gap-2">
+              {notifications.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-red-600 hover:text-red-800 p-1 h-auto"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteAllMutation.mutate();
+                  }}
+                  disabled={deleteAllMutation.isPending}
+                >
+                  Clear All
+                </Button>
+              )}
+              <Link
+                to={
+                  user?.user.role === "viewer"
+                    ? "/viewer/viewer-support"
+                    : "/dashboard/support"
+                }
+                className="text-sm text-blue-600 hover:text-blue-800"
+              >
+                Support Center
+              </Link>
+            </Flex>
           </Flex>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="my-2" />
         <Box className="space-y-1 max-h-[400px] overflow-y-auto">
-          {notifications.slice(0, 5).map((notification) => (
-            <Flex
-              key={notification.id}
-              className={cn(
-                "gap-3 items-start p-2 rounded-lg cursor-pointer hover:bg-gray-50",
-                !notification.isRead && "bg-blue-50"
-              )}
-              onClick={() => handleNotificationClick(notification.id)}
-            >
-              <Center
+          {isLoading ? (
+            <Box className="text-center py-4 text-gray-500">
+              Loading notifications...
+            </Box>
+          ) : notifications.length > 0 ? (
+            notifications.map((notification) => (
+              <Flex
+                key={notification.id}
                 className={cn(
-                  "h-8 w-8 rounded-full text-white",
-                  getTypeColor(notification.type)
+                  "gap-3 items-start p-2 rounded-lg cursor-pointer hover:bg-gray-50",
+                  !notification.read && "bg-blue-50"
                 )}
+                onClick={() => handleNotificationClick(notification)}
               >
-                {getTypeIcon(notification.type)}
-              </Center>
-              <Box className="flex-1 space-y-1">
-                <p
+                <Center
                   className={cn(
-                    "text-sm font-medium",
-                    !notification.isRead && "text-blue-600"
+                    "h-8 w-8 rounded-full text-white",
+                    getTypeColor(notification.type)
                   )}
                 >
-                  {notification.title}
-                </p>
-                <p className="text-sm text-gray-500 line-clamp-2">
-                  {notification.message}
-                </p>
-                <p className="text-xs text-gray-400">
-                  {format(notification.timestamp, "PPp")}
-                </p>
-              </Box>
-            </Flex>
-          ))}
-          {notifications.length === 0 && (
+                  {getTypeIcon(notification.type)}
+                </Center>
+                <Box className="flex-1 space-y-1">
+                  <p
+                    className={cn(
+                      "text-sm font-medium",
+                      !notification.read && "text-blue-600"
+                    )}
+                  >
+                    {notification.title}
+                  </p>
+                  <p className="text-sm text-gray-500 line-clamp-2">
+                    {notification.message}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {format(new Date(notification.createdAt), "PPp")}
+                  </p>
+                </Box>
+              </Flex>
+            ))
+          ) : (
             <Box className="text-center py-4 text-gray-500">
               No notifications
             </Box>

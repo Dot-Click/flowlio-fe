@@ -45,7 +45,6 @@ export const SupportTicketTable = ({
       window.confirm("Are you sure you want to delete this support ticket?")
     ) {
       deleteSupportTicket(id);
-      toast.success("Support Ticket deleted successfully");
       refetch();
     }
   };
@@ -107,7 +106,11 @@ export const SupportTicketTable = ({
       accessorKey: "client",
       header: () => <Box className="text-black text-center">Client</Box>,
       cell: ({ row }) => (
-        <Box className="captialize text-center">{row.original.client}</Box>
+        <Box className="capitalize text-center">
+          {row.original.clientOrganization?.name ||
+            row.original.client ||
+            "General"}
+        </Box>
       ),
     },
 
@@ -115,7 +118,12 @@ export const SupportTicketTable = ({
       accessorKey: "assignedto",
       header: () => <Box className="text-black text-center">Assigned To</Box>,
       cell: ({ row }) => (
-        <Box className="captialize text-center">{row.original.assignedto}</Box>
+        <Box className="capitalize text-center">
+          {row.original.assignedUser?.name ||
+            row.original.assignedOrganization?.name ||
+            row.original.assignedto ||
+            "Unassigned"}
+        </Box>
       ),
     },
 
@@ -124,7 +132,7 @@ export const SupportTicketTable = ({
       header: () => <Box className="text-center text-black">priority</Box>,
       cell: ({ row }) => {
         return (
-          <Center className="text-center font-semibold">
+          <Center className="text-center font-semibold capitalize">
             {row.original.priority}
           </Center>
         );

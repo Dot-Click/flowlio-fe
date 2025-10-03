@@ -39,20 +39,27 @@ import {
   getStatusColor,
   formatTicketDate,
   useCreateUniversalSupportTicket,
+  useUpdateUniversalSupportTicket,
+  useDeleteUniversalSupportTicket,
   type CreateUniversalSupportTicketRequest,
 } from "@/hooks/useUniversalSupportTickets";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import axios from "axios";
+import { useNavigate } from "react-router";
+import {
+  useDeleteAllNotifications,
+  useNotifications,
+  useMarkNotificationAsRead,
+} from "@/hooks/useNotifications";
+import { useGetCurrentOrgUserMembers } from "@/hooks/usegetallusermembers";
+import { useUser } from "@/providers/user.provider";
 
 const formSchema = z.object({
   subject: z.string().min(1, "Subject is required"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  priority: z.enum(["High", "Medium", "Low"]),
+  priority: z.enum(["high", "medium", "low", "urgent"]),
   client: z.string().optional(),
-  assignedTo: z
-    .string()
-    .min(1, "Please select a team member to assign this ticket to"),
+  assignedTo: z.string().optional(),
 });
 
 const SupportHeader = () => {
@@ -61,7 +68,7 @@ const SupportHeader = () => {
     defaultValues: {
       subject: "",
       description: "",
-      priority: "Medium",
+      priority: "medium",
       client: "",
       assignedTo: "",
     },
@@ -81,14 +88,28 @@ const SupportHeader = () => {
     refetch: refetchRecent,
   } = useUniversalSupportTickets();
 
+  const {
+    data: sentTicketsData,
+    isLoading: sentTicketsLoading,
+    error: sentTicketsError,
+    refetch: refetchSentTickets,
+  } = useUniversalSupportTickets();
+
   const createTicketMutation = useCreateUniversalSupportTicket();
+  const updateTicketMutation = useUpdateUniversalSupportTicket();
+  const deleteTicketMutation = useDeleteUniversalSupportTicket();
 
   const modalProps = useGeneralModalDisclosure();
-  const [activeTab, setActiveTab] = useState<"submitted" | "recent">(
+  const [activeTab, setActiveTab] = useState<"submitted" | "recent" | "sent">(
     "submitted"
   );
-  const [organizationMembers, setOrganizationMembers] = useState<any[]>([]);
-  const [membersLoading, setMembersLoading] = useState(false);
+  // Use the same hook as user management to get organization members
+  const { data: organizationMembersData, isLoading: membersLoading } =
+    useGetCurrentOrgUserMembers();
+
+  const organizationMembers = organizationMembersData?.data?.userMembers || [];
+  const [selectedTicket, setSelectedTicket] = useState<any>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   useEffect(() => {
     console.log("useEffect triggered, activeTab:", activeTab);
@@ -98,58 +119,23 @@ const SupportHeader = () => {
     } else if (activeTab === "recent") {
       console.log("Fetching recent tickets...");
       refetchRecent();
+    } else if (activeTab === "sent") {
+      console.log("Fetching sent tickets...");
+      refetchSentTickets();
     }
-  }, [activeTab, refetchSubmitted, refetchRecent]);
+  }, [activeTab, refetchSubmitted, refetchRecent, refetchSentTickets]);
 
-  // Fetch organization members when modal opens
+  // Set current user ID from organization members data
   useEffect(() => {
-    const fetchOrganizationMembers = async () => {
-      console.log("🚀 Starting to fetch organization members...");
-      setMembersLoading(true);
-      try {
-        const response = await axios.get(
-          "/api/organizations/current-org-user-members",
-          {
-            withCredentials: true,
-          }
-        );
-        if (response.data.success) {
-          console.log("Full API response:", response.data);
-          console.log(
-            "Raw organization members:",
-            response.data.data.userMembers
-          );
-          console.log(
-            "Total members count:",
-            response.data.data.userMembers.length
-          );
-          console.log("Organization ID:", response.data.data.organizationId);
-          // Filter out current user from assignable members (prevent self-assignment)
-          const currentUserId =
-            response.data.data.currentUserId || response.data.data.user?.id;
-          console.log("Current user ID:", currentUserId);
-          const assignableMembers = response.data.data.userMembers.filter(
-            (member: any) => (member.user?.id || member.id) !== currentUserId
-          );
-          console.log(
-            "Filtered assignable members (excluding current user):",
-            assignableMembers
-          );
-          setOrganizationMembers(assignableMembers);
-        }
-      } catch (error) {
-        console.error("Failed to fetch organization members:", error);
-        toast.error("Failed to load team members");
-      } finally {
-        setMembersLoading(false);
-      }
-    };
-
-    if (modalProps.open) {
-      console.log("🔄 Modal opened, fetching organization members...");
-      fetchOrganizationMembers();
+    if (organizationMembersData?.data?.userMembers) {
+      // The hook already provides the organization members, no need for manual API call
+      console.log(
+        "Support Ticket - Organization members:",
+        organizationMembers.length,
+        organizationMembers
+      );
     }
-  }, [modalProps.open]);
+  }, [organizationMembersData, organizationMembers.length]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log("Form values:", values);
@@ -162,10 +148,19 @@ const SupportHeader = () => {
         description: values.description,
         priority: values.priority,
         client: values.client,
-        assignedTo: values.assignedTo,
+        assignedToUser:
+          values.assignedTo && values.assignedTo !== "no-assignment"
+            ? values.assignedTo
+            : undefined,
+        assignedToOrganization: undefined,
       };
 
+      console.log("Sending ticket data:", ticketData);
+      console.log("createTicketMutation:", createTicketMutation);
+
       await createTicketMutation.mutateAsync(ticketData);
+
+      console.log("Ticket created successfully, resetting form...");
       form.reset();
       modalProps.onOpenChange(false);
       // Refresh the appropriate tab
@@ -176,11 +171,37 @@ const SupportHeader = () => {
       }
       toast.success("Support ticket created successfully!");
     } catch (error) {
-      toast.error("Failed to create support ticket", {
-        description: error as string,
-      });
+      console.error("Error creating support ticket:", error);
+      toast.error("Failed to create support ticket");
     }
   }
+
+  const clearAllNotificationsMutation = useDeleteAllNotifications();
+  const { data: notificationsData } = useNotifications({ limit: 10 });
+  const markAsReadMutation = useMarkNotificationAsRead();
+  const navigate = useNavigate();
+  const { data: user } = useUser();
+  const handleViewTicket = (ticket: any) => {
+    setSelectedTicket(ticket);
+    setIsViewModalOpen(true);
+  };
+
+  const handleCloseViewModal = () => {
+    setIsViewModalOpen(false);
+    setSelectedTicket(null);
+  };
+
+  const handleNotificationClick = (notification: any) => {
+    // Mark as read if not already read
+    if (!notification.read) {
+      markAsReadMutation.mutate(notification.id);
+    }
+
+    // Navigate to support tickets page for support ticket notifications
+    if (notification.type.includes("support_ticket")) {
+      navigate("/dashboard/support");
+    }
+  };
 
   return (
     <ComponentWrapper className="mt-6 p-5 shadow-none">
@@ -193,48 +214,144 @@ const SupportHeader = () => {
         </Box>
       </Flex>
 
-      <Flex className="justify-between max-md:flex-col max-md:items-start bg-white p-5 rounded-lg border border-gray-200 mt-5">
-        <Box>
-          <h1 className="text-md font-medium capitalize">Your Tickets</h1>
-          <p className="text-gray-500 mt-0 max-md:text-sm">
-            {submittedData?.data?.length || 0} total tickets,{" "}
-            {submittedData?.data?.filter((ticket) => ticket.status === "open")
-              .length || 0}{" "}
-            open
+      <Flex className="justify-between max-md:flex-col max-md:items-start bg-white p-6 rounded-lg border border-gray-200 mt-5 shadow-sm">
+        <Box className="flex-1">
+          <Flex className="items-center gap-3 mb-2">
+            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+            <h1 className="text-lg font-semibold text-gray-800">
+              Your Tickets
+            </h1>
+          </Flex>
+          <p className="text-gray-600 text-sm">
+            {submittedData?.data?.tickets.length || 0} total tickets •{" "}
+            {submittedData?.data?.tickets.filter(
+              (ticket) => ticket.status === "open"
+            ).length || 0}{" "}
+            open •{" "}
+            {submittedData?.data?.tickets.filter(
+              (ticket) => ticket.status === "closed"
+            ).length || 0}{" "}
+            resolved
           </p>
         </Box>
 
         <Button
           variant="outline"
-          className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer h-11"
+          className="bg-blue-600 hover:bg-blue-700 text-white border-none rounded-lg px-6 py-3 flex items-center gap-2 cursor-pointer h-12 font-medium"
           onClick={() => modalProps.onOpenChange(true)}
         >
-          Create Ticket
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
+          Create New Ticket
         </Button>
       </Flex>
 
-      <Flex className="justify-between max-md:flex-col max-md:items-start bg-white p-5 rounded-lg border border-gray-200 mt-5">
-        <Box>
-          <h1 className="text-md font-medium capitalize">
-            Your Ticket Notification
-          </h1>
-          <p className="text-gray-500 max-md:text-sm">
-            Oops sorry. There are notification to show
-          </p>
-        </Box>
+      <Flex className="justify-between max-md:flex-col max-md:items-start bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200 mt-5">
+        <Box className="flex-1">
+          <Flex className="items-center gap-3 mb-2">
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            <h1 className="text-lg font-semibold text-gray-800">
+              Recent Notifications
+            </h1>
+          </Flex>
+          <Flex className="justify-between items-center">
+            <p className="text-gray-600 text-sm">
+              {notificationsData?.data?.notifications?.filter(
+                (n: any) => !n.read
+              )?.length || 0}{" "}
+              unread notifications
+              {notificationsData?.data?.notifications?.filter(
+                (n: any) => !n.read
+              )?.length === 0 && " - You're all caught up!"}
+            </p>
+            {notificationsData?.data?.notifications &&
+              notificationsData.data.notifications.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 ml-4"
+                  onClick={() => clearAllNotificationsMutation.mutate()}
+                  disabled={clearAllNotificationsMutation.isPending}
+                >
+                  {clearAllNotificationsMutation.isPending
+                    ? "Clearing..."
+                    : "Clear All Notifications"}
+                </Button>
+              )}
+          </Flex>
 
-        <p className="text-red-500 max-md:text-sm underline">
-          Clear All Notifications
-        </p>
+          {/* Notification List */}
+          {notificationsData?.data?.notifications &&
+            notificationsData.data.notifications.length > 0 && (
+              <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
+                {notificationsData.data.notifications
+                  .sort((a: any, b: any) => {
+                    // Sort unread notifications first, then by date
+                    if (a.read !== b.read) {
+                      return a.read ? 1 : -1;
+                    }
+                    return (
+                      new Date(b.createdAt).getTime() -
+                      new Date(a.createdAt).getTime()
+                    );
+                  })
+                  .map((notification: any) => (
+                    <div
+                      key={notification.id}
+                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-blue-100 cursor-pointer transition-colors"
+                      onClick={() => handleNotificationClick(notification)}
+                    >
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          notification.read ? "bg-gray-400" : "bg-blue-500"
+                        }`}
+                      ></div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-800 truncate">
+                          {notification.title}
+                        </p>
+                        <p className="text-xs text-gray-600 truncate">
+                          {notification.message}
+                        </p>
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {new Date(notification.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+        </Box>
       </Flex>
 
-      <Flex className="flex-col items-start bg-white p-5 rounded-lg border border-gray-200 mt-5 w-full">
-        <Flex className="justify-between items-center w-full mb-4">
-          <h1 className="text-md font-medium capitalize">Support Tickets</h1>
+      <Flex className="flex-col items-start bg-white p-6 rounded-lg border border-gray-200 mt-5 w-full shadow-sm">
+        <Flex className="justify-between items-center w-full mb-6">
+          <Flex className="items-center gap-3">
+            <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+            <h1 className="text-lg font-semibold text-gray-800">
+              Support Tickets
+            </h1>
+          </Flex>
           <Flex className="gap-2">
             <Button
               variant={activeTab === "submitted" ? "default" : "outline"}
               size="sm"
+              className={
+                activeTab === "submitted"
+                  ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
+                  : ""
+              }
               onClick={() => setActiveTab("submitted")}
             >
               My Tickets
@@ -242,9 +359,26 @@ const SupportHeader = () => {
             <Button
               variant={activeTab === "recent" ? "default" : "outline"}
               size="sm"
+              className={
+                activeTab === "recent"
+                  ? "bg-blue-600 hover:bg-blue-700 cursor-pointer "
+                  : ""
+              }
               onClick={() => setActiveTab("recent")}
             >
               Recent Activity
+            </Button>
+            <Button
+              variant={activeTab === "sent" ? "default" : "outline"}
+              size="sm"
+              className={
+                activeTab === "sent"
+                  ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
+                  : ""
+              }
+              onClick={() => setActiveTab("sent")}
+            >
+              Sent Tickets
             </Button>
           </Flex>
         </Flex>
@@ -258,52 +392,54 @@ const SupportHeader = () => {
                 Error loading tickets:{" "}
                 {submittedError?.message || "Unknown error"}
               </p>
-            ) : submittedData?.data?.length === 0 ? (
+            ) : submittedData?.data?.tickets.length === 0 ? (
               <p className="text-gray-500">No tickets submitted yet.</p>
             ) : (
               <Accordion type="single" collapsible className="w-full">
-                {submittedData?.data?.map((ticket: any, index: number) => (
-                  <AccordionItem key={ticket.id} value={`submitted-${index}`}>
-            <AccordionTrigger className="cursor-pointer">
-              <Stack>
-                        <Flex className="items-center gap-2">
-                <h1 className="font-normal hover:underline text-[18px]">
-                            {ticket.subject}
-                </h1>
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                              ticket.status
-                            )}`}
-                          >
-                            {ticket.status}
-                          </span>
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(
-                              ticket.priority
-                            )}`}
-                          >
-                            {ticket.priority}
-                          </span>
-                        </Flex>
-                <p className="text-[#7184b4] text-sm font-normal">
-                          Ticket #{ticket.ticketNumber} •{" "}
-                          {formatTicketDate(ticket.createdon)}
-                          {ticket.assignedto && (
-                            <span> • Assigned to: {ticket.assignedto}</span>
-                          )}
-                </p>
-              </Stack>
-            </AccordionTrigger>
-            <AccordionContent className="flex flex-col gap-4 text-balance">
-                      <p>{ticket.description}</p>
-                      {ticket.client && (
-                        <p className="text-sm text-gray-600">
-                          <strong>Client:</strong> {ticket.client}
-                        </p>
-                      )}
-            </AccordionContent>
-          </AccordionItem>
-                ))}
+                {submittedData?.data?.tickets?.map(
+                  (ticket: any, index: number) => (
+                    <AccordionItem key={ticket.id} value={`submitted-${index}`}>
+                      <AccordionTrigger className="cursor-pointer">
+                        <Stack>
+                          <Flex className="items-center gap-2">
+                            <h1 className="font-normal hover:underline text-[18px] capitalize">
+                              {ticket.subject}
+                            </h1>
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(
+                                ticket.status
+                              )}`}
+                            >
+                              {ticket.status}
+                            </span>
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${getPriorityColor(
+                                ticket.priority
+                              )}`}
+                            >
+                              {ticket.priority}
+                            </span>
+                          </Flex>
+                          <p className="text-[#7184b4] text-sm font-normal">
+                            Ticket #{ticket.ticketNumber} •{" "}
+                            {formatTicketDate(ticket.createdon)}
+                            {/* {ticket.assignedto && (
+                              <span> • Assigned to: {ticket.assignedto}</span>
+                            )} */}
+                          </p>
+                        </Stack>
+                      </AccordionTrigger>
+                      <AccordionContent className="flex flex-col gap-4 text-balance">
+                        <p>Description: {ticket.description}</p>
+                        {ticket.submittedbyName && (
+                          <p className="text-sm text-gray-600">
+                            <strong>Sent By:</strong> {ticket.submittedbyName}
+                          </p>
+                        )}
+                      </AccordionContent>
+                    </AccordionItem>
+                  )
+                )}
               </Accordion>
             )}
           </>
@@ -318,63 +454,230 @@ const SupportHeader = () => {
                 Error loading recent activity:{" "}
                 {recentError?.message || "Unknown error"}
               </p>
-            ) : recentData?.data?.length === 0 ? (
+            ) : recentData?.data?.tickets?.length === 0 ? (
               <p className="text-gray-500">No recent activity.</p>
             ) : (
               <Accordion type="single" collapsible className="w-full">
-                {recentData?.data?.map((ticket: any, index: number) => (
-                  <AccordionItem key={ticket.id} value={`recent-${index}`}>
-            <AccordionTrigger className="cursor-pointer">
-              <Stack>
-                        <Flex className="items-center gap-2">
-                <h1 className="font-normal hover:underline text-[18px]">
-                            {ticket.subject}
-                </h1>
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                              ticket.status
-                            )}`}
+                {recentData?.data?.tickets?.map(
+                  (ticket: any, index: number) => (
+                    <AccordionItem key={ticket.id} value={`recent-${index}`}>
+                      <AccordionTrigger className="cursor-pointer">
+                        <Stack>
+                          <Flex className="items-center gap-2">
+                            <h1 className="font-normal hover:underline text-[18px] capitalize">
+                              {ticket.subject}
+                            </h1>
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                                ticket.status
+                              )}`}
+                            >
+                              {ticket.status}
+                            </span>
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(
+                                ticket.priority
+                              )}`}
+                            >
+                              {ticket.priority}
+                            </span>
+                          </Flex>
+                          <p className="text-[#7184b4] text-sm font-normal">
+                            Ticket #{ticket.ticketNumber} •{" "}
+                            {formatTicketDate(ticket.createdon)}
+                            {ticket.submittedbyName && (
+                              <span> • From: {ticket.submittedbyName}</span>
+                            )}
+                            {/* {ticket.assignedto && (
+                              <span> • Assigned to: {ticket.assignedto}</span>
+                            )} */}
+                          </p>
+                        </Stack>
+                      </AccordionTrigger>
+                      <AccordionContent className="flex flex-col gap-4 text-balance">
+                        <p>{ticket.description}</p>
+                        {ticket.client && (
+                          <p className="text-sm text-gray-600">
+                            <strong>Client:</strong> {ticket.client}
+                          </p>
+                        )}
+                      </AccordionContent>
+                    </AccordionItem>
+                  )
+                )}
+              </Accordion>
+            )}
+          </>
+        )}
+
+        {activeTab === "sent" && (
+          <>
+            {sentTicketsLoading ? (
+              <p className="text-gray-500">Loading your sent tickets...</p>
+            ) : sentTicketsError ? (
+              <p className="text-red-500">
+                Error loading sent tickets:{" "}
+                {sentTicketsError?.message || "Unknown error"}
+              </p>
+            ) : sentTicketsData?.data?.tickets?.filter(
+                (ticket: any) => ticket.submittedby === user?.user.id
+              )?.length === 0 ? (
+              <p className="text-gray-500">You haven't sent any tickets yet.</p>
+            ) : (
+              <div className="w-full">
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">
+                          Ticket #
+                        </th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">
+                          Subject
+                        </th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">
+                          Priority
+                        </th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">
+                          Status
+                        </th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">
+                          Created
+                        </th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-700">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sentTicketsData?.data?.tickets
+                        ?.filter(
+                          (ticket: any) => ticket.submittedby === user?.user.id
+                        )
+                        ?.map((ticket: any) => (
+                          <tr
+                            key={ticket.id}
+                            className="border-b border-gray-100 hover:bg-gray-50"
                           >
-                            {ticket.status}
-                          </span>
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(
-                              ticket.priority
-                            )}`}
-                          >
-                            {ticket.priority}
-                          </span>
-                        </Flex>
-                <p className="text-[#7184b4] text-sm font-normal">
-                          Ticket #{ticket.ticketNumber} •{" "}
-                          {formatTicketDate(ticket.createdon)}
-                          {ticket.submittedbyName && (
-                            <span> • From: {ticket.submittedbyName}</span>
-                          )}
-                          {ticket.assignedto && (
-                            <span> • Assigned to: {ticket.assignedto}</span>
-                          )}
-                </p>
-              </Stack>
-            </AccordionTrigger>
-            <AccordionContent className="flex flex-col gap-4 text-balance">
-                      <p>{ticket.description}</p>
-                      {ticket.client && (
-                        <p className="text-sm text-gray-600">
-                          <strong>Client:</strong> {ticket.client}
-                        </p>
-                      )}
-            </AccordionContent>
-          </AccordionItem>
-                ))}
-        </Accordion>
+                            <td className="py-3 px-4 text-sm font-medium text-gray-900">
+                              #{ticket.ticketNumber}
+                            </td>
+                            <td className="py-3 px-4 text-sm text-gray-900">
+                              <div
+                                className="max-w-xs truncate"
+                                title={ticket.subject}
+                              >
+                                {ticket.subject}
+                              </div>
+                            </td>
+                            <td className="py-3 px-4">
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(
+                                  ticket.priority
+                                )}`}
+                              >
+                                {ticket.priority}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4">
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                                  ticket.status
+                                )}`}
+                              >
+                                {ticket.status}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-sm text-gray-500">
+                              {formatTicketDate(ticket.createdon)}
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
+                                  onClick={() => handleViewTicket(ticket)}
+                                >
+                                  View
+                                </Button>
+                                {ticket.status === "open" && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
+                                    onClick={() => {
+                                      updateTicketMutation.mutate(
+                                        {
+                                          id: ticket.id,
+                                          data: { status: "closed" },
+                                        },
+                                        {
+                                          onSuccess: () => {
+                                            toast.success(
+                                              "Ticket closed successfully"
+                                            );
+                                            refetchSentTickets();
+                                          },
+                                          onError: (error: any) => {
+                                            toast.error(
+                                              error.response?.data?.message ||
+                                                "Failed to close ticket"
+                                            );
+                                          },
+                                        }
+                                      );
+                                    }}
+                                  >
+                                    Close
+                                  </Button>
+                                )}
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                                  onClick={() => {
+                                    if (
+                                      window.confirm(
+                                        "Are you sure you want to delete this ticket?"
+                                      )
+                                    ) {
+                                      deleteTicketMutation.mutate(ticket.id, {
+                                        onSuccess: () => {
+                                          toast.success(
+                                            "Ticket deleted successfully"
+                                          );
+                                          refetchSentTickets();
+                                        },
+                                        onError: (error: any) => {
+                                          toast.error(
+                                            error.response?.data?.message ||
+                                              "Failed to delete ticket"
+                                          );
+                                        },
+                                      });
+                                    }
+                                  }}
+                                >
+                                  Delete
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             )}
           </>
         )}
       </Flex>
 
       <GeneralModal {...modalProps}>
-        <h2 className="text-lg font-normal mb-4">Create Support Ticket</h2>
+        <h2 className="text-lg font-normal mb-4">
+          Create Support Ticket for Viewer
+        </h2>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <Box className="bg-white/80 gap-4 grid grid-cols-1">
@@ -415,9 +718,10 @@ const SupportHeader = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Low">Low</SelectItem>
-                          <SelectItem value="Medium">Medium</SelectItem>
-                          <SelectItem value="High">High</SelectItem>
+                          <SelectItem value="low">Low</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="high">High</SelectItem>
+                          <SelectItem value="urgent">Urgent</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -446,6 +750,9 @@ const SupportHeader = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
+                          <SelectItem value="no-assignment">
+                            No Assignment (General Support)
+                          </SelectItem>
                           {organizationMembers.length === 0 ? (
                             <SelectItem value="no-members" disabled>
                               No team members available - Create users first
@@ -532,6 +839,174 @@ const SupportHeader = () => {
             </Box>
           </form>
         </Form>
+      </GeneralModal>
+
+      {/* View Ticket Modal */}
+      <GeneralModal
+        {...modalProps}
+        open={isViewModalOpen}
+        onOpenChange={setIsViewModalOpen}
+        contentProps={{
+          className: "max-w-2xl w-full max-h-[90vh] overflow-y-auto",
+        }}
+      >
+        {selectedTicket && (
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-800">
+                Ticket #{selectedTicket.ticketNumber}
+              </h2>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCloseViewModal}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </Button>
+            </div>
+
+            <div className="space-y-6">
+              {/* Ticket Header Info */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">
+                      Subject
+                    </label>
+                    <p className="text-lg font-semibold text-gray-800">
+                      {selectedTicket.subject}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">
+                      Status
+                    </label>
+                    <div className="mt-1">
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+                          selectedTicket.status
+                        )}`}
+                      >
+                        {selectedTicket.status}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">
+                      Priority
+                    </label>
+                    <div className="mt-1">
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-medium ${getPriorityColor(
+                          selectedTicket.priority
+                        )}`}
+                      >
+                        {selectedTicket.priority}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">
+                      Created
+                    </label>
+                    <p className="text-sm text-gray-800">
+                      {formatTicketDate(selectedTicket.createdon)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="text-sm font-medium text-gray-600 mb-2 block">
+                  Description
+                </label>
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <p className="text-gray-800 whitespace-pre-wrap">
+                    {selectedTicket.description}
+                  </p>
+                </div>
+              </div>
+
+              {/* Additional Info */}
+              {selectedTicket.client && (
+                <div>
+                  <label className="text-sm font-medium text-gray-600 mb-2 block">
+                    Client
+                  </label>
+                  <p className="text-gray-800">{selectedTicket.client}</p>
+                </div>
+              )}
+
+              {selectedTicket.assignedto && (
+                <div>
+                  <label className="text-sm font-medium text-gray-600 mb-2 block">
+                    Assigned To
+                  </label>
+                  <p className="text-gray-800">{selectedTicket.assignedto}</p>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                {selectedTicket.status === "open" && (
+                  <Button
+                    variant="outline"
+                    className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
+                    onClick={() => {
+                      updateTicketMutation.mutate(
+                        { id: selectedTicket.id, data: { status: "closed" } },
+                        {
+                          onSuccess: () => {
+                            toast.success("Ticket closed successfully");
+                            refetchSentTickets();
+                            handleCloseViewModal();
+                          },
+                          onError: (error: any) => {
+                            toast.error(
+                              error.response?.data?.message ||
+                                "Failed to close ticket"
+                            );
+                          },
+                        }
+                      );
+                    }}
+                  >
+                    Close Ticket
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        "Are you sure you want to delete this ticket?"
+                      )
+                    ) {
+                      deleteTicketMutation.mutate(selectedTicket.id, {
+                        onSuccess: () => {
+                          toast.success("Ticket deleted successfully");
+                          refetchSentTickets();
+                          handleCloseViewModal();
+                        },
+                        onError: (error: any) => {
+                          toast.error(
+                            error.response?.data?.message ||
+                              "Failed to delete ticket"
+                          );
+                        },
+                      });
+                    }
+                  }}
+                >
+                  Delete Ticket
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </GeneralModal>
     </ComponentWrapper>
   );

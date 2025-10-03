@@ -6,8 +6,8 @@ import {
 } from "@/configs/axios.config";
 import { toast } from "sonner";
 
-// Types
-export interface UniversalSupportTicket {
+// Types for Viewer Support Tickets
+export interface ViewerSupportTicket {
   id: string;
   ticketNumber: string;
   subject: string;
@@ -49,47 +49,26 @@ export interface UniversalSupportTicket {
   };
 }
 
-export interface CreateUniversalSupportTicketRequest {
+export interface CreateViewerSupportTicketRequest {
   subject: string;
   description: string;
   priority: "low" | "medium" | "high" | "urgent";
   client?: string;
-  assignedTo?: string;
-  assignedToOrganization?: string; // Organization ID
-  assignedToUser?: string; // Specific user ID within organization
+  assignedToUser?: string; // Only specific user assignment allowed for viewers
 }
 
-export interface UpdateUniversalSupportTicketRequest {
+export interface UpdateViewerSupportTicketRequest {
   subject?: string;
   description?: string;
   priority?: "low" | "medium" | "high" | "urgent";
   status?: "open" | "in_progress" | "resolved" | "closed";
   category?: string;
-  assignedToOrganization?: string;
   assignedToUser?: string;
   resolution?: string;
 }
 
-export interface AssignmentOptions {
-  organizations: Array<{
-    id: string;
-    name: string;
-    email?: string;
-  }>;
-  users: Array<{
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    organization?: {
-      id: string;
-      name: string;
-    };
-  }>;
-}
-
-// Universal Support Ticket Hooks
-export const useUniversalSupportTickets = (filters?: {
+// Viewer Support Ticket Hooks
+export const useViewerSupportTickets = (filters?: {
   status?: string;
   priority?: string;
   search?: string;
@@ -97,10 +76,10 @@ export const useUniversalSupportTickets = (filters?: {
   limit?: number;
 }) => {
   return useQuery<
-    ApiResponse<{ tickets: UniversalSupportTicket[]; pagination: any }>,
+    ApiResponse<{ tickets: ViewerSupportTicket[]; pagination: any }>,
     ErrorWithMessage
   >({
-    queryKey: ["universal-support-tickets", filters],
+    queryKey: ["viewer-support-tickets", filters],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (filters?.status) params.append("status", filters.status);
@@ -110,112 +89,101 @@ export const useUniversalSupportTickets = (filters?: {
       if (filters?.limit) params.append("limit", filters.limit.toString());
 
       const response = await axios.get<
-        ApiResponse<{ tickets: UniversalSupportTicket[]; pagination: any }>
-      >(`/support-tickets?${params.toString()}`);
+        ApiResponse<{ tickets: ViewerSupportTicket[]; pagination: any }>
+      >(`/viewer-support-tickets?${params.toString()}`);
       return response.data;
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
 
-export const useCreateUniversalSupportTicket = () => {
+export const useCreateViewerSupportTicket = () => {
   const queryClient = useQueryClient();
 
   return useMutation<
-    ApiResponse<UniversalSupportTicket>,
+    ApiResponse<ViewerSupportTicket>,
     ErrorWithMessage,
-    CreateUniversalSupportTicketRequest
+    CreateViewerSupportTicketRequest
   >({
     mutationFn: async (data) => {
-      const response = await axios.post<ApiResponse<UniversalSupportTicket>>(
-        "/support-tickets",
+      const response = await axios.post<ApiResponse<ViewerSupportTicket>>(
+        "/viewer-support-tickets",
         data
       );
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["universal-support-tickets"],
+        queryKey: ["viewer-support-tickets"],
       });
-      toast.success("Support ticket created successfully");
+      toast.success("Viewer support ticket created successfully");
     },
     onError: (error) => {
       toast.error(
-        error.response?.data?.message || "Failed to create support ticket"
+        error.response?.data?.message ||
+          "Failed to create viewer support ticket"
       );
     },
   });
 };
 
-export const useUpdateUniversalSupportTicket = () => {
+export const useUpdateViewerSupportTicket = () => {
   const queryClient = useQueryClient();
 
   return useMutation<
-    ApiResponse<UniversalSupportTicket>,
+    ApiResponse<ViewerSupportTicket>,
     ErrorWithMessage,
-    { id: string; data: UpdateUniversalSupportTicketRequest }
+    { id: string; data: UpdateViewerSupportTicketRequest }
   >({
     mutationFn: async ({ id, data }) => {
-      const response = await axios.put<ApiResponse<UniversalSupportTicket>>(
-        `/support-tickets/${id}`,
+      const response = await axios.put<ApiResponse<ViewerSupportTicket>>(
+        `/viewer-support-tickets/${id}`,
         data
       );
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["universal-support-tickets"],
+        queryKey: ["viewer-support-tickets"],
       });
-      toast.success("Support ticket updated successfully");
+      toast.success("Viewer support ticket updated successfully");
     },
     onError: (error) => {
       toast.error(
-        error.response?.data?.message || "Failed to update support ticket"
+        error.response?.data?.message ||
+          "Failed to update viewer support ticket"
       );
     },
   });
 };
 
-export const useDeleteUniversalSupportTicket = () => {
+export const useDeleteViewerSupportTicket = () => {
   const queryClient = useQueryClient();
 
   return useMutation<ApiResponse<void>, ErrorWithMessage, { id: string }>({
     mutationFn: async ({ id }) => {
       const response = await axios.delete<ApiResponse<void>>(
-        `/support-tickets/${id}`
+        `/viewer-support-tickets/${id}`
       );
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["universal-support-tickets"],
+        queryKey: ["viewer-support-tickets"],
       });
-      toast.success("Support ticket deleted successfully universel");
+      toast.success("Viewer support ticket deleted successfully");
     },
     onError: (error) => {
       toast.error(
-        error.response?.data?.message || "Failed to delete support ticket"
+        error.response?.data?.message ||
+          "Failed to delete viewer support ticket"
       );
     },
-  });
-};
-
-export const useAssignmentOptions = () => {
-  return useQuery<ApiResponse<AssignmentOptions>, ErrorWithMessage>({
-    queryKey: ["assignment-options"],
-    queryFn: async () => {
-      const response = await axios.get<ApiResponse<AssignmentOptions>>(
-        "/support-tickets/assignment-options"
-      );
-      console.log("Assignment options response:", response.data);
-      return response.data;
-    },
-    staleTime: 1000 * 60 * 10, // 10 minutes
   });
 };
 
 // Utility functions
-export const getPriorityColor = (priority: string) => {
+export const getViewerPriorityColor = (priority: string) => {
   switch (priority) {
     case "urgent":
       return "text-red-600 bg-red-100";
@@ -230,7 +198,7 @@ export const getPriorityColor = (priority: string) => {
   }
 };
 
-export const getStatusColor = (status: string) => {
+export const getViewerStatusColor = (status: string) => {
   switch (status) {
     case "open":
       return "text-blue-600 bg-blue-100";
@@ -245,7 +213,7 @@ export const getStatusColor = (status: string) => {
   }
 };
 
-export const formatTicketDate = (dateString: string) => {
+export const formatViewerTicketDate = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleDateString("en-US", {
     year: "numeric",

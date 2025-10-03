@@ -16,6 +16,12 @@ interface UserProfile {
   subadminId: string | null;
   createdAt: string;
   updatedAt: string;
+  organizationId?: string | null;
+  organization?: {
+    id: string;
+    name: string;
+    slug: string;
+  } | null;
 }
 
 export const useUserProfile = (options?: { enabled?: boolean }) => {

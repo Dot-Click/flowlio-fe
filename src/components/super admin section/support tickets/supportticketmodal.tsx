@@ -84,7 +84,7 @@ export const SupportTicketModal = ({
       onOpenChange={onClose}
       contentProps={{
         className:
-          "max-w-4xl max-h-[90vh] overflow-y-auto bg-white shadow-2xl border-0",
+          "max-w-4xl max-h-[90vh] overflow-y-auto bg-white shadow-2xl border-0 w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] xl:w-[60vw]",
       }}
     >
       <Box className="space-y-4">
@@ -166,7 +166,11 @@ export const SupportTicketModal = ({
                   <p className="text-sm font-semibold text-gray-900">
                     Assigned To
                   </p>
-                  <p className="text-sm text-gray-700">{ticket.assignedto}</p>
+                  <p className="text-sm text-gray-700">
+                    {ticket.assignedOrganization?.name ||
+                      ticket.assignedto ||
+                      "Unassigned"}
+                  </p>
                 </Box>
               </Flex>
             </Box>
