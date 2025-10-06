@@ -10,14 +10,25 @@ import { ComponentWrapper } from "@/components/common/componentwrapper";
 import { useSubscriptionStatus } from "@/hooks/usesubscription";
 import { useAvailablePlans } from "@/hooks/useavailableplans";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, AlertCircle, Clock, UserX } from "lucide-react";
+import {
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Clock,
+  UserX,
+  Calendar,
+  CreditCard,
+  RefreshCw,
+} from "lucide-react";
 
 const SubscriptionsPage = () => {
   const navigate = useNavigate();
+
   const {
     data: subscriptionData,
     isLoading: subscriptionLoading,
     error: subscriptionError,
+    refetch: refetchSubscription,
   } = useSubscriptionStatus();
 
   const {
@@ -25,6 +36,8 @@ const SubscriptionsPage = () => {
     isLoading: plansLoading,
     error: plansError,
   } = useAvailablePlans();
+
+  // const updatePlanMutation = useUpdateSubscriptionPlan();
 
   useEffect(() => {
     if (subscriptionError) {
@@ -48,6 +61,38 @@ const SubscriptionsPage = () => {
 
   const subscriptionStatus = subscriptionData?.data;
   const availablePlans = plansData?.data || [];
+
+  // Helper function to calculate trial days remaining
+  const getTrialDaysRemaining = (endDate: string) => {
+    const now = new Date();
+    const end = new Date(endDate);
+    const diffTime = end.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffDays);
+  };
+
+  // Helper function to format date
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  // Handle plan selection
+  // const handlePlanUpdate = async (planId: string) => {
+  //   try {
+  //     await updatePlanMutation.mutateAsync({ planId });
+  //   } catch (error) {
+  //     console.error("Failed to update plan:", error);
+  //   }
+  // };
+
+  // Handle refresh
+  const handleRefresh = () => {
+    refetchSubscription();
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -106,7 +151,24 @@ const SubscriptionsPage = () => {
         {/* Current Subscription Status */}
         {subscriptionStatus && (
           <Box className="mt-8 p-6 bg-white rounded-lg shadow max-w-2xl w-full">
-            <Box className="text-xl font-semibold mb-4">Current Status</Box>
+            <Flex className="justify-between items-center mb-4">
+              <Box className="text-xl font-semibold">Current Status</Box>
+              <Button
+                onClick={handleRefresh}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+                disabled={subscriptionLoading}
+              >
+                <RefreshCw
+                  className={`h-4 w-4 ${
+                    subscriptionLoading ? "animate-spin" : ""
+                  }`}
+                />
+                Refresh
+              </Button>
+            </Flex>
+
             <Flex className="justify-between items-center mb-4">
               <Box>
                 <Box className="text-sm text-gray-600">Subscription Status</Box>
@@ -118,9 +180,12 @@ const SubscriptionsPage = () => {
             </Flex>
 
             {subscriptionStatus.subscription && (
-              <Box className="space-y-2">
+              <Box className="space-y-3">
                 <Flex className="justify-between">
-                  <Box className="text-sm text-gray-600">Plan:</Box>
+                  <Box className="text-sm text-gray-600 flex items-center gap-2">
+                    <CreditCard className="h-4 w-4" />
+                    Plan:
+                  </Box>
                   <Box className="font-semibold">
                     {subscriptionStatus.plan?.name || "Unknown Plan"}
                   </Box>
@@ -132,14 +197,33 @@ const SubscriptionsPage = () => {
                   </Box>
                 </Flex>
                 {subscriptionStatus.subscription.currentPeriodEnd && (
-                  <Flex className="justify-between">
-                    <Box className="text-sm text-gray-600">Next Billing:</Box>
-                    <Box className="font-semibold">
-                      {new Date(
-                        subscriptionStatus.subscription.currentPeriodEnd
-                      ).toLocaleDateString()}
-                    </Box>
-                  </Flex>
+                  <>
+                    <Flex className="justify-between">
+                      <Box className="text-sm text-gray-600 flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        Trial Ends:
+                      </Box>
+                      <Box className="font-semibold">
+                        {formatDate(
+                          subscriptionStatus.subscription.currentPeriodEnd
+                        )}
+                      </Box>
+                    </Flex>
+                    {subscriptionStatus.subscription.isTrial && (
+                      <Box className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <Box className="text-blue-800 font-medium mb-1">
+                          🎉 Free Trial Active
+                        </Box>
+                        <Box className="text-blue-700 text-sm">
+                          {subscriptionStatus.subscription.trialDaysRemaining ||
+                            getTrialDaysRemaining(
+                              subscriptionStatus.subscription.currentPeriodEnd
+                            )}{" "}
+                          days remaining
+                        </Box>
+                      </Box>
+                    )}
+                  </>
                 )}
               </Box>
             )}
@@ -164,7 +248,7 @@ const SubscriptionsPage = () => {
         )}
 
         {/* Available Plans */}
-        {availablePlans.length > 0 && (
+        {/* {availablePlans.length > 0 && (
           <Box className="mt-8 max-w-4xl w-full">
             <Box className="text-xl font-semibold mb-4 text-center">
               Available Plans
@@ -206,17 +290,29 @@ const SubscriptionsPage = () => {
                     </Box>
                   )}
 
-                  <Button
-                    onClick={() => navigate(`/checkout?plan=${plan.id}`)}
-                    className="w-full bg-[#1797B9] text-white rounded-full hover:bg-[#1797B9]/80"
-                  >
-                    Choose Plan
-                  </Button>
+                  <Flex className="gap-2">
+                    <Button
+                      onClick={() => handlePlanUpdate(plan.id)}
+                      className="flex-1 bg-[#1797B9] text-white rounded-full hover:bg-[#1797B9]/80"
+                      disabled={updatePlanMutation.isPending}
+                    >
+                      {updatePlanMutation.isPending
+                        ? "Updating..."
+                        : "Choose Plan"}
+                    </Button>
+                    <Button
+                      onClick={() => navigate(`/checkout?plan=${plan.id}`)}
+                      variant="outline"
+                      className="flex-1 rounded-full"
+                    >
+                      Checkout
+                    </Button>
+                  </Flex>
                 </Box>
               ))}
             </Stack>
           </Box>
-        )}
+        )} */}
 
         {availablePlans.length === 0 &&
           !subscriptionStatus?.hasSubscription && (

@@ -39,6 +39,15 @@ type Data = {
       name: string;
       slug: string;
     };
+    notificationPreferences?: {
+      paymentAlerts: boolean;
+      invoiceReminders: boolean;
+      projectActivityUpdates: boolean;
+      emailNotifications: boolean;
+      pushNotifications: boolean;
+      smsNotifications: boolean;
+      [key: string]: any;
+    };
   };
   session: SessionObject["session"];
 };
@@ -136,8 +145,9 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
     }
 
     // Clear data when no session exists (logout scenario)
-    if (!authData?.user || !authData?.session) {
-      console.log("🔒 No session found - clearing user data (logout scenario)");
+    // Be more lenient - only clear if we're sure there's no session
+    if (!authData?.user) {
+      console.log("🔒 No user found - clearing user data (logout scenario)");
       setData(null);
       setIsLoading(false);
 
@@ -157,8 +167,10 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
     }
 
     // User is logged in - process session data
-    if (authData?.user && authData?.session) {
+    if (authData?.user) {
       console.log("🔑 Better Auth session data:", authData);
+      console.log("🔑 Session exists:", !!authData.session);
+      console.log("🔑 User exists:", !!authData.user);
 
       // Use fresh user profile data if available, otherwise fall back to Better Auth data
       if (userProfileData?.data) {

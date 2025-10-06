@@ -35,47 +35,56 @@ export const ProtectedRoute = ({
   const location = useLocation();
 
   useEffect(() => {
+    // Don't do anything while loading
     if (isLoading) return;
 
+    // User is not authenticated
     if (!userData?.user) {
+      console.log(
+        "🔒 User not authenticated - storing redirect and navigating to sign-in"
+      );
+
       // Store the current page for redirect after login
       storeRedirectFrom(location.pathname);
 
-      // Only show error if we're sure there's no session (not just loading)
-      // Add a small delay to prevent race conditions during login
-      const timeoutId = setTimeout(() => {
-        if (!userData?.user) {
-          toast.error("Authentication required");
-          navigate("/auth/signin", {
-            replace: true,
-            state: { from: location.pathname },
-          });
-        }
-      }, 1000); // 1 second delay
-
-      return () => clearTimeout(timeoutId);
-    } else {
-      // User is authenticated - store this as last visited page
-      storeLastVisitedPage(location.pathname);
+      // Navigate to sign-in immediately (no delays)
+      navigate("/auth/signin", {
+        replace: true,
+        state: { from: location.pathname },
+      });
+      return;
     }
+
+    // User is authenticated - store this as last visited page
+    storeLastVisitedPage(location.pathname);
 
     const user = userData.user;
 
+    // Check role requirements
     if (requiredRole && user.role) {
       if (!hasRole(user.role, requiredRole)) {
+        console.log(
+          `🚫 Access denied. User role: ${user.role}, Required: ${requiredRole}`
+        );
         toast.error(`Access denied. Required role: ${requiredRole}`);
-        // Go back to previous page instead of redirectTo
-        navigate(-1);
+        navigate(-1); // Go back to previous page
         return;
       }
     }
 
+    // Check organization requirements
     if (requiredOrganization && !user.organizationId) {
+      console.log(
+        "🚫 Organization access required but user has no organization"
+      );
       toast.error("Organization access required");
-      // Go back to previous page instead of dashboard
-      navigate(-1);
+      navigate(-1); // Go back to previous page
       return;
     }
+
+    console.log(
+      "✅ User authenticated and authorized - rendering protected content"
+    );
   }, [
     userData,
     isLoading,
@@ -85,34 +94,40 @@ export const ProtectedRoute = ({
     location,
   ]);
 
+  // Show loading spinner while checking authentication
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading...</p>
+          <p className="text-gray-600 text-lg">Verifying access...</p>
           <p className="text-gray-500 text-sm mt-2">
-            Please wait while we verify your access
+            Please wait while we check your permissions
           </p>
         </div>
       </div>
     );
   }
 
+  // Don't render anything if user is not authenticated
+  // The useEffect will handle the redirect
   if (!userData?.user) {
     return null;
   }
 
   const user = userData.user;
 
+  // Don't render if user doesn't have required role
   if (requiredRole && user.role && !hasRole(user.role, requiredRole)) {
     return null;
   }
 
+  // Don't render if user doesn't have required organization
   if (requiredOrganization && !user.organizationId) {
     return null;
   }
 
+  // User is authenticated and authorized - render the protected content
   return <>{children}</>;
 };
 

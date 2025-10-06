@@ -10,6 +10,7 @@ interface UserProfile {
   name: string;
   email: string;
   emailVerified: boolean;
+  twoFactorEnabled: boolean;
   image: string | null;
   isSuperAdmin: boolean;
   role: string;

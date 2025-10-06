@@ -52,6 +52,11 @@ const ForbiddenPage = lazy(() =>
   }))
 );
 const SigninPage = lazy(() => import("./pages/signin.page"));
+const SignInOTPPage = lazy(() =>
+  import("./pages/SignInOTP.page").then((module) => ({
+    default: module.SignInOTPPage,
+  }))
+);
 const CheckoutPage = lazy(() => import("./pages/checkout.page"));
 const SignupPage = lazy(() => import("./pages/signup.page"));
 const UserLayout = lazy(() =>
@@ -193,6 +198,10 @@ const AppRoutes = () => {
         element={<LazyWrapper component={AuthenticationLayout} />}
       >
         <Route path="signin" element={<LazyWrapper component={SigninPage} />} />
+        <Route
+          path="signin-otp"
+          element={<LazyWrapper component={SignInOTPPage} />}
+        />
         <Route
           path="verify-email"
           element={<LazyWrapper component={VerifyEmailPage} />}

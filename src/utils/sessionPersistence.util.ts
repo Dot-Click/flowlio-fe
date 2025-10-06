@@ -81,6 +81,59 @@ export const getAndClearRedirectFrom = (): string | null => {
 };
 
 /**
+ * Get the appropriate redirect path after login based on user role
+ * Priority: redirect from ProtectedRoute > last visited page > role-based dashboard
+ */
+export const getRoleBasedRedirectPathAfterLogin = (
+  userRole?: string
+): string => {
+  const redirectFrom = getAndClearRedirectFrom();
+  const lastVisited = getLastVisitedPage();
+
+  // If there's a specific redirect path, use it
+  if (redirectFrom) {
+    console.log(
+      "🎯 Redirect path after login (from ProtectedRoute):",
+      redirectFrom
+    );
+    return redirectFrom;
+  }
+
+  // If there's a last visited page, use it
+  if (lastVisited) {
+    console.log("🎯 Redirect path after login (last visited):", lastVisited);
+    return lastVisited;
+  }
+
+  // Default to role-based dashboard
+  let defaultPath = "/dashboard"; // Default for regular users
+
+  switch (userRole) {
+    case "superadmin":
+      defaultPath = "/superadmin";
+      break;
+    case "viewer":
+      defaultPath = "/viewer";
+      break;
+    case "subadmin":
+      defaultPath = "/dashboard"; // Subadmins use regular dashboard
+      break;
+    case "user":
+    default:
+      defaultPath = "/dashboard";
+      break;
+  }
+
+  console.log(
+    "🎯 Redirect path after login (role-based):",
+    defaultPath,
+    "for role:",
+    userRole
+  );
+  return defaultPath;
+};
+
+/**
  * Get the appropriate redirect path after login
  * Priority: redirect from ProtectedRoute > last visited page > dashboard
  */

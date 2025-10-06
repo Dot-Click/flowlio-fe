@@ -22,7 +22,7 @@ import { z } from "zod";
 import { Box } from "../ui/box";
 import { toast } from "sonner";
 import { IoEye, IoEyeOff } from "react-icons/io5";
-import { getRedirectPathAfterLogin } from "@/utils/sessionPersistence.util";
+import { getRoleBasedRedirectPathAfterLogin } from "@/utils/sessionPersistence.util";
 
 const formSchema = z.object({
   password: z
@@ -66,8 +66,8 @@ export const SignInForm: FC = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       rememberMe: true,
-      password: "Super@123",
-      email: "superadmin@gmail.com",
+      password: "Test@123",
+      email: "tahirkhanji007@gmail.com",
     },
   });
 
@@ -81,39 +81,69 @@ export const SignInForm: FC = () => {
         onRequest: () => {
           setIsLoading(true);
         },
-        onSuccess: async () => {
+        onSuccess: async (ctx) => {
           setIsLoading(false);
           setError(null);
 
+          console.log("Sign-in success context:", ctx);
+
           try {
-            // Wait a moment for Better Auth session to be fully established
+            // Wait for Better Auth session to be established
             await new Promise((resolve) => setTimeout(resolve, 500));
 
-            // Fetch fresh user profile data directly
+            // Check if user has 2FA enabled by fetching profile
             const profileResponse = await axios.get("/user/profile");
             const userProfile = profileResponse.data.data;
 
             console.log("User profile:", userProfile);
 
+            // Check if user has 2FA enabled
+            if (userProfile.twoFactorEnabled) {
+              console.log(
+                "🔐 User has 2FA enabled, redirecting to OTP verification"
+              );
+
+              // Store email for OTP verification
+              sessionStorage.setItem("otpEmail", email);
+
+              // Redirect to OTP verification page
+              navigate("/auth/signin-otp", { replace: true });
+              return;
+            }
+
             // Show success message
             toast.success("Login successful");
 
-            // Get the appropriate redirect path (last visited page or dashboard)
-            const redirectPath = getRedirectPathAfterLogin();
+            // Get comprehensive role-based redirect path
+            const redirectPath = getRoleBasedRedirectPathAfterLogin(
+              userProfile.role
+            );
             console.log("🎯 Redirecting to:", redirectPath);
 
             // Redirect to the appropriate page
             navigate(redirectPath, { replace: true });
           } catch (error) {
             console.error("Error fetching user profile:", error);
+
+            // Check if it's a 401 error (unauthorized) - might indicate 2FA is required
+            if ((error as any).response?.status === 401) {
+              console.log("🔐 401 error - user might have 2FA enabled");
+
+              // Store email for OTP verification
+              sessionStorage.setItem("otpEmail", email);
+
+              // Redirect to OTP verification page
+              navigate("/auth/signin-otp", { replace: true });
+              return;
+            }
+
             // Still redirect but show warning
             toast.warning(
               "Login successful, but some data may not be available yet"
             );
 
-            // Get the appropriate redirect path even on error
-            const redirectPath = getRedirectPathAfterLogin();
-            navigate(redirectPath, { replace: true });
+            // Fallback to default dashboard if profile fetch fails
+            navigate("/dashboard", { replace: true });
           }
         },
         onError: (ctx) => {

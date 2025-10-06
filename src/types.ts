@@ -236,6 +236,15 @@ export type IUser<T = {}> = {
   imagePublicId: string | null;
   twoFactorEnabled: boolean | null;
   canViewProjectHours: boolean | null;
+  notificationPreferences: {
+    paymentAlerts: boolean;
+    invoiceReminders: boolean;
+    projectActivityUpdates: boolean;
+    emailNotifications: boolean;
+    pushNotifications: boolean;
+    smsNotifications: boolean;
+    [key: string]: any;
+  } | null;
 } & T;
 
 export type INotification<T = {}> = {

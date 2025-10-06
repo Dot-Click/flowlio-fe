@@ -11,6 +11,16 @@ import { IoMdLock, IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { Box } from "@/components/ui/box";
 import { Switch } from "@/components/ui/switch";
 import React, { useRef, useState } from "react";
+import { TwoFAModal } from "@/components/settings/TwoFAModal";
+import {
+  useVerifyOTP,
+  useGenerateOTP,
+  useDisable2FA,
+  useEnable2FA,
+} from "@/hooks/useBetterAuthTwoFA";
+import { useUser } from "@/providers/user.provider";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 const settingsSchema = z
   .object({
@@ -47,6 +57,13 @@ const settingsSchema = z
   });
 
 export const ViewerSettingsHeader = () => {
+  const { data: userData } = useUser();
+  const queryClient = useQueryClient();
+  const verifyOTPMutation = useVerifyOTP();
+  const generateOTPMutation = useGenerateOTP();
+  const disable2FAMutation = useDisable2FA();
+  const enable2FAMutation = useEnable2FA();
+
   const [avatarPreview, setAvatarPreview] = useState<string | undefined>(
     undefined
   );
@@ -104,6 +121,76 @@ export const ViewerSettingsHeader = () => {
     setAvatarPreview(undefined);
     setValue("avatar", undefined);
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  // Get 2FA status from user data
+  const is2FAEnabled = userData?.user?.twoFactorEnabled || false;
+
+  // 2FA handlers
+  const handleToggle2FA = async (enabled: boolean, password?: string) => {
+    try {
+      console.log(
+        `🔄 Viewer handleToggle2FA called: enabled=${enabled}, hasPassword=${!!password}`
+      );
+
+      if (enabled) {
+        if (password) {
+          // Password provided - verify it and generate OTP
+          console.log("🔐 Password provided, generating OTP...");
+          await generateOTPMutation.mutateAsync();
+          console.log("✅ OTP generation completed");
+        } else {
+          // Generate OTP when enabling 2FA
+          console.log("📧 No password provided, generating OTP directly...");
+          await generateOTPMutation.mutateAsync();
+          console.log("✅ OTP generation completed");
+        }
+      } else {
+        // Disable 2FA directly
+        console.log("❌ Disabling 2FA...");
+        await disable2FAMutation.mutateAsync({ password: password || "" });
+        console.log("✅ 2FA disabled");
+      }
+    } catch (error) {
+      console.error("Failed to toggle 2FA:", error);
+      toast.error("Failed to update 2FA settings. Please try again.");
+      throw error;
+    }
+  };
+
+  const handleVerifyOTP = async (otp: string) => {
+    try {
+      await verifyOTPMutation.mutateAsync({ otp });
+      // After successful OTP verification, enable 2FA by updating the database
+      await enable2FAMutation.mutateAsync();
+      // Refresh user data to reflect the new 2FA status
+      queryClient.invalidateQueries({ queryKey: ["user-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+    } catch (error) {
+      console.error("OTP verification failed:", error);
+      throw error;
+    }
+  };
+
+  const handleResendOTP = async () => {
+    try {
+      await generateOTPMutation.mutateAsync();
+    } catch (error) {
+      console.error("Failed to resend OTP:", error);
+      throw error;
+    }
+  };
+
+  const handleDisable2FA = async (password: string) => {
+    try {
+      await disable2FAMutation.mutateAsync({ password });
+      // Refresh user data to reflect the new 2FA status
+      queryClient.invalidateQueries({ queryKey: ["user-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+    } catch (error) {
+      console.error("Failed to disable 2FA:", error);
+      throw error;
+    }
   };
 
   return (
@@ -330,6 +417,16 @@ export const ViewerSettingsHeader = () => {
                 </Flex>
               </Stack>
             </Box>
+
+            {/* 2FA Section */}
+            <TwoFAModal
+              isEnabled={is2FAEnabled}
+              onToggle={handleToggle2FA}
+              onVerifyOTP={handleVerifyOTP}
+              onResendOTP={handleResendOTP}
+              onDisable2FA={handleDisable2FA}
+              userEmail={userData?.user?.email || ""}
+            />
           </Stack>
         </Stack>
       </form>
