@@ -3,68 +3,26 @@ import { Center } from "@/components/ui/center";
 import { Box } from "@/components/ui/box";
 import { ReusableTable } from "@/components/reusable/reusabletable";
 import { PageWrapper } from "@/components/common/pagewrapper";
-
-const data: Data[] = [
-  {
-    id: "1",
-    status: "Active",
-    submittedby: "Abe45",
-    companyname: "Mike Wangi",
-    email: "hello@novatech.com",
-    role: "Project Manager",
-  },
-  {
-    id: "2",
-    status: "Active",
-    submittedby: "Abe45",
-    companyname: "Mike Wangi",
-    email: "hello@novatech.com",
-    role: "Project Manager",
-  },
-  {
-    id: "3",
-    status: "Active",
-    submittedby: "Monserrat44",
-    companyname: "Mike Wangi",
-    email: "hello@novatech.com",
-    role: "Project Manager",
-  },
-  {
-    id: "4",
-    status: "Active",
-    submittedby: "Silas22",
-    companyname: "Mike Wangi",
-    email: "hello@novatech.com",
-    role: "Project Manager",
-  },
-  {
-    id: "5",
-    status: "Active",
-    submittedby: "carmella",
-    companyname: "Mike Wangi",
-    email: "hello@novatech.com",
-    role: "Project Manager",
-  },
-];
+import { CompanyUser } from "@/hooks/useGetCompanyDetails";
 
 export type Data = {
   id: string;
   status: string;
-  submittedby: string;
-  companyname: string;
+  name: string;
   email: string;
   role: string;
+  joinedAt: string;
 };
 
 export const columns: ColumnDef<Data>[] = [
   {
-    accessorKey: "companyname",
-    header: () => <Box className="text-black p-4">Company Name</Box>,
+    accessorKey: "name",
+    header: () => <Box className="text-black p-4">Employee Name</Box>,
     cell: ({ row }) => (
       <Box className="capitalize p-4 max-sm:w-full">
-        {row.original.companyname.length > 28
-          ? row.original.companyname.slice(0, 28) + "..."
-          : row.original.companyname}
+        {row.original.name.length > 28
+          ? row.original.name.slice(0, 28) + "..."
+          : row.original.name}
       </Box>
     ),
   },
@@ -99,23 +57,40 @@ export const columns: ColumnDef<Data>[] = [
   },
 
   {
-    accessorKey: "actions",
-    header: () => <Box className="text-center text-black">Last Active</Box>,
-    cell: () => {
-      return <Center className="space-x-2">Today</Center>;
+    accessorKey: "joinedAt",
+    header: () => <Box className="text-center text-black">Joined Date</Box>,
+    cell: ({ row }) => {
+      const joinedDate = new Date(row.original.joinedAt);
+      return (
+        <Center className="space-x-2">{joinedDate.toLocaleDateString()}</Center>
+      );
     },
   },
 ];
 
-export const ViewTable = () => {
+interface ViewTableProps {
+  users: CompanyUser[];
+}
+
+export const ViewTable = ({ users }: ViewTableProps) => {
+  // Transform the users data to match the table format
+  const transformedData: Data[] = users.map((user) => ({
+    id: user.id,
+    status: user.status,
+    name: user.user.name,
+    email: user.user.email,
+    role: user.role,
+    joinedAt: user.joinedAt,
+  }));
+
   return (
     <PageWrapper className="bg-white border-none w-full min-h-full p-0">
       <h1 className="text-black text-xl max-sm:text-lg font-medium p-4 pb-0">
-        Employees
+        Employees ({users.length})
       </h1>
 
       <ReusableTable
-        data={data}
+        data={transformedData}
         columns={columns}
         // searchInput={false}
         enablePaymentLinksCalender={false}

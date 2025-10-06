@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { useNavigate } from "react-router";
 import { useFetchAllOrganizations } from "@/hooks/usefetchallorganizations";
+import { useState } from "react";
+import { DeleteOrganizationModal } from "./DeleteOrganizationModal";
 
 // Define the actual data structure from the API (userOrganizations with nested organization)
 export type OrganizationData = {
@@ -58,11 +60,11 @@ export type OrganizationData = {
 };
 
 export const CompaniesTable = () => {
-  // const {
-  //   data: organizationsResponse,
-  //   isLoading,
-  //   error,
-  // } = useFetchUserOrganizations();
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedOrganization, setSelectedOrganization] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   const {
     data: allOrganizationsResponse,
@@ -73,6 +75,19 @@ export const CompaniesTable = () => {
   // The API returns userOrganizations array directly
   const transformedData: OrganizationData[] =
     allOrganizationsResponse?.data || [];
+
+  const handleDeleteClick = (organization: any) => {
+    setSelectedOrganization({
+      id: organization.id,
+      name: organization.name,
+    });
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteModalClose = () => {
+    setDeleteModalOpen(false);
+    setSelectedOrganization(null);
+  };
 
   const getColumns = (
     navigate: ReturnType<typeof useNavigate>
@@ -224,6 +239,7 @@ export const CompaniesTable = () => {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
+                    onClick={() => handleDeleteClick(row.original)}
                     variant="outline"
                     className="bg-[#A50403] border-none w-9 h-9 hover:bg-[#A50403]/80 cursor-pointer rounded-md "
                   >
@@ -231,7 +247,7 @@ export const CompaniesTable = () => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="mb-2">
-                  <p>Trash</p>
+                  <p>Delete Company</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -265,12 +281,23 @@ export const CompaniesTable = () => {
   }
 
   return (
-    <ReusableTable
-      data={transformedData}
-      columns={getColumns(navigate)}
-      // searchInput={false}
-      enablePaymentLinksCalender={true}
-      onRowClick={(row) => console.log("Row clicked:", row.original)}
-    />
+    <>
+      <ReusableTable
+        data={transformedData}
+        columns={getColumns(navigate)}
+        // searchInput={false}
+        enablePaymentLinksCalender={true}
+        onRowClick={(row) => console.log("Row clicked:", row.original)}
+      />
+
+      {selectedOrganization && (
+        <DeleteOrganizationModal
+          isOpen={deleteModalOpen}
+          onClose={handleDeleteModalClose}
+          organizationId={selectedOrganization.id}
+          organizationName={selectedOrganization.name}
+        />
+      )}
+    </>
   );
 };

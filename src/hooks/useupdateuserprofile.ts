@@ -8,6 +8,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 export interface UpdateUserProfileRequest {
   name: string;
   email: string;
+  phone?: string;
+  address?: string;
 }
 
 export interface UpdateUserProfileResponse {

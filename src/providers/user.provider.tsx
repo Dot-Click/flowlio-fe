@@ -48,6 +48,8 @@ type Data = {
       smsNotifications: boolean;
       [key: string]: any;
     };
+    phone?: string;
+    address?: string;
   };
   session: SessionObject["session"];
 };

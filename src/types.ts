@@ -227,6 +227,7 @@ export type IUser<T = {}> = {
   createdAt: Date;
   updatedAt: Date;
   phone: string;
+  address: string;
   image: string | null;
   banned: boolean | null;
   emailVerified: boolean;

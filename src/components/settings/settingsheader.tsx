@@ -30,6 +30,8 @@ const settingsSchema = z
     avatar: z.any().optional(),
     fullName: z.string().min(2, "Full name is required"),
     email: z.string().email("Invalid email address"),
+    phone: z.string().optional(),
+    address: z.string().optional(),
     currentpassword: z.string().optional(),
     newpassword: z.string().optional(),
     confirmpassword: z.string().optional(),
@@ -131,6 +133,8 @@ export const SettingsHeader = () => {
       avatar: undefined,
       fullName: "",
       email: "",
+      phone: "",
+      address: "",
       currentpassword: "",
       newpassword: "",
       confirmpassword: "",
@@ -153,6 +157,8 @@ export const SettingsHeader = () => {
     if (userData?.user) {
       setValue("fullName", userData.user.name || "");
       setValue("email", userData.user.email || "");
+      setValue("phone", userData.user.phone || "");
+      setValue("address", userData.user.address || "");
       if (userData.user.image) {
         setAvatarPreview(userData.user.image);
       }
@@ -188,10 +194,12 @@ export const SettingsHeader = () => {
         toast.success("Profile image updated successfully!");
       }
 
-      // Update profile information (name and email)
+      // Update profile information (name, email, phone, address)
       await updateProfileMutation.mutateAsync({
         name: values.fullName,
         email: values.email,
+        phone: values.phone,
+        address: values.address,
       });
 
       toast.success("Profile updated successfully!");
@@ -517,6 +525,22 @@ export const SettingsHeader = () => {
                   {errors.fullName.message as string}
                 </span>
               )}
+
+              <Input
+                className="bg-white rounded-full"
+                size="lg"
+                type="text"
+                placeholder="Phone Number"
+                {...register("phone")}
+              />
+
+              <Input
+                className="bg-white rounded-full"
+                size="lg"
+                type="text"
+                placeholder="Address"
+                {...register("address")}
+              />
 
               <Flex className="w-full relative border border-gray-200 rounded-full">
                 <Input
