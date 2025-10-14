@@ -73,6 +73,20 @@ export const useUpdateTask = () => {
       queryClient.invalidateQueries({ queryKey: ["task", variables.taskId] });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
 
+      // Invalidate dashboard stats when task is updated
+      queryClient.invalidateQueries({
+        queryKey: ["organization-pending-tasks"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organization-hours-tracked"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organization-weekly-hours-tracked"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organization-active-projects"],
+      });
+
       toast.success("Task updated successfully!");
     },
     onError: (error: any) => {
@@ -108,8 +122,23 @@ export const useUpdateTaskStatus = () => {
       console.log("Task status updated successfully!", data);
       // Invalidate and refetch tasks
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["viewer-tasks"] }); // Added for viewer tasks
       queryClient.invalidateQueries({ queryKey: ["task", variables.taskId] });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+
+      // Invalidate dashboard stats when task status changes
+      queryClient.invalidateQueries({
+        queryKey: ["organization-pending-tasks"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organization-hours-tracked"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organization-weekly-hours-tracked"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organization-active-projects"],
+      });
 
       toast.success("Task status updated successfully!");
     },

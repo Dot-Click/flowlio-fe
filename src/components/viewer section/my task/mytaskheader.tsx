@@ -1,12 +1,11 @@
-import { ChevronDown, Grip, List } from "lucide-react";
+import { ChevronDown, Grip, List, Search } from "lucide-react";
 import { PageWrapper } from "@/components/common/pagewrapper";
 import { Button } from "@/components/ui/button";
 import { Center } from "@/components/ui/center";
 import { Stack } from "@/components/ui/stack";
-import KanbanBoard, { initialTasks, Task } from "./mytaskkanbanboard";
+import KanbanBoard from "./mytaskkanbanboard";
 import { Flex } from "@/components/ui/flex";
 import { cn } from "@/lib/utils";
-import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { DropdownMenu } from "@/components/ui/dropdown-menu";
@@ -14,19 +13,91 @@ import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { DropdownMenuContent } from "@/components/ui/dropdown-menu";
 import { DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
 import { MyTaskTable } from "./mytasktable";
+import { useFetchViewerTasks, ViewerTask } from "@/hooks/useFetchViewerTasks";
+import { format } from "date-fns";
+
+// Task type for kanban board
+type Task = {
+  id: string;
+  title: string;
+  project: string;
+  comments?: string;
+  endDate: string;
+  status:
+    | "To Do"
+    | "In Progress"
+    | "Completed"
+    | "Updated"
+    | "Delay"
+    | "Changes";
+  creatorName?: string;
+  creatorEmail?: string;
+};
+
+// Map backend status to frontend status
+const mapStatusToDisplay = (status: string): Task["status"] => {
+  switch (status) {
+    case "todo":
+      return "To Do";
+    case "in_progress":
+      return "In Progress";
+    case "completed":
+      return "Completed";
+    case "updated":
+      return "Updated";
+    case "delay":
+      return "Delay";
+    case "changes":
+      return "Changes";
+    default:
+      return "To Do";
+  }
+};
 
 export const MyTaskHeader = () => {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
-
   const [search, setSearch] = useState("");
-  // Filter tasks by search query (task name or project name)
-  const filteredTasks = tasks.filter(
-    (task) =>
-      task.title.toLowerCase().includes(search.toLowerCase()) ||
-      task.project.toLowerCase().includes(search.toLowerCase())
+  const [view, setView] = useState<"kanban" | "table">("kanban");
+  const [selectedProject, setSelectedProject] = useState<string>("all");
+
+  const { data: tasksResponse } = useFetchViewerTasks();
+  const tasks = tasksResponse?.data || [];
+
+  // Get unique projects from tasks
+  const uniqueProjects = Array.from(
+    new Set(tasks.map((task) => task.projectName))
   );
 
-  const [view, setView] = useState<"kanban" | "table">("kanban");
+  // Convert ViewerTask to Task format
+  const convertViewerTasksToTasks = (viewerTasks: ViewerTask[]): Task[] => {
+    return viewerTasks.map((task) => ({
+      id: task.id,
+      title: task.title,
+      project: task.projectName,
+      comments: task.description,
+      endDate: task.endDate
+        ? format(new Date(task.endDate), "MMM dd, yyyy")
+        : "",
+      status: mapStatusToDisplay(task.status),
+      creatorName: task.creatorName,
+      creatorEmail: task.creatorEmail,
+    }));
+  };
+
+  // Filter tasks by search query and selected project
+  const filteredViewerTasks = tasks.filter((task) => {
+    const matchesSearch =
+      task.title.toLowerCase().includes(search.toLowerCase()) ||
+      task.projectName.toLowerCase().includes(search.toLowerCase());
+
+    const matchesProject =
+      selectedProject === "all" || task.projectName === selectedProject;
+
+    return matchesSearch && matchesProject;
+  });
+
+  // Convert filtered tasks to Task format
+  const filteredTasks = convertViewerTasksToTasks(filteredViewerTasks);
+
   return (
     <PageWrapper className="mt-6 p-4">
       <Stack className="gap-4 py-2">
@@ -37,7 +108,7 @@ export const MyTaskHeader = () => {
             </h1>
             <h1 className={`max-sm:text-sm text-[#616572]`}>
               Track and manage your assigned tasks with real-time progress and
-              time logging.
+              time logging. Drag and drop tasks to update their status.
             </h1>
           </Stack>
         </Center>
@@ -50,7 +121,7 @@ export const MyTaskHeader = () => {
               placeholder="Search My Tasks"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full md:w-115 lg:w-80 xl:w-[400px] py-4 pl-10 bg-white h-10  placeholder:text-gray-700  placeholder:text-[15px] border border-gray-100 rounded-md focus:outline-none active:border-gray-200 focus:ring-0 focus:ring-offset-0 rounded-full"
+              className="w-full md:w-115 lg:w-80 xl:w-[400px] py-4 pl-10 bg-white h-10  placeholder:text-gray-700  placeholder:text-[15px] border border-gray-100 focus:outline-none active:border-gray-200 focus:ring-0 focus:ring-offset-0 rounded-full"
             />
           </Flex>
 
@@ -61,33 +132,46 @@ export const MyTaskHeader = () => {
                   variant="ghost"
                   aria-haspopup="dialog"
                   className={cn(
-                    "ml-auto cursor-pointer bg-white border border-gray-200 rounded-full h-10 w-32 text-black shadow-none flex p-3 gap-8"
+                    "ml-auto cursor-pointer bg-white border border-gray-200 rounded-full h-10 w-40 text-black shadow-none flex p-3 gap-8"
                   )}
                 >
-                  Projects
+                  {selectedProject === "all" ? "All Projects" : selectedProject}
                   <ChevronDown />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuCheckboxItem>Project 1</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>Project 2</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>Project 3</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>Project 4</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>Project 5</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>Project 6</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>Project 7</DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem>Project 8</DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={selectedProject === "all"}
+                  onCheckedChange={() => setSelectedProject("all")}
+                >
+                  All Projects
+                </DropdownMenuCheckboxItem>
+                {uniqueProjects.map((projectName) => (
+                  <DropdownMenuCheckboxItem
+                    key={projectName}
+                    checked={selectedProject === projectName}
+                    onCheckedChange={() => setSelectedProject(projectName)}
+                  >
+                    {projectName}
+                  </DropdownMenuCheckboxItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
 
             <Button
-              className="bg-white text-white border border-gray-200 rounded-lg px-4 py-5  gap-2 cursor-pointer hover:bg-gray-100"
+              className={cn(
+                "bg-white text-white border border-gray-200 rounded-lg px-4 py-5 gap-2 cursor-pointer hover:bg-gray-100",
+                view === "table" && "bg-blue-50 border-blue-300"
+              )}
               onClick={() => setView("table")}
             >
               <List className="text-black size-5" />
             </Button>
             <Button
-              className="bg-white text-white border border-gray-200 rounded-lg px-4 py-5  gap-2 cursor-pointer hover:bg-gray-100"
+              className={cn(
+                "bg-white text-white border border-gray-200 rounded-lg px-4 py-5 gap-2 cursor-pointer hover:bg-gray-100",
+                view === "kanban" && "bg-blue-50 border-blue-300"
+              )}
               onClick={() => setView("kanban")}
             >
               <Grip className="text-black size-4.5" />
@@ -97,13 +181,9 @@ export const MyTaskHeader = () => {
       </Stack>
 
       {view === "kanban" ? (
-        <KanbanBoard
-          tasks={tasks}
-          setTasks={setTasks}
-          filteredTasks={filteredTasks}
-        />
+        <KanbanBoard filteredTasks={filteredTasks} />
       ) : (
-        <MyTaskTable />
+        <MyTaskTable filteredTasks={filteredViewerTasks} />
       )}
     </PageWrapper>
   );

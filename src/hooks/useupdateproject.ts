@@ -3,16 +3,19 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 interface UpdateProjectData {
-  name: string;
-  projectNumber: string;
-  clientId: string;
-  startDate: string;
-  endDate: string;
-  assignedTo: string;
+  name?: string;
+  projectNumber?: string;
+  clientId?: string;
+  startDate?: string;
+  endDate?: string;
+  assignedTo?: string;
   description?: string;
-  address: string;
+  address?: string;
   contractfile?: string;
-  organizationId: string;
+  organizationId?: string;
+  // Newly allowed partial updates
+  status?: "pending" | "completed" | "ongoing" | "active";
+  progress?: number; // 0-100
 }
 
 interface UpdateProjectResponse {
@@ -58,6 +61,14 @@ export const useUpdateProject = () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["organization-projects"] });
       queryClient.invalidateQueries({ queryKey: ["project", data.data.id] });
+
+      // Invalidate dashboard stats when project is updated
+      queryClient.invalidateQueries({
+        queryKey: ["organization-active-projects"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organization-pending-tasks"],
+      });
     },
     onError: (error: any) => {
       let errorMessage = "Failed to update project";

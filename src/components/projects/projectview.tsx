@@ -33,7 +33,7 @@ import {
   GeneralModal,
   useGeneralModalDisclosure,
 } from "../common/generalmodal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Flex } from "../ui/flex";
 import { Input } from "../ui/input";
@@ -43,6 +43,14 @@ import { useFetchProjectComments } from "@/hooks/usefetchprojectcomments";
 import { useCreateProjectComment } from "@/hooks/usecreateprojectcomment";
 import { useDeleteProjectComment } from "@/hooks/usedeleteprojectcomment";
 import { Skeleton } from "../ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { useUpdateProject } from "@/hooks/useupdateproject";
 
 export const ProjectView = () => {
   const navigate = useNavigate();
@@ -65,6 +73,21 @@ export const ProjectView = () => {
     useCreateProjectComment();
   const { mutate: deleteComment, isPending: isDeletingComment } =
     useDeleteProjectComment();
+
+  // Local state for inline edits (initialized with safe defaults)
+  const [editStatus, setEditStatus] = useState<string>("pending");
+  const [editProgress, setEditProgress] = useState<number>(0);
+
+  const { mutate: updateProject, isPending: isUpdating } = useUpdateProject();
+
+  // Sync local edit fields when project data loads/changes
+  useEffect(() => {
+    const pd = projectData?.data;
+    if (pd) {
+      setEditStatus(pd.status || "pending");
+      setEditProgress(pd.progress ?? 0);
+    }
+  }, [projectData?.data]);
 
   if (isLoading) {
     return (
@@ -180,6 +203,16 @@ export const ProjectView = () => {
   }
 
   const project = projectData.data;
+
+  const handleQuickUpdate = () => {
+    if (!id) return;
+    // Normalize: treat "active" as "ongoing" for storage if needed
+    const normalizedStatus = editStatus === "active" ? "ongoing" : editStatus;
+    updateProject({
+      id,
+      data: { status: normalizedStatus as any, progress: editProgress },
+    });
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -651,34 +684,69 @@ export const ProjectView = () => {
                     Progress
                   </span>
                   <span className="font-bold text-blue-600 text-lg">
-                    {project.progress}%
+                    {editProgress}%
                   </span>
                 </Box>
-                <Progress
-                  value={project.progress}
-                  className="h-3 bg-gray-200"
-                />
+                <Box className="flex items-center gap-3">
+                  <Input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={editProgress || 0}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      if (isNaN(value)) return;
+                      setEditProgress(Math.max(0, Math.min(100, value)));
+                    }}
+                    className="w-24 bg-white"
+                    placeholder="0"
+                  />
+                  <Progress
+                    value={editProgress}
+                    className="h-3 bg-gray-200 flex-1"
+                  />
+                </Box>
               </Box>
 
               <Separator className="bg-gray-200" />
 
               <Box className="p-4 bg-white/70 rounded-lg border border-gray-100">
-                <Box className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 font-medium">
+                <Stack className="justify-between">
+                  <Flex className="text-sm text-gray-600 font-medium justify-start items-start">
                     Status
-                  </span>
-                  <Badge
-                    variant="outline"
-                    className={`${getStatusColor(
-                      project.status
-                    )} flex items-center gap-1 px-3 py-1`}
-                  >
-                    {getStatusIcon(project.status)}
-                    {project.status?.charAt(0).toUpperCase() +
-                      project.status?.slice(1)}
-                  </Badge>
-                </Box>
+                  </Flex>
+                  <Box className="flex items-center gap-3">
+                    <Select value={editStatus} onValueChange={setEditStatus}>
+                      <SelectTrigger className="w-36 bg-white">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="ongoing">Ongoing</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Badge
+                      variant="outline"
+                      className={`${getStatusColor(
+                        editStatus
+                      )} flex items-center gap-1 px-3 py-1`}
+                    >
+                      {getStatusIcon(editStatus)}
+                      {editStatus?.charAt(0).toUpperCase() +
+                        editStatus?.slice(1)}
+                    </Badge>
+                  </Box>
+                </Stack>
               </Box>
+
+              <Button
+                onClick={handleQuickUpdate}
+                disabled={isUpdating}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
+              >
+                {isUpdating ? "Saving..." : "Save Changes"}
+              </Button>
 
               <Box className="p-4 bg-white/70 rounded-lg border border-gray-100">
                 <Box className="flex justify-between items-center">

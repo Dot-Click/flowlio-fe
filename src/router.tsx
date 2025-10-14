@@ -11,6 +11,7 @@ import {
   useSessionPersistence,
   useSessionRestoration,
 } from "./hooks/useSessionPersistence";
+import ViewerSettingsPage from "./pages/viewersettings.page";
 
 // Lazy load all page components
 const PasswordresetsucessPage = lazy(
@@ -148,7 +149,9 @@ const ViewermyTasksPage = lazy(() =>
   }))
 );
 const ViewerSupportsPage = lazy(() => import("./pages/viewersupports.page"));
-const ViewerSettingsPage = lazy(() => import("./pages/viewersettings.page"));
+const ViewerProjectDetailsPage = lazy(
+  () => import("./pages/viewerprojectdetails.page")
+);
 const ClientManagementPage = lazy(
   () => import("./pages/clientmanagement.page")
 );
@@ -373,6 +376,10 @@ const AppRoutes = () => {
         <Route
           path="my-projects"
           element={<LazyWrapper component={ViewermyProjectsPage} />}
+        />
+        <Route
+          path="projects/:id"
+          element={<LazyWrapper component={ViewerProjectDetailsPage} />}
         />
         <Route
           path="my-tasks"

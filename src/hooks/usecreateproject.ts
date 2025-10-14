@@ -63,6 +63,14 @@ export const useCreateProject = () => {
       queryClient.invalidateQueries({
         queryKey: ["organization-projects"],
       });
+
+      // Invalidate dashboard stats when new project is created
+      queryClient.invalidateQueries({
+        queryKey: ["organization-active-projects"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organization-total-clients"],
+      });
     },
     onError: (error) => {
       console.error("Error creating project:", error);

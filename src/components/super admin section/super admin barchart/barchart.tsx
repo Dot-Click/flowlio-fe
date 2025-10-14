@@ -1,5 +1,5 @@
 import { ChartContainer } from "@/components/ui/chart";
-import { type FC } from "react";
+import { type FC, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Flex } from "@/components/ui/flex";
 import { SuperAdminChartGuides } from "./chartguides";
@@ -17,26 +17,44 @@ import {
 import { ComponentWrapper } from "@/components/common/componentwrapper";
 import { SuperAdminCalendarPopOver } from "./calendarpopover";
 import { DiamondIcon } from "./diamondicon";
-
-const chartData = [
-  { project: "Jan", companies: 25, projectsCreated: 40 },
-  { project: "Feb", companies: 15, projectsCreated: 25 },
-  { project: "Mar", companies: 28, projectsCreated: 38 },
-  { project: "Apr", companies: 35, projectsCreated: 40 },
-  { project: "May", companies: 30, projectsCreated: 45 },
-  { project: "Jun", companies: 14, projectsCreated: 30 },
-  { project: "Jul", companies: 22, projectsCreated: 45 },
-  { project: "Aug", companies: 21, projectsCreated: 35 },
-  { project: "Sep", companies: 11, projectsCreated: 28 },
-  { project: "Oct", companies: 22, projectsCreated: 38 },
-  { project: "Nov", companies: 33, projectsCreated: 49 },
-  { project: "Dec", companies: 45, projectsCreated: 55 },
-];
+import { useFetchAllData } from "@/hooks/useFetchAllData";
+import { processChartData } from "@/utils/chartDataProcessor";
 
 export const SuperAdminBarChartComponent: FC<BoxProps> = ({
   className,
   ...props
 }) => {
+  const [selectedYear, setSelectedYear] = useState<number>(
+    new Date().getFullYear()
+  );
+
+  const { data: allDataResponse, isLoading, error } = useFetchAllData();
+
+  // Process the data for the selected year
+  const chartData = allDataResponse?.data
+    ? processChartData(
+        allDataResponse.data.organizations,
+        allDataResponse.data.projects,
+        [], // Empty invoices array since we removed it from getAllData
+        selectedYear
+      )
+    : [];
+
+  // Debug: Check if data has actual values
+  console.log("📊 All Data Response:", allDataResponse);
+  console.log("📊 Chart Data:", chartData);
+  console.log("📊 Selected Year:", selectedYear);
+  console.log(
+    "📊 Organizations:",
+    allDataResponse?.data?.organizations?.length || 0
+  );
+  console.log("📊 Projects:", allDataResponse?.data?.projects?.length || 0);
+
+  // Check if any data has values > 0
+  const hasData = chartData.some(
+    (item) => item.companies > 0 || item.projectsCreated > 0
+  );
+  console.log("📊 Has Data:", hasData);
   const CustomDiamondDot = (props: any) => {
     const { cx, cy } = props;
     if (typeof cx !== "number" || typeof cy !== "number") return null;
@@ -63,94 +81,117 @@ export const SuperAdminBarChartComponent: FC<BoxProps> = ({
         <Flex className="max-lg:flex-col items-center justify-between">
           <Flex className="justify-between max-md:justify-start max-lg:w-full">
             <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
-            <h1 className="text-lg font-medium">Project Overview</h1>
+            <h1 className="text-lg font-medium">
+              Project Overview ({selectedYear})
+            </h1>
           </Flex>
 
           <Flex className="gap-4">
             <SuperAdminChartGuides className="gap-4 pt-1 max-md:mr-auto" />
-            <SuperAdminCalendarPopOver />
+            <SuperAdminCalendarPopOver
+              selectedYear={selectedYear}
+              onYearChange={setSelectedYear}
+            />
           </Flex>
         </Flex>
       </Stack>
 
       <ChartContainer className="mt-5 w-full h-[21.8rem] " config={{}}>
-        <ComposedChart data={chartData}>
-          <CartesianGrid
-            vertical={true}
-            horizontal={true}
-            stroke="#cccccc"
-            strokeWidth={1}
-            strokeDasharray="none"
-            opacity={0.6}
-          />
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-gray-500">Loading chart data...</div>
+          </div>
+        ) : error ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-red-500">
+              Failed to load chart data: {error.message}
+            </div>
+          </div>
+        ) : chartData.length === 0 ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-gray-500">
+              No data available for the selected year
+            </div>
+          </div>
+        ) : (
+          <ComposedChart data={chartData}>
+            <CartesianGrid
+              vertical={true}
+              horizontal={true}
+              stroke="#cccccc"
+              strokeWidth={1}
+              strokeDasharray="none"
+              opacity={0.6}
+            />
 
-          <XAxis
-            dataKey="project"
-            axisLine={false}
-            tickLine={false}
-            tickMargin={10}
-            tick={{
-              fontSize: 12,
-              fontWeight: 500,
-              fill: "#666666",
-              transform: "translateX(-50%)",
-              textAnchor: "middle",
-            }}
-            interval={0}
-            padding={{ left: 15, right: 15 }}
-          />
-
-          <YAxis
-            axisLine={true}
-            tickLine={false}
-            tick={{ fontSize: 12 }}
-            tickCount={7}
-            label={{
-              value: "No. of companies",
-              angle: -90,
-              position: "insideLeft",
-              offset: 10,
-              style: {
+            <XAxis
+              dataKey="month"
+              axisLine={false}
+              tickLine={false}
+              tickMargin={10}
+              tick={{
+                fontSize: 12,
+                fontWeight: 500,
+                fill: "#666666",
+                transform: "translateX(-50%)",
                 textAnchor: "middle",
-                fontSize: 14,
-                fontWeight: 300,
+              }}
+              interval={0}
+              padding={{ left: 15, right: 15 }}
+            />
+
+            <YAxis
+              axisLine={true}
+              tickLine={false}
+              tick={{ fontSize: 12 }}
+              tickCount={7}
+              label={{
+                value: "No. of companies",
+                angle: -90,
+                position: "insideLeft",
+                offset: 10,
+                style: {
+                  textAnchor: "middle",
+                  fontSize: 14,
+                  fontWeight: 300,
+                  color: "#666666",
+                },
+              }}
+            />
+
+            <Tooltip
+              contentStyle={{
+                borderRadius: "10px",
+                border: "1px solid #cccccc",
+                backgroundColor: "#ffffff",
+                padding: "10px",
+                fontSize: "12px",
+                fontWeight: "500",
                 color: "#666666",
-              },
-            }}
-          />
+                textTransform: "capitalize",
+                textShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+              }}
+            />
+            <defs>
+              <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#ea4864" stopOpacity={0.3} />
+                <stop offset="100%" stopColor="#ea4864" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <Area
+              type="monotone"
+              dataKey="projectsCreated"
+              fill="url(#areaGradient)"
+              stroke="#ea4864"
+              dot={<CustomDiamondDot />}
+              activeDot={<HoverCustomDiamondDot />}
+              fillOpacity={1}
+              strokeWidth={0}
+            />
 
-          <Tooltip
-            contentStyle={{
-              borderRadius: "10px",
-              border: "1px solid #cccccc",
-              backgroundColor: "#ffffff",
-              padding: "10px",
-              fontSize: "12px",
-              fontWeight: "500",
-              color: "#666666",
-              textTransform: "capitalize",
-              textShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-            }}
-          />
-          <defs>
-            <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#ea4864" stopOpacity={0.3} />
-              <stop offset="100%" stopColor="#ea4864" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <Area
-            type="monotone"
-            dataKey="projectsCreated"
-            fill="url(#areaGradient)"
-            stroke="#ea4864"
-            dot={<CustomDiamondDot />}
-            activeDot={<HoverCustomDiamondDot />}
-            fillOpacity={1}
-            strokeWidth={0}
-          />
-
-          <Bar dataKey="companies" barSize={30} fill="#3f53b5" />
-        </ComposedChart>
+            <Bar dataKey="companies" barSize={30} fill="#3f53b5" />
+          </ComposedChart>
+        )}
       </ChartContainer>
     </ComponentWrapper>
   );

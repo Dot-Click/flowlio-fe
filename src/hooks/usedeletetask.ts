@@ -19,12 +19,27 @@ export const useDeleteTask = () => {
       // Invalidate and refetch tasks
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
-      
+
+      // Invalidate dashboard stats when task is deleted
+      queryClient.invalidateQueries({
+        queryKey: ["organization-pending-tasks"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organization-hours-tracked"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organization-weekly-hours-tracked"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organization-active-projects"],
+      });
+
       toast.success("Task deleted successfully!");
     },
     onError: (error: any) => {
       console.error("Error deleting task:", error);
-      const errorMessage = error.response?.data?.message || "Failed to delete task";
+      const errorMessage =
+        error.response?.data?.message || "Failed to delete task";
       toast.error(errorMessage);
     },
   });

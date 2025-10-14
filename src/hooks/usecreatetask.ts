@@ -60,6 +60,20 @@ export const useCreateTask = () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
 
+      // Invalidate dashboard stats when new task is created
+      queryClient.invalidateQueries({
+        queryKey: ["organization-pending-tasks"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organization-hours-tracked"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organization-weekly-hours-tracked"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organization-active-projects"],
+      });
+
       toast.success("Task created successfully!");
     },
     onError: (error: any) => {

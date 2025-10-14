@@ -12,6 +12,9 @@ import Img3 from "/dashboard/projstat3.svg";
 import { SuperAdminBarChartComponent } from "@/components/super admin section/super admin barchart/barchart";
 import { SuperAdminTable } from "@/components/super admin section/super admin barchart/superadmintable";
 import { useFetchAllOrganizations } from "@/hooks/usefetchallorganizations";
+import { useFetchAllData } from "@/hooks/useFetchAllData";
+import { useFetchTotalInvoices } from "@/hooks/useFetchTotalInvoices";
+import { getTotalCounts } from "@/utils/chartDataProcessor";
 // import { useUser } from "@/providers/user.provider";
 // import { Badge } from "@/components/ui/badge";
 
@@ -25,8 +28,21 @@ const SuperAdminDashboardPage = () => {
   // const { data: userData } = useUser();
   // console.log(userData, "check the sub admin id");
 
+  const { data: allDataResponse } = useFetchAllData();
+  const { data: totalInvoicesResponse } = useFetchTotalInvoices();
+
+  // Use the new all-data approach for consistent counts
+  const { totalCompanies, totalProjects } = allDataResponse?.data
+    ? getTotalCounts(
+        allDataResponse.data.organizations,
+        allDataResponse.data.projects
+      )
+    : { totalCompanies: 0, totalProjects: 0 };
+
+  const totalInvoices = totalInvoicesResponse?.data?.totalInvoices ?? 0;
+
+  // For active subscriptions, we still need the detailed org data
   const { data: allOrganizationsResponse } = useFetchAllOrganizations();
-  const totalCompanies = allOrganizationsResponse?.data?.length ?? 0;
   const activeSubscriptions = Array.isArray(allOrganizationsResponse?.data)
     ? allOrganizationsResponse.data.filter(
         (org: any) => org.subscriptionStatus === "active"
@@ -46,7 +62,7 @@ const SuperAdminDashboardPage = () => {
       title: "Total Projects",
       description: "All projects created by companies",
       icon: img2,
-      count: "0",
+      count: String(totalProjects),
     },
     {
       link: "/superadmin",
@@ -60,32 +76,12 @@ const SuperAdminDashboardPage = () => {
       title: "Total Invoices",
       description: "Invoices created via platform",
       icon: img4,
-      count: "0",
+      count: String(totalInvoices),
     },
   ];
 
   return (
     <Stack className="pt-5 gap-3 px-2">
-      {/* Debug Section - Remove this after testing */}
-      {/* {userData && (
-        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <h3 className="text-lg font-semibold mb-2">User Role Debug</h3>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm">Role:</span>
-            {userData.user.subadminId ? (
-              <Badge variant="secondary">Sub Admin</Badge>
-            ) : (
-              <Badge variant="default">Super Admin</Badge>
-            )}
-          </div>
-          <div className="text-sm text-gray-600">
-            <p>subadminId: {userData.user.subadminId || "Not set"}</p>
-            <p>User ID: {userData.user.id}</p>
-            <p>Email: {userData.user.email}</p>
-            <p>Raw user data: {JSON.stringify(userData.user, null, 2)}</p>
-          </div>
-        </div>
-      )} */}
       <Stats
         stats={stats}
         classNameDescription="text-[13px] leading-4"
