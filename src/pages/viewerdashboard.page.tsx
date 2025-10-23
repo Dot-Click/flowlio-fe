@@ -7,28 +7,28 @@ import TimeModal from "@/components/timemodal";
 
 const stats: Stat[] = [
   {
-    link: "/viewer",
+    link: "/viewer/my-tasks",
     title: "Total Tasks",
     description: "All tasks assigned to you",
     icon: img1,
     count: "23",
   },
   {
-    link: "/viewer",
+    link: "/viewer/my-projects",
     title: "Total Projects",
-    description: "Tasks yet to be completed",
+    description: "Projects you're involved in",
     icon: img1,
     count: "12",
   },
   {
-    link: "/viewer",
+    link: "/viewer/my-tasks",
     title: "Completed Tasks",
-    description: "Tasks you’ve finished",
+    description: "Tasks you've finished",
     icon: img1,
     count: "11",
   },
   {
-    link: "/viewer",
+    link: "/viewer", // No specific route for hour tracking yet
     title: "Active Task Hour",
     description: "08:35 AM, 11 March 2025",
     icon: img1,

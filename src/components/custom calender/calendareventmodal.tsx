@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { CustomEvent } from "./calendarUtils";
+import { CalendarEvent as CustomEvent } from "./calendarUtils";
 import { GeneralModalReturnTypeProps } from "../common/generalmodal";
 import { Input } from "../ui/input";
 import { Flex } from "../ui/flex";
@@ -33,8 +33,8 @@ interface EventFormData {
   date: Date;
   startHour: number;
   endHour: number;
-  calendarType: "work" | "education" | "personal";
-  platform: "google_meet" | "whatsapp" | "outlook" | "none";
+  calendarType: "education" | "personal" | "meeting";
+  platform: "google_meet" | "whatsapp" | "outlook" | "zoom" | "none";
   meetLink: string;
   whatsappNumber: string;
   outlookEvent: string;
@@ -147,7 +147,7 @@ export const EventModal: React.FC<EventModalProps> = ({
       date: eventToEdit ? new Date(eventToEdit.date) : new Date(),
       startHour: eventToEdit?.startHour ?? 8,
       endHour: eventToEdit?.endHour ?? 13,
-      calendarType: eventToEdit?.calendarType || "work",
+      calendarType: eventToEdit?.calendarType || "education",
       platform: eventToEdit?.platform || "none",
       meetLink: eventToEdit?.meetLink || "",
       whatsappNumber: eventToEdit?.whatsappNumber || "",
@@ -181,7 +181,7 @@ export const EventModal: React.FC<EventModalProps> = ({
         date: new Date(),
         startHour: 8,
         endHour: 13,
-        calendarType: "work",
+        calendarType: "education",
         platform: "none",
         meetLink: "",
         whatsappNumber: "",
@@ -223,7 +223,10 @@ export const EventModal: React.FC<EventModalProps> = ({
               startHour: Number(data.startHour),
               endHour: Number(data.endHour),
               weekStart,
-              calendarType: data.calendarType,
+              calendarType: data.calendarType as
+                | "education"
+                | "personal"
+                | "meeting",
               platform: data.platform,
               meetLink:
                 data.platform === "google_meet" ? data.meetLink : undefined,
@@ -427,12 +430,14 @@ export const EventModal: React.FC<EventModalProps> = ({
             <label className="font-normal text-sm">Calendar</label>
             <Flex className="gap-1.5 mt-1">
               <Flex
-                onClick={() => setValue("calendarType", "work")}
+                onClick={() => setValue("calendarType", "education")}
                 className={`flex items-center gap-1 text-sm border-none rounded-md px-2 py-1.5 cursor-pointer font-light ${
-                  calendarType === "work" ? "bg-cyan-100" : "bg-transparent"
+                  calendarType === "education"
+                    ? "bg-cyan-100"
+                    : "bg-transparent"
                 }`}
               >
-                {calendarType === "work" ? (
+                {calendarType === "education" ? (
                   <img
                     src={WhatsAppCheckBoxIcon}
                     alt="Work"
@@ -443,14 +448,14 @@ export const EventModal: React.FC<EventModalProps> = ({
               </Flex>
               <button
                 type="button"
-                onClick={() => setValue("calendarType", "education")}
+                onClick={() => setValue("calendarType", "personal")}
                 className={`flex items-center gap-1.5 text-sm border-none rounded-md px-3 py-1.5 cursor-pointer font-light ${
-                  calendarType === "education"
+                  calendarType === "personal"
                     ? "bg-indigo-100"
                     : "bg-transparent"
                 }`}
               >
-                {calendarType === "education" ? (
+                {calendarType === "personal" ? (
                   <img
                     src={EducationCheckBoxIcon}
                     alt="Education"
@@ -474,6 +479,24 @@ export const EventModal: React.FC<EventModalProps> = ({
                   />
                 ) : null}
                 Personal
+              </button>
+              <button
+                type="button"
+                onClick={() => setValue("calendarType", "meeting")}
+                className={`flex items-center gap-1.5 text-sm border-none rounded-md px-3 py-1.5 cursor-pointer font-light ${
+                  calendarType === "meeting"
+                    ? "bg-indigo-100"
+                    : "bg-transparent"
+                }`}
+              >
+                {calendarType === "meeting" ? (
+                  <img
+                    src={EducationCheckBoxIcon}
+                    alt="Meeting"
+                    className="size-4"
+                  />
+                ) : null}
+                Meeting
               </button>
             </Flex>
           </Box>

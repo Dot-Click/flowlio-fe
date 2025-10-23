@@ -21,7 +21,7 @@ export const useActiveTimeEntries = () => {
   return useQuery<ActiveTimeEntriesResponse>({
     queryKey: ["active-time-entries"],
     queryFn: async () => {
-      const response = await axios.get("/viewer/tasks/active-time");
+      const response = await axios.get("/tasks/active-time");
       return response.data;
     },
     refetchInterval: 30000, // Refetch every 30 seconds to update timer
@@ -58,14 +58,17 @@ export const useStartTask = () => {
 
   return useMutation({
     mutationFn: async (taskId: string): Promise<StartTaskResponse> => {
-      const response = await axios.post(`/viewer/tasks/${taskId}/start`);
+      const response = await axios.post(`/tasks/${taskId}/start`);
       return response.data;
     },
     onSuccess: (data) => {
       console.log("Task started successfully!", data);
-      // Invalidate viewer tasks to refresh the data
-      queryClient.invalidateQueries({ queryKey: ["viewer-tasks"] });
+      // Invalidate tasks and time entries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["active-time-entries"] });
+      queryClient.invalidateQueries({
+        queryKey: ["organization-weekly-hours-tracked"],
+      });
 
       toast.success(`Started tracking: ${data.data.taskTitle}`);
     },
@@ -83,14 +86,17 @@ export const useEndTask = () => {
 
   return useMutation({
     mutationFn: async (taskId: string): Promise<EndTaskResponse> => {
-      const response = await axios.post(`/viewer/tasks/${taskId}/end`);
+      const response = await axios.post(`/tasks/${taskId}/end`);
       return response.data;
     },
     onSuccess: (data) => {
       console.log("Task ended successfully!", data);
-      // Invalidate viewer tasks to refresh the data
-      queryClient.invalidateQueries({ queryKey: ["viewer-tasks"] });
+      // Invalidate tasks and time entries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["active-time-entries"] });
+      queryClient.invalidateQueries({
+        queryKey: ["organization-weekly-hours-tracked"],
+      });
 
       const durationHours = Math.floor(data.data.duration / 60);
       const durationMinutes = data.data.duration % 60;

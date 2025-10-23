@@ -10,6 +10,10 @@ import { useFetchOrganizationTotalClients } from "@/hooks/useFetchOrganizationTo
 import { useFetchOrganizationActiveProjects } from "@/hooks/useFetchOrganizationActiveProjects";
 import { useFetchOrganizationWeeklyHoursTracked } from "@/hooks/useFetchOrganizationWeeklyHoursTracked";
 import { useFetchOrganizationPendingTasks } from "@/hooks/useFetchOrganizationPendingTasks";
+import {
+  useFetchProjectStatusData,
+  transformToPieChartData,
+} from "@/hooks/useFetchProjectStatusData";
 import { formatHours } from "@/utils/timeFormat";
 import img1 from "/dashboard/1.svg";
 import img2 from "/dashboard/2.svg";
@@ -26,6 +30,7 @@ const DashboardPage = () => {
   const { data: weeklyHoursResponse } =
     useFetchOrganizationWeeklyHoursTracked();
   const { data: pendingTasksResponse } = useFetchOrganizationPendingTasks();
+  const { data: projectStatusResponse } = useFetchProjectStatusData();
 
   // Extract values from responses
   const totalClients = totalClientsResponse?.data?.totalClients ?? 0;
@@ -35,28 +40,28 @@ const DashboardPage = () => {
 
   const stats: Stat[] = [
     {
-      link: "/dashboard",
+      link: "/dashboard/client-management",
       title: "Total Clients",
       description: "Active users on the platform",
       icon: img1,
       count: String(totalClients),
     },
     {
-      link: "/dashboard",
+      link: "/dashboard/project",
       title: "Active Projects",
       description: "Ongoing client projects",
       icon: img2,
       count: String(activeProjects),
     },
     {
-      link: "/dashboard",
+      link: "/dashboard/time-tracking", // Add route for time tracking
       title: "Hours Tracked",
       description: "Time logged this week",
       icon: img3,
       count: formatHours(weeklyHours),
     },
     {
-      link: "/dashboard",
+      link: "/dashboard/task-management",
       title: "Pending Tasks",
       description: "Tasks not yet completed",
       icon: img4,
@@ -64,11 +69,14 @@ const DashboardPage = () => {
     },
   ];
 
-  const data = [
-    { name: "Ongoing", value: 10.61, icon: Img2, color: "#FFE000" },
-    { name: "Delayed", value: 18.46, icon: Img3, color: "#F50057" },
-    { name: "Finished", value: 70.93, icon: Img1, color: "#3f53b5" },
-  ];
+  // Transform project status data for pie chart
+  const pieChartData = projectStatusResponse?.data
+    ? transformToPieChartData(projectStatusResponse.data)
+    : [
+        { name: "Ongoing", value: 0, icon: Img2, color: "#FFE000" },
+        { name: "Delayed", value: 0, icon: Img3, color: "#F50057" },
+        { name: "Finished", value: 0, icon: Img1, color: "#3f53b5" },
+      ];
 
   return (
     <Stack className="pt-5 gap-3 px-2">
@@ -80,7 +88,7 @@ const DashboardPage = () => {
         </Stack>
 
         <Stack className="max-[950px]:w-full items-start gap-3">
-          <ProjectStatusPieChart data={data} title="Project Status" />
+          <ProjectStatusPieChart data={pieChartData} title="Project Status" />
           <RecentActivities className="w-full" />
         </Stack>
       </Flex>

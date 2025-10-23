@@ -10,11 +10,22 @@ import { Flex } from "@/components/ui/flex";
 import { useMediaQuery } from "usehooks-ts";
 import { useMemo, type FC } from "react";
 import { cn } from "@/lib/utils";
+import {
+  useFetchOngoingTasks,
+  transformOngoingTaskData,
+} from "@/hooks/useFetchOngoingTasks";
 
 export const OngoingTasks: FC<BoxProps> = ({ className, ...props }) => {
   const is1154 = useMediaQuery("(max-width: 1154px)");
   const is950 = useMediaQuery("(max-width: 950px)");
   const { state, isMobile } = useSidebar();
+
+  // Fetch ongoing tasks data
+  const {
+    data: ongoingTasksResponse,
+    isLoading,
+    error,
+  } = useFetchOngoingTasks();
 
   const carouselMaxWidth = useMemo(() => {
     const sidebarWidth = state === "collapsed" ? 82 : 136;
@@ -25,6 +36,70 @@ export const OngoingTasks: FC<BoxProps> = ({ className, ...props }) => {
 
     return `calc(65vw - ${sidebarWidth}px)`;
   }, [isMobile, is950, is1154, state]);
+
+  // Transform ongoing tasks data for the carousel
+  const ongoingTasks = ongoingTasksResponse?.data || [];
+  const transformedTasks = ongoingTasks.map(transformOngoingTaskData);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <ComponentWrapper
+        className={cn("p-5 rounded-lg overflow-hidden", className)}
+        {...props}
+      >
+        <Stack className="gap-5 items-center">
+          <Flex className="justify-start mr-auto">
+            <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
+            <h1 className="text-lg font-medium">Ongoing Tasks</h1>
+          </Flex>
+          <div className="flex items-center justify-center h-32">
+            <div className="text-gray-500">Loading ongoing tasks...</div>
+          </div>
+        </Stack>
+      </ComponentWrapper>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <ComponentWrapper
+        className={cn("p-5 rounded-lg overflow-hidden", className)}
+        {...props}
+      >
+        <Stack className="gap-5 items-center">
+          <Flex className="justify-start mr-auto">
+            <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
+            <h1 className="text-lg font-medium">Ongoing Tasks</h1>
+          </Flex>
+          <div className="flex items-center justify-center h-32">
+            <div className="text-red-500">Failed to load ongoing tasks</div>
+          </div>
+        </Stack>
+      </ComponentWrapper>
+    );
+  }
+
+  // Show empty state
+  if (transformedTasks.length === 0) {
+    return (
+      <ComponentWrapper
+        className={cn("p-5 rounded-lg overflow-hidden", className)}
+        {...props}
+      >
+        <Stack className="gap-5 items-center">
+          <Flex className="justify-start mr-auto">
+            <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
+            <h1 className="text-lg font-medium">Ongoing Tasks</h1>
+          </Flex>
+          <div className="flex items-center justify-center h-32">
+            <div className="text-gray-500">No ongoing tasks found</div>
+          </div>
+        </Stack>
+      </ComponentWrapper>
+    );
+  }
 
   return (
     <ComponentWrapper
@@ -42,16 +117,15 @@ export const OngoingTasks: FC<BoxProps> = ({ className, ...props }) => {
           style={{ maxWidth: carouselMaxWidth }}
           carouselClassName="relative max-w-[45vw]"
           options={{ align: "start", dragFree: true }}
-          slides={Array.from({ length: 4 }).map(() => (
+          slides={transformedTasks.map((task, index) => (
             <OngoingTaskCard
-              taskName="Site Foundation WorkSite Foundation Work"
+              key={index}
+              taskName={task.taskName}
               className="md:basis-1/1 lg:basis-1/1 min-w-[17.5rem]"
-              createdAt="Jan,02 2002"
-              createdBy="mike wangi"
-              assignees={Array.from({ length: 3 }).map(() => ({
-                src: "https://github.com/shadcn.png",
-                userName: "jhon doe",
-              }))}
+              createdAt={task.createdAt}
+              createdBy={task.createdBy}
+              assignees={task.assignees}
+              progress={task.progress}
             />
           ))}
         >

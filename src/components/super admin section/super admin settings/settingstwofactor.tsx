@@ -106,6 +106,7 @@ export const SettingsTwoFactor = () => {
         onVerifyOTP={handleVerifyOTP}
         onResendOTP={handleResendOTP}
         onDisable2FA={handleDisable2FA}
+        onClose={() => {}} // Empty function for super admin
         userEmail={userData?.user?.email || ""}
       />
     </Flex>

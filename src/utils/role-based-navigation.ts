@@ -4,7 +4,7 @@ import { IoSettingsOutline } from "react-icons/io5";
 import { LuWandSparkles } from "react-icons/lu";
 import { TbInvoice, TbReportSearch } from "react-icons/tb";
 import { LuUsers } from "react-icons/lu";
-import { SquareKanban, UserPen } from "lucide-react";
+import { SquareKanban, UserPen, Clock } from "lucide-react";
 import { GroupIcon, TaskManagementIcon } from "@/components/customeIcons";
 import { MessageCircleQuestion } from "lucide-react";
 import type { NavItem } from "@/components/admin/appsidebar";
@@ -64,6 +64,11 @@ const operatorNavItems: NavItem[] = [
     icon: React.createElement(TaskManagementIcon),
   },
   {
+    url: "/dashboard/time-tracking",
+    title: "Time Tracking",
+    icon: React.createElement(Clock),
+  },
+  {
     url: "/dashboard/support",
     title: "Support Tickets",
     icon: React.createElement(MessageCircleQuestion),
@@ -107,6 +112,11 @@ const userNavItems: NavItem[] = [
     url: "/dashboard/calender",
     title: "Calender",
     icon: React.createElement(IoCalendarOutline),
+  },
+  {
+    url: "/dashboard/time-tracking",
+    title: "Time Tracking",
+    icon: React.createElement(Clock),
   },
   {
     url: "/dashboard/ai-assist",
@@ -174,6 +184,7 @@ const subAdminNavItems: NavItem[] = [
     title: "Calender",
     icon: React.createElement(IoCalendarOutline),
   },
+
   {
     url: "/dashboard/ai-assist",
     title: "AI Assistance",
@@ -193,6 +204,11 @@ const subAdminNavItems: NavItem[] = [
     url: "/dashboard/subscription",
     title: "My Subscriptions",
     icon: React.createElement(TbInvoice),
+  },
+  {
+    url: "/dashboard/time-tracking",
+    title: "Time Tracking",
+    icon: React.createElement(Clock),
   },
   {
     url: "/dashboard/support",
@@ -238,6 +254,11 @@ const superAdminNavItems: NavItem[] = [
     url: "/dashboard/calender",
     title: "Calender",
     icon: React.createElement(IoCalendarOutline),
+  },
+  {
+    url: "/dashboard/time-tracking",
+    title: "Time Tracking",
+    icon: React.createElement(Clock),
   },
   {
     url: "/dashboard/ai-assist",

@@ -1,36 +1,40 @@
 import { useRef, useState } from "react";
 import { Box } from "@/components/ui/box";
 import { Flex } from "@/components/ui/flex";
-import { EventModal } from "./calendareventmodal";
-import { useGeneralModalDisclosure } from "../common/generalmodal";
-import { getStartOfWeek, getWeekDates, CustomEvent } from "./calendarUtils";
 import {
-  useFetchCalendarEvents,
+  useFetchViewerCalendarEvents,
   CalendarEvent,
-} from "@/hooks/usefetchcalendarevents";
-import { useCreateCalendarEvent } from "@/hooks/usecreatecalendarevent";
-import { useUpdateCalendarEvent } from "@/hooks/useupdatecalendarevent";
-import { useDeleteCalendarEvent } from "@/hooks/usedeletecalendarevent";
-import { EventDetailsPopup } from "./eventdetailspopup";
-import { CalendarHeader } from "./CalendarHeader";
-import { CalendarSidebar } from "./CalendarSidebar";
-import { DayView } from "./DayView";
-import { WeekView } from "./WeekView";
-import { MonthView } from "./MonthView";
+} from "@/hooks/useViewerCalendar";
+import { useCreateViewerCalendarEvent } from "@/hooks/useViewerCalendar";
+import { useUpdateViewerCalendarEvent } from "@/hooks/useViewerCalendar";
+import { useDeleteViewerCalendarEvent } from "@/hooks/useViewerCalendar";
 import { useTimezone } from "@/hooks/useTimezone";
+import {
+  getStartOfWeek,
+  getWeekDates,
+  CalendarEvent as CustomEvent,
+} from "@/components/custom calender/calendarUtils";
+import { useGeneralModalDisclosure } from "@/components/common/generalmodal";
+import { CalendarSidebar } from "@/components/custom calender/CalendarSidebar";
+import { CalendarHeader } from "@/components/custom calender/CalendarHeader";
+import { WeekView } from "@/components/custom calender/WeekView";
+import { EventModal } from "@/components/custom calender/calendareventmodal";
+import { EventDetailsPopup } from "@/components/custom calender/eventdetailspopup";
+import { DayView } from "@/components/custom calender/DayView";
+import { MonthView } from "@/components/custom calender/MonthView";
 
 const hours = Array.from({ length: 24 }, (_, i) => i + 1); // 1-24 (24 hours) to match Google Calendar
 
-export const CustomCalendarHeader = () => {
+export const ViewerCustomCalendarHeader = () => {
   const [currentWeek, setCurrentWeek] = useState(getStartOfWeek(new Date()));
 
   // Timezone hook - automatically detects and updates user timezone
   useTimezone();
 
-  // API hooks
-  const createEventMutation = useCreateCalendarEvent();
-  const updateEventMutation = useUpdateCalendarEvent();
-  const deleteEventMutation = useDeleteCalendarEvent();
+  // API hooks - using viewer-specific endpoints
+  const createEventMutation = useCreateViewerCalendarEvent();
+  const updateEventMutation = useUpdateViewerCalendarEvent();
+  const deleteEventMutation = useDeleteViewerCalendarEvent();
 
   // Calculate date range for the current week
   const startOfWeek = getStartOfWeek(currentWeek);
@@ -38,8 +42,8 @@ export const CustomCalendarHeader = () => {
   endOfWeek.setDate(endOfWeek.getDate() + 6);
   endOfWeek.setHours(23, 59, 59, 999);
 
-  // Fetch events for the current week
-  const { data: eventsResponse } = useFetchCalendarEvents({
+  // Fetch events for the current week using viewer API
+  const { data: eventsResponse } = useFetchViewerCalendarEvents({
     startDate: startOfWeek.toISOString(),
     endDate: endOfWeek.toISOString(),
   });
@@ -57,7 +61,7 @@ export const CustomCalendarHeader = () => {
     // Convert to ISO string for comparison
     const weekStartISO = weekStart.toISOString();
 
-    console.log("🔍 Event Debug:", {
+    console.log("🔍 Viewer Event Debug:", {
       title: event.title,
       originalDate: event.date,
       eventDate: eventDate.toISOString(),
@@ -71,10 +75,9 @@ export const CustomCalendarHeader = () => {
       ...event,
       day: eventDate.getDay(),
       weekStart: weekStartISO,
-      calendarType:
-        event.calendarType === "work" ? "education" : event.calendarType,
     };
   });
+
   const [miniCalRange, setMiniCalRange] = useState<{ from?: Date }>({});
   const [viewMode, setViewMode] = useState<"day" | "week" | "month">("week");
   const [selectedEvent, setSelectedEvent] = useState<CustomEvent | null>(null);
@@ -136,11 +139,12 @@ export const CustomCalendarHeader = () => {
     }
     setCurrentWeek(next);
   };
+
   // Filter events based on view mode
   const weekKey = getStartOfWeek(currentWeek).toISOString();
   const weekEvents = events.filter((e: any) => e.weekStart === weekKey);
 
-  console.log("🔍 Week Filter Debug:", {
+  console.log("🔍 Viewer Week Filter Debug:", {
     currentWeek: currentWeek.toISOString(),
     currentWeekLocal: currentWeek.toLocaleDateString(),
     weekKey,
@@ -193,10 +197,10 @@ export const CustomCalendarHeader = () => {
               setEditEvent(null);
               newEventModalProps.onOpenChange(true);
             }}
-            miniCalRange={miniCalRange}
-            setMiniCalRange={setMiniCalRange}
-            allMeetings={allMeetings}
             navigateToMeetingWeek={navigateToMeetingWeek}
+            setMiniCalRange={setMiniCalRange}
+            miniCalRange={miniCalRange}
+            allMeetings={allMeetings}
           />
 
           {/* Main Calendar Area */}
@@ -296,21 +300,11 @@ export const CustomCalendarHeader = () => {
             date: newEvent.date,
             startHour: newEvent.startHour,
             endHour: newEvent.endHour,
-            calendarType: newEvent.calendarType as
-              | "education"
-              | "personal"
-              | "meeting",
-            platform:
-              newEvent.platform === "google_meet"
-                ? "google_meet"
-                : (newEvent.platform as
-                    | "google_meet"
-                    | "whatsapp"
-                    | "outlook"
-                    | "none"),
+            calendarType: newEvent.calendarType,
+            platform: newEvent.platform || "none",
             meetLink: newEvent.meetLink,
             whatsappNumber: newEvent.whatsappNumber,
-            outlookEvent: newEvent.outlookEvent?.toString(),
+            outlookEvent: newEvent.outlookEvent,
           });
           newEventModalProps.onOpenChange(false);
         }}
@@ -353,7 +347,7 @@ export const CustomCalendarHeader = () => {
         modalProps={editEventModalProps}
         eventToEdit={editEvent}
         onSave={(updatedEvent: CustomEvent) => {
-          console.log("🎯 EVENT MODAL SAVE TRIGGERED");
+          console.log("🎯 VIEWER EVENT MODAL SAVE TRIGGERED");
           console.log("Edit event:", editEvent);
           console.log("Updated event data:", updatedEvent);
 
@@ -370,21 +364,11 @@ export const CustomCalendarHeader = () => {
                 date: updatedEvent.date,
                 startHour: updatedEvent.startHour,
                 endHour: updatedEvent.endHour,
-                calendarType: updatedEvent.calendarType as
-                  | "education"
-                  | "personal"
-                  | "meeting",
-                platform:
-                  updatedEvent.platform === "google_meet"
-                    ? "google_meet"
-                    : (updatedEvent.platform as
-                        | "google_meet"
-                        | "whatsapp"
-                        | "outlook"
-                        | "none"),
+                calendarType: updatedEvent.calendarType,
+                platform: updatedEvent.platform || "none",
                 meetLink: updatedEvent.meetLink,
                 whatsappNumber: updatedEvent.whatsappNumber,
-                outlookEvent: updatedEvent.outlookEvent?.toString(),
+                outlookEvent: updatedEvent.outlookEvent,
               },
             });
           } else {

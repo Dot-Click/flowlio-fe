@@ -42,6 +42,7 @@ const AiAssistPage = lazy(() =>
 );
 const SettingsPage = lazy(() => import("./pages/settings.page"));
 const DashboardPage = lazy(() => import("./pages/dashboard.page"));
+const TimeTrackingPage = lazy(() => import("./pages/timetracking.page"));
 const NotFound = lazy(() =>
   import("./pages/notfound.page").then((module) => ({
     default: module.NotFound,
@@ -151,6 +152,12 @@ const ViewermyTasksPage = lazy(() =>
 const ViewerSupportsPage = lazy(() => import("./pages/viewersupports.page"));
 const ViewerProjectDetailsPage = lazy(
   () => import("./pages/viewerprojectdetails.page")
+);
+const ViewerCalendarPage = lazy(() => import("./pages/viewercalendar.page"));
+const ViewerAiAssistantPage = lazy(() =>
+  import("./pages/aiassist.page").then((module) => ({
+    default: module.AiAssistPage,
+  }))
 );
 const ClientManagementPage = lazy(
   () => import("./pages/clientmanagement.page")
@@ -275,6 +282,10 @@ const AppRoutes = () => {
           element={<LazyWrapper component={SettingsPage} />}
           path="settings"
         />
+        <Route
+          element={<LazyWrapper component={TimeTrackingPage} />}
+          path="time-tracking"
+        />
         <Route element={<LazyWrapper component={UserLayout} />} path="user" />
         <Route
           element={<LazyWrapper component={AddUserMembersPage} />}
@@ -384,6 +395,14 @@ const AppRoutes = () => {
         <Route
           path="my-tasks"
           element={<LazyWrapper component={ViewermyTasksPage} />}
+        />
+        <Route
+          path="calendar"
+          element={<LazyWrapper component={ViewerCalendarPage} />}
+        />
+        <Route
+          path="ai-assistant"
+          element={<LazyWrapper component={ViewerAiAssistantPage} />}
         />
         <Route
           path="viewer-support"

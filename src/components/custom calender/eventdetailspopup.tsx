@@ -7,7 +7,7 @@ import { CopyCheck, Trash2, X } from "lucide-react";
 import GoogleMeetIcon from "/dashboard/google-meet.svg";
 import WhatsappIcon from "/dashboard/whatsapp-icon.svg";
 import OutlookIcon from "/dashboard/google-drive.svg";
-import { CustomEvent, formatHour } from "./calendarUtils";
+import { CalendarEvent as CustomEvent, formatHour } from "./calendarUtils";
 import { cn } from "@/lib/utils";
 
 export const EventDetailsPopup = ({
@@ -44,7 +44,7 @@ export const EventDetailsPopup = ({
   };
   const handleCopyEvent = async () => {
     if (event.outlookEvent) {
-      await navigator.clipboard.writeText(event.outlookEvent);
+      await navigator.clipboard.writeText(event.outlookEvent.toString());
       setCopiedEvent(true);
       setTimeout(() => setCopiedEvent(false), 1200);
     }
@@ -70,10 +70,12 @@ export const EventDetailsPopup = ({
             <span
               className={cn(
                 "w-3 h-3 rounded-full",
-                event.calendarType === "work"
+                event.calendarType === "education"
                   ? "bg-[#6ee7b7]"
-                  : event.calendarType === "education"
+                  : event.calendarType === "meeting"
                   ? "bg-[#818cf8]"
+                  : event.calendarType === "personal"
+                  ? "bg-[#f472b6]"
                   : "bg-[#f472b6]"
               )}
             ></span>

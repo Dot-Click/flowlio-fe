@@ -20,6 +20,7 @@ interface OngoingTaskCardProps extends BoxProps {
   createdAt: string | undefined;
   createdBy: string;
   taskName: string;
+  progress?: number;
 }
 
 export const OngoingTaskCard: FC<OngoingTaskCardProps> = ({
@@ -28,6 +29,7 @@ export const OngoingTaskCard: FC<OngoingTaskCardProps> = ({
   createdBy,
   className,
   taskName,
+  progress = 0,
   ...props
 }) => {
   return (
@@ -86,10 +88,10 @@ export const OngoingTaskCard: FC<OngoingTaskCardProps> = ({
           </Flex>
         </Flex>
 
-        <Progress value={22} className="w-full min-h-0.5 mt-6" />
+        <Progress value={progress} className="w-full min-h-0.5 mt-6" />
         <Flex className="justify-between mb-2">
           <h5 className="text-gray-500 text-sm">Progress</h5>
-          <p className="text-sm">65%</p>
+          <p className="text-sm">{progress}%</p>
         </Flex>
       </Box>
     </Link>

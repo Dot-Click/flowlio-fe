@@ -425,6 +425,7 @@ export const ViewerSettingsHeader = () => {
               onVerifyOTP={handleVerifyOTP}
               onResendOTP={handleResendOTP}
               onDisable2FA={handleDisable2FA}
+              onClose={() => {}} // Empty function for viewer
               userEmail={userData?.user?.email || ""}
             />
           </Stack>

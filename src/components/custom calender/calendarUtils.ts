@@ -1,6 +1,6 @@
 // Shared types and utilities for custom calendar components
 
-export type CustomEvent = {
+export type CalendarEvent = {
   id?: string; // Optional for new events, required for existing events
   title: string;
   description?: string;
@@ -9,8 +9,8 @@ export type CustomEvent = {
   startHour: number;
   endHour: number;
   weekStart?: string; // Calculated field for UI
-  calendarType: "work" | "education" | "personal";
-  platform?: "google_meet" | "whatsapp" | "outlook" | "none";
+  calendarType: "education" | "personal" | "meeting";
+  platform?: "google_meet" | "whatsapp" | "outlook" | "zoom" | "none";
   meetLink?: string;
   whatsappNumber?: string;
   outlookEvent?: string;
@@ -20,7 +20,10 @@ export type CustomEvent = {
   updatedAt?: string;
 };
 
-export const initialEvents: CustomEvent[] = [];
+// Alias for backward compatibility
+export type CustomEvent = CalendarEvent;
+
+export const initialEvents: CalendarEvent[] = [];
 
 export function formatHour(hour: number) {
   // Handle hours 1-24 (Google Calendar format)
@@ -57,5 +60,6 @@ export const platformColors = {
   google_meet: { bg: "#E6F4D6", text: "#92AB74" },
   whatsapp: { bg: "#E8EBFF", text: "#6D7EF3" },
   outlook: { bg: "#FFF4EB", text: "#F39F5A" },
+  zoom: { bg: "#E6F4D6", text: "#92AB74" },
   none: { bg: "#f0f0f0", text: "#323334" },
 };

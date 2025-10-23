@@ -24,6 +24,7 @@ import {
 } from "@/hooks/useBetterAuthTwoFA";
 import { useQueryClient } from "@tanstack/react-query";
 import { axios } from "@/configs/axios.config";
+import { authClient } from "@/lib/auth-client";
 
 const settingsSchema = z
   .object({
@@ -127,6 +128,16 @@ export const SettingsHeader = () => {
   // Get 2FA status from user data
   const is2FAEnabled = userData?.user?.twoFactorEnabled || false;
 
+  // Local state for immediate 2FA status updates
+  const [local2FAStatus, setLocal2FAStatus] = useState<boolean>(is2FAEnabled);
+
+  // Update local state when user data changes
+  useEffect(() => {
+    if (userData?.user?.twoFactorEnabled !== undefined) {
+      setLocal2FAStatus(userData.user.twoFactorEnabled || false);
+    }
+  }, [userData?.user?.twoFactorEnabled]);
+
   const form = useForm<z.infer<typeof settingsSchema>>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
@@ -155,6 +166,13 @@ export const SettingsHeader = () => {
   // Update form with user data when available
   useEffect(() => {
     if (userData?.user) {
+      console.log("🔄 Updating form with user data:", {
+        name: userData.user.name,
+        email: userData.user.email,
+        phone: userData.user.phone,
+        address: userData.user.address,
+      });
+
       setValue("fullName", userData.user.name || "");
       setValue("email", userData.user.email || "");
       setValue("phone", userData.user.phone || "");
@@ -186,6 +204,9 @@ export const SettingsHeader = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // 2FA modal state
+  const [showTwoFAModal, setShowTwoFAModal] = useState(false);
+
   async function onSubmit(values: z.infer<typeof settingsSchema>) {
     try {
       // Update profile image if a new one was selected
@@ -194,17 +215,52 @@ export const SettingsHeader = () => {
         toast.success("Profile image updated successfully!");
       }
 
+      // Note: Password changes are now handled separately via the dedicated password change button
+
       // Update profile information (name, email, phone, address)
-      await updateProfileMutation.mutateAsync({
+      const profileData = {
         name: values.fullName,
         email: values.email,
-        phone: values.phone,
-        address: values.address,
+        phone: values.phone && values.phone.trim() !== "" ? values.phone : "",
+        address:
+          values.address && values.address.trim() !== "" ? values.address : "",
+      };
+
+      console.log(
+        "🔄 Updating profile with data:",
+        JSON.stringify(profileData, null, 2)
+      );
+      console.log("🔄 Profile data types:", {
+        name: typeof profileData.name,
+        email: typeof profileData.email,
+        phone: typeof profileData.phone,
+        address: typeof profileData.address,
       });
+
+      await updateProfileMutation.mutateAsync(profileData);
+
+      // Password fields are cleared separately in the password change handler
+
+      // Force refetch user data to ensure form is updated
+      console.log("🔄 Profile updated, refetching user data...");
+      await queryClient.invalidateQueries({ queryKey: ["user-profile"] });
 
       toast.success("Profile updated successfully!");
     } catch (error) {
-      console.error("Error updating profile:", error);
+      console.error("❌ Error updating profile:", error);
+      console.error("❌ Error details:", {
+        message: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
+        errorObject: error,
+      });
+
+      // Check if it's an axios error with response data
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as any;
+        console.error("❌ Axios error response:", axiosError.response?.data);
+        console.error("❌ Axios error status:", axiosError.response?.status);
+      }
+
       toast.error("Failed to update profile. Please try again.");
     }
   }
@@ -278,6 +334,10 @@ export const SettingsHeader = () => {
       await verifyOTPMutation.mutateAsync({ otp });
       // After successful OTP verification, enable 2FA by updating the database
       await enable2FAMutation.mutateAsync();
+
+      // Immediately update local state for instant UI feedback
+      setLocal2FAStatus(true);
+
       // Refresh user data to reflect the new 2FA status
       queryClient.invalidateQueries({ queryKey: ["user-profile"] });
       queryClient.invalidateQueries({ queryKey: ["user"] });
@@ -301,6 +361,10 @@ export const SettingsHeader = () => {
   const handleDisable2FA = async (password: string) => {
     try {
       await disable2FAMutation.mutateAsync({ password });
+
+      // Immediately update local state for instant UI feedback
+      setLocal2FAStatus(false);
+
       // Refresh user data to reflect the new 2FA status
       queryClient.invalidateQueries({ queryKey: ["user-profile"] });
       queryClient.invalidateQueries({ queryKey: ["user"] });
@@ -425,6 +489,94 @@ export const SettingsHeader = () => {
       toast.error(
         "Failed to update project activity preferences. Please try again."
       );
+    }
+  };
+
+  // Password strength calculation
+  const getPasswordStrength = (password: string): number => {
+    if (!password) return 0;
+
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+    return Math.min(strength, 4);
+  };
+
+  const getPasswordStrengthText = (password: string): string => {
+    const strength = getPasswordStrength(password);
+    switch (strength) {
+      case 0:
+      case 1:
+        return "Very weak";
+      case 2:
+        return "Weak";
+      case 3:
+        return "Good";
+      case 4:
+        return "Strong";
+      default:
+        return "";
+    }
+  };
+
+  // Separate password change handler
+  const handlePasswordChange = async () => {
+    const currentPassword = watch("currentpassword");
+    const newPassword = watch("newpassword");
+    const confirmPassword = watch("confirmpassword");
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error("Please fill in all password fields");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error("New passwords do not match");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast.error("Password must be at least 8 characters long");
+      return;
+    }
+
+    try {
+      console.log("🔐 Changing password...");
+
+      const { error } = await authClient.changePassword({
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+        revokeOtherSessions: true, // Log out from all other devices for security
+      });
+
+      if (error) {
+        console.error("❌ Password change error:", error);
+        toast.error(
+          (error as any)?.message ||
+            "Failed to change password. Please check your current password."
+        );
+        return;
+      }
+
+      console.log("✅ Password changed successfully");
+      toast.success(
+        "Password changed successfully! You will be logged out from other devices for security."
+      );
+
+      // Clear password fields
+      setValue("currentpassword", "");
+      setValue("newpassword", "");
+      setValue("confirmpassword", "");
+
+      // Refresh user data
+      await queryClient.invalidateQueries({ queryKey: ["user-profile"] });
+    } catch (passwordError) {
+      console.error("❌ Password change failed:", passwordError);
+      toast.error("Failed to change password. Please try again.");
     }
   };
 
@@ -561,27 +713,42 @@ export const SettingsHeader = () => {
             </Flex>
           </Stack>
 
+          {/* Security Settings Section */}
           <Stack className="w-full bg-white border-1 border-gray-200 p-8 rounded-xl max-md:px-3">
             <h1 className="text-2xl font-semibold">Security Settings</h1>
 
             <Box className=" bg-[#f6fcfe] border border-white mt-4 min-h-6 w-3xl p-4 rounded-md max-md:w-full max-md:text-xs">
               <p className="text-sm text-gray-600">
-                <strong>Profile Updates:</strong> You can update your name and
-                email without entering a password.
+                <strong>Profile Updates:</strong> You can update your name,
+                phone, and address without entering a password.
                 <br />
                 <strong>Password Changes:</strong> Password changes require
                 additional verification for security.
               </p>
             </Box>
+          </Stack>
 
-            {/* Password Change Section - Optional */}
+          {/* Dedicated Password Change Section */}
+          <Stack className="w-full bg-white border-1 border-gray-200 p-8 rounded-xl max-md:px-3">
+            <h1 className="text-2xl font-semibold">Password Security</h1>
+
+            <Box className="bg-yellow-50 border border-yellow-200 mt-4 min-h-6 w-3xl p-4 rounded-md max-md:w-full max-md:text-xs">
+              <p className="text-sm text-yellow-800">
+                <strong>🔒 Security Notice:</strong> Password changes will log
+                you out of all other devices for security.
+                <br />
+                <strong>💡 Tip:</strong> Use a strong password with at least 8
+                characters, including numbers and symbols.
+              </p>
+            </Box>
+
             <Box className="mt-8">
               <h2 className="text-lg font-medium text-gray-700 mb-4">
                 Change Password
               </h2>
               <p className="text-sm text-gray-500 mb-6">
-                Leave password fields empty if you don't want to change your
-                password.
+                Update your password to keep your account secure. All fields are
+                required for password changes.
               </p>
 
               <Stack className="gap-6 w-3xl max-md:w-full">
@@ -666,6 +833,48 @@ export const SettingsHeader = () => {
                     {errors.confirmpassword.message as string}
                   </span>
                 )}
+
+                {/* Password Strength Indicator */}
+                {watch("newpassword") && (
+                  <Box className="mt-2">
+                    <div className="text-xs text-gray-600 mb-2">
+                      Password Strength:
+                    </div>
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4].map((level) => (
+                        <div
+                          key={level}
+                          className={`h-1 flex-1 rounded ${
+                            getPasswordStrength(watch("newpassword") ?? "") >=
+                            level
+                              ? "bg-green-500"
+                              : "bg-gray-200"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {getPasswordStrengthText(watch("newpassword") ?? "")}
+                    </p>
+                  </Box>
+                )}
+
+                {/* Separate Password Change Button */}
+                <Flex className="justify-end mt-6">
+                  <Button
+                    type="button"
+                    className="bg-red-600 text-white rounded-full px-8 py-3 hover:bg-red-700 disabled:opacity-50 cursor-pointer"
+                    onClick={handlePasswordChange}
+                    disabled={
+                      !watch("currentpassword") ||
+                      !watch("newpassword") ||
+                      !watch("confirmpassword") ||
+                      watch("newpassword") !== watch("confirmpassword")
+                    }
+                  >
+                    🔒 Change Password
+                  </Button>
+                </Flex>
               </Stack>
             </Box>
 
@@ -721,15 +930,46 @@ export const SettingsHeader = () => {
                   />
                 </Flex>
 
-                {/* 2FA Section */}
-                <TwoFAModal
-                  isEnabled={is2FAEnabled}
-                  onToggle={handleToggle2FA}
-                  onVerifyOTP={handleVerifyOTP}
-                  onResendOTP={handleResendOTP}
-                  onDisable2FA={handleDisable2FA}
-                  userEmail={userData?.user?.email || ""}
-                />
+                {/* Two-Factor Authentication Section */}
+                <Flex className="items-center justify-between w-full py-4 border-t border-gray-200">
+                  <div className="flex-1">
+                    <h3 className="text-sm font-medium text-gray-700 mb-1">
+                      Two-Factor Authentication
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      {local2FAStatus
+                        ? "Your account is protected with two-factor authentication"
+                        : "Add an extra layer of security to your account"}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    className={`rounded-full px-4 py-2 cursor-pointer transition-all duration-200 font-medium ${
+                      local2FAStatus
+                        ? "bg-red-100 text-red-700 hover:bg-red-200 border border-red-300"
+                        : "bg-green-100 text-green-700 hover:bg-green-200 border border-green-300"
+                    }`}
+                    onClick={() => setShowTwoFAModal(true)}
+                  >
+                    {local2FAStatus ? "Disable 2FA" : "Enable 2FA"}
+                  </Button>
+                </Flex>
+
+                {/* 2FA Modal */}
+                {showTwoFAModal && (
+                  <TwoFAModal
+                    isEnabled={local2FAStatus}
+                    onToggle={async (enabled, password) => {
+                      await handleToggle2FA(enabled, password);
+                      // Don't close modal here - let the modal handle its own closing
+                    }}
+                    onVerifyOTP={handleVerifyOTP}
+                    onResendOTP={handleResendOTP}
+                    onDisable2FA={handleDisable2FA}
+                    onClose={() => setShowTwoFAModal(false)}
+                    userEmail={userData?.user?.email || ""}
+                  />
+                )}
               </Stack>
             </Box>
           </Stack>

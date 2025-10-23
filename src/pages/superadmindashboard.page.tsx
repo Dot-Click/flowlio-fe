@@ -51,28 +51,28 @@ const SuperAdminDashboardPage = () => {
 
   const stats: Stat[] = [
     {
-      link: "/superadmin",
+      link: "/superadmin/companies",
       title: "Total Companies",
       description: "Companies currently on platform",
       icon: img1,
       count: String(totalCompanies),
     },
     {
-      link: "/superadmin",
+      link: "/superadmin", // No specific projects route, stays on dashboard
       title: "Total Projects",
       description: "All projects created by companies",
       icon: img2,
       count: String(totalProjects),
     },
     {
-      link: "/superadmin",
+      link: "/superadmin/subscriptions",
       title: "Active Subscriptions",
       description: "Companies on active paid plans",
       icon: img3,
       count: String(activeSubscriptions),
     },
     {
-      link: "/superadmin",
+      link: "/superadmin", // No specific invoices route, stays on dashboard
       title: "Total Invoices",
       description: "Invoices created via platform",
       icon: img4,

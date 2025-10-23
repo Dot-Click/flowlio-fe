@@ -1,5 +1,4 @@
-import { useState } from "react";
-import React from "react";
+import { useState, useEffect } from "react";
 import {
   Select,
   SelectTrigger,
@@ -7,35 +6,108 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Play } from "lucide-react";
+import { Play, Square } from "lucide-react";
 import { Center } from "./ui/center";
 import { Flex } from "./ui/flex";
 import { Stack } from "./ui/stack";
 import { Box } from "./ui/box";
+import { toast } from "sonner";
+import { useFetchProjects } from "@/hooks/usefetchprojects";
+import { useFetchTasks } from "@/hooks/usefetchtasks";
+import {
+  useActiveTimeEntries,
+  useStartTask,
+  useEndTask,
+} from "@/hooks/useTimeTracking";
 
 export default function TimeModal() {
-  const [timer, setTimer] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
-  const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
   const [open, setOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<string>("");
+  const [selectedTask, setSelectedTask] = useState<string>("");
+  const [selectedActivityType, setSelectedActivityType] = useState<string>("");
 
-  // Simple timer logic
-  const handleStart = () => {
-    if (!isRunning) {
-      setIsRunning(true);
-      const id = setInterval(() => {
-        setTimer((prev) => prev + 1);
-      }, 1000);
-      setIntervalId(id);
+  // Fetch data for regular users
+  const { data: projects } = useFetchProjects();
+  const { data: tasks } = useFetchTasks();
+  const { data: activeTimeEntries } = useActiveTimeEntries();
+
+  // Mutations for time tracking
+  const startTaskMutation = useStartTask();
+  const endTaskMutation = useEndTask();
+
+  // Get current active time entry
+  const activeTimeEntry = activeTimeEntries?.data?.[0];
+  const isTracking = !!activeTimeEntry;
+
+  // Debug logging
+  console.log("🔍 TimeModal Debug:", {
+    activeTimeEntries: activeTimeEntries?.data,
+    activeTimeEntry,
+    isTracking,
+  });
+
+  // Calculate elapsed time for active tracking
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  useEffect(() => {
+    console.log("⏰ Timer Effect:", { activeTimeEntry, isTracking });
+
+    if (activeTimeEntry && isTracking) {
+      const startTime = new Date(activeTimeEntry.startTime);
+      console.log("⏰ Start Time:", startTime);
+
+      const updateElapsed = () => {
+        const now = new Date();
+        const elapsed = Math.floor(
+          (now.getTime() - startTime.getTime()) / 1000
+        );
+        console.log("⏰ Elapsed:", elapsed, "seconds");
+        setElapsedTime(elapsed);
+      };
+
+      updateElapsed();
+      const interval = setInterval(updateElapsed, 1000);
+      return () => clearInterval(interval);
+    } else {
+      console.log("⏰ No active tracking, resetting timer");
+      setElapsedTime(0);
+    }
+  }, [activeTimeEntry, isTracking]);
+
+  // Filter tasks based on selected project
+  const filteredTasks =
+    tasks?.data?.filter((task) => task.projectId === selectedProject) || [];
+
+  // Handle starting time tracking
+  const handleStart = async () => {
+    if (!selectedTask) {
+      toast.error("Please select a task to track");
+      return;
+    }
+
+    if (isTracking) {
+      toast.error("You are already tracking a task");
+      return;
+    }
+
+    try {
+      await startTaskMutation.mutateAsync(selectedTask);
+    } catch (error) {
+      console.error("Failed to start task:", error);
     }
   };
 
-  // Pause timer logic
-  const handlePause = () => {
-    if (isRunning && intervalId) {
-      setIsRunning(false);
-      clearInterval(intervalId);
-      setIntervalId(null);
+  // Handle stopping time tracking
+  const handleStop = async () => {
+    if (!activeTimeEntry) {
+      toast.error("No active time tracking found");
+      return;
+    }
+
+    try {
+      await endTaskMutation.mutateAsync(activeTimeEntry.taskId);
+    } catch (error) {
+      console.error("Failed to stop task:", error);
     }
   };
 
@@ -47,12 +119,12 @@ export default function TimeModal() {
     return `${h}:${m}:${s}`;
   };
 
-  // Cleanup interval on unmount
-  React.useEffect(() => {
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [intervalId]);
+  // Reset task selection when project changes
+  useEffect(() => {
+    if (selectedProject) {
+      setSelectedTask("");
+    }
+  }, [selectedProject]);
 
   return (
     <>
@@ -77,32 +149,74 @@ export default function TimeModal() {
               x
             </button>
             <form className="flex flex-col gap-6 h-full bg-[#F5F5F5] rounded-2xl p-6">
+              {/* Show active tracking info if tracking */}
+              {isTracking && activeTimeEntry && (
+                <Box className="bg-green-100 border border-green-300 rounded-lg p-4">
+                  <Stack className="gap-2">
+                    <h3 className="font-semibold text-green-800">
+                      Currently Tracking:
+                    </h3>
+                    <p className="text-green-700">
+                      <strong>Task:</strong> {activeTimeEntry.taskTitle}
+                    </p>
+                    <p className="text-green-700">
+                      <strong>Project:</strong> {activeTimeEntry.projectName}
+                    </p>
+                    <p className="text-green-700">
+                      <strong>Started:</strong>{" "}
+                      {new Date(activeTimeEntry.startTime).toLocaleTimeString()}
+                    </p>
+                  </Stack>
+                </Box>
+              )}
+
               <Flex className="flex-row max-sm:flex-col gap-2 w-full justify-between">
                 <Stack className="flex-1 max-sm:w-full gap-2">
                   <label className="font-medium">
                     Project<span className="text-red-500">*</span>
                   </label>
-                  <Select>
+                  <Select
+                    value={selectedProject}
+                    onValueChange={setSelectedProject}
+                    disabled={isTracking}
+                  >
                     <SelectTrigger className="rounded-full h-14 w-full py-6 border-none">
-                      Select User
+                      {selectedProject
+                        ? projects?.data?.find((p) => p.id === selectedProject)
+                            ?.projectName || "Select Project"
+                        : "Select Project"}
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="user1">User 1</SelectItem>
-                      <SelectItem value="user2">User 2</SelectItem>
+                      {projects?.data?.map((project) => (
+                        <SelectItem key={project.id} value={project.id}>
+                          {project.projectName} ({project.projectNumber})
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </Stack>
+
                 <Stack className="flex-1 max-sm:w-full gap-2">
                   <label className="font-medium">
                     Task<span className="text-red-500">*</span>
                   </label>
-                  <Select>
+                  <Select
+                    value={selectedTask}
+                    onValueChange={setSelectedTask}
+                    disabled={isTracking || !selectedProject}
+                  >
                     <SelectTrigger className="rounded-full h-14 w-full py-6 border-none">
-                      Select User
+                      {selectedTask
+                        ? filteredTasks.find((t) => t.id === selectedTask)
+                            ?.title || "Select Task"
+                        : "Select Task"}
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="user1">User 1</SelectItem>
-                      <SelectItem value="user2">User 2</SelectItem>
+                      {filteredTasks.map((task) => (
+                        <SelectItem key={task.id} value={task.id}>
+                          {task.title}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </Stack>
@@ -111,47 +225,77 @@ export default function TimeModal() {
                   <label className="font-medium">
                     Activity Type<span className="text-red-500">*</span>
                   </label>
-                  <Select>
+                  <Select
+                    value={selectedActivityType}
+                    onValueChange={setSelectedActivityType}
+                    disabled={isTracking}
+                  >
                     <SelectTrigger className="rounded-full h-14 w-full py-6 border-none">
-                      Agenda
+                      {selectedActivityType === "meeting"
+                        ? "Meeting"
+                        : selectedActivityType === "agenda"
+                        ? "Agenda"
+                        : "Select Activity Type"}
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="agenda">Agenda</SelectItem>
                       <SelectItem value="meeting">Meeting</SelectItem>
+                      <SelectItem value="agenda">Agenda</SelectItem>
                     </SelectContent>
                   </Select>
                 </Stack>
               </Flex>
-              <Flex className="items-center justify-end max-sm:flex-col gap-4 mt-4">
-                <span className="text-2xl font-mono font-bold">
-                  {formatTime(timer)}
-                </span>
-                <Button
-                  type="button"
-                  className="cursor-pointer rounded-full px-6 py-4 h-14 text-lg max-sm:text-sm bg-yellow-500 hover:bg-yellow-600"
-                  onClick={handlePause}
-                  disabled={!isRunning}
-                >
-                  Pause
-                </Button>
-                <Button
-                  type="button"
-                  className="cursor-pointer rounded-full px-8 py-4 max-sm:px-4 max-sm:py-2 h-14 text-lg bg-[#47C363] hover:bg-[#47C363]/80"
-                  onClick={handleStart}
-                  disabled={isRunning}
-                >
-                  <span className="flex items-center gap-2">
-                    <Center
-                      className="w-5 h-5 rounded-full border-2 border-white flex-shrink-0"
-                      style={{
-                        background: isRunning ? "#22c55e" : "transparent",
-                      }}
-                    >
-                      <Play className="size-3 fill-white" />
-                    </Center>
-                    Start
-                  </span>
-                </Button>
+              <Flex className="items-center justify-between max-sm:flex-col gap-4 mt-4">
+                {/* Timer Display */}
+                <Box className="flex-1">
+                  <Stack className="gap-2">
+                    <label className="font-medium text-gray-700">
+                      {isTracking ? "Elapsed Time" : "Timer"}
+                    </label>
+                    <Box className="bg-white border-2 border-gray-200 rounded-lg p-4 text-center">
+                      <span className="text-3xl font-mono font-bold text-blue-600">
+                        {formatTime(elapsedTime)}
+                      </span>
+                      {isTracking && (
+                        <p className="text-sm text-gray-500 mt-1">
+                          Tracking in progress...
+                        </p>
+                      )}
+                    </Box>
+                  </Stack>
+                </Box>
+
+                {isTracking ? (
+                  <Button
+                    type="button"
+                    className="cursor-pointer rounded-full px-6 py-4 h-14 text-lg max-sm:text-sm bg-red-500 hover:bg-red-600"
+                    onClick={handleStop}
+                    disabled={endTaskMutation.isPending}
+                  >
+                    <span className="flex items-center gap-2">
+                      <Square className="size-4 fill-white" />
+                      {endTaskMutation.isPending ? "Stopping..." : "Stop"}
+                    </span>
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    className="cursor-pointer rounded-full px-8 py-4 max-sm:px-4 max-sm:py-2 h-14 text-lg bg-[#47C363] hover:bg-[#47C363]/80"
+                    onClick={handleStart}
+                    disabled={!selectedTask || startTaskMutation.isPending}
+                  >
+                    <span className="flex items-center gap-2">
+                      <Center
+                        className="w-5 h-5 rounded-full border-2 border-white flex-shrink-0"
+                        style={{
+                          background: isTracking ? "#22c55e" : "transparent",
+                        }}
+                      >
+                        <Play className="size-3 fill-white" />
+                      </Center>
+                      {startTaskMutation.isPending ? "Starting..." : "Start"}
+                    </span>
+                  </Button>
+                )}
               </Flex>
             </form>
           </Box>

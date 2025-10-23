@@ -25,7 +25,7 @@ interface CalendarSidebarProps {
 }
 
 const MyCalendars = [
-  { name: "Work", image: WhatsAppCheckBoxIcon },
+  { name: "Meeting", image: WhatsAppCheckBoxIcon },
   { name: "Education", image: EducationCheckBoxIcon },
   { name: "Personal", image: PersolCheckBoxIcon },
 ];

@@ -31,6 +31,7 @@ interface TwoFAModalProps {
   onVerifyOTP: (otp: string) => Promise<void>;
   onResendOTP: () => Promise<void>;
   onDisable2FA: (password: string) => Promise<void>;
+  onClose: () => void;
   userEmail: string;
 }
 
@@ -40,12 +41,14 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
   onVerifyOTP,
   onResendOTP,
   onDisable2FA,
+  onClose,
   userEmail,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showOTPForm, setShowOTPForm] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [showEnablePasswordForm, setShowEnablePasswordForm] = useState(false);
+  const [showSuccessState, setShowSuccessState] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const [canResend, setCanResend] = useState(false);
 
@@ -126,9 +129,17 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
     try {
       await onVerifyOTP(values.otp);
       toast.success("2FA enabled successfully!");
-      setShowOTPForm(false);
-      modalProps.onOpenChange(false);
-      form.reset();
+
+      // Show success state
+      setShowSuccessState(true);
+
+      // Close modal after showing success
+      setTimeout(() => {
+        setShowOTPForm(false);
+        setShowSuccessState(false);
+        onClose(); // Use the callback to close the modal
+        form.reset();
+      }, 2000); // Wait 2 seconds to show success
     } catch (error) {
       console.error("OTP verification failed:", error);
       toast.error("Invalid OTP. Please try again.");
@@ -172,7 +183,7 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
       await onDisable2FA(values.password);
       toast.success("2FA disabled successfully!");
       setShowPasswordForm(false);
-      modalProps.onOpenChange(false);
+      onClose();
       passwordForm.reset();
     } catch (error) {
       console.error("Failed to disable 2FA:", error);
@@ -297,7 +308,7 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
                   variant="outline"
                   onClick={() => {
                     setShowOTPForm(false);
-                    modalProps.onOpenChange(false);
+                    onClose();
                     form.reset();
                   }}
                   disabled={isLoading}
@@ -362,7 +373,7 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
                   className="flex-1"
                   onClick={() => {
                     setShowEnablePasswordForm(false);
-                    modalProps.onOpenChange(false);
+                    onClose();
                     enablePasswordForm.reset();
                   }}
                 >
@@ -377,6 +388,24 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
                 </Button>
               </Flex>
             </form>
+          </Box>
+        ) : showSuccessState ? (
+          // Success State
+          <Box className="space-y-6">
+            <Stack className="gap-4 text-center">
+              <Center className="mx-auto w-16 h-16 bg-green-100 rounded-full">
+                <CheckCircle className="w-8 h-8 text-green-600" />
+              </Center>
+              <Stack className="gap-2">
+                <h2 className="text-xl font-bold text-gray-900">Success!</h2>
+                <p className="text-gray-600">
+                  Two-factor authentication has been enabled successfully.
+                </p>
+                <p className="text-sm text-gray-500">
+                  Your account is now protected with an extra layer of security.
+                </p>
+              </Stack>
+            </Stack>
           </Box>
         ) : showPasswordForm ? (
           // Password Verification Form for Disabling 2FA
@@ -422,7 +451,7 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
                   variant="outline"
                   onClick={() => {
                     setShowPasswordForm(false);
-                    modalProps.onOpenChange(false);
+                    onClose();
                     passwordForm.reset();
                   }}
                   disabled={isLoading}
@@ -467,7 +496,7 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => modalProps.onOpenChange(false)}
+                onClick={() => onClose()}
                 className="flex-1"
               >
                 Close

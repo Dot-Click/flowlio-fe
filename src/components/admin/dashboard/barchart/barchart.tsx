@@ -8,22 +8,12 @@ import { CalendarPopOver } from "./calendarpopover";
 import { Box, type BoxProps } from "@/components/ui/box";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
 import { ComponentWrapper } from "@/components/common/componentwrapper";
-
-const chartData = [
-  { project: "Project A", Completed: 16, "In-Progress": 18, Delayed: 20 },
-  { project: "Project B", Completed: 25, "In-Progress": 10, Delayed: 50 },
-  { project: "Project C", Completed: 23, "In-Progress": 10, Delayed: 30 },
-  { project: "Project D", Completed: 13, "In-Progress": 10, Delayed: 30 },
-  { project: "Project E", Completed: 60, "In-Progress": 30, Delayed: 10 },
-  { project: "Project F", Completed: 14, "In-Progress": 40, Delayed: 14 },
-  { project: "Project G", Completed: 22, "In-Progress": 20, Delayed: 22 },
-  { project: "Project H", Completed: 21, "In-Progress": 10, Delayed: 12 },
-  { project: "Project I", Completed: 11, "In-Progress": 30, Delayed: 2 },
-  { project: "Project J", Completed: 22, "In-Progress": 20, Delayed: 21 },
-  { project: "Project K", Completed: 33, "In-Progress": 20, Delayed: 18 },
-  { project: "Project L", Completed: 44, "In-Progress": 10, Delayed: 8 },
-  { project: "Project O", Completed: 23, "In-Progress": 30, Delayed: 21 },
-];
+import {
+  useFetchProjectScheduleData,
+  transformToChartData,
+} from "@/hooks/useFetchProjectScheduleData";
+import { useState } from "react";
+import { addDays } from "date-fns";
 
 const CustomTooltip = ({
   active,
@@ -50,6 +40,102 @@ const CustomTooltip = ({
 };
 
 export const BarChartComponent: FC<BoxProps> = ({ className, ...props }) => {
+  // Initialize with default date range (last 30 days)
+  const [dateRange, setDateRange] = useState<{ from: Date; to: Date } | null>({
+    from: addDays(new Date(), -30),
+    to: new Date(),
+  });
+
+  const {
+    data: projectScheduleResponse,
+    isLoading,
+    error,
+  } = useFetchProjectScheduleData();
+
+  // Transform API data to chart format with frontend filtering
+  const chartData = projectScheduleResponse?.data
+    ? transformToChartData(projectScheduleResponse.data, dateRange || undefined)
+    : [];
+
+  const handleDateRangeChange = (
+    newDateRange: { from: Date; to: Date } | null
+  ) => {
+    console.log("📅 Date range changed:", newDateRange);
+    setDateRange(newDateRange);
+  };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <ComponentWrapper className={cn("p-4 relative", className)} {...props}>
+        <Stack className="gap-5">
+          <Flex className="max-lg:flex-col items-center justify-between">
+            <Flex className="justify-between max-md:justify-start max-lg:w-full">
+              <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
+              <h1 className="text-lg font-medium">Project Schedule Overview</h1>
+            </Flex>
+            <ChartGuides className="gap-4 pt-1 max-md:mr-auto" />
+            <CalendarPopOver
+              onDateRangeChange={handleDateRangeChange}
+              initialDateRange={dateRange || undefined}
+            />
+          </Flex>
+        </Stack>
+        <Box className="flex items-center justify-center h-[21.8rem]">
+          <p className="text-gray-500">Loading project data...</p>
+        </Box>
+      </ComponentWrapper>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <ComponentWrapper className={cn("p-4 relative", className)} {...props}>
+        <Stack className="gap-5">
+          <Flex className="max-lg:flex-col items-center justify-between">
+            <Flex className="justify-between max-md:justify-start max-lg:w-full">
+              <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
+              <h1 className="text-lg font-medium">Project Schedule Overview</h1>
+            </Flex>
+            <ChartGuides className="gap-4 pt-1 max-md:mr-auto" />
+            <CalendarPopOver
+              onDateRangeChange={handleDateRangeChange}
+              initialDateRange={dateRange || undefined}
+            />
+          </Flex>
+        </Stack>
+        <Box className="flex items-center justify-center h-[21.8rem]">
+          <p className="text-red-500">Failed to load project data</p>
+        </Box>
+      </ComponentWrapper>
+    );
+  }
+
+  // Show empty state
+  if (chartData.length === 0) {
+    return (
+      <ComponentWrapper className={cn("p-4 relative", className)} {...props}>
+        <Stack className="gap-5">
+          <Flex className="max-lg:flex-col items-center justify-between">
+            <Flex className="justify-between max-md:justify-start max-lg:w-full">
+              <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
+              <h1 className="text-lg font-medium">Project Schedule Overview</h1>
+            </Flex>
+            <ChartGuides className="gap-4 pt-1 max-md:mr-auto" />
+            <CalendarPopOver
+              onDateRangeChange={handleDateRangeChange}
+              initialDateRange={dateRange || undefined}
+            />
+          </Flex>
+        </Stack>
+        <Box className="flex items-center justify-center h-[21.8rem]">
+          <p className="text-gray-500">No project data available</p>
+        </Box>
+      </ComponentWrapper>
+    );
+  }
+
   return (
     <ComponentWrapper className={cn("p-4 relative", className)} {...props}>
       <Stack className="gap-5">

@@ -4,7 +4,12 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import type { CSSProperties } from "react";
 import { Box } from "@/components/ui/box";
 import { Outlet } from "react-router";
-import { MessageCircleQuestion, SquareKanban } from "lucide-react";
+import {
+  MessageCircleQuestion,
+  SquareKanban,
+  Bot,
+  Calendar,
+} from "lucide-react";
 import { GroupIcon, TaskManagementIcon } from "@/components/customeIcons";
 import { IoSettingsOutline } from "react-icons/io5";
 
@@ -25,11 +30,20 @@ export const navItems: NavItem[] = [
     icon: <TaskManagementIcon />,
   },
   {
+    url: "/viewer/calendar",
+    title: "Calendar",
+    icon: <Calendar />,
+  },
+  {
+    url: "/viewer/ai-assistant",
+    title: "AI Assistant",
+    icon: <Bot />,
+  },
+  {
     url: "/viewer/viewer-support",
     title: "Support",
     icon: <MessageCircleQuestion />,
   },
-
   {
     url: "/viewer/viewer-settings",
     title: "Settings",

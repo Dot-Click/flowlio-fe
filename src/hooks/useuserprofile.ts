@@ -9,6 +9,8 @@ interface UserProfile {
   id: string;
   name: string;
   email: string;
+  phone: string | null;
+  address: string | null;
   emailVerified: boolean;
   twoFactorEnabled: boolean;
   image: string | null;
@@ -23,6 +25,15 @@ interface UserProfile {
     name: string;
     slug: string;
   } | null;
+  notificationPreferences?: {
+    paymentAlerts: boolean;
+    invoiceReminders: boolean;
+    projectActivityUpdates: boolean;
+    emailNotifications: boolean;
+    pushNotifications: boolean;
+    smsNotifications: boolean;
+    [key: string]: any;
+  };
 }
 
 export const useUserProfile = (options?: { enabled?: boolean }) => {

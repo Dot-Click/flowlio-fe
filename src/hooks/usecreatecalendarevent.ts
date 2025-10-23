@@ -8,8 +8,8 @@ export interface CreateCalendarEventRequest {
   date: string; // ISO date string
   startHour: number;
   endHour: number;
-  calendarType: "work" | "education" | "personal";
-  platform?: "google_meet" | "whatsapp" | "outlook" | "none";
+  calendarType: "education" | "personal" | "meeting";
+  platform?: "google_meet" | "whatsapp" | "outlook" | "zoom" | "none";
   meetLink?: string;
   whatsappNumber?: string;
   outlookEvent?: string;
@@ -25,8 +25,8 @@ export interface CreateCalendarEventResponse {
     date: string;
     startHour: number;
     endHour: number;
-    calendarType: "work" | "education" | "personal";
-    platform: "google_meet" | "whatsapp" | "outlook" | "none";
+    calendarType: "education" | "personal" | "meeting";
+    platform: "google_meet" | "whatsapp" | "outlook" | "zoom" | "none";
     meetLink?: string;
     whatsappNumber?: string;
     outlookEvent?: string;

@@ -1,12 +1,12 @@
 import { create } from "zustand";
-import { CustomEvent } from "@/components/custom calender/calendarUtils";
+import { CalendarEvent } from "@/components/custom calender/calendarUtils";
 
 interface CalendarEventsState {
-  events: CustomEvent[];
-  setEvents: (events: CustomEvent[]) => void;
-  addEvent: (event: CustomEvent) => void;
-  updateEvent: (event: CustomEvent) => void;
-  deleteEvent: (event: CustomEvent) => void;
+  events: CalendarEvent[];
+  setEvents: (events: CalendarEvent[]) => void;
+  addEvent: (event: CalendarEvent) => void;
+  updateEvent: (event: CalendarEvent) => void;
+  deleteEvent: (event: CalendarEvent) => void;
 }
 
 export const useCalendarEventsStore = create<CalendarEventsState>((set) => ({
