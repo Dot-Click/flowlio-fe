@@ -24,8 +24,8 @@ import {
   TooltipContent,
   TooltipProvider,
 } from "../ui/tooltip";
-import { ComponentProps, FC, type ReactElement } from "react";
-import { ChevronRight, LogOut } from "lucide-react";
+import { ComponentProps, FC, type ReactElement, useState } from "react";
+import { ChevronRight, LogOut, Loader } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { useMediaQuery } from "usehooks-ts";
 import { Button } from "../ui/button";
@@ -68,9 +68,11 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
     try {
+      setIsLoggingOut(true);
       // Clear React Query cache first
       queryClient.removeQueries({ queryKey: ["user-profile"] });
       queryClient.removeQueries({ queryKey: ["get-current-org-user-members"] });
@@ -101,6 +103,8 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
 
       // Force redirect even if logout fails
       navigate("/auth/signin", { replace: true });
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -365,18 +369,32 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
         <Button
           className="bg-transparent text-black hover:bg-red-50 cursor-pointer border-none flex items-start justify-start gap-2 shadow-none"
           onClick={handleLogout}
+          disabled={isLoggingOut}
+          aria-busy={isLoggingOut}
         >
+          {state === "collapsed" && <LogOut className="size-4" />}
           <Flex className="gap-2">
-            <LogOut
-              color="red"
-              className={state === "collapsed" ? "m-auto size-4" : "size-4"}
-            />
             <span
               className={`${
                 state === "collapsed" ? "hidden" : undefined
               } text-red-400`}
             >
-              Logout
+              {isLoggingOut ? (
+                <Center>
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  Logging out...
+                </Center>
+              ) : (
+                <Flex className="items-center gap-2">
+                  <LogOut
+                    color="red"
+                    className={
+                      state === "collapsed" ? "m-auto size-4" : "size-4"
+                    }
+                  />
+                  <span className="text-sm">Logout</span>
+                </Flex>
+              )}
             </span>
           </Flex>
         </Button>

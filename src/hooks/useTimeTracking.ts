@@ -21,11 +21,20 @@ export const useActiveTimeEntries = () => {
   return useQuery<ActiveTimeEntriesResponse>({
     queryKey: ["active-time-entries"],
     queryFn: async () => {
-      const response = await axios.get("/tasks/active-time");
-      return response.data;
+      try {
+        const response = await axios.get("/tasks/active-time");
+        return response.data;
+      } catch (error: any) {
+        // Fallback for viewer routes (some environments mount under /viewer)
+        if (error?.response?.status === 404) {
+          const fallback = await axios.get("/viewer/tasks/active-time");
+          return fallback.data;
+        }
+        throw error;
+      }
     },
-    refetchInterval: 30000, // Refetch every 30 seconds to update timer
-    staleTime: 0, // Always consider data stale to get real-time updates
+    refetchInterval: 5000, // Refresh more frequently for responsiveness
+    staleTime: 0,
   });
 };
 
@@ -66,6 +75,7 @@ export const useStartTask = () => {
       // Invalidate tasks and time entries to refresh the data
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["active-time-entries"] });
+      queryClient.invalidateQueries({ queryKey: ["all-time-entries"] });
       queryClient.invalidateQueries({
         queryKey: ["organization-weekly-hours-tracked"],
       });
@@ -94,6 +104,7 @@ export const useEndTask = () => {
       // Invalidate tasks and time entries to refresh the data
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["active-time-entries"] });
+      queryClient.invalidateQueries({ queryKey: ["all-time-entries"] });
       queryClient.invalidateQueries({
         queryKey: ["organization-weekly-hours-tracked"],
       });
@@ -108,6 +119,42 @@ export const useEndTask = () => {
       console.error("Error ending task:", error);
       const errorMessage =
         error.response?.data?.message || "Failed to end task";
+      toast.error(errorMessage);
+    },
+  });
+};
+
+export const useDeleteTimeEntry = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (entryId: string) => {
+      try {
+        const response = await axios.delete(`/tasks/time-entries/${entryId}`);
+        return response.data;
+      } catch (error: any) {
+        // Fallback for viewer routes
+        if (error?.response?.status === 404) {
+          const fallback = await axios.delete(
+            `/viewer/tasks/time-entries/${entryId}`
+          );
+          return fallback.data;
+        }
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["all-time-entries"] });
+      queryClient.invalidateQueries({ queryKey: ["active-time-entries"] });
+      queryClient.invalidateQueries({
+        queryKey: ["organization-weekly-hours-tracked"],
+      });
+      toast.success("Time entry deleted successfully");
+    },
+    onError: (error: any) => {
+      console.error("Error deleting time entry:", error);
+      const errorMessage =
+        error.response?.data?.message || "Failed to delete time entry";
       toast.error(errorMessage);
     },
   });

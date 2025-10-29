@@ -11,6 +11,7 @@ import {
   Settings,
   SquareKanban,
   User,
+  FlaskConical,
 } from "lucide-react";
 import { useUser } from "@/providers/user.provider";
 
@@ -34,6 +35,11 @@ export const navItems: NavItem[] = [
     title: "Subscriptions",
     url: "/superadmin/subscriptions",
     icon: <BadgeCent />,
+  },
+  {
+    title: "Demo Accounts",
+    url: "/superadmin/demo-accounts",
+    icon: <FlaskConical />,
   },
   {
     title: "Support Tickets",
@@ -65,6 +71,8 @@ export const SuperAdminLayout = () => {
     }
     return true;
   });
+
+  document.title = "Super Admin - Flowlio";
 
   return (
     <Box className="bg-gradient-to-l from-indigo-50 via-slate-50 to-indigo-50 border-[2px] rounded-none border-white p-1 min-h-screen">

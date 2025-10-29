@@ -110,6 +110,9 @@ const SuperAdminLayout = lazy(() =>
 const SuperAdminDashboardPage = lazy(
   () => import("./pages/superadmindashboard.page")
 );
+const SuperAdminDemoAccountsPage = lazy(
+  () => import("./pages/superadmindemoaccounts.page")
+);
 const SuperAdminCompaniesPage = lazy(
   () => import("./pages/superadmincompanies.page")
 );
@@ -365,6 +368,10 @@ const AppRoutes = () => {
           element={<LazyWrapper component={SuperAdminSettingsPage} />}
         />
         <Route
+          path="demo-accounts"
+          element={<LazyWrapper component={SuperAdminDemoAccountsPage} />}
+        />
+        <Route
           index
           element={<LazyWrapper component={SuperAdminDashboardPage} />}
         />
@@ -411,6 +418,10 @@ const AppRoutes = () => {
         <Route
           path="viewer-settings"
           element={<LazyWrapper component={ViewerSettingsPage} />}
+        />
+        <Route
+          path="time-tracking"
+          element={<LazyWrapper component={TimeTrackingPage} />}
         />
         <Route path="*" element={<LazyWrapper component={NotFound} />} />
       </Route>

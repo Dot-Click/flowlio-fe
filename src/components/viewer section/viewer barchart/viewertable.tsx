@@ -8,81 +8,86 @@ import Img from "/viewer/tasklistline.svg";
 import TasklistIcon from "/viewer/tasklisticon.svg";
 import { Flex } from "@/components/ui/flex";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useFetchViewerTasks, ViewerTask } from "@/hooks/useFetchViewerTasks";
+import { useActiveTimeEntries } from "@/hooks/useTimeTracking";
+import { useAllTimeEntries } from "@/hooks/useAllTimeEntries";
+import { useMemo } from "react";
+import { Loader2 } from "lucide-react";
 
-const data: Data[] = [
-  {
-    id: "1",
-    trackedon: "on",
-    project: "Marketing Website ",
-    submittedby: "Abe45",
-    taskname: "Mike Wangi",
-    status: "to do",
-  },
-  {
-    id: "2",
-    trackedon: "on",
-    project: "Marketing Website ",
-    submittedby: "Abe45",
-    taskname: "Mike Wangi",
-    status: "in progress",
-  },
-  {
-    id: "3",
-    trackedon: "on",
-    project: "Marketing Website ",
-    submittedby: "Monserrat44",
-    taskname: "Mike Wangi",
-    status: "in progress",
-  },
-  {
-    id: "4",
-    trackedon: "on",
-    project: "Marketing Website ",
-    submittedby: "Silas22",
-    taskname: "Mike Wangi",
-    status: "completed",
-  },
-  {
-    id: "5",
-    trackedon: "on",
-    project: "Marketing Website ",
-    submittedby: "carmella",
-    taskname: "Mike Wangi",
-    status: "completed",
-  },
-  {
-    id: "6",
-    trackedon: "on",
-    project: "Marketing Website ",
-    submittedby: "carmella",
-    taskname: "Mike Wangi",
-    status: "completed",
-  },
-  {
-    id: "7",
-    trackedon: "on",
-    project: "Marketing Website ",
-    submittedby: "carmella",
-    taskname: "Mike Wangi",
-    status: "to do",
-  },
-  {
-    id: "8",
-    trackedon: "on",
-    project: "Marketing Website ",
-    submittedby: "carmella",
-    taskname: "Mike Wangi",
-    status: "in progress",
-  },
-  {
-    id: "9",
-    trackedon: "on",
-    project: "Marketing Website ",
-    submittedby: "carmella",
-    taskname: "Mike Wangi",
-    status: "completed",
-  },
-];
+// const data: Data[] = [
+//   {
+//     id: "1",
+//     trackedon: "on",
+//     project: "Marketing Website ",
+//     submittedby: "Abe45",
+//     taskname: "Mike Wangi",
+//     status: "to do",
+//   },
+//   {
+//     id: "2",
+//     trackedon: "on",
+//     project: "Marketing Website ",
+//     submittedby: "Abe45",
+//     taskname: "Mike Wangi",
+//     status: "in progress",
+//   },
+//   {
+//     id: "3",
+//     trackedon: "on",
+//     project: "Marketing Website ",
+//     submittedby: "Monserrat44",
+//     taskname: "Mike Wangi",
+//     status: "in progress",
+//   },
+//   {
+//     id: "4",
+//     trackedon: "on",
+//     project: "Marketing Website ",
+//     submittedby: "Silas22",
+//     taskname: "Mike Wangi",
+//     status: "completed",
+//   },
+//   {
+//     id: "5",
+//     trackedon: "on",
+//     project: "Marketing Website ",
+//     submittedby: "carmella",
+//     taskname: "Mike Wangi",
+//     status: "completed",
+//   },
+//   {
+//     id: "6",
+//     trackedon: "on",
+//     project: "Marketing Website ",
+//     submittedby: "carmella",
+//     taskname: "Mike Wangi",
+//     status: "completed",
+//   },
+//   {
+//     id: "7",
+//     trackedon: "on",
+//     project: "Marketing Website ",
+//     submittedby: "carmella",
+//     taskname: "Mike Wangi",
+//     status: "to do",
+//   },
+//   {
+//     id: "8",
+//     trackedon: "on",
+//     project: "Marketing Website ",
+//     submittedby: "carmella",
+//     taskname: "Mike Wangi",
+//     status: "in progress",
+//   },
+//   {
+//     id: "9",
+//     trackedon: "on",
+//     project: "Marketing Website ",
+//     submittedby: "carmella",
+//     taskname: "Mike Wangi",
+//     status: "completed",
+//   },
+// ];
 
 export type Data = {
   id: string;
@@ -91,6 +96,7 @@ export type Data = {
   project: string;
   taskname: string;
   status: "in progress" | "completed" | "to do";
+  taskData?: ViewerTask;
 };
 
 export const columns: ColumnDef<Data>[] = [
@@ -116,7 +122,9 @@ export const columns: ColumnDef<Data>[] = [
           onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="Select row"
         />
-        <Box className="text-center">{row.index + 1234}</Box>
+        <Box className="text-center">
+          {row.original.taskData?.projectNumber || row.index + 1234}
+        </Box>
       </Flex>
     ),
     enableSorting: false,
@@ -205,6 +213,67 @@ export const columns: ColumnDef<Data>[] = [
 ];
 
 export const ViewerTable = () => {
+  // Fetch real data
+  const { data: tasksResponse, isLoading: tasksLoading } =
+    useFetchViewerTasks();
+  const { data: activeTimeEntries } = useActiveTimeEntries();
+  const { data: allTimeEntries } = useAllTimeEntries();
+
+  // Map status from API format to table format
+  const mapStatus = (
+    status: ViewerTask["status"]
+  ): "in progress" | "completed" | "to do" => {
+    switch (status) {
+      case "in_progress":
+        return "in progress";
+      case "completed":
+        return "completed";
+      case "todo":
+        return "to do";
+      default:
+        return "to do"; // Default for updated, delay, changes
+    }
+  };
+
+  // Create a set of active task IDs
+  const activeTaskIds = useMemo(() => {
+    return new Set(activeTimeEntries?.data?.map((entry) => entry.taskId) || []);
+  }, [activeTimeEntries]);
+
+  // Create a set of tracked task IDs (any task that has time entries)
+  const trackedTaskIds = useMemo(() => {
+    return new Set(allTimeEntries?.data?.map((entry) => entry.taskId) || []);
+  }, [allTimeEntries]);
+
+  // Transform API data to table data format
+  const tableData: Data[] = useMemo(() => {
+    if (!tasksResponse?.data) return [];
+
+    return tasksResponse.data.map((task) => ({
+      id: task.id,
+      trackedon: activeTaskIds.has(task.id)
+        ? "on"
+        : trackedTaskIds.has(task.id)
+        ? "yes"
+        : "no",
+      submittedby: task.creatorName || "N/A",
+      project: task.projectName || "N/A",
+      taskname: task.title,
+      status: mapStatus(task.status),
+      taskData: task,
+    }));
+  }, [tasksResponse, activeTaskIds, trackedTaskIds]);
+
+  if (tasksLoading) {
+    return (
+      <PageWrapper className="h-full">
+        <Center className="h-64">
+          <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        </Center>
+      </PageWrapper>
+    );
+  }
+
   return (
     <PageWrapper className="h-full">
       <Stack className="gap-0 w-full p-4">
@@ -221,7 +290,7 @@ export const ViewerTable = () => {
       </Stack>
 
       <ReusableTable
-        data={data}
+        data={tableData}
         columns={columns}
         // searchInput={false}
         enablePaymentLinksCalender={false}

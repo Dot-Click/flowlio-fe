@@ -9,6 +9,7 @@ import {
   SquareKanban,
   Bot,
   Calendar,
+  Clock,
 } from "lucide-react";
 import { GroupIcon, TaskManagementIcon } from "@/components/customeIcons";
 import { IoSettingsOutline } from "react-icons/io5";
@@ -35,6 +36,11 @@ export const navItems: NavItem[] = [
     icon: <Calendar />,
   },
   {
+    url: "/viewer/time-tracking",
+    title: "Time Tracking",
+    icon: <Clock />,
+  },
+  {
     url: "/viewer/ai-assistant",
     title: "AI Assistant",
     icon: <Bot />,
@@ -50,6 +56,8 @@ export const navItems: NavItem[] = [
     icon: <IoSettingsOutline />,
   },
 ];
+
+document.title = "Viewer - Flowlio";
 
 export const ViewerLayout = () => {
   return (

@@ -958,6 +958,7 @@ export const SettingsHeader = () => {
                 {/* 2FA Modal */}
                 {showTwoFAModal && (
                   <TwoFAModal
+                    open={showTwoFAModal}
                     isEnabled={local2FAStatus}
                     onToggle={async (enabled, password) => {
                       await handleToggle2FA(enabled, password);

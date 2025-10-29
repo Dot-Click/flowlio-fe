@@ -4,6 +4,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "./components/ui/sonner";
 import { AppRouter } from "./router";
 import { UserProvider } from "./providers/user.provider";
+import { ErrorBoundary } from "./components/common/ErrorBoundary";
 
 const client = new QueryClient();
 
@@ -12,7 +13,9 @@ const App = () => {
     <QueryClientProvider client={client}>
       <UserProvider>
         <NotificationsProvider>
-          <AppRouter />
+          <ErrorBoundary>
+            <AppRouter />
+          </ErrorBoundary>
           <Toaster />
           <ReactQueryDevtools />
         </NotificationsProvider>

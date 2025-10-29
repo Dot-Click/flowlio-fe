@@ -67,7 +67,24 @@ export const ProtectedRoute = ({
           `🚫 Access denied. User role: ${user.role}, Required: ${requiredRole}`
         );
         toast.error(`Access denied. Required role: ${requiredRole}`);
-        navigate(-1); // Go back to previous page
+
+        // Redirect to a safe default page for the current user's role
+        let fallbackPath = "/dashboard";
+        switch (user.role) {
+          case "superadmin":
+            fallbackPath = "/superadmin";
+            break;
+          case "viewer":
+            fallbackPath = "/viewer";
+            break;
+          case "subadmin":
+          case "operator":
+          case "user":
+          default:
+            fallbackPath = "/dashboard";
+            break;
+        }
+        navigate(fallbackPath, { replace: true });
         return;
       }
     }

@@ -9,6 +9,7 @@ import { Stack } from "@/components/ui/stack";
 import { Center } from "@/components/ui/center";
 import { Mail, ArrowLeft, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router";
 
 const otpSchema = z.object({
   otp: z.string().min(6, "OTP must be 6 digits").max(6, "OTP must be 6 digits"),
@@ -75,7 +76,7 @@ export const OTPSignIn: FC<OTPSignInProps> = ({
       form.setValue("otp", value);
     }
   };
-
+  const navigate = useNavigate();
   return (
     <Center className="min-h-screen bg-gray-50 px-4">
       <Box className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
@@ -157,7 +158,7 @@ export const OTPSignIn: FC<OTPSignInProps> = ({
             <Button
               type="button"
               variant="outline"
-              onClick={onBack}
+              onClick={onBack || (() => navigate("/auth/signin"))}
               disabled={isLoading}
               className="w-full h-12"
             >

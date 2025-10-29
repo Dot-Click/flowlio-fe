@@ -27,9 +27,26 @@ export const useAllTimeEntries = () => {
   return useQuery<TimeEntriesResponse>({
     queryKey: ["all-time-entries"],
     queryFn: async () => {
-      const response = await axios.get("/tasks/time-entries");
-      return response.data;
+      try {
+        const response = await axios.get("/tasks/time-entries");
+        return response.data;
+      } catch (error: any) {
+        // Fallback for viewer routes
+        if (error?.response?.status === 404) {
+          try {
+            const fallback = await axios.get("/viewer/tasks/time-entries");
+            return fallback.data;
+          } catch (fallbackError: any) {
+            // If both fail, return empty list gracefully
+            if (fallbackError?.response?.status === 404) {
+              return { success: true, message: "No entries", data: [] };
+            }
+            throw fallbackError;
+          }
+        }
+        throw error;
+      }
     },
-    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchInterval: 15000,
   });
 };

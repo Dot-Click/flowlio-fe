@@ -22,6 +22,7 @@ import { z } from "zod";
 import { Box } from "../ui/box";
 import { toast } from "sonner";
 import { IoEye, IoEyeOff } from "react-icons/io5";
+import { RefreshCw } from "lucide-react";
 import { getRoleBasedRedirectPathAfterLogin } from "@/utils/sessionPersistence.util";
 
 const formSchema = z.object({
@@ -82,9 +83,7 @@ export const SignInForm: FC = () => {
           setIsLoading(true);
         },
         onSuccess: async (ctx) => {
-          setIsLoading(false);
           setError(null);
-
           console.log("Sign-in success context:", ctx);
 
           try {
@@ -93,8 +92,32 @@ export const SignInForm: FC = () => {
 
             // Check if user has 2FA enabled by fetching profile
             const profileResponse = await axios.get("/user/profile");
-            const userProfile = profileResponse.data.data;
 
+            // Check if organization is deactivated or trial expired
+            if (profileResponse.status === 403) {
+              const errorCode = profileResponse.data?.code;
+              if (
+                errorCode === "ORGANIZATION_DEACTIVATED" ||
+                errorCode === "TRIAL_EXPIRED"
+              ) {
+                const errorMessage =
+                  profileResponse.data?.message ||
+                  "Access denied. Please contact the administrator for assistance.";
+                toast.error(errorMessage);
+
+                // Log out the user session that was created
+                try {
+                  await authClient.signOut();
+                } catch (signOutError) {
+                  console.error("Error signing out:", signOutError);
+                }
+
+                setIsLoading(false);
+                return;
+              }
+            }
+
+            const userProfile = profileResponse.data.data;
             console.log("User profile:", userProfile);
 
             // Check if user has 2FA enabled
@@ -105,6 +128,7 @@ export const SignInForm: FC = () => {
 
               // Store email for OTP verification
               sessionStorage.setItem("otpEmail", email);
+              setIsLoading(false);
 
               // Redirect to OTP verification page
               navigate("/auth/signin-otp", { replace: true });
@@ -124,6 +148,31 @@ export const SignInForm: FC = () => {
             navigate(redirectPath, { replace: true });
           } catch (error) {
             console.error("Error fetching user profile:", error);
+
+            // Check if organization is deactivated or trial expired
+            if ((error as any).response?.status === 403) {
+              const errorCode = (error as any).response?.data?.code;
+              const errorMessage =
+                (error as any).response?.data?.message ||
+                "Access denied. Please contact the administrator for assistance.";
+
+              if (
+                errorCode === "ORGANIZATION_DEACTIVATED" ||
+                errorCode === "TRIAL_EXPIRED"
+              ) {
+                toast.error(errorMessage);
+
+                // Log out the user session that was created
+                try {
+                  await authClient.signOut();
+                } catch (signOutError) {
+                  console.error("Error signing out:", signOutError);
+                }
+
+                setIsLoading(false);
+                return;
+              }
+            }
 
             // Check if it's a 401 error (unauthorized) - might indicate 2FA is required
             if ((error as any).response?.status === 401) {
@@ -165,91 +214,103 @@ export const SignInForm: FC = () => {
   };
 
   return (
-    <FormWrapper
-      description="Log In to access your account"
-      logoSource="/logo/logowithtext.png"
-      label="Log In. Take Control"
-    >
-      <Form {...form}>
-        <form
-          className="flex flex-col gap-5"
-          onSubmit={form.handleSubmit(onSubmit)}
-        >
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem className="mt-8">
-                <FormLabel className="font-normal">Email</FormLabel>
-                <FormControl>
-                  <Input
-                    size="lg"
-                    placeholder="Enter email here"
-                    {...field}
-                    className="bg-white rounded-full border border-gray-100 placeholder:text-gray-400 focus:border-gray-400 placeholder:text-sm"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="font-normal">Password</FormLabel>
-                <FormControl>
-                  <Box className="relative">
+    <>
+      <FormWrapper
+        description="Log In to access your account"
+        logoSource="/logo/logowithtext.png"
+        label="Log In. Take Control"
+      >
+        <Form {...form}>
+          <form
+            className="flex flex-col gap-5"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem className="mt-8">
+                  <FormLabel className="font-normal">Email</FormLabel>
+                  <FormControl>
                     <Input
                       size="lg"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter Password"
-                      className="bg-white rounded-full border border-gray-100 placeholder:text-gray-400 focus:border-gray-400 placeholder:text-sm"
+                      placeholder="Enter email here"
                       {...field}
+                      className="bg-white rounded-full border border-gray-100 placeholder:text-gray-400 focus:border-gray-400 placeholder:text-sm"
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
-                    >
-                      {showPassword ? (
-                        <IoEyeOff size={20} />
-                      ) : (
-                        <IoEye size={20} />
-                      )}
-                    </button>
-                  </Box>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-normal">Password</FormLabel>
+                  <FormControl>
+                    <Box className="relative">
+                      <Input
+                        size="lg"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter Password"
+                        className="bg-white rounded-full border border-gray-100 placeholder:text-gray-400 focus:border-gray-400 placeholder:text-sm"
+                        {...field}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+                      >
+                        {showPassword ? (
+                          <IoEyeOff size={20} />
+                        ) : (
+                          <IoEye size={20} />
+                        )}
+                      </button>
+                    </Box>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Flex className="justify-between mb-8 gap-0">
+              <Anchor to="/auth/signup" className="text-sm text-black">
+                Don't have an account?
+              </Anchor>
+              <Anchor
+                to="/auth/verify-email"
+                className="text-sm text-[#F48E2D]"
+              >
+                Forgot Password?
+              </Anchor>
+            </Flex>
+
+            {error && (
+              <Box className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-red-600 text-sm">{error}</p>
+              </Box>
             )}
-          />
 
-          <Flex className="justify-between mb-8 gap-0">
-            <Anchor to="/auth/signup" className="text-sm text-black">
-              Don't have an account?
-            </Anchor>
-            <Anchor to="/auth/verify-email" className="text-sm text-[#F48E2D]">
-              Forgot Password?
-            </Anchor>
-          </Flex>
-
-          {error && (
-            <Box className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-600 text-sm">{error}</p>
-            </Box>
-          )}
-
-          <Button
-            size="xl"
-            disabled={isLoading}
-            className="bg-[#1797B9] text-white rounded-full cursor-pointer hover:bg-[#1797B9]/80 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading ? "Signing In..." : "Sign In"}
-          </Button>
-        </form>
-      </Form>
-    </FormWrapper>
+            <Button
+              size="xl"
+              disabled={isLoading}
+              aria-busy={isLoading}
+              className="bg-[#1797B9] text-white rounded-full cursor-pointer hover:bg-[#1797B9]/80 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <span className="inline-flex items-center">
+                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                </span>
+              ) : (
+                "Sign In"
+              )}
+            </Button>
+          </form>
+        </Form>
+      </FormWrapper>
+    </>
   );
 };

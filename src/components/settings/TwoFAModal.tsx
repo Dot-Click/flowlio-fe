@@ -33,6 +33,7 @@ interface TwoFAModalProps {
   onDisable2FA: (password: string) => Promise<void>;
   onClose: () => void;
   userEmail: string;
+  open: boolean;
 }
 
 export const TwoFAModal: FC<TwoFAModalProps> = ({
@@ -43,6 +44,7 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
   onDisable2FA,
   onClose,
   userEmail,
+  open,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showOTPForm, setShowOTPForm] = useState(false);
@@ -52,7 +54,7 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
   const [countdown, setCountdown] = useState(60);
   const [canResend, setCanResend] = useState(false);
 
-  const modalProps = useGeneralModalDisclosure();
+  const modalProps = useGeneralModalDisclosure({ open });
 
   // Countdown timer for resend functionality
   useEffect(() => {
@@ -84,6 +86,20 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
       setCanResend(false);
     }
   }, [showOTPForm]);
+
+  // Effect to close modal and reset states when modal closes
+  useEffect(() => {
+    if (!open) {
+      // Reset all form states when modal closes
+      setShowOTPForm(false);
+      setShowPasswordForm(false);
+      setShowEnablePasswordForm(false);
+      setShowSuccessState(false);
+      form.reset();
+      enablePasswordForm.reset();
+      passwordForm.reset();
+    }
+  }, [open]);
 
   const form = useForm<z.infer<typeof otpSchema>>({
     resolver: zodResolver(otpSchema),
@@ -243,7 +259,12 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
 
       {/* 2FA Modal */}
       <GeneralModal
-        {...modalProps}
+        open={open}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            onClose();
+          }
+        }}
         contentProps={{
           className: "max-w-md w-[95vw]",
         }}

@@ -74,6 +74,32 @@ export const SignInOTPPage: FC<SignInOTPPageProps> = ({
 
         // Fetch user profile to get role for role-based redirection
         const profileResponse = await axios.get("/user/profile");
+
+        // Check if organization is deactivated or trial expired
+        if (profileResponse.status === 403) {
+          const errorCode = profileResponse.data?.code;
+          if (
+            errorCode === "ORGANIZATION_DEACTIVATED" ||
+            errorCode === "TRIAL_EXPIRED"
+          ) {
+            const errorMessage =
+              profileResponse.data?.message ||
+              "Access denied. Please contact the administrator for assistance.";
+            toast.error(errorMessage);
+
+            // Log out the user session that was created
+            try {
+              const { authClient } = await import("@/providers/user.provider");
+              await authClient.signOut();
+            } catch (signOutError) {
+              console.error("Error signing out:", signOutError);
+            }
+
+            navigate("/auth/signin");
+            return;
+          }
+        }
+
         const userProfile = profileResponse.data.data;
         const userRole = userProfile.role;
 
@@ -86,8 +112,33 @@ export const SignInOTPPage: FC<SignInOTPPageProps> = ({
         // Use window.location.href for a full page reload to ensure auth state is established
         console.log("🔄 Using full page reload for redirection...");
         window.location.href = redirectPath;
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching user profile for redirection:", error);
+
+        // Check if organization is deactivated or trial expired
+        if (error?.response?.status === 403) {
+          const errorCode = error?.response?.data?.code;
+          if (
+            errorCode === "ORGANIZATION_DEACTIVATED" ||
+            errorCode === "TRIAL_EXPIRED"
+          ) {
+            const errorMessage =
+              error?.response?.data?.message ||
+              "Access denied. Please contact the administrator for assistance.";
+            toast.error(errorMessage);
+
+            // Log out the user session that was created
+            try {
+              const { authClient } = await import("@/providers/user.provider");
+              await authClient.signOut();
+            } catch (signOutError) {
+              console.error("Error signing out:", signOutError);
+            }
+
+            navigate("/auth/signin");
+            return;
+          }
+        }
 
         // Fallback to default dashboard if profile fetch fails
         console.log("🎯 Fallback: Redirecting to default dashboard");

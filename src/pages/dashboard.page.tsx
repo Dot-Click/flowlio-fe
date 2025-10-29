@@ -78,6 +78,8 @@ const DashboardPage = () => {
         { name: "Finished", value: 0, icon: Img1, color: "#3f53b5" },
       ];
 
+  document.title = "User Dashboard - Flowlio";
+
   return (
     <Stack className="pt-5 gap-3 px-2">
       <Stats stats={stats} />

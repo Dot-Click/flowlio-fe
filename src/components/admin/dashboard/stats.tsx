@@ -29,7 +29,21 @@ export const Stats: FC<{
   stats: Stat[];
   isSuperAdmin?: boolean;
   isViewer?: boolean;
-}> = ({ classNameDescription, className, stats, isSuperAdmin, isViewer }) => {
+  activeTimeData?: {
+    elapsedTime: string; // formatted time like "1h 30m 45s"
+    elapsedSeconds: number; // for circular progress calculation
+    progressPercentage: number;
+  };
+  totalProductionHours?: number;
+}> = ({
+  classNameDescription,
+  className,
+  stats,
+  isSuperAdmin,
+  isViewer,
+  activeTimeData,
+  totalProductionHours = 0,
+}) => {
   const pathname = useLocation();
   return (
     <Box
@@ -67,13 +81,14 @@ export const Stats: FC<{
                           </p>
                         </Stack>
                         <Box className="bg-black w-38 text-white p-2 rounded-sm text-xs font-light mt-2">
-                          Total Production : 48 hrs
+                          Total Production : {totalProductionHours.toFixed(1)}{" "}
+                          hrs
                         </Box>
                       </Center>
                       <div className="flex flex-col">
                         <CircularProgress
-                          value={70}
-                          time="5:45:32"
+                          value={activeTimeData?.progressPercentage ?? 0}
+                          time={activeTimeData?.elapsedTime ?? "0:00:00"}
                           label="Total Hours"
                         />
                       </div>

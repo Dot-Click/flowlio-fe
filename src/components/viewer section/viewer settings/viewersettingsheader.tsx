@@ -420,6 +420,7 @@ export const ViewerSettingsHeader = () => {
 
             {/* 2FA Section */}
             <TwoFAModal
+              open={false} // Viewer settings doesn't use modal state
               isEnabled={is2FAEnabled}
               onToggle={handleToggle2FA}
               onVerifyOTP={handleVerifyOTP}
