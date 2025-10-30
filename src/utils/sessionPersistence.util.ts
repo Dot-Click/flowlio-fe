@@ -84,30 +84,42 @@ export const getAndClearRedirectFrom = (): string | null => {
  * Get the appropriate redirect path after login based on user role
  * Priority: redirect from ProtectedRoute > last visited page > role-based dashboard
  */
+// Validate whether a path is accessible for a given role
+const isPathAccessibleForRole = (path: string, userRole?: string): boolean => {
+  if (!path) return false;
+  if (path.startsWith("/superadmin")) return userRole === "superadmin";
+  if (path.startsWith("/viewer")) return userRole === "viewer";
+  if (path.startsWith("/dashboard"))
+    return ["user", "subadmin", "operator"].includes(userRole || "");
+  if (path.startsWith("/auth") || path === "/") return true;
+  return false;
+};
+
 export const getRoleBasedRedirectPathAfterLogin = (
-  userRole?: string
+  userRole?: string,
+  validateAccess: boolean = true
 ): string => {
   const redirectFrom = getAndClearRedirectFrom();
-  const lastVisited = getLastVisitedPage();
-
-  // If there's a specific redirect path, use it
   if (redirectFrom) {
-    console.log(
-      "🎯 Redirect path after login (from ProtectedRoute):",
-      redirectFrom
-    );
-    return redirectFrom;
+    if (!validateAccess || isPathAccessibleForRole(redirectFrom, userRole)) {
+      console.log(
+        "🎯 Redirect path after login (from ProtectedRoute):",
+        redirectFrom
+      );
+      return redirectFrom;
+    }
   }
 
-  // If there's a last visited page, use it
+  const lastVisited = getLastVisitedPage();
   if (lastVisited) {
-    console.log("🎯 Redirect path after login (last visited):", lastVisited);
-    return lastVisited;
+    if (!validateAccess || isPathAccessibleForRole(lastVisited, userRole)) {
+      console.log("🎯 Redirect path after login (last visited):", lastVisited);
+      return lastVisited;
+    }
   }
 
   // Default to role-based dashboard
-  let defaultPath = "/dashboard"; // Default for regular users
-
+  let defaultPath = "/dashboard";
   switch (userRole) {
     case "superadmin":
       defaultPath = "/superadmin";
@@ -116,7 +128,8 @@ export const getRoleBasedRedirectPathAfterLogin = (
       defaultPath = "/viewer";
       break;
     case "subadmin":
-      defaultPath = "/dashboard"; // Subadmins use regular dashboard
+    case "operator":
+      defaultPath = "/dashboard";
       break;
     case "user":
     default:

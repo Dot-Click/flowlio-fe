@@ -23,6 +23,7 @@ import {
   useActiveTimeEntries,
 } from "@/hooks/useTimeTracking";
 import { Checkbox } from "@radix-ui/react-checkbox";
+import { useAllTimeEntries } from "@/hooks/useAllTimeEntries";
 
 export type Data = {
   id: string;
@@ -53,12 +54,16 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
   const startTaskMutation = useStartTask();
   const endTaskMutation = useEndTask();
   const { data: activeTimeEntries } = useActiveTimeEntries();
+  const { data: allTimeEntries } = useAllTimeEntries();
   const modalProps = useGeneralModalDisclosure();
   const [selectedTask, setSelectedTask] = useState<Data | null>(null);
+  // removed live ticking: no need for useEffect
 
   // Convert ViewerTask to Data format
   const convertViewerTasksToData = (tasks: ViewerTask[]): Data[] => {
     const activeEntries = activeTimeEntries?.data || [];
+    const entries = allTimeEntries?.data || [];
+    // Team total: sum all users' time for the task
 
     return tasks.map((task) => {
       const activeEntry = activeEntries.find(
@@ -69,17 +74,32 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
       let timeSpent = "0h 0m";
       let startTime: Date | undefined;
 
-      if (activeEntry) {
-        const start = new Date(activeEntry.startTime);
-        const now = new Date();
-        const durationMinutes = Math.floor(
-          (now.getTime() - start.getTime()) / (1000 * 60)
-        );
-        const hours = Math.floor(durationMinutes / 60);
-        const minutes = durationMinutes % 60;
-        timeSpent = `${hours}h ${minutes}m`;
-        startTime = start;
+      // Sum durations from DB for this task (only DB time)
+      let totalSeconds = 0;
+      for (const e of entries) {
+        if (String(e.taskId) === String(task.id)) {
+          if (typeof e.duration === "number") {
+            // Backend provides duration in MINUTES → convert to seconds
+            totalSeconds += Math.max(0, Math.floor(e.duration * 60));
+          } else if (e.endTime && e.startTime) {
+            const end = new Date(e.endTime).getTime();
+            const startMs = new Date(e.startTime).getTime();
+            if (!isNaN(end) && !isNaN(startMs) && end >= startMs) {
+              totalSeconds += Math.floor((end - startMs) / 1000);
+            }
+          }
+        }
       }
+
+      // Do not add live time; only show persisted DB time
+      if (activeEntry) {
+        startTime = new Date(activeEntry.startTime);
+      }
+
+      // Format
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      timeSpent = `${hours}h ${minutes}m`;
 
       return {
         id: task.id,
@@ -195,7 +215,12 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
       accessorKey: "duedate",
       header: () => <Box className="text-black text-center">Due Date</Box>,
       cell: ({ row }) => (
-        <Box className="captialize text-center">{row.original.duedate}</Box>
+        <Box className="captialize text-center">
+          {new Date(row.original.duedate)
+            .toLocaleDateString("en-GB")
+            .split("/")
+            .join("-")}
+        </Box>
       ),
     },
     {

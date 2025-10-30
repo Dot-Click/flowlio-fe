@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { RefreshCw } from "lucide-react";
 import { getRoleBasedRedirectPathAfterLogin } from "@/utils/sessionPersistence.util";
+import { useUser } from "@/providers/user.provider";
 
 const formSchema = z.object({
   password: z
@@ -52,6 +53,7 @@ export const SignInForm: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const { refetchUser } = useUser();
 
   // Check for deactivation message in URL params
   useEffect(() => {
@@ -144,7 +146,8 @@ export const SignInForm: FC = () => {
             );
             console.log("🎯 Redirecting to:", redirectPath);
 
-            // Redirect to the appropriate page
+            // Refresh user context to avoid stale state, then client-side navigate
+            await refetchUser();
             navigate(redirectPath, { replace: true });
           } catch (error) {
             console.error("Error fetching user profile:", error);

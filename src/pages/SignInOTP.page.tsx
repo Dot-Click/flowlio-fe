@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router";
 import { getRoleBasedRedirectPathAfterLogin } from "@/utils/sessionPersistence.util";
 import { axios } from "@/configs/axios.config";
+import { useUser } from "@/providers/user.provider";
 
 interface SignInOTPPageProps {
   email?: string;
@@ -19,6 +20,7 @@ export const SignInOTPPage: FC<SignInOTPPageProps> = ({
   onBack: propOnBack,
 }) => {
   const navigate = useNavigate();
+  const { refetchUser } = useUser();
   const [email, setEmail] = useState<string>("");
   const generateOTPMutation = useGenerateSignInOTP();
   const verifyOTPMutation = useVerifySignInOTP();
@@ -109,9 +111,9 @@ export const SignInOTPPage: FC<SignInOTPPageProps> = ({
         const redirectPath = getRoleBasedRedirectPathAfterLogin(userRole);
         console.log("🎯 Redirecting to:", redirectPath);
 
-        // Use window.location.href for a full page reload to ensure auth state is established
-        console.log("🔄 Using full page reload for redirection...");
-        window.location.href = redirectPath;
+        // Refresh user context, then client-side navigate without reload
+        await refetchUser();
+        navigate(redirectPath, { replace: true });
       } catch (error: any) {
         console.error("Error fetching user profile for redirection:", error);
 
@@ -141,8 +143,11 @@ export const SignInOTPPage: FC<SignInOTPPageProps> = ({
         }
 
         // Fallback to default dashboard if profile fetch fails
-        console.log("🎯 Fallback: Redirecting to default dashboard");
-        window.location.href = "/dashboard";
+        console.log(
+          "🎯 Fallback: Redirecting to default dashboard (client-side)"
+        );
+        await refetchUser();
+        navigate("/dashboard", { replace: true });
       }
     } catch (error) {
       console.error("OTP verification failed:", error);

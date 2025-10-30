@@ -3,14 +3,8 @@ import { Box } from "@/components/ui/box";
 import { Flex } from "@/components/ui/flex";
 import { Center } from "@/components/ui/center";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { ColumnDef } from "@tanstack/react-table";
+import { ReusableTable } from "@/components/reusable/reusabletable";
 import {
   Clock,
   Play,
@@ -28,10 +22,13 @@ import {
 import { useAllTimeEntries } from "@/hooks/useAllTimeEntries";
 import { useFetchProjects } from "@/hooks/usefetchprojects";
 import { useFetchTasks } from "@/hooks/usefetchtasks";
+import { useFetchViewerProjects } from "@/hooks/useFetchViewerProjects";
+import { useFetchViewerTasks } from "@/hooks/useFetchViewerTasks";
+import { useLocation } from "react-router";
 import { useFetchOrganizationWeeklyHoursTracked } from "@/hooks/useFetchOrganizationWeeklyHoursTracked";
 import { formatHours, formatDuration } from "@/utils/timeFormat";
 import { toast } from "sonner";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { format, formatDistanceToNow } from "date-fns";
 import {
   Select,
@@ -83,10 +80,27 @@ const ActiveTableTimer = ({ startTime }: { startTime: string }) => {
 const TimeTrackingPage = () => {
   const [selectedProject, setSelectedProject] = useState<string>("");
   const [selectedTask, setSelectedTask] = useState<string>("");
+  // History filters for custom table
+  // Pending (UI) filter state
+  const [historyProject, setHistoryProject] = useState<string>("all");
+  const [historyTask, setHistoryTask] = useState<string>("all_tasks");
+  const [historyStatus, setHistoryStatus] = useState<
+    "active" | "completed" | "" | "all"
+  >("all");
+  // Applied filter state (used by table)
+  const [appliedProject, setAppliedProject] = useState<string>("all");
+  const [appliedTask, setAppliedTask] = useState<string>("all_tasks");
+  const [appliedStatus, setAppliedStatus] = useState<
+    "active" | "completed" | "" | "all"
+  >("all");
 
   // Fetch data for regular users
-  const { data: projects } = useFetchProjects();
-  const { data: tasks } = useFetchTasks();
+  const { pathname } = useLocation();
+  const isViewer = pathname.startsWith("/viewer");
+  const { data: orgProjects } = useFetchProjects();
+  const { data: orgTasks } = useFetchTasks();
+  const { data: viewerProjects } = useFetchViewerProjects();
+  const { data: viewerTasks } = useFetchViewerTasks();
   const { data: activeTimeEntries } = useActiveTimeEntries();
   const { data: allTimeEntries } = useAllTimeEntries();
   const { data: weeklyHours } = useFetchOrganizationWeeklyHoursTracked();
@@ -140,9 +154,12 @@ const TimeTrackingPage = () => {
     return parts.join(" ");
   };
 
-  // Filter tasks based on selected project
-  const filteredTasks =
-    tasks?.data?.filter((task) => task.projectId === selectedProject) || [];
+  // Build taskOptions (role-aware) before filtering
+  // Filter tasks based on selected project (role-aware)
+  const filteredTasks = useMemo(
+    () => (isViewer ? viewerTasks?.data : orgTasks?.data) || [],
+    [isViewer, viewerTasks?.data, orgTasks?.data]
+  );
 
   // Handle starting time tracking
   const handleStart = async () => {
@@ -203,6 +220,223 @@ const TimeTrackingPage = () => {
       console.error("Failed to restart task:", error);
     }
   };
+
+  // Build options for dependent task filter list
+  // Build project list per role
+  const projectOptions = useMemo(
+    () => (isViewer ? viewerProjects?.data : orgProjects?.data) || [],
+    [isViewer, viewerProjects?.data, orgProjects?.data]
+  );
+
+  // Build task list per role
+  const taskOptions = useMemo(
+    () => (isViewer ? viewerTasks?.data : orgTasks?.data) || [],
+    [isViewer, viewerTasks?.data, orgTasks?.data]
+  );
+
+  const historyTasksOptions = useMemo(() => taskOptions, [taskOptions]);
+
+  type EntryRow = (
+    typeof allTimeEntries extends { data: infer A } ? A : any
+  ) extends Array<infer R>
+    ? R
+    : any;
+
+  const columns: ColumnDef<EntryRow>[] = useMemo(
+    () => [
+      {
+        id: "index",
+        header: () => (
+          <span className="font-semibold px-2 py-2 text-left block">#</span>
+        ),
+        cell: ({ row }) => (
+          <span className="text-sm text-gray-600 px-2 py-2 block">
+            {row.index + 1}
+          </span>
+        ),
+        enableSorting: false,
+      },
+      {
+        accessorKey: "projectName",
+        header: () => (
+          <span className="font-semibold px-2 py-2 text-left block">
+            Project
+          </span>
+        ),
+        cell: ({ row }) => (
+          <span className="font-medium px-2 py-2 text-left block">
+            {row.original.projectName}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "taskTitle",
+        header: () => (
+          <span className="font-semibold px-2 py-2 text-left block">Task</span>
+        ),
+        cell: ({ row }) => (
+          <span className="font-medium px-2 py-2 text-left block">
+            {row.original.taskTitle}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "startTime",
+        header: () => (
+          <span className="font-semibold px-2 py-2 text-left block">
+            Start Time
+          </span>
+        ),
+        cell: ({ row }) => {
+          const d = new Date(row.original.startTime as any);
+          const valid = !isNaN(d.getTime());
+          return (
+            <span className="text-sm text-gray-600 px-2 py-2 block">
+              {valid ? format(d, "PPp") : "-"}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: "endTime",
+        header: () => (
+          <span className="font-semibold px-2 py-2 text-left block">
+            End Time
+          </span>
+        ),
+        cell: ({ row }) => {
+          const endVal = row.original.endTime as any;
+          const d = endVal ? new Date(endVal) : null;
+          const valid = d ? !isNaN(d.getTime()) : false;
+          return (
+            <span className="text-sm text-gray-600 px-2 py-2 block">
+              {valid ? format(d!, "PPp") : "-"}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: "duration",
+        header: () => (
+          <span className="font-semibold px-2 py-2 text-left block">
+            Duration
+          </span>
+        ),
+        cell: ({ row }) =>
+          row.original.status === "active" ? (
+            <Box className="px-2 py-2 block">
+              <ActiveTableTimer startTime={row.original.startTime as any} />
+            </Box>
+          ) : (
+            <span className="font-mono font-semibold text-gray-700 px-2 py-2 block">
+              {formatDuration(
+                typeof row.original.duration === "number"
+                  ? (row.original.duration as any)
+                  : 0
+              )}
+            </span>
+          ),
+      },
+      {
+        id: "filter_status",
+        accessorFn: (row: any) =>
+          row.status === "in_progress" ? "active" : row.status,
+        header: () => null,
+        cell: () => null,
+        enableHiding: true,
+        filterFn: (row, id, value) =>
+          String(row.getValue(id) ?? "") === String(value),
+      },
+      {
+        accessorKey: "status",
+        header: () => (
+          <span className="font-semibold px-2 py-2 text-center block">
+            Status
+          </span>
+        ),
+        cell: ({ row }) => {
+          const normalized =
+            row.original.status === "in_progress"
+              ? "active"
+              : row.original.status;
+          return normalized === "active" ? (
+            <span className="px-2 py-1 mx-auto block bg-green-100 text-green-800 text-xs font-medium rounded-full w-20 text-center capitalize">
+              Active
+            </span>
+          ) : (
+            <span className="px-2 py-1 mx-auto block bg-gray-100 text-gray-800 text-xs font-medium rounded-full w-20 text-center capitalize">
+              Completed
+            </span>
+          );
+        },
+      },
+      {
+        id: "actions",
+        header: () => (
+          <span className="font-semibold px-2 py-2 text-center block">
+            Actions
+          </span>
+        ),
+        cell: ({ row }) => (
+          <Flex className="justify-center gap-2 px-2 py-2">
+            {row.original.status === "completed" && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleRestart(row.original.taskId)}
+                disabled={isTracking || startTaskMutation.isPending}
+                className="h-8 px-2 hover:bg-blue-50 cursor-pointer"
+                title="Restart this task"
+              >
+                <RotateCcw className="h-4 w-4 text-blue-600" />
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDelete(row.original.id)}
+              disabled={deleteEntryMutation.isPending}
+              className="h-8 px-2 hover:bg-red-50 cursor-pointer"
+              title="Delete this entry"
+            >
+              <Trash2 className="h-4 w-4 text-red-600" />
+            </Button>
+          </Flex>
+        ),
+      },
+      {
+        id: "filter_projectId",
+        accessorFn: (row: any) => String(row.projectId ?? ""),
+        header: () => null,
+        cell: () => null,
+        enableHiding: true,
+        filterFn: (row, id, value) =>
+          String(row.getValue(id) ?? "") === String(value),
+      },
+      {
+        id: "filter_taskId",
+        accessorFn: (row: any) => String(row.taskId ?? ""),
+        header: () => null,
+        cell: () => null,
+        enableHiding: true,
+        filterFn: (row, id, value) =>
+          String(row.getValue(id) ?? "") === String(value),
+      },
+    ],
+    [isTracking, startTaskMutation.isPending, deleteEntryMutation.isPending]
+  );
+
+  // Build columnFilters for table (default show all)
+  const tableColumnFilters = useMemo(() => {
+    const filters: { id: string; value: any }[] = [];
+    if (appliedProject !== "all")
+      filters.push({ id: "filter_projectId", value: appliedProject });
+    if (appliedTask !== "all_tasks")
+      filters.push({ id: "filter_taskId", value: appliedTask });
+    if (appliedStatus !== "all" && appliedStatus !== "")
+      filters.push({ id: "filter_status", value: appliedStatus });
+    return filters;
+  }, [appliedProject, appliedTask, appliedStatus]);
 
   return (
     <Stack className="pt-5 gap-6 px-2">
@@ -320,19 +554,17 @@ const TimeTrackingPage = () => {
             </label>
             <Select
               value={selectedProject}
-              onValueChange={(value) => {
-                setSelectedProject(value);
-                setSelectedTask("");
-              }}
+              onValueChange={(value) => setSelectedProject(value)}
               disabled={isTracking}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select Project" />
               </SelectTrigger>
               <SelectContent>
-                {projects?.data?.map((project) => (
-                  <SelectItem key={project.id} value={project.id}>
-                    {project.projectName} ({project.projectNumber})
+                {projectOptions.map((p: any) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.projectName || p.name}{" "}
+                    {p.projectNumber ? `(${p.projectNumber})` : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -381,106 +613,166 @@ const TimeTrackingPage = () => {
           Time Entries History
         </h2>
 
-        {allTimeEntries?.data && allTimeEntries.data.length > 0 ? (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="font-semibold">Project</TableHead>
-                  <TableHead className="font-semibold">Task</TableHead>
-                  <TableHead className="font-semibold">Start Time</TableHead>
-                  <TableHead className="font-semibold">End Time</TableHead>
-                  <TableHead className="font-semibold">Duration</TableHead>
-                  <TableHead className="font-semibold">Status</TableHead>
-                  <TableHead className="font-semibold text-right">
-                    Actions
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {allTimeEntries.data.map((entry) => (
-                  <TableRow
-                    key={entry.id}
-                    className={
-                      entry.status === "active"
-                        ? "bg-green-50 hover:bg-green-100"
-                        : ""
-                    }
-                  >
-                    <TableCell className="font-medium">
-                      {entry.projectName}
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {entry.taskTitle}
-                    </TableCell>
-                    <TableCell className="text-sm text-gray-600">
-                      {format(new Date(entry.startTime), "PPp")}
-                    </TableCell>
-                    <TableCell className="text-sm text-gray-600">
-                      {entry.endTime
-                        ? format(new Date(entry.endTime), "PPp")
-                        : "-"}
-                    </TableCell>
-                    <TableCell>
-                      {entry.status === "active" ? (
-                        <ActiveTableTimer startTime={entry.startTime} />
-                      ) : (
-                        <span className="font-mono font-semibold text-gray-700">
-                          {formatDuration(entry.duration ? entry.duration : 0)}
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {entry.status === "active" ? (
-                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-                          ACTIVE
-                        </span>
-                      ) : (
-                        <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs font-medium rounded-full">
-                          COMPLETED
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Flex className="justify-end gap-2">
-                        {entry.status === "completed" && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRestart(entry.taskId)}
-                            disabled={isTracking || startTaskMutation.isPending}
-                            className="h-8 px-2 hover:bg-blue-50 cursor-pointer"
-                            title="Restart this task"
-                          >
-                            <RotateCcw className="h-4 w-4 text-blue-600" />
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(entry.id)}
-                          disabled={deleteEntryMutation.isPending}
-                          className="h-8 px-2 hover:bg-red-50 cursor-pointer"
-                          title="Delete this entry"
-                        >
-                          <Trash2 className="h-4 w-4 text-red-600" />
-                        </Button>
-                      </Flex>
-                    </TableCell>
-                  </TableRow>
+        {/* Filters */}
+        <Flex className="gap-4 mb-4 flex-wrap">
+          <div className="min-w-[220px]">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Project
+            </label>
+            <Select
+              value={historyProject}
+              onValueChange={(v) => {
+                setHistoryProject(v);
+                setHistoryTask("all_tasks");
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="All Projects" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Projects</SelectItem>
+                {projectOptions.map((p: any) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.projectName || p.name}{" "}
+                    {p.projectNumber ? `(${p.projectNumber})` : ""}
+                  </SelectItem>
                 ))}
-              </TableBody>
-            </Table>
+              </SelectContent>
+            </Select>
           </div>
-        ) : (
-          <div className="text-center py-8">
-            <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500">No time entries found</p>
-            <p className="text-sm text-gray-400 mt-1">
-              Start tracking time to see your entries here
-            </p>
+
+          <div className="min-w-[220px]">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Task
+            </label>
+            <Select
+              value={historyTask}
+              onValueChange={(v) => setHistoryTask(v)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={"All Tasks"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all_tasks">All Tasks</SelectItem>
+                {historyTasksOptions.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>
+                    {t.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        )}
+
+          <div className="min-w-[180px]">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Status
+            </label>
+            <Select
+              value={historyStatus}
+              onValueChange={(v) => setHistoryStatus(v as any)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="self-end ml-auto">
+            <Flex className="gap-2">
+              <Button
+                variant="outline"
+                className="cursor-pointer"
+                onClick={() => {
+                  setHistoryProject("all");
+                  setHistoryTask("all_tasks");
+                  setHistoryStatus("all");
+                }}
+              >
+                Clear
+              </Button>
+              <Button
+                className="cursor-pointer"
+                onClick={() => {
+                  setAppliedProject(historyProject);
+                  setAppliedTask(historyTask);
+                  setAppliedStatus(historyStatus as any);
+                }}
+              >
+                Apply Filter
+              </Button>
+            </Flex>
+          </div>
+        </Flex>
+
+        <Box className="">
+          {(() => {
+            const filteredEntries = (
+              (allTimeEntries?.data as any[]) || []
+            ).filter((row: any) => {
+              const matchProject =
+                appliedProject === "all" ||
+                String(row.projectId) === String(appliedProject);
+              const matchTask =
+                appliedTask === "all_tasks" ||
+                String(row.taskId) === String(appliedTask);
+              const normalizedStatus =
+                row.status === "in_progress" ? "active" : row.status;
+              const matchStatus =
+                appliedStatus === "all" ||
+                appliedStatus === "" ||
+                String(normalizedStatus) === String(appliedStatus);
+              return matchProject && matchTask && matchStatus;
+            });
+
+            if (filteredEntries.length > 0) {
+              return (
+                <div className="w-full overflow-x-auto">
+                  <ReusableTable
+                    key={`${appliedProject}|${appliedTask}|${appliedStatus}`}
+                    data={filteredEntries as any[]}
+                    columns={columns as any}
+                    enableGlobalFilter={true}
+                    searchClassName="rounded-full"
+                    filterClassName="rounded-full"
+                    enablePaymentLinksCalender={false}
+                    defaultColumnFilters={tableColumnFilters as any}
+                    externalColumnFilters={tableColumnFilters as any}
+                  />
+                </div>
+              );
+            }
+
+            // Empty state with messaging tailored to filters
+            const hasAnyFilter =
+              appliedProject !== "all" ||
+              appliedTask !== "all_tasks" ||
+              (appliedStatus !== "all" && appliedStatus !== "");
+
+            let message = "No time entries found";
+            if (hasAnyFilter) {
+              if (appliedStatus === "active")
+                message = "No active time entries";
+              else if (appliedStatus === "completed")
+                message = "No completed time entries";
+              else message = "No entries available for the selected filters";
+            }
+
+            return (
+              <div className="text-center py-8">
+                <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">{message}</p>
+                <p className="text-sm text-gray-400 mt-1">
+                  Start tracking time to see your entries here
+                </p>
+              </div>
+            );
+          })()}
+        </Box>
       </Box>
     </Stack>
   );

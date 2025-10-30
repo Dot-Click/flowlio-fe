@@ -14,9 +14,10 @@ import {
 } from "recharts";
 import { ComponentWrapper } from "@/components/common/componentwrapper";
 import { ViewerCalendarPopOver } from "./viewercalendarpopover";
+import type { DateRange } from "react-day-picker";
 import { ViewerChartGuides } from "./viewerchartguides";
 
-const chartData = [
+const defaultChartData = [
   { month: "Jan", Mon: 5, Tue: 4, Wed: 4, Thurs: 3, Fri: 5, Sat: 4 },
   { month: "Feb", Mon: 7, Tue: 23, Wed: 5, Thurs: 4, Fri: 6, Sat: 6 },
   { month: "Mar", Mon: 2, Tue: 1, Wed: 2, Thurs: 1, Fri: 3, Sat: 2 },
@@ -43,7 +44,7 @@ type ChartDatum = {
   total?: number;
 };
 
-chartData.forEach((d: ChartDatum) => {
+defaultChartData.forEach((d: ChartDatum) => {
   d.total = d.Mon + d.Tue + d.Wed + d.Thurs + d.Fri + d.Sat;
 });
 
@@ -87,10 +88,40 @@ const dayFullNames: Record<string, string> = {
   Fri: "Friday",
   Sat: "Saturday",
 };
-export const ViewerBarChartComponent: FC<BoxProps> = ({
+export type ViewerChartPoint = {
+  month: string;
+  Mon: number;
+  Tue: number;
+  Wed: number;
+  Thurs: number;
+  Fri: number;
+  Sat: number;
+  total?: number;
+};
+
+export const ViewerBarChartComponent: FC<
+  BoxProps & {
+    data?: ViewerChartPoint[];
+    dateRange?: DateRange;
+    onApplyDateRange?: (range: DateRange) => void;
+    onResetDateRange?: () => void;
+  }
+> = ({
   className,
+  data,
+  dateRange,
+  onApplyDateRange,
+  onResetDateRange,
   ...props
 }) => {
+  const chartData = (
+    data && data.length > 0
+      ? data.map((d) => ({
+          ...d,
+          total: d.total ?? d.Mon + d.Tue + d.Wed + d.Thurs + d.Fri + d.Sat,
+        }))
+      : defaultChartData
+  ) as ChartDatum[];
   return (
     <ComponentWrapper className={cn("p-4", className)} {...props}>
       <Flex className="max-lg:flex-col items-center justify-between">
@@ -101,7 +132,11 @@ export const ViewerBarChartComponent: FC<BoxProps> = ({
         <Flex className="gap-4">
           <ViewerChartGuides className="gap-4 pt-1 max-md:mr-auto" />
         </Flex>
-        <ViewerCalendarPopOver />
+        <ViewerCalendarPopOver
+          selected={dateRange}
+          onApply={(r) => onApplyDateRange && onApplyDateRange(r)}
+          onReset={() => onResetDateRange && onResetDateRange()}
+        />
       </Flex>
 
       <ChartContainer className="mt-5 w-full h-[21.8rem] " config={{}}>

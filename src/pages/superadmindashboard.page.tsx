@@ -15,21 +15,22 @@ import { useFetchAllOrganizations } from "@/hooks/usefetchallorganizations";
 import { useFetchAllData } from "@/hooks/useFetchAllData";
 import { useFetchTotalInvoices } from "@/hooks/useFetchTotalInvoices";
 import { getTotalCounts } from "@/utils/chartDataProcessor";
+import { useFetchSuperadminOverview } from "@/hooks/useFetchSuperadminOverview";
 // import { useUser } from "@/providers/user.provider";
 // import { Badge } from "@/components/ui/badge";
 
-const data = [
-  { name: "Projects", value: 65.63, icon: Img1, color: "#3f53b5" },
-  { name: "Tasks", value: 18.46, icon: Img2, color: "#FFE000" },
-  { name: "Invoices", value: 16.91, icon: Img3, color: "#F50057" },
-];
+// Feature overview colors
+const FEATURE_COLORS = {
+  projects: "#3f53b5",
+  tasks: "#FFE000",
+  invoices: "#F50057",
+} as const;
 
 const SuperAdminDashboardPage = () => {
-  // const { data: userData } = useUser();
-  // console.log(userData, "check the sub admin id");
-
   const { data: allDataResponse } = useFetchAllData();
   const { data: totalInvoicesResponse } = useFetchTotalInvoices();
+  const { data: overviewResponse } = useFetchSuperadminOverview();
+  console.log(overviewResponse, "check the overview response");
 
   // Use the new all-data approach for consistent counts
   const { totalCompanies, totalProjects } = allDataResponse?.data
@@ -40,6 +41,28 @@ const SuperAdminDashboardPage = () => {
     : { totalCompanies: 0, totalProjects: 0 };
 
   const totalInvoices = totalInvoicesResponse?.data?.totalInvoices ?? 0;
+  const liveProjects = overviewResponse?.data?.projectsCount ?? totalProjects;
+  const liveTasks = overviewResponse?.data?.tasksCount ?? 0;
+  const liveInvoices = overviewResponse?.data?.invoicesCount ?? totalInvoices;
+
+  // Use raw counts for stats, percentages for chart values
+  const totalAll = liveProjects + liveTasks + liveInvoices;
+  // Build integer percentages that sum to 100
+  const rawPercents =
+    totalAll > 0
+      ? [
+          Math.round((liveProjects / totalAll) * 100),
+          Math.round((liveTasks / totalAll) * 100),
+          Math.round((liveInvoices / totalAll) * 100),
+        ]
+      : [0, 0, 0];
+  let sumPerc = rawPercents.reduce((a, b) => a + b, 0);
+  if (sumPerc !== 100 && totalAll > 0) {
+    // Adjust the largest bucket by the remainder to ensure sum = 100
+    const maxIdx = rawPercents.indexOf(Math.max(...rawPercents));
+    rawPercents[maxIdx] = rawPercents[maxIdx] + (100 - sumPerc);
+    sumPerc = rawPercents.reduce((a, b) => a + b, 0);
+  }
 
   // For active subscriptions, we still need the detailed org data
   const { data: allOrganizationsResponse } = useFetchAllOrganizations();
@@ -62,7 +85,7 @@ const SuperAdminDashboardPage = () => {
       title: "Total Projects",
       description: "All projects created by companies",
       icon: img2,
-      count: String(totalProjects),
+      count: String(liveProjects),
     },
     {
       link: "/superadmin/subscriptions",
@@ -80,6 +103,27 @@ const SuperAdminDashboardPage = () => {
     },
   ];
 
+  const featureOverviewData = [
+    {
+      name: "Projects",
+      value: rawPercents[0],
+      icon: Img1,
+      color: FEATURE_COLORS.projects,
+    },
+    {
+      name: "Tasks",
+      value: rawPercents[1],
+      icon: Img2,
+      color: FEATURE_COLORS.tasks,
+    },
+    {
+      name: "Invoices",
+      value: rawPercents[2],
+      icon: Img3,
+      color: FEATURE_COLORS.invoices,
+    },
+  ];
+
   return (
     <Stack className="pt-5 gap-3 px-2">
       <Stats
@@ -93,7 +137,10 @@ const SuperAdminDashboardPage = () => {
         </Stack>
 
         <Stack className="max-[950px]:w-full items-start">
-          <ProjectStatusPieChart data={data} title="Feature Overview" />
+          <ProjectStatusPieChart
+            data={featureOverviewData}
+            title="Feature Overview"
+          />
         </Stack>
       </Flex>
 

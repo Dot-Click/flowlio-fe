@@ -1,15 +1,19 @@
 import { Stat, Stats } from "@/components/admin/dashboard/stats";
 import { Stack } from "@/components/ui/stack";
 import img1 from "/viewer/taskicon.svg";
-import { ViewerBarChartComponent } from "@/components/viewer section/viewer barchart/viewerbarchart";
+import {
+  ViewerBarChartComponent,
+  type ViewerChartPoint,
+} from "@/components/viewer section/viewer barchart/viewerbarchart";
 import { ViewerTable } from "@/components/viewer section/viewer barchart/viewertable";
 import TimeModal from "@/components/timemodal";
 import { useFetchViewerTasks } from "@/hooks/useFetchViewerTasks";
 import { useFetchViewerProjects } from "@/hooks/useFetchViewerProjects";
 import { useActiveTimeEntries } from "@/hooks/useTimeTracking";
 import { useAllTimeEntries } from "@/hooks/useAllTimeEntries";
-import { format } from "date-fns";
+import { format, startOfDay, endOfDay } from "date-fns";
 import { useEffect, useState, useMemo } from "react";
+import type { DateRange } from "react-day-picker";
 
 const ViewerDashboardPage = () => {
   // Fetch real data
@@ -17,6 +21,7 @@ const ViewerDashboardPage = () => {
   const { data: projectsResponse } = useFetchViewerProjects();
   const { data: activeTimeEntries } = useActiveTimeEntries();
   const { data: allTimeEntries } = useAllTimeEntries();
+  const [dateRange, setDateRange] = useState<DateRange | null>(null);
 
   // Calculate stats from data
   const totalTasks = tasksResponse?.data?.length ?? 0;
@@ -92,6 +97,99 @@ const ViewerDashboardPage = () => {
     return Math.min(Math.round((hoursElapsed / 8) * 100), 100);
   }, [elapsedTime, isTracking]);
 
+  // Build chart data from all time entries: counts by weekday per month
+  const chartData: ViewerChartPoint[] = useMemo(() => {
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sept",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    // Build months list depending on selected range
+    const buildMonths = (): string[] => {
+      if (dateRange?.from && dateRange?.to) {
+        const start = dateRange.from;
+        const end = dateRange.to;
+        const result: string[] = [];
+        const cur = new Date(start.getFullYear(), start.getMonth(), 1);
+        const last = new Date(end.getFullYear(), end.getMonth(), 1);
+        while (cur <= last) {
+          const mi = cur.getMonth();
+          result.push(mi === 8 ? "Sept" : monthNames[mi]);
+          cur.setMonth(cur.getMonth() + 1);
+        }
+        return result;
+      }
+      return monthNames;
+    };
+    const months = buildMonths();
+    const initMonth = () => ({
+      Mon: 0,
+      Tue: 0,
+      Wed: 0,
+      Thurs: 0,
+      Fri: 0,
+      Sat: 0,
+    });
+    const byMonth: Record<
+      string,
+      {
+        Mon: number;
+        Tue: number;
+        Wed: number;
+        Thurs: number;
+        Fri: number;
+        Sat: number;
+      }
+    > = {};
+    months.forEach((m) => (byMonth[m] = initMonth()));
+
+    const entries = (allTimeEntries?.data || []).filter((e) => {
+      const d = new Date(e.startTime);
+      if (dateRange?.from && dateRange?.to) {
+        const from = startOfDay(dateRange.from);
+        const to = endOfDay(dateRange.to);
+        return d >= from && d <= to;
+      }
+      // No default year filter: include all entries
+      return true;
+    });
+    for (const e of entries) {
+      const date = new Date(e.startTime);
+      const monthIdx = date.getMonth();
+      const monthKey = monthIdx === 8 ? "Sept" : monthNames[monthIdx];
+      const day = date.getDay(); // 0 Sun .. 6 Sat
+      const key =
+        day === 1
+          ? "Mon"
+          : day === 2
+          ? "Tue"
+          : day === 3
+          ? "Wed"
+          : day === 4
+          ? "Thurs"
+          : day === 5
+          ? "Fri"
+          : day === 6
+          ? "Sat"
+          : null;
+      if (!key) continue; // skip Sundays to match existing design (Mon-Sat)
+      byMonth[monthKey][key as keyof (typeof byMonth)[string]] += 1;
+    }
+
+    return months.map(
+      (m) => ({ month: m, ...byMonth[m] } as unknown as ViewerChartPoint)
+    );
+  }, [allTimeEntries, dateRange]);
+
   // Build stats array
   const stats: Stat[] = [
     {
@@ -147,7 +245,18 @@ const ViewerDashboardPage = () => {
         totalProductionHours={totalProductionHours}
       />
       <Stack className="w-full">
-        <ViewerBarChartComponent />
+        <ViewerBarChartComponent
+          data={chartData}
+          dateRange={dateRange || undefined}
+          onApplyDateRange={(r) => {
+            if (!r?.from || !r?.to) return;
+            // Normalize order and snap to full days
+            const start = r.from <= r.to ? r.from : r.to;
+            const end = r.to >= r.from ? r.to : r.from;
+            setDateRange({ from: startOfDay(start), to: endOfDay(end) });
+          }}
+          onResetDateRange={() => setDateRange(null)}
+        />
       </Stack>
 
       <ViewerTable />

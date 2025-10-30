@@ -56,6 +56,8 @@ export interface ReusableTableProps<TData> {
   }) => void;
   defaultColumnVisibility?: VisibilityState;
   defaultColumnFilters?: ColumnFiltersState;
+  // Optional external filters to control table filtering from parent
+  externalColumnFilters?: ColumnFiltersState;
 }
 
 export const ReusableTable = <TData,>({
@@ -74,6 +76,7 @@ export const ReusableTable = <TData,>({
   defaultColumnVisibility = {},
   defaultSorting = [],
   defaultColumnFilters = [],
+  externalColumnFilters,
 }: ReusableTableProps<TData>) => {
   const [sorting, setSorting] = React.useState<SortingState>(defaultSorting);
   const [rowSelection, setRowSelection] = React.useState({});
@@ -121,6 +124,13 @@ export const ReusableTable = <TData,>({
       onTableStateChange({ rowSelection });
     }
   }, [rowSelection, onTableStateChange]);
+
+  // Sync external filters into internal state when provided
+  React.useEffect(() => {
+    if (externalColumnFilters) {
+      setColumnFilters(externalColumnFilters);
+    }
+  }, [externalColumnFilters]);
 
   const [range, setRange] = React.useState<{ from?: Date; to?: Date }>({});
   React.useEffect(() => {

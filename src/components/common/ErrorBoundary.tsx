@@ -32,10 +32,18 @@ export class ErrorBoundary extends React.Component<
             <p className="text-sm text-gray-600 mb-4">
               Please try again. If the problem persists, refresh the page.
             </p>
+            {process.env.NODE_ENV !== "production" && (
+              <div className="text-left bg-red-50 border border-red-200 rounded-md p-3 mb-4 text-xs text-red-800 break-words">
+                <div className="font-medium mb-1">Error:</div>
+                <pre className="whitespace-pre-wrap">
+                  {String(this.state.error?.message || this.state.error)}
+                </pre>
+              </div>
+            )}
             <button
               type="button"
               onClick={this.handleRetry}
-              className="inline-flex items-center rounded-full bg-black px-4 py-2 text-white hover:bg-black/80"
+              className="inline-flex items-center rounded-full bg-black px-4 py-2 text-white hover:bg-black/80 cursor-pointer transition-all duration-300"
             >
               Retry
             </button>

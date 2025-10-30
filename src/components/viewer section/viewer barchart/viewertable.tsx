@@ -13,6 +13,7 @@ import { useActiveTimeEntries } from "@/hooks/useTimeTracking";
 import { useAllTimeEntries } from "@/hooks/useAllTimeEntries";
 import { useMemo } from "react";
 import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router";
 
 // const data: Data[] = [
 //   {
@@ -213,6 +214,7 @@ export const columns: ColumnDef<Data>[] = [
 ];
 
 export const ViewerTable = () => {
+  const navigate = useNavigate();
   // Fetch real data
   const { data: tasksResponse, isLoading: tasksLoading } =
     useFetchViewerTasks();
@@ -275,7 +277,7 @@ export const ViewerTable = () => {
   }
 
   return (
-    <PageWrapper className="h-full">
+    <PageWrapper className="min-h-full h-[calc(100vh-100px)] overflow-y-auto">
       <Stack className="gap-0 w-full p-4">
         <Center className="justify-between">
           <Flex className="gap-1">
@@ -284,7 +286,12 @@ export const ViewerTable = () => {
               Task List
             </h1>
           </Flex>
-          <h1 className="text-blue-500 text-sm">View Page</h1>
+          <h1
+            className="text-blue-500 text-sm cursor-pointer hover:text-blue-900"
+            onClick={() => navigate("/viewer/my-tasks")}
+          >
+            View Page
+          </h1>
         </Center>
         <img src={Img} alt="tasklistline" className="w-full mt-4" />
       </Stack>

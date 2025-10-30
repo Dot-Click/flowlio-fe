@@ -47,6 +47,5 @@ export const useAllTimeEntries = () => {
         throw error;
       }
     },
-    refetchInterval: 15000,
   });
 };
