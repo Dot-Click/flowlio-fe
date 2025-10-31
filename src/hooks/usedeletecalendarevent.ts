@@ -19,6 +19,8 @@ export const useDeleteCalendarEvent = () => {
       console.log("Invalidate and refetch calendar events!", data);
       // Invalidate and refetch calendar events
       queryClient.invalidateQueries({ queryKey: ["calendar-events"] });
+      // Invalidate activities so the deleted calendar event is removed
+      queryClient.invalidateQueries({ queryKey: ["organization-activities"] });
 
       toast.success("Calendar event deleted successfully!");
     },

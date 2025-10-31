@@ -29,6 +29,13 @@ import { useViewerSupportTickets } from "@/hooks/useViewerSupportTickets";
 import { useUser } from "@/providers/user.provider";
 import { useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  useDeleteAllNotifications,
+  useNotifications,
+  useMarkNotificationAsRead,
+} from "@/hooks/useNotifications";
+import { useNavigate } from "react-router";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   clientname: z.string().min(2, {
@@ -42,6 +49,10 @@ const formSchema = z.object({
 export const ViewerSupportHeader = () => {
   const { data: user } = useUser();
   const { data: ticketsData, isLoading, error } = useViewerSupportTickets();
+  const clearAllNotificationsMutation = useDeleteAllNotifications();
+  const { data: notificationsData } = useNotifications({ limit: 10 });
+  const markAsReadMutation = useMarkNotificationAsRead();
+  const navigate = useNavigate();
 
   // Debug logging for viewer tickets
   useEffect(() => {
@@ -105,19 +116,114 @@ export const ViewerSupportHeader = () => {
         )}
       </Flex>
 
-      <Flex className="justify-between max-md:flex-col max-md:items-start bg-transparent py-8">
-        <Box>
-          <h1 className="text-md font-medium capitalize">
-            Your Ticket Notification
-          </h1>
-          <p className="text-gray-500 max-md:text-sm">
-            Oops sorry. There are notification to show
-          </p>
-        </Box>
+      <Flex className="justify-between max-md:flex-col max-md:items-start bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200 mt-5">
+        <Box className="flex-1">
+          <Flex className="items-center gap-3 mb-2">
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            <h1 className="text-lg font-semibold text-gray-800">
+              Your Ticket Notifications
+            </h1>
+          </Flex>
+          <Flex className="justify-between items-center">
+            <p className="text-gray-600 text-sm">
+              {notificationsData?.data?.notifications?.filter(
+                (n: any) => !n.read
+              )?.length || 0}{" "}
+              unread notifications
+              {notificationsData?.data?.notifications?.filter(
+                (n: any) => !n.read
+              )?.length === 0 && " - You're all caught up!"}
+            </p>
+            {notificationsData?.data?.notifications &&
+              notificationsData.data.notifications.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 ml-4"
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        "Are you sure you want to clear all notifications?"
+                      )
+                    ) {
+                      clearAllNotificationsMutation.mutate(undefined, {
+                        onSuccess: () => {
+                          toast.success("All notifications cleared");
+                        },
+                        onError: () => {
+                          toast.error("Failed to clear notifications");
+                        },
+                      });
+                    }
+                  }}
+                  disabled={clearAllNotificationsMutation.isPending}
+                >
+                  {clearAllNotificationsMutation.isPending
+                    ? "Clearing..."
+                    : "Clear All Notifications"}
+                </Button>
+              )}
+          </Flex>
 
-        <p className="text-red-500 max-md:text-sm underline">
-          Clear All Notifications
-        </p>
+          {/* Notification List */}
+          {notificationsData?.data?.notifications &&
+            notificationsData.data.notifications.length > 0 && (
+              <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
+                {notificationsData.data.notifications
+                  .sort((a: any, b: any) => {
+                    // Sort unread notifications first, then by date
+                    if (a.read !== b.read) {
+                      return a.read ? 1 : -1;
+                    }
+                    return (
+                      new Date(b.createdAt).getTime() -
+                      new Date(a.createdAt).getTime()
+                    );
+                  })
+                  .map((notification: any) => (
+                    <div
+                      key={notification.id}
+                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-blue-100 cursor-pointer transition-colors"
+                      onClick={() => {
+                        // Mark as read if not already read
+                        if (!notification.read) {
+                          markAsReadMutation.mutate(notification.id);
+                        }
+
+                        // Navigate to support tickets page for support ticket notifications
+                        if (notification.type.includes("support_ticket")) {
+                          navigate("/dashboard/viewer-support");
+                        }
+                      }}
+                    >
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          notification.read ? "bg-gray-400" : "bg-blue-500"
+                        }`}
+                      ></div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-800 truncate">
+                          {notification.title}
+                        </p>
+                        <p className="text-xs text-gray-600 truncate">
+                          {notification.message}
+                        </p>
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {new Date(notification.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+
+          {(!notificationsData?.data?.notifications ||
+            notificationsData.data.notifications.length === 0) && (
+            <p className="text-gray-500 text-sm mt-2">
+              No notifications to show
+            </p>
+          )}
+        </Box>
       </Flex>
 
       <Flex className="flex-col items-start bg-transparent w-full mt-5">
@@ -146,7 +252,7 @@ export const ViewerSupportHeader = () => {
               <AccordionItem key={ticket.id} value={`item-${index}`}>
                 <AccordionTrigger className="cursor-pointer">
                   <Stack>
-                    <h1 className="font-normal hover:underline text-[18px]">
+                    <h1 className="font-normal hover:underline text-[18px] cursor-pointer">
                       {ticket.subject}
                     </h1>
                     <p className="text-[#797979] text-sm font-normal">
@@ -155,7 +261,7 @@ export const ViewerSupportHeader = () => {
                     </p>
                   </Stack>
                 </AccordionTrigger>
-                <AccordionContent className="flex flex-col gap-4 text-balance">
+                <AccordionContent className="flex flex-col gap-4 text-balance capitalize">
                   <p>{ticket.description}</p>
                   <p className="text-sm text-gray-600">
                     Priority: {ticket.priority} | Status: {ticket.status}

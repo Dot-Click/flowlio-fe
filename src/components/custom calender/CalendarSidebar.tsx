@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box } from "@/components/ui/box";
 import { Flex } from "@/components/ui/flex";
 import { Stack } from "@/components/ui/stack";
@@ -55,6 +55,8 @@ export const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
         return GoogleMeetIcon;
     }
   };
+  const [showMyCalendars, setShowMyCalendars] = useState(true);
+  const [showPlatforms, setShowPlatforms] = useState(true);
 
   return (
     <Flex className="w-[290px] bg-white flex-col gap-6 items-start h-[127rem]">
@@ -85,20 +87,27 @@ export const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
           <span className="font-semibold">My Calendars</span>
           <Flex className="items-center gap-2">
             <Plus className="size-4 cursor-pointer text-gray-500" />
-            <ChevronDown className="size-4 cursor-pointer text-gray-500" />
+            <ChevronDown
+              className={`size-4 cursor-pointer text-gray-500 transition-transform duration-300 ${
+                showMyCalendars ? "rotate-180" : ""
+              }`}
+              onClick={() => setShowMyCalendars(!showMyCalendars)}
+            />
           </Flex>
         </Flex>
         <Flex className="flex-col items-start gap-2">
-          {MyCalendars.map((calendar, index) => (
-            <Center key={index} className="gap-4 cursor-pointer">
-              <img
-                src={calendar.image}
-                alt={calendar.name}
-                className="size-4"
-              />
-              <span className="text-sm font-normal">{calendar.name}</span>
-            </Center>
-          ))}
+          {showMyCalendars
+            ? MyCalendars.map((calendar, index) => (
+                <Center key={index} className="gap-4 cursor-pointer">
+                  <img
+                    src={calendar.image}
+                    alt={calendar.name}
+                    className="size-4"
+                  />
+                  <span className="text-sm font-normal">{calendar.name}</span>
+                </Center>
+              ))
+            : null}
         </Flex>
       </Stack>
 
@@ -108,20 +117,31 @@ export const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
           <Box className="font-semibold mb-4">Platforms</Box>
           <Flex className="items-center">
             <Plus className="size-4 cursor-pointer text-gray-500" />
-            <ChevronDown className="size-4 cursor-pointer text-gray-500" />
+            <ChevronDown
+              className={`size-4 cursor-pointer text-gray-500 transition-transform duration-300 ${
+                showPlatforms ? "rotate-180" : ""
+              }`}
+              onClick={() => setShowPlatforms(!showPlatforms)}
+            />
           </Flex>
         </Flex>
         <Flex className="flex-col gap-4 items-start">
-          {platformsImages.map((platform, index) => (
-            <Center key={index} className="gap-4 cursor-pointer">
-              <img src={platform.checkbox} alt="CheckBox" className="size-4" />
-              <img
-                src={platform.image}
-                alt={platform.name}
-                className="size-4"
-              />
-            </Center>
-          ))}
+          {showPlatforms
+            ? platformsImages.map((platform, index) => (
+                <Center key={index} className="gap-4 cursor-pointer">
+                  <img
+                    src={platform.checkbox}
+                    alt="CheckBox"
+                    className="size-4"
+                  />
+                  <img
+                    src={platform.image}
+                    alt={platform.name}
+                    className="size-4"
+                  />
+                </Center>
+              ))
+            : null}
         </Flex>
       </Stack>
 

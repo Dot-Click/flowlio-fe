@@ -42,6 +42,7 @@ import {
   useUpdateUniversalSupportTicket,
   useDeleteUniversalSupportTicket,
   type CreateUniversalSupportTicketRequest,
+  type UniversalSupportTicket,
 } from "@/hooks/useUniversalSupportTickets";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -53,6 +54,19 @@ import {
 } from "@/hooks/useNotifications";
 import { useGetCurrentOrgUserMembers } from "@/hooks/usegetallusermembers";
 import { useUser } from "@/providers/user.provider";
+import { ColumnDef } from "@tanstack/react-table";
+import { ReusableTable } from "@/components/reusable/reusabletable";
+import { Center } from "@/components/ui/center";
+import { format, formatDistanceToNow } from "date-fns";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useFetchOrganizationActivities } from "@/hooks/useFetchOrganizationActivities";
+import { useDeleteActivity } from "@/hooks/useDeleteActivity";
+import { Trash2, Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   subject: z.string().min(1, "Subject is required"),
@@ -82,13 +96,6 @@ const SupportHeader = () => {
   } = useUniversalSupportTickets({ status: "open" });
 
   const {
-    data: recentData,
-    isLoading: recentLoading,
-    error: recentError,
-    refetch: refetchRecent,
-  } = useUniversalSupportTickets();
-
-  const {
     data: sentTicketsData,
     isLoading: sentTicketsLoading,
     error: sentTicketsError,
@@ -98,6 +105,9 @@ const SupportHeader = () => {
   const createTicketMutation = useCreateUniversalSupportTicket();
   const updateTicketMutation = useUpdateUniversalSupportTicket();
   const deleteTicketMutation = useDeleteUniversalSupportTicket();
+  const { data: activitiesResponse, isLoading: activitiesLoading } =
+    useFetchOrganizationActivities();
+  const { mutate: deleteActivity } = useDeleteActivity();
 
   const modalProps = useGeneralModalDisclosure();
   const [activeTab, setActiveTab] = useState<"submitted" | "recent" | "sent">(
@@ -116,14 +126,11 @@ const SupportHeader = () => {
     if (activeTab === "submitted") {
       console.log("Fetching submitted tickets...");
       refetchSubmitted();
-    } else if (activeTab === "recent") {
-      console.log("Fetching recent tickets...");
-      refetchRecent();
     } else if (activeTab === "sent") {
       console.log("Fetching sent tickets...");
       refetchSentTickets();
     }
-  }, [activeTab, refetchSubmitted, refetchRecent, refetchSentTickets]);
+  }, [activeTab, refetchSubmitted, refetchSentTickets]);
 
   // Set current user ID from organization members data
   useEffect(() => {
@@ -166,9 +173,8 @@ const SupportHeader = () => {
       // Refresh the appropriate tab
       if (activeTab === "submitted") {
         refetchSubmitted();
-      } else {
-        refetchRecent();
       }
+      refetchSentTickets();
       toast.success("Support ticket created successfully!");
     } catch (error) {
       console.error("Error creating support ticket:", error);
@@ -350,7 +356,7 @@ const SupportHeader = () => {
               className={
                 activeTab === "submitted"
                   ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
-                  : ""
+                  : "cursor-pointer"
               }
               onClick={() => setActiveTab("submitted")}
             >
@@ -361,8 +367,8 @@ const SupportHeader = () => {
               size="sm"
               className={
                 activeTab === "recent"
-                  ? "bg-blue-600 hover:bg-blue-700 cursor-pointer "
-                  : ""
+                  ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
+                  : "cursor-pointer"
               }
               onClick={() => setActiveTab("recent")}
             >
@@ -374,7 +380,7 @@ const SupportHeader = () => {
               className={
                 activeTab === "sent"
                   ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
-                  : ""
+                  : "cursor-pointer"
               }
               onClick={() => setActiveTab("sent")}
             >
@@ -447,65 +453,69 @@ const SupportHeader = () => {
 
         {activeTab === "recent" && (
           <>
-            {recentLoading ? (
-              <p className="text-gray-500">Loading recent activity...</p>
-            ) : recentError ? (
-              <p className="text-red-500">
-                Error loading recent activity:{" "}
-                {recentError?.message || "Unknown error"}
-              </p>
-            ) : recentData?.data?.tickets?.length === 0 ? (
-              <p className="text-gray-500">No recent activity.</p>
+            {activitiesLoading ? (
+              <Center className="flex items-center justify-center h-64">
+                <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+              </Center>
+            ) : activitiesResponse?.data?.activities?.length === 0 ? (
+              <Center className="h-64">
+                <Box className="text-lg text-gray-500">
+                  No recent activities
+                </Box>
+              </Center>
             ) : (
-              <Accordion type="single" collapsible className="w-full">
-                {recentData?.data?.tickets?.map(
-                  (ticket: any, index: number) => (
-                    <AccordionItem key={ticket.id} value={`recent-${index}`}>
-                      <AccordionTrigger className="cursor-pointer">
-                        <Stack>
+              <Box className="w-full space-y-3 max-h-[500px] overflow-y-auto">
+                {activitiesResponse?.data?.activities?.map((activity) => {
+                  const dateObj =
+                    typeof activity.date === "string"
+                      ? new Date(activity.date)
+                      : activity.date;
+                  const timeAgo = formatDistanceToNow(dateObj, {
+                    addSuffix: true,
+                  });
+
+                  return (
+                    <Flex
+                      key={activity.id}
+                      className="items-start justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                    >
+                      <Flex className="items-start gap-3 flex-1">
+                        <Box className="size-2.5 border outline outline-slate-300 outline-offset-1 bg-slate-200 rounded-full mt-1.5" />
+                        <Stack className="gap-1 flex-1">
                           <Flex className="items-center gap-2">
-                            <h1 className="font-normal hover:underline text-[18px] capitalize">
-                              {ticket.subject}
-                            </h1>
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                                ticket.status
-                              )}`}
-                            >
-                              {ticket.status}
-                            </span>
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(
-                                ticket.priority
-                              )}`}
-                            >
-                              {ticket.priority}
-                            </span>
+                            <h2 className="font-medium text-sm text-gray-800">
+                              {activity.user}
+                            </h2>
+                            <p className="text-xs text-slate-500">{timeAgo}</p>
                           </Flex>
-                          <p className="text-[#7184b4] text-sm font-normal">
-                            Ticket #{ticket.ticketNumber} •{" "}
-                            {formatTicketDate(ticket.createdon)}
-                            {ticket.submittedbyName && (
-                              <span> • From: {ticket.submittedbyName}</span>
-                            )}
-                            {/* {ticket.assignedto && (
-                              <span> • Assigned to: {ticket.assignedto}</span>
-                            )} */}
+                          <p className="text-sm text-slate-600">
+                            {activity.activity}
                           </p>
                         </Stack>
-                      </AccordionTrigger>
-                      <AccordionContent className="flex flex-col gap-4 text-balance">
-                        <p>{ticket.description}</p>
-                        {ticket.client && (
-                          <p className="text-sm text-gray-600">
-                            <strong>Client:</strong> {ticket.client}
-                          </p>
-                        )}
-                      </AccordionContent>
-                    </AccordionItem>
-                  )
-                )}
-              </Accordion>
+                      </Flex>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              "Are you sure you want to delete this activity?"
+                            )
+                          ) {
+                            deleteActivity({
+                              id: activity.id,
+                              source: activity.source || "recent", // Default to "recent" if source not available
+                            });
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </Flex>
+                  );
+                })}
+              </Box>
             )}
           </>
         )}
@@ -513,100 +523,198 @@ const SupportHeader = () => {
         {activeTab === "sent" && (
           <>
             {sentTicketsLoading ? (
-              <p className="text-gray-500">Loading your sent tickets...</p>
+              <Center className="flex items-center justify-center h-64">
+                <Box className="text-lg">Loading your sent tickets...</Box>
+              </Center>
             ) : sentTicketsError ? (
-              <p className="text-red-500">
-                Error loading sent tickets:{" "}
-                {sentTicketsError?.message || "Unknown error"}
-              </p>
-            ) : sentTicketsData?.data?.tickets?.filter(
-                (ticket: any) => ticket.submittedby === user?.user.id
-              )?.length === 0 ? (
-              <p className="text-gray-500">You haven't sent any tickets yet.</p>
+              <Center className="h-64">
+                <Box className="text-lg text-red-600">
+                  Error loading sent tickets:{" "}
+                  {sentTicketsError?.message || "Unknown error"}
+                </Box>
+              </Center>
             ) : (
-              <div className="w-full">
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">
-                          Ticket #
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">
-                          Subject
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">
-                          Priority
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">
-                          Status
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">
-                          Created
-                        </th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-700">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {sentTicketsData?.data?.tickets
-                        ?.filter(
-                          (ticket: any) => ticket.submittedby === user?.user.id
-                        )
-                        ?.map((ticket: any) => (
-                          <tr
-                            key={ticket.id}
-                            className="border-b border-gray-100 hover:bg-gray-50"
+              (() => {
+                const sentTickets =
+                  sentTicketsData?.data?.tickets?.filter(
+                    (ticket: any) => ticket.submittedby === user?.user.id
+                  ) || [];
+
+                if (sentTickets.length === 0) {
+                  return (
+                    <Center className="h-64">
+                      <Box className="text-lg text-gray-500">
+                        You haven't sent any tickets yet.
+                      </Box>
+                    </Center>
+                  );
+                }
+
+                const columns: ColumnDef<UniversalSupportTicket>[] = [
+                  {
+                    id: "ticketNumber",
+                    header: () => (
+                      <Box className="text-center text-black p-3">Ticket #</Box>
+                    ),
+                    cell: ({ row }) => (
+                      <Box className="text-center p-3">
+                        #{row.original.ticketNumber}
+                      </Box>
+                    ),
+                    enableSorting: false,
+                  },
+                  {
+                    accessorKey: "subject",
+                    header: () => <Box className="text-black">Subject</Box>,
+                    cell: ({ row }) => (
+                      <Box className="capitalize w-30 max-sm:w-full">
+                        {row.original.subject.length > 28
+                          ? row.original.subject.slice(0, 28) + "..."
+                          : row.original.subject}
+                      </Box>
+                    ),
+                  },
+                  {
+                    accessorKey: "priority",
+                    header: () => (
+                      <Box className="text-center text-black">Priority</Box>
+                    ),
+                    cell: ({ row }) => {
+                      const priority = row.original.priority;
+                      return (
+                        <Center className="text-center">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${getPriorityColor(
+                              priority
+                            )}`}
                           >
-                            <td className="py-3 px-4 text-sm font-medium text-gray-900">
-                              #{ticket.ticketNumber}
-                            </td>
-                            <td className="py-3 px-4 text-sm text-gray-900">
-                              <div
-                                className="max-w-xs truncate"
-                                title={ticket.subject}
-                              >
-                                {ticket.subject}
-                              </div>
-                            </td>
-                            <td className="py-3 px-4">
-                              <span
-                                className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(
-                                  ticket.priority
-                                )}`}
-                              >
-                                {ticket.priority}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4">
-                              <span
-                                className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                                  ticket.status
-                                )}`}
-                              >
-                                {ticket.status}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4 text-sm text-gray-500">
-                              {formatTicketDate(ticket.createdon)}
-                            </td>
-                            <td className="py-3 px-4">
-                              <div className="flex gap-2">
+                            {priority}
+                          </span>
+                        </Center>
+                      );
+                    },
+                  },
+                  {
+                    accessorKey: "status",
+                    header: () => (
+                      <Box className="text-center text-black">Status</Box>
+                    ),
+                    cell: ({ row }) => {
+                      const status = row.original.status as
+                        | "open"
+                        | "in_progress"
+                        | "resolved"
+                        | "closed";
+
+                      const statusStyles: Record<
+                        typeof status,
+                        { text: string; dot: string }
+                      > = {
+                        open: {
+                          text: "text-white bg-[#00A400] border-none rounded-full",
+                          dot: "bg-white",
+                        },
+                        closed: {
+                          text: "text-white bg-[#F98618] border-none rounded-full",
+                          dot: "bg-white",
+                        },
+                        in_progress: {
+                          text: "text-white bg-blue-500 border-none rounded-full",
+                          dot: "bg-white",
+                        },
+                        resolved: {
+                          text: "text-white bg-green-600 border-none rounded-full",
+                          dot: "bg-white",
+                        },
+                      };
+
+                      return (
+                        <Center>
+                          <Flex
+                            className={`rounded-md capitalize w-26 h-10 gap-2 border items-center ${
+                              statusStyles[status]?.text ||
+                              statusStyles.open.text
+                            }`}
+                          >
+                            <Flex className="ml-5.5">
+                              <Flex
+                                className={`w-2 h-2 rounded-full ${
+                                  statusStyles[status]?.dot ||
+                                  statusStyles.open.dot
+                                }`}
+                              />
+                              <span>{status}</span>
+                            </Flex>
+                          </Flex>
+                        </Center>
+                      );
+                    },
+                  },
+                  {
+                    accessorKey: "createdon",
+                    header: () => (
+                      <Box className="text-center text-black">Created</Box>
+                    ),
+                    cell: ({ row }) => {
+                      const createdon = row.original.createdon;
+                      try {
+                        return (
+                          <Box className="text-center">
+                            {format(new Date(createdon), "d MMM yyyy")}
+                          </Box>
+                        );
+                      } catch (error) {
+                        return (
+                          <Box className="text-center">
+                            {formatTicketDate(createdon)}
+                            {error instanceof Error
+                              ? error.message
+                              : "Unknown error"}
+                          </Box>
+                        );
+                      }
+                    },
+                  },
+                  {
+                    accessorKey: "actions",
+                    header: () => (
+                      <Box className="text-center text-black">Actions</Box>
+                    ),
+                    cell: ({ row }) => {
+                      const ticket = row.original;
+                      return (
+                        <Center className="space-x-2">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
-                                  onClick={() => handleViewTicket(ticket)}
+                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 cursor-pointer"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleViewTicket(ticket);
+                                  }}
                                 >
                                   View
                                 </Button>
-                                {ticket.status === "open" && (
+                              </TooltipTrigger>
+                              <TooltipContent className="mb-2">
+                                <p>View Ticket</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+
+                          {ticket.status === "open" && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
-                                    onClick={() => {
+                                    className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200 cursor-pointer"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
                                       updateTicketMutation.mutate(
                                         {
                                           id: ticket.id,
@@ -631,44 +739,73 @@ const SupportHeader = () => {
                                   >
                                     Close
                                   </Button>
-                                )}
+                                </TooltipTrigger>
+                                <TooltipContent className="mb-2">
+                                  <p>Close Ticket</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
+
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
-                                  onClick={() => {
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 cursor-pointer"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
                                     if (
                                       window.confirm(
                                         "Are you sure you want to delete this ticket?"
                                       )
                                     ) {
-                                      deleteTicketMutation.mutate(ticket.id, {
-                                        onSuccess: () => {
-                                          toast.success(
-                                            "Ticket deleted successfully"
-                                          );
-                                          refetchSentTickets();
-                                        },
-                                        onError: (error: any) => {
-                                          toast.error(
-                                            error.response?.data?.message ||
-                                              "Failed to delete ticket"
-                                          );
-                                        },
-                                      });
+                                      deleteTicketMutation.mutate(
+                                        { id: ticket.id },
+                                        {
+                                          onSuccess: () => {
+                                            toast.success(
+                                              "Ticket deleted successfully"
+                                            );
+                                            refetchSentTickets();
+                                          },
+                                          onError: (error: any) => {
+                                            toast.error(
+                                              error.response?.data?.message ||
+                                                "Failed to delete ticket"
+                                            );
+                                          },
+                                        }
+                                      );
                                     }
                                   }}
                                 >
                                   Delete
                                 </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+                              </TooltipTrigger>
+                              <TooltipContent className="mb-2">
+                                <p>Delete Ticket</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </Center>
+                      );
+                    },
+                  },
+                ];
+
+                return (
+                  <ReusableTable
+                    data={sentTickets}
+                    columns={columns}
+                    enablePaymentLinksCalender={false}
+                    onRowClick={(row) => {
+                      handleViewTicket(row.original);
+                    }}
+                  />
+                );
+              })()
             )}
           </>
         )}
@@ -844,10 +981,11 @@ const SupportHeader = () => {
       {/* View Ticket Modal */}
       <GeneralModal
         {...modalProps}
+        withoutCloseButton
         open={isViewModalOpen}
         onOpenChange={setIsViewModalOpen}
         contentProps={{
-          className: "max-w-2xl w-full max-h-[90vh] overflow-y-auto",
+          className: "max-w-2xl w-full max-h-[90vh] overflow-y-auto p-0",
         }}
       >
         {selectedTicket && (
@@ -935,16 +1073,25 @@ const SupportHeader = () => {
                   <label className="text-sm font-medium text-gray-600 mb-2 block">
                     Client
                   </label>
-                  <p className="text-gray-800">{selectedTicket.client}</p>
+                  <p className="text-gray-800 capitalize">
+                    {selectedTicket.client}
+                  </p>
                 </div>
               )}
 
-              {selectedTicket.assignedto && (
+              {(selectedTicket.assignedUser ||
+                selectedTicket.assignedOrganization ||
+                selectedTicket.assignedto) && (
                 <div>
                   <label className="text-sm font-medium text-gray-600 mb-2 block">
                     Assigned To
                   </label>
-                  <p className="text-gray-800">{selectedTicket.assignedto}</p>
+                  <p className="text-gray-800 capitalize">
+                    {selectedTicket.assignedUser?.name ||
+                      selectedTicket.assignedOrganization?.name ||
+                      selectedTicket.assignedto ||
+                      "Unassigned"}
+                  </p>
                 </div>
               )}
 

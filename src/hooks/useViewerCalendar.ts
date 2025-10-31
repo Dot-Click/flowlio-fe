@@ -26,7 +26,7 @@ interface CreateCalendarEventRequest {
   date: string;
   startHour: number;
   endHour: number;
-  calendarType: "education" | "personal" | "meeting";
+  calendarType: "education" | "personal" | "meeting" | "work";
   platform?: "google_meet" | "whatsapp" | "outlook" | "zoom" | "none";
   meetLink?: string;
   whatsappNumber?: string;

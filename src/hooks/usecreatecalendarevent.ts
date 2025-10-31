@@ -8,7 +8,7 @@ export interface CreateCalendarEventRequest {
   date: string; // ISO date string
   startHour: number;
   endHour: number;
-  calendarType: "education" | "personal" | "meeting";
+  calendarType: "work" | "education" | "personal" | "meeting";
   platform?: "google_meet" | "whatsapp" | "outlook" | "zoom" | "none";
   meetLink?: string;
   whatsappNumber?: string;
@@ -25,7 +25,7 @@ export interface CreateCalendarEventResponse {
     date: string;
     startHour: number;
     endHour: number;
-    calendarType: "education" | "personal" | "meeting";
+    calendarType: "work" | "education" | "personal" | "meeting";
     platform: "google_meet" | "whatsapp" | "outlook" | "zoom" | "none";
     meetLink?: string;
     whatsappNumber?: string;
@@ -51,6 +51,8 @@ export const useCreateCalendarEvent = () => {
       console.log("Invalidate and refetch calendar events!", data);
       // Invalidate and refetch calendar events
       queryClient.invalidateQueries({ queryKey: ["calendar-events"] });
+      // Invalidate activities so the new calendar event shows up
+      queryClient.invalidateQueries({ queryKey: ["organization-activities"] });
 
       toast.success("Calendar event created successfully!");
     },

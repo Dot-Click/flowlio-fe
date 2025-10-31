@@ -33,7 +33,7 @@ interface EventFormData {
   date: Date;
   startHour: number;
   endHour: number;
-  calendarType: "education" | "personal" | "meeting";
+  calendarType: "work" | "education" | "personal" | "meeting";
   platform: "google_meet" | "whatsapp" | "outlook" | "zoom" | "none";
   meetLink: string;
   whatsappNumber: string;
@@ -224,6 +224,7 @@ export const EventModal: React.FC<EventModalProps> = ({
               endHour: Number(data.endHour),
               weekStart,
               calendarType: data.calendarType as
+                | "work"
                 | "education"
                 | "personal"
                 | "meeting",
@@ -429,15 +430,14 @@ export const EventModal: React.FC<EventModalProps> = ({
           <Box className="mb-3.5">
             <label className="font-normal text-sm">Calendar</label>
             <Flex className="gap-1.5 mt-1">
-              <Flex
-                onClick={() => setValue("calendarType", "education")}
-                className={`flex items-center gap-1 text-sm border-none rounded-md px-2 py-1.5 cursor-pointer font-light ${
-                  calendarType === "education"
-                    ? "bg-cyan-100"
-                    : "bg-transparent"
+              <button
+                type="button"
+                onClick={() => setValue("calendarType", "work")}
+                className={`flex items-center gap-1.5 text-sm border-none rounded-md px-3 py-1.5 cursor-pointer font-light ${
+                  calendarType === "work" ? "bg-cyan-100" : "bg-transparent"
                 }`}
               >
-                {calendarType === "education" ? (
+                {calendarType === "work" ? (
                   <img
                     src={WhatsAppCheckBoxIcon}
                     alt="Work"
@@ -445,17 +445,17 @@ export const EventModal: React.FC<EventModalProps> = ({
                   />
                 ) : null}
                 Work
-              </Flex>
+              </button>
               <button
                 type="button"
-                onClick={() => setValue("calendarType", "personal")}
+                onClick={() => setValue("calendarType", "education")}
                 className={`flex items-center gap-1.5 text-sm border-none rounded-md px-3 py-1.5 cursor-pointer font-light ${
-                  calendarType === "personal"
+                  calendarType === "education"
                     ? "bg-indigo-100"
                     : "bg-transparent"
                 }`}
               >
-                {calendarType === "personal" ? (
+                {calendarType === "education" ? (
                   <img
                     src={EducationCheckBoxIcon}
                     alt="Education"

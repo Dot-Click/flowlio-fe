@@ -168,9 +168,25 @@ export const CreateProject = () => {
   });
 
   // Populate form with project data when in edit mode
+  // Wait for all data to be loaded before resetting the form
   useEffect(() => {
-    if (isEditMode && projectData?.data) {
+    if (
+      isEditMode &&
+      projectData?.data &&
+      !isLoadingProject &&
+      clientsData &&
+      usersData &&
+      !isLoadingClients &&
+      !isLoadingUsers
+    ) {
       const project = projectData.data;
+      console.log("🔄 Resetting form with project data:", {
+        clientId: project.clientId,
+        assignedTo: project.assignedTo,
+        clientsAvailable: Array.isArray(clientsData?.data),
+        usersAvailable: Array.isArray(usersData?.data),
+      });
+
       form.reset({
         name: project.projectName || "",
         projectNumber: project.projectNumber || "",
@@ -184,8 +200,41 @@ export const CreateProject = () => {
         address: project.address || "",
         contractfile: project.contractfile || "",
       });
+
+      // Explicitly set Select values after reset to ensure they're recognized
+      // This ensures the Select components show the selected values even if options load slightly after
+      if (project.clientId) {
+        const clientExists =
+          Array.isArray(clientsData.data) &&
+          clientsData.data.some((c) => c.id === project.clientId);
+        if (clientExists) {
+          form.setValue("clientId", project.clientId, {
+            shouldValidate: false,
+          });
+        }
+      }
+
+      if (project.assignedTo) {
+        const userExists =
+          Array.isArray(usersData.data) &&
+          usersData.data.some((u) => u.id === project.assignedTo);
+        if (userExists) {
+          form.setValue("assignedTo", project.assignedTo, {
+            shouldValidate: false,
+          });
+        }
+      }
     }
-  }, [isEditMode, projectData, form]);
+  }, [
+    isEditMode,
+    projectData,
+    clientsData,
+    usersData,
+    isLoadingProject,
+    isLoadingClients,
+    isLoadingUsers,
+    form,
+  ]);
 
   // Handle form submission
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -731,11 +780,13 @@ export const CreateProject = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="w-full">
-                        {clientsData?.data?.map((client) => (
-                          <SelectItem key={client.id} value={client.id}>
-                            {client.name}
-                          </SelectItem>
-                        )) || []}
+                        {Array.isArray(clientsData?.data)
+                          ? clientsData.data.map((client) => (
+                              <SelectItem key={client.id} value={client.id}>
+                                {client.name}
+                              </SelectItem>
+                            ))
+                          : []}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -772,11 +823,13 @@ export const CreateProject = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="w-full">
-                        {usersData?.data?.map((user) => (
-                          <SelectItem key={user.id} value={user.id}>
-                            {user.name}
-                          </SelectItem>
-                        )) || []}
+                        {Array.isArray(usersData?.data)
+                          ? usersData.data.map((user) => (
+                              <SelectItem key={user.id} value={user.id}>
+                                {user.name}
+                              </SelectItem>
+                            ))
+                          : []}
                       </SelectContent>
                     </Select>
                     <FormMessage />

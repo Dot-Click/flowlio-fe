@@ -22,7 +22,7 @@ interface GoogleCalendarIntegrationProps {
 export const GoogleCalendarIntegration: React.FC<
   GoogleCalendarIntegrationProps
 > = ({ onSyncComplete }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [showSyncOptions, setShowSyncOptions] = useState(false);
 
   const {
@@ -102,12 +102,12 @@ export const GoogleCalendarIntegration: React.FC<
             size="sm"
             variant="ghost"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1 h-6 w-6"
+            className="p-1 h-6 w-6 cursor-pointer"
           >
             {isExpanded ? (
-              <ChevronUp className="size-3" />
+              <ChevronUp className="size-4 cursor-pointer text-gray-500 transition-transform duration-300" />
             ) : (
-              <ChevronDown className="size-3" />
+              <ChevronDown className="size-4 cursor-pointer text-gray-500 transition-transform duration-300" />
             )}
           </Button>
         </Flex>

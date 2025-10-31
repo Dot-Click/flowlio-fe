@@ -90,7 +90,7 @@ export const useViewerSupportTickets = (filters?: {
 
       const response = await axios.get<
         ApiResponse<{ tickets: ViewerSupportTicket[]; pagination: any }>
-      >(`/viewer-support-tickets?${params.toString()}`);
+      >(`/viewer/support-tickets?${params.toString()}`);
       return response.data;
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -107,7 +107,7 @@ export const useCreateViewerSupportTicket = () => {
   >({
     mutationFn: async (data) => {
       const response = await axios.post<ApiResponse<ViewerSupportTicket>>(
-        "/viewer-support-tickets",
+        "/viewer/support-tickets",
         data
       );
       return response.data;
@@ -137,7 +137,7 @@ export const useUpdateViewerSupportTicket = () => {
   >({
     mutationFn: async ({ id, data }) => {
       const response = await axios.put<ApiResponse<ViewerSupportTicket>>(
-        `/viewer-support-tickets/${id}`,
+        `/viewer/support-tickets/${id}`,
         data
       );
       return response.data;
@@ -163,7 +163,7 @@ export const useDeleteViewerSupportTicket = () => {
   return useMutation<ApiResponse<void>, ErrorWithMessage, { id: string }>({
     mutationFn: async ({ id }) => {
       const response = await axios.delete<ApiResponse<void>>(
-        `/viewer-support-tickets/${id}`
+        `/viewer/support-tickets/${id}`
       );
       return response.data;
     },

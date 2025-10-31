@@ -96,7 +96,7 @@ export const SearchBox: React.FC<{
           <h1 className="max-md:hidden">Search...</h1>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] top-20" withoutCloseButton>
+      <DialogContent className="sm:max-w-[425px] top-40" withoutCloseButton>
         <Stack className={className}>
           <Input
             placeholder="Search projects or tasks..."

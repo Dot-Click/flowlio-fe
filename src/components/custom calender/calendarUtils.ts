@@ -9,7 +9,7 @@ export type CalendarEvent = {
   startHour: number;
   endHour: number;
   weekStart?: string; // Calculated field for UI
-  calendarType: "education" | "personal" | "meeting";
+  calendarType: "work" | "education" | "personal" | "meeting";
   platform?: "google_meet" | "whatsapp" | "outlook" | "zoom" | "none";
   meetLink?: string;
   whatsappNumber?: string;

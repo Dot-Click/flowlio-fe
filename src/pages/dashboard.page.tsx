@@ -24,6 +24,8 @@ import Img2 from "/dashboard/prostat2.svg";
 import Img3 from "/dashboard/projstat3.svg";
 
 const DashboardPage = () => {
+  document.title = "User Dashboard - Flowlio";
+
   // Fetch real data for stats
   const { data: totalClientsResponse } = useFetchOrganizationTotalClients();
   const { data: activeProjectsResponse } = useFetchOrganizationActiveProjects();
@@ -78,7 +80,6 @@ const DashboardPage = () => {
         { name: "Finished", value: 0, icon: Img1, color: "#3f53b5" },
       ];
 
-  document.title = "User Dashboard - Flowlio";
 
   return (
     <Stack className="pt-5 gap-3 px-2">
