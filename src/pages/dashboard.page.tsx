@@ -80,7 +80,7 @@ const DashboardPage = () => {
         { name: "Finished", value: 0, icon: Img1, color: "#3f53b5" },
       ];
 
-
+  // issue fixed
   return (
     <Stack className="pt-5 gap-3 px-2">
       <Stats stats={stats} />
