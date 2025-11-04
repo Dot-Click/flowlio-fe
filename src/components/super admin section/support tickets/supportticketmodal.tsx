@@ -167,10 +167,16 @@ export const SupportTicketModal = ({
                     Assigned To
                   </p>
                   <p className="text-sm text-gray-700">
-                    {ticket.assignedOrganization?.name ||
+                    {ticket.assignedUser?.name ||
+                      ticket.assignedOrganization?.name ||
                       ticket.assignedto ||
                       "Unassigned"}
                   </p>
+                  {/* {ticket.assignedUser?.email && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      {ticket.assignedUser.email}
+                    </p>
+                  )} */}
                 </Box>
               </Flex>
             </Box>

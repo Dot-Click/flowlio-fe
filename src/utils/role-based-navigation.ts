@@ -37,6 +37,11 @@ const viewerNavItems: NavItem[] = [
     title: "Support Tickets",
     icon: React.createElement(MessageCircleQuestion),
   },
+  // {
+  //   url: "/dashboard/notifications",
+  //   title: "Notifications",
+  //   icon: React.createElement(Bell),
+  // },
   {
     url: "/dashboard/settings",
     title: "Settings",
@@ -73,6 +78,11 @@ const operatorNavItems: NavItem[] = [
     title: "Support Tickets",
     icon: React.createElement(MessageCircleQuestion),
   },
+  // {
+  //   url: "/dashboard/notifications",
+  //   title: "Notifications",
+  //   icon: React.createElement(Bell),
+  // },
   {
     url: "/dashboard/settings",
     title: "Settings",
@@ -143,7 +153,11 @@ const userNavItems: NavItem[] = [
     title: "Support Tickets",
     icon: React.createElement(MessageCircleQuestion),
   },
-
+  // {
+  //   url: "/dashboard/notifications",
+  //   title: "Notifications",
+  //   icon: React.createElement(Bell),
+  // },
   {
     url: "/dashboard/settings",
     title: "Settings",
@@ -215,6 +229,11 @@ const subAdminNavItems: NavItem[] = [
     title: "Support Tickets",
     icon: React.createElement(MessageCircleQuestion),
   },
+  // {
+  //   url: "/dashboard/notifications",
+  //   title: "Notifications",
+  //   icon: React.createElement(Bell),
+  // },
   {
     url: "/dashboard/settings",
     title: "Settings",
@@ -285,6 +304,11 @@ const superAdminNavItems: NavItem[] = [
     title: "Support Tickets",
     icon: React.createElement(MessageCircleQuestion),
   },
+  // {
+  //   url: "/dashboard/notifications",
+  //   title: "Notifications",
+  //   icon: React.createElement(Bell),
+  // },
   {
     url: "/dashboard/settings",
     title: "Settings",

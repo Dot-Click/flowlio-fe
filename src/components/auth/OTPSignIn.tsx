@@ -160,7 +160,7 @@ export const OTPSignIn: FC<OTPSignInProps> = ({
               variant="outline"
               onClick={onBack || (() => navigate("/auth/signin"))}
               disabled={isLoading}
-              className="w-full h-12"
+              className="w-full h-12 cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Sign In

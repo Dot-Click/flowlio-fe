@@ -15,10 +15,12 @@ export const SettingsNotification = () => {
     userSubscribeNotifications: boolean;
     newCompanyNotifications: boolean;
     projectCompletionNotifications: boolean;
+    newUserSignupNotifications: boolean;
   }>({
     userSubscribeNotifications: false,
     newCompanyNotifications: false,
     projectCompletionNotifications: false,
+    newUserSignupNotifications: false,
   });
 
   // Get current notification preferences or defaults
@@ -26,13 +28,15 @@ export const SettingsNotification = () => {
     userSubscribeNotifications: true,
     newCompanyNotifications: true,
     projectCompletionNotifications: true,
+    newUserSignupNotifications: true,
   };
 
   const handleToggle = async (
     key:
       | "userSubscribeNotifications"
       | "newCompanyNotifications"
-      | "projectCompletionNotifications",
+      | "projectCompletionNotifications"
+      | "newUserSignupNotifications",
     enabled: boolean
   ) => {
     setLoadingStates((prev) => ({ ...prev, [key]: true }));
@@ -58,6 +62,7 @@ export const SettingsNotification = () => {
         userSubscribeNotifications: "User Subscription",
         newCompanyNotifications: "New Company Registration",
         projectCompletionNotifications: "Project Completion",
+        newUserSignupNotifications: "New User Registration",
       };
 
       if (enabled) {
@@ -98,14 +103,20 @@ export const SettingsNotification = () => {
       description: "Get notified when projects are completed",
       enabled: notificationPrefs.projectCompletionNotifications ?? true,
     },
+    {
+      key: "newUserSignupNotifications" as const,
+      label: "New User Registration",
+      description: "Get notified when new users sign up",
+      enabled: notificationPrefs.newUserSignupNotifications ?? true,
+    },
   ];
 
   return (
     <Box>
       <h1 className="text-xl font-semibold">Notification Preferences</h1>
       <h4 className="max-md:text-sm">
-        Customize alerts for subscriptions, company registrations, and project
-        completions to suit your needs.
+        Customize alerts for user registrations, subscriptions, company
+        registrations, and project completions to suit your needs.
       </h4>
 
       <Stack className="gap-6 mt-8">
@@ -129,11 +140,7 @@ export const SettingsNotification = () => {
                 handleToggle(notification.key, checked)
               }
               disabled={
-                notification.key === "userSubscribeNotifications"
-                  ? loadingStates.userSubscribeNotifications
-                  : notification.key === "newCompanyNotifications"
-                  ? loadingStates.newCompanyNotifications
-                  : loadingStates.projectCompletionNotifications
+                loadingStates[notification.key as keyof typeof loadingStates]
               }
             />
           </Flex>
