@@ -10,6 +10,7 @@ import {
 import { useUser } from "@/providers/user.provider";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 export const SettingsTwoFactor = () => {
   const { data: userData } = useUser();
@@ -18,6 +19,7 @@ export const SettingsTwoFactor = () => {
   const generateOTPMutation = useGenerateOTP();
   const disable2FAMutation = useDisable2FA();
   const enable2FAMutation = useEnable2FA();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Get 2FA status from user data
   const is2FAEnabled = userData?.user?.twoFactorEnabled || false;
@@ -46,6 +48,8 @@ export const SettingsTwoFactor = () => {
         console.log("❌ Disabling 2FA...");
         await disable2FAMutation.mutateAsync({ password: password || "" });
         console.log("✅ 2FA disabled");
+        // Close modal after successful disable
+        setIsModalOpen(false);
       }
     } catch (error) {
       console.error("Failed to toggle 2FA:", error);
@@ -62,6 +66,8 @@ export const SettingsTwoFactor = () => {
       // Refresh user data to reflect the new 2FA status
       queryClient.invalidateQueries({ queryKey: ["user-profile"] });
       queryClient.invalidateQueries({ queryKey: ["user"] });
+      // Close modal after successful enable
+      setIsModalOpen(false);
     } catch (error) {
       console.error("OTP verification failed:", error);
       throw error;
@@ -83,9 +89,29 @@ export const SettingsTwoFactor = () => {
       // Refresh user data to reflect the new 2FA status
       queryClient.invalidateQueries({ queryKey: ["user-profile"] });
       queryClient.invalidateQueries({ queryKey: ["user"] });
+      // Close modal after successful disable
+      setIsModalOpen(false);
     } catch (error) {
       console.error("Failed to disable 2FA:", error);
       throw error;
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  // Wrapper to handle toggle and open modal
+  const handleToggleWithModal = async (enabled: boolean, password?: string) => {
+    // If password is provided, it means we're in the flow (password verified, etc.)
+    // Otherwise, this is the initial switch click - just open the modal
+    if (password !== undefined) {
+      // Password provided means we're in the flow - handle the actual toggle
+      await handleToggle2FA(enabled, password);
+    } else {
+      // Initial switch click - just open the modal
+      // The modal's handleToggle will handle showing the password form
+      setIsModalOpen(true);
     }
   };
 
@@ -101,13 +127,13 @@ export const SettingsTwoFactor = () => {
       </Stack>
 
       <TwoFAModal
-        open={false} // Super admin settings doesn't use modal state
+        open={isModalOpen}
         isEnabled={is2FAEnabled}
-        onToggle={handleToggle2FA}
+        onToggle={handleToggleWithModal}
         onVerifyOTP={handleVerifyOTP}
         onResendOTP={handleResendOTP}
         onDisable2FA={handleDisable2FA}
-        onClose={() => {}} // Empty function for super admin
+        onClose={handleCloseModal}
         userEmail={userData?.user?.email || ""}
       />
     </Flex>

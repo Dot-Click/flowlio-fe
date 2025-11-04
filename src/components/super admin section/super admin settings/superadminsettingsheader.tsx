@@ -91,12 +91,12 @@ export const SuperAdminSettingsHeader = ({ user }: { user: any }) => {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button
+                    {/* <Button
                       className="hover:bg-gray-800/50 cursor-pointer"
                       size={"lg"}
                     >
                       Remove User
-                    </Button>
+                    </Button> */}
                   </TooltipTrigger>
                   <TooltipContent className="mb-1.5">
                     <p>Remove User Account Permanently</p>

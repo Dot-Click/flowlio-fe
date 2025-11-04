@@ -127,16 +127,18 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
       `🔄 TwoFAModal handleToggle called: enabled=${enabled}, isEnabled=${isEnabled}`
     );
 
+    // First, notify parent to open the modal (this updates parent's isModalOpen state)
+    // Call onToggle without password to just open the modal
+    await onToggle(enabled);
+
     if (enabled && !isEnabled) {
       // Enabling 2FA - show password form first
       console.log("📝 Showing password form for 2FA enable");
       setShowEnablePasswordForm(true);
-      modalProps.onOpenChange(true);
     } else if (!enabled && isEnabled) {
       // Disabling 2FA - show password form
       console.log("📝 Showing password form for 2FA disable");
       setShowPasswordForm(true);
-      modalProps.onOpenChange(true);
     }
   };
 
@@ -263,6 +265,9 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
         onOpenChange={(isOpen) => {
           if (!isOpen) {
             onClose();
+          } else {
+            // When modal is opened externally, ensure internal state is synced
+            modalProps.onOpenChange(true);
           }
         }}
         contentProps={{
