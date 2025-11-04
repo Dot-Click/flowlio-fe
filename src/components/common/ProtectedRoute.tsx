@@ -6,6 +6,7 @@ import {
   storeRedirectFrom,
   storeLastVisitedPage,
 } from "@/utils/sessionPersistence.util";
+import { DemoPasswordGuard } from "./demopasswordguard";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -145,7 +146,8 @@ export const ProtectedRoute = ({
   }
 
   // User is authenticated and authorized - render the protected content
-  return <>{children}</>;
+  // Wrap with DemoPasswordGuard to check for password change requirement
+  return <DemoPasswordGuard>{children}</DemoPasswordGuard>;
 };
 
 export const SuperAdminRoute = ({ children }: { children: ReactNode }) => (

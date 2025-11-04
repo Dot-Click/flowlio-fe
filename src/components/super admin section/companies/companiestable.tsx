@@ -217,10 +217,8 @@ export const CompaniesTable = () => {
                 <TooltipTrigger asChild>
                   <Button
                     onClick={() => {
-                      const slug = (row.original.name || "")
-                        .toLowerCase()
-                        .replace(/[^a-z0-9]+/g, "-")
-                        .replace(/(^-|-$)/g, "");
+                      // Use the actual slug field from the database
+                      const slug = row.original.slug;
                       navigate(`/superadmin/companies/details/${slug}`);
                     }}
                     variant="outline"

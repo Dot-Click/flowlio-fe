@@ -24,13 +24,10 @@ export const ViewDetails = () => {
   const organizationId = useMemo(() => {
     if (!slug || !organizationsResponse?.data) return null;
 
-    const organization = organizationsResponse.data.find((org: any) => {
-      const orgSlug = (org.name || "")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
-      return orgSlug === slug;
-    });
+    // Use the actual slug field from the database instead of generating from name
+    const organization = organizationsResponse.data.find(
+      (org: any) => org.slug === slug
+    );
 
     return organization?.id || null;
   }, [slug, organizationsResponse?.data]);

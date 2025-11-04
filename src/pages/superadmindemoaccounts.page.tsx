@@ -23,7 +23,15 @@ import { axios } from "@/configs/axios.config";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { Center } from "@/components/ui/center";
-import { Loader2, X } from "lucide-react";
+import { Loader2, X, Edit, Calendar, Trash } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type DemoOrg = {
   id: string;
@@ -53,16 +61,24 @@ const SuperAdminDemoAccountsPage = () => {
   const [showForm, setShowForm] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [loadingActions, setLoadingActions] = useState<
-    Record<string, "toggle" | "delete" | null>
+    Record<string, "toggle" | "delete" | "edit" | null>
   >({});
+  const [fetchingDemos, setFetchingDemos] = useState(true);
+  const [editingDemo, setEditingDemo] = useState<DemoOrg | null>(null);
+  const [editTrialDays, setEditTrialDays] = useState(7);
+  const [editTrialEndsAt, setEditTrialEndsAt] = useState("");
+  const [convertToClient, setConvertToClient] = useState(false);
 
   const fetchDemos = async () => {
+    setFetchingDemos(true);
     try {
       const res = await axios.get("/superadmin/demo-accounts");
       setDemos(res.data.data || []);
     } catch (e) {
       console.error(e);
       toast.error("Failed to load demo accounts");
+    } finally {
+      setFetchingDemos(false);
     }
   };
 
@@ -175,6 +191,71 @@ const SuperAdminDemoAccountsPage = () => {
       setLoadingActions((prev) => {
         const updated = { ...prev };
         delete updated[organizationId];
+        return updated;
+      });
+    }
+  };
+
+  const handleEditClick = (demo: DemoOrg) => {
+    setEditingDemo(demo);
+    setEditTrialDays(7); // Default to extending by 7 days
+    if (demo.trialEndsAt) {
+      // Set date picker to current trial end date
+      const date = new Date(demo.trialEndsAt);
+      setEditTrialEndsAt(date.toISOString().split("T")[0]);
+    } else {
+      setEditTrialEndsAt("");
+    }
+    setConvertToClient(false);
+  };
+
+  const handleUpdateDemo = async () => {
+    if (!editingDemo) return;
+
+    try {
+      setLoadingActions((prev) => ({
+        ...prev,
+        [editingDemo.id]: "edit",
+      }));
+
+      const payload: {
+        trialDays?: number;
+        trialEndsAt?: string;
+        convertToClient?: boolean;
+      } = {};
+
+      if (convertToClient) {
+        payload.convertToClient = true;
+      } else if (editTrialEndsAt) {
+        // If date is provided, use it directly
+        const date = new Date(editTrialEndsAt);
+        payload.trialEndsAt = date.toISOString();
+      } else if (editTrialDays > 0) {
+        // If days are provided, extend the trial
+        payload.trialDays = editTrialDays;
+      } else {
+        toast.error("Please provide either days to extend or a specific date");
+        return;
+      }
+
+      await axios.put(`/superadmin/demo-accounts/${editingDemo.id}`, payload);
+
+      if (convertToClient) {
+        toast.success("Demo account converted to regular client successfully");
+      } else {
+        toast.success("Trial duration updated successfully");
+      }
+
+      setEditingDemo(null);
+      await fetchDemos();
+    } catch (e: any) {
+      toast.error(
+        e?.response?.data?.message || "Failed to update demo account"
+      );
+    } finally {
+      setLoadingActions((prev) => {
+        const updated = { ...prev };
+        delete updated[editingDemo.id];
         return updated;
       });
     }
@@ -358,90 +439,229 @@ const SuperAdminDemoAccountsPage = () => {
         <h2 className="text-xl font-semibold text-gray-900 mb-4">
           Demo Accounts
         </h2>
-        <div className="overflow-x-auto border border-gray-200 rounded-lg shadow-sm ">
-          <Table className="w-full ">
-            <TableHeader className="bg-gray-100">
-              <TableRow>
-                <TableHead>Organization</TableHead>
-                <TableHead>User</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Trial Ends</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead className="text-center">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {demos.map((d) => (
-                <TableRow key={d.id}>
-                  <TableCell className="font-medium">{d.name}</TableCell>
-                  <TableCell>{d.userName || "-"}</TableCell>
-                  <TableCell>{d.email || "-"}</TableCell>
-                  <TableCell className="capitalize">
-                    {d.demoRole || d.userRole || "-"}
-                  </TableCell>
-                  <TableCell className="capitalize">{d.status}</TableCell>
-                  <TableCell>
-                    {d.trialEndsAt
-                      ? format(new Date(d.trialEndsAt), "PPp")
-                      : "-"}
-                  </TableCell>
-                  <TableCell>
-                    {d.demoCreatedAt
-                      ? format(new Date(d.demoCreatedAt), "PP")
-                      : "-"}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Center className="gap-2">
-                      <Button
-                        variant="ghost"
-                        className={`cursor-pointer border ${
-                          d.status === "suspended" || d.status === "inactive"
-                            ? "hover:bg-green-50 bg-green-50 text-green-700"
-                            : "hover:bg-yellow-50 bg-yellow-50 text-yellow-700"
-                        }`}
-                        onClick={() => handleToggleStatus(d.id, d.status)}
-                        disabled={loadingActions[d.id] !== undefined}
-                      >
-                        {loadingActions[d.id] === "toggle" ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            {d.status === "suspended" || d.status === "inactive"
-                              ? "Reactivating..."
-                              : "Deactivating..."}
-                          </>
-                        ) : (
-                          <>
-                            {d.status === "suspended" || d.status === "inactive"
-                              ? "Reactivate"
-                              : "Deactivate"}
-                          </>
-                        )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        className="hover:bg-red-50 cursor-pointer border bg-red-50 text-red-700"
-                        onClick={() => handleDelete(d.id)}
-                        disabled={loadingActions[d.id] !== undefined}
-                      >
-                        {loadingActions[d.id] === "delete" ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Deleting...
-                          </>
-                        ) : (
-                          <>Delete</>
-                        )}
-                      </Button>
-                    </Center>
-                  </TableCell>
+        {fetchingDemos ? (
+          <Center className="py-12">
+            <div className="flex flex-col items-center gap-4">
+              <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+              <p className="text-sm text-gray-600">Loading demo accounts...</p>
+            </div>
+          </Center>
+        ) : (
+          <div className="overflow-x-auto border border-gray-200 rounded-lg shadow-sm ">
+            <Table className="w-full ">
+              <TableHeader className="bg-gray-100">
+                <TableRow>
+                  <TableHead>Organization</TableHead>
+                  <TableHead>User</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Trial Ends</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead className="text-center">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {demos.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8">
+                      <p className="text-gray-500">No demo accounts found</p>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  demos.map((d) => (
+                    <TableRow key={d.id}>
+                      <TableCell className="font-medium">{d.name}</TableCell>
+                      <TableCell>{d.userName || "-"}</TableCell>
+                      <TableCell>{d.email || "-"}</TableCell>
+                      <TableCell className="capitalize">
+                        {d.demoRole || d.userRole || "-"}
+                      </TableCell>
+                      <TableCell className="capitalize">{d.status}</TableCell>
+                      <TableCell>
+                        {d.trialEndsAt
+                          ? format(new Date(d.trialEndsAt), "PPp")
+                          : "-"}
+                      </TableCell>
+                      <TableCell>
+                        {d.demoCreatedAt
+                          ? format(new Date(d.demoCreatedAt), "PP")
+                          : "-"}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Center className="gap-2">
+                          <Button
+                            variant="ghost"
+                            className={`cursor-pointer border ${
+                              d.status === "suspended" ||
+                              d.status === "inactive"
+                                ? "hover:bg-green-50 bg-green-50 text-green-700"
+                                : "hover:bg-yellow-50 bg-yellow-50 text-yellow-700"
+                            }`}
+                            onClick={() => handleToggleStatus(d.id, d.status)}
+                            disabled={loadingActions[d.id] !== undefined}
+                          >
+                            {loadingActions[d.id] === "toggle" ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                {d.status === "suspended" ||
+                                d.status === "inactive"
+                                  ? "Reactivating..."
+                                  : "Deactivating..."}
+                              </>
+                            ) : (
+                              <>
+                                {d.status === "suspended" ||
+                                d.status === "inactive"
+                                  ? "Reactivate"
+                                  : "Deactivate"}
+                              </>
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            className="hover:bg-blue-50 cursor-pointer border bg-blue-50 text-blue-700"
+                            onClick={() => handleEditClick(d)}
+                            disabled={loadingActions[d.id] !== undefined}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            className="hover:bg-red-50 cursor-pointer border bg-red-50 text-red-700"
+                            onClick={() => handleDelete(d.id)}
+                            disabled={loadingActions[d.id] !== undefined}
+                          >
+                            {loadingActions[d.id] === "delete" ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Deleting...
+                              </>
+                            ) : (
+                              <>
+                                <Trash className="w-4 h-4" />
+                              </>
+                            )}
+                          </Button>
+                        </Center>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </Box>
+
+      {/* Edit Demo Account Dialog */}
+      <Dialog
+        open={!!editingDemo}
+        onOpenChange={(open) => !open && setEditingDemo(null)}
+      >
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Edit Demo Account</DialogTitle>
+            <DialogDescription>
+              Extend trial duration or convert to regular client
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Convert to Client</Label>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="convertToClient"
+                  checked={convertToClient}
+                  onChange={(e) => setConvertToClient(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <Label
+                  htmlFor="convertToClient"
+                  className="text-sm text-gray-700 cursor-pointer"
+                >
+                  Convert this demo account to a regular client account
+                </Label>
+              </div>
+            </div>
+
+            {!convertToClient && (
+              <>
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="editTrialDays"
+                    className="text-sm font-medium"
+                  >
+                    Extend Trial (Days)
+                  </Label>
+                  <Input
+                    id="editTrialDays"
+                    type="number"
+                    min={1}
+                    max={365}
+                    placeholder="7"
+                    value={editTrialDays}
+                    onChange={(e) => setEditTrialDays(Number(e.target.value))}
+                    className="w-full"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Number of days to extend from current trial end date
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="editTrialEndsAt"
+                    className="text-sm font-medium flex items-center gap-2"
+                  >
+                    <Calendar className="w-4 h-4" />
+                    Or Set Specific Date
+                  </Label>
+                  <Input
+                    id="editTrialEndsAt"
+                    type="date"
+                    value={editTrialEndsAt}
+                    onChange={(e) => setEditTrialEndsAt(e.target.value)}
+                    className="w-full"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Set a specific end date for the trial period
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setEditingDemo(null)}
+              disabled={loadingActions[editingDemo?.id || ""] === "edit"}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleUpdateDemo}
+              disabled={
+                loadingActions[editingDemo?.id || ""] === "edit" ||
+                (!convertToClient && !editTrialEndsAt && editTrialDays <= 0)
+              }
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {loadingActions[editingDemo?.id || ""] === "edit" ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Updating...
+                </>
+              ) : convertToClient ? (
+                "Convert to Client"
+              ) : (
+                "Update Trial"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Stack>
   );
 };

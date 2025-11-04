@@ -22,9 +22,30 @@ import img4 from "/dashboard/4.svg";
 import Img1 from "/dashboard/prostat1.svg";
 import Img2 from "/dashboard/prostat2.svg";
 import Img3 from "/dashboard/projstat3.svg";
+import { DemoPasswordChangeModal } from "@/components/dempasswordchangemodal";
+import { useState, useEffect } from "react";
+import { useUserProfile } from "@/hooks/useuserprofile";
+import { useQueryClient } from "@tanstack/react-query";
 
 const DashboardPage = () => {
   document.title = "User Dashboard - Flowlio";
+
+  const { data: userProfile, refetch } = useUserProfile();
+  const [showPasswordChangeModal, setShowPasswordChangeModal] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Check if demo user needs to change password
+  useEffect(() => {
+    if (
+      userProfile?.data?.demoOrgInfo?.isDemo &&
+      !userProfile?.data?.demoOrgInfo?.passwordChanged
+    ) {
+      setShowPasswordChangeModal(true);
+    } else {
+      // If password has been changed, hide the modal
+      setShowPasswordChangeModal(false);
+    }
+  }, [userProfile]);
 
   // Fetch real data for stats
   const { data: totalClientsResponse } = useFetchOrganizationTotalClients();
@@ -97,6 +118,19 @@ const DashboardPage = () => {
       </Flex>
 
       <TimeModal />
+
+      <DemoPasswordChangeModal
+        open={showPasswordChangeModal}
+        onOpenChange={(open) => {
+          // Close modal immediately when password is changed
+          setShowPasswordChangeModal(false);
+          if (!open) {
+            // Refetch user profile after password change to update the state
+            queryClient.invalidateQueries({ queryKey: ["user-profile"] });
+            refetch();
+          }
+        }}
+      />
     </Stack>
   );
 };

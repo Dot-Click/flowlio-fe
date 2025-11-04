@@ -16,8 +16,12 @@ import { Button } from "../ui/button";
 import { Stack } from "../ui/stack";
 import { Input } from "../ui/input";
 import { Flex } from "../ui/flex";
-import { useEffect, type FC } from "react";
+import { useEffect, useState, type FC } from "react";
 import { z } from "zod";
+import { useSearchParams } from "react-router";
+import { toast } from "sonner";
+import { RefreshCw } from "lucide-react";
+import { authClient } from "@/providers/user.provider";
 
 const formSchema = z
   .object({
@@ -45,6 +49,14 @@ export const ResetPasswordForm: FC = () => {
     document.title = "Reset Password - Flowlio";
   }, []);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Get token from URL query parameter (from email reset link)
+  // Better Auth redirects with ?token=XXX or ?error=INVALID_TOKEN
+  const token = searchParams.get("token") || "";
+  const error = searchParams.get("error");
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -53,9 +65,57 @@ export const ResetPasswordForm: FC = () => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-    navigate("/auth/reset-success");
+  // Check if token exists or if there's an error
+  useEffect(() => {
+    if (error === "INVALID_TOKEN" || (!token && error)) {
+      toast.error(
+        "Invalid or expired reset token. Please request a new password reset."
+      );
+      navigate("/auth/verify-email");
+    } else if (!token) {
+      toast.error(
+        "Invalid or missing reset token. Please request a new password reset."
+      );
+      navigate("/auth/verify-email");
+    }
+  }, [token, error, navigate]);
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!token) {
+      toast.error("Invalid reset token. Please request a new password reset.");
+      navigate("/auth/verify-email");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Use Better Auth's resetPassword with token from email link
+      const { error } = await authClient.resetPassword({
+        newPassword: values.password,
+        token: token,
+      });
+
+      if (error) {
+        toast.error(
+          error.message || "Failed to reset password. Please try again."
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      // Success
+      toast.success(
+        "Password reset successfully! You can now login with your new password."
+      );
+      navigate("/auth/signin");
+    } catch (error: any) {
+      console.error("Error resetting password:", error);
+      toast.error(
+        error?.response?.data?.message ||
+          "Failed to reset password. Please try again."
+      );
+      setIsLoading(false);
+    }
   };
 
   const password = form.watch().password;
@@ -149,9 +209,18 @@ export const ResetPasswordForm: FC = () => {
 
             <Button
               size="xl"
-              className="bg-[#1797B9] text-white rounded-full cursor-pointer hover:bg-[#1797B9]/80"
+              type="submit"
+              disabled={isLoading || !token}
+              className="bg-[#1797B9] text-white rounded-full cursor-pointer hover:bg-[#1797B9]/80 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Change Password
+              {isLoading ? (
+                <span className="inline-flex items-center">
+                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                  Resetting Password...
+                </span>
+              ) : (
+                "Reset Password"
+              )}
             </Button>
           </form>
         </Form>

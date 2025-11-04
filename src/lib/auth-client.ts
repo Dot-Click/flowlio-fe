@@ -7,9 +7,13 @@ export const authClient = createAuthClient({
 });
 
 // Export the email OTP methods for easy use
+// Note: checkVerificationOtp exists at runtime but may not be in TypeScript types
+const emailOtpClient = authClient.emailOtp as any;
 export const emailOTP = {
   sendVerificationOTP: authClient.emailOtp.sendVerificationOtp,
+  checkVerificationOTP: emailOtpClient.checkVerificationOtp,
   verifyOTP: authClient.emailOtp.verifyEmail,
+  resetPassword: authClient.emailOtp.resetPassword,
   signInWithOTP: authClient.signIn.emailOtp,
 };
 

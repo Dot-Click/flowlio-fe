@@ -34,6 +34,10 @@ interface UserProfile {
     smsNotifications: boolean;
     [key: string]: any;
   };
+  demoOrgInfo?: {
+    isDemo: boolean;
+    passwordChanged: boolean;
+  } | null;
 }
 
 export const useUserProfile = (options?: { enabled?: boolean }) => {

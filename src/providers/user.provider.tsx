@@ -55,7 +55,7 @@ type Data = {
 };
 
 interface ContextData {
-  refetchUser: () => void;
+  refetchUser: () => Promise<void>;
   isLoading: boolean;
   data: Data | null;
   isSuperAdmin: boolean;
