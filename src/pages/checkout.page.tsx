@@ -1,6 +1,5 @@
 import { useLocation, useNavigate } from "react-router";
 import { Box } from "@/components/ui/box";
-import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Navbar } from "@/components/user section/navbar/navbar";
 import { Flex } from "@/components/ui/flex";
@@ -8,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useUser } from "@/providers/user.provider";
 import { useFetchPublicPlans } from "@/hooks/usefetchplans";
-import { useCreateOrganizationWithPlan } from "@/hooks/usecreateorganization";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -20,6 +18,12 @@ import {
   FormMessage,
   FormControl,
 } from "@/components/ui/form";
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import { Button } from "@/components/ui/button";
+import {
+  useCreatePayPalOrder,
+  useCapturePayPalOrder,
+} from "@/hooks/usePayPalPayment";
 
 // Function to convert database features to display format
 const formatPlanFeatures = (planFeatures: any) => {
@@ -42,11 +46,6 @@ const formSchema = z.object({
   organizationName: z
     .string()
     .min(1, { message: "Organization name is required" }),
-  cardholderName: z.string().min(1, { message: "Cardholder name is required" }),
-  cardNumber: z.string().min(13, { message: "Valid card number is required" }),
-  expiryMonth: z.string().min(1, { message: "Expiry month is required" }),
-  expiryYear: z.string().min(1, { message: "Expiry year is required" }),
-  cvc: z.string().min(3, { message: "CVC is required" }),
 });
 
 const CheckoutPage = () => {
@@ -58,8 +57,12 @@ const CheckoutPage = () => {
   const navigate = useNavigate();
   const { data: userData, isLoading: userLoading } = useUser();
   const { data: plansResponse } = useFetchPublicPlans();
-  const createOrganizationMutation = useCreateOrganizationWithPlan();
+  const createPayPalOrderMutation = useCreatePayPalOrder();
+  const capturePayPalOrderMutation = useCapturePayPalOrder();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isBackendDemoMode, setIsBackendDemoMode] = useState<boolean | null>(
+    null
+  );
 
   const selectedPlanIndex = location.state?.selectedPlan ?? null;
   const createOrganization = location.state?.createOrganization;
@@ -108,24 +111,10 @@ const CheckoutPage = () => {
     (_, index) => index === finalPlanIndex
   );
 
-  // Debug logging for plan selection
-  console.log("🔍 Plan selection debug:", {
-    selectedPlanIndex,
-    locationState: location.state,
-    plan,
-    planDetails,
-    plansResponse: plansResponse?.data,
-  });
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       organizationName: "",
-      cardholderName: userData?.user?.name || "",
-      cardNumber: "4444 4444 4444 4444",
-      expiryMonth: "08",
-      expiryYear: "2025",
-      cvc: "123",
     },
   });
 
@@ -155,44 +144,102 @@ const CheckoutPage = () => {
       return;
     }
 
-    // Pre-fill form with user data if available
-    if (userData?.user) {
-      form.setValue("cardholderName", userData.user.name || "");
-    }
-
     window.scrollTo(0, 0);
-  }, [plan, navigate, userData, userLoading, finalPlanIndex, form]);
+  }, [plan, navigate, userData, userLoading, finalPlanIndex]);
 
-  // Add a separate effect to handle authentication state changes
-  useEffect(() => {
-    // If user becomes authenticated and we have a plan, we can proceed
-    if (userData?.user && plan && !userLoading) {
-      // User is authenticated and we have a plan, pre-fill the form
-      form.setValue("cardholderName", userData.user.name || "");
+  // Handle PayPal order creation
+  const handlePayPalCreateOrder = async (): Promise<string> => {
+    if (!selectedPlan) {
+      const errorMsg = "Plan not selected";
+      console.error("[PayPal] Error:", errorMsg);
+      toast.error(errorMsg);
+      throw new Error(errorMsg);
     }
-  }, [userData?.user, plan, userLoading, form]);
 
-  // Add debug logging to understand the flow
-  useEffect(() => {
-    console.log("🔍 Checkout page state:", {
-      hasPlan: !!plan,
-      planIndex: finalPlanIndex,
-      userLoading,
-      hasUser: !!userData?.user,
-      userId: userData?.user?.id,
-      userEmail: userData?.user?.email,
-      locationState: window.history.state?.usr,
-    });
-  }, [plan, finalPlanIndex, userLoading, userData]);
+    // Validate organization name if creating organization
+    if (createOrganization) {
+      // Trigger form validation first
+      const isValid = await form.trigger("organizationName");
+      if (!isValid) {
+        const errorMsg = "Please enter a valid organization name";
+        console.error("[PayPal] Error:", errorMsg);
+        toast.error(errorMsg);
+        throw new Error(errorMsg);
+      }
 
-  // Log when the component mounts
-  useEffect(() => {
-    console.log("🚀 Checkout page mounted");
-    console.log("📋 Location state:", window.history.state?.usr);
-    console.log("📋 Current URL:", window.location.href);
-  }, []);
+      const formData = form.getValues();
+      if (
+        !formData.organizationName ||
+        formData.organizationName.trim() === ""
+      ) {
+        const errorMsg = "Please enter an organization name";
+        console.error("[PayPal] Error:", errorMsg);
+        toast.error(errorMsg);
+        throw new Error(errorMsg);
+      }
+    }
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    try {
+      const planPrice = parseFloat(
+        selectedPlan.price.toString().replace("$", "")
+      );
+
+      console.log("[PayPal] Creating order:", {
+        planId: selectedPlan.id,
+        amount: planPrice,
+        currency: "USD",
+      });
+
+      const response = await createPayPalOrderMutation.mutateAsync({
+        planId: selectedPlan.id,
+        amount: planPrice,
+        currency: "USD",
+      });
+
+      console.log("[PayPal] Order created:", response.data);
+
+      // Check if backend is in demo mode (returns demo order IDs)
+      if (
+        response.data?.orderId &&
+        response.data.orderId.startsWith("demo_order_")
+      ) {
+        console.log(
+          "[PayPal] Demo order detected - Backend is in demo mode. PayPal SDK cannot process demo orders."
+        );
+        // Mark backend as demo mode
+        setIsBackendDemoMode(true);
+        // Don't return the demo order ID to PayPal SDK - it will cause an error
+        // Instead, throw an error that will be caught and the user can use the demo button
+        const errorMsg =
+          "PayPal is not configured on the server. Please use the 'Complete Demo Payment' button below.";
+        console.error("[PayPal] Error:", errorMsg);
+        toast.error(errorMsg);
+        throw new Error(errorMsg);
+      }
+
+      // If we get a real PayPal order ID, backend has PayPal configured
+      if (response.data?.orderId) {
+        setIsBackendDemoMode(false);
+        return response.data.orderId;
+      }
+
+      const errorMsg = "Failed to create PayPal order - no order ID returned";
+      console.error("[PayPal] Error:", errorMsg, response);
+      toast.error(errorMsg);
+      throw new Error(errorMsg);
+    } catch (error: any) {
+      console.error("[PayPal] Error creating order:", error);
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to create PayPal order. Please try again.";
+      toast.error(errorMessage);
+      throw error;
+    }
+  };
+
+  // Handle PayPal order approval
+  const handlePayPalApprove = async (data: { orderID: string }) => {
     if (!userData?.user || !selectedPlan) {
       toast.error("User or plan information is missing");
       return;
@@ -201,46 +248,83 @@ const CheckoutPage = () => {
     setIsProcessing(true);
 
     try {
-      // DEMO: Simulate payment processing instead of calling the API
-      console.log("Demo: Simulating payment processing...");
+      const formData = form.getValues();
 
-      // Simulate payment processing delay
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Capture the PayPal order with organization details
+      // This will create the organization automatically after successful payment
+      const captureResponse = await capturePayPalOrderMutation.mutateAsync({
+        orderId: data.orderID,
+        userId: userData.user.id,
+        organizationName: createOrganization
+          ? formData.organizationName
+          : undefined,
+        planId: selectedPlan.id,
+      });
 
-      // Simulate successful payment
-      console.log("Demo: Payment processed successfully!");
-      toast.success("Payment processed successfully! (Demo Mode)");
+      if (captureResponse.data?.status === "COMPLETED") {
+        toast.success("Payment processed successfully!");
 
-      // Then, create organization with plan
-      if (createOrganization) {
-        try {
-          await createOrganizationMutation.mutateAsync({
-            userId: userData.user.id,
-            organizationName: data.organizationName,
-            planId: selectedPlan.id,
-          });
-
+        // If organization was created, it's already done in the backend
+        if (captureResponse.data?.organization) {
           toast.success("Organization created successfully!");
-        } catch (orgError) {
-          console.error("Organization creation error:", orgError);
-          toast.error(
-            "Payment successful but organization setup failed. Please contact support."
-          );
-          setIsProcessing(false);
-          return;
         }
-      }
 
-      // Redirect to dashboard after successful setup
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1500);
-    } catch (error) {
-      console.error("Checkout error:", error);
-      toast.error("Checkout failed. Please try again.");
+        // Redirect to dashboard after successful setup
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1500);
+      } else {
+        toast.error("Payment was not completed. Please try again.");
+      }
+    } catch (error: any) {
+      console.error("Error capturing PayPal order:", error);
+      toast.error(
+        error?.response?.data?.message ||
+          "Failed to process payment. Please try again."
+      );
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  // Handle PayPal errors
+  const handlePayPalError = (error: any) => {
+    console.error("[PayPal] SDK Error:", error);
+    console.error("[PayPal] Error details:", JSON.stringify(error, null, 2));
+
+    // Check if error is related to demo orders
+    if (
+      error?.err === "INVALID_RESOURCE_ID" ||
+      error?.message?.includes("INVALID_RESOURCE_ID")
+    ) {
+      const errorMessage =
+        "Demo orders cannot be processed through PayPal. Please use the 'Complete Demo Payment' button instead.";
+      toast.error(errorMessage);
+      setIsProcessing(false);
+      return;
+    }
+
+    // Provide more specific error messages
+    let errorMessage = "An error occurred with PayPal. Please try again.";
+
+    if (error?.message) {
+      errorMessage = `PayPal Error: ${error.message}`;
+    } else if (typeof error === "string") {
+      errorMessage = `PayPal Error: ${error}`;
+    } else if (error?.err) {
+      errorMessage = `PayPal Error: ${error.err}`;
+    }
+
+    toast.error(errorMessage);
+    setIsProcessing(false);
+  };
+
+  // Format price for display
+  const formatPrice = (price: string | number | undefined): string => {
+    if (!price || price === "Free") return "Free";
+    const priceStr = price.toString();
+    if (priceStr.startsWith("$")) return priceStr;
+    return `$${priceStr}`;
   };
 
   if (!plan || userLoading) {
@@ -256,21 +340,31 @@ const CheckoutPage = () => {
     );
   }
 
-  return (
-    <Box className="min-h-screen bg-gray-50 max-md:p-4">
-      <Navbar />
+  // Get PayPal client ID from environment
+  // Note: Vite requires VITE_ prefix for environment variables to be exposed to client
+  const paypalClientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
+  const isFrontendPayPalConfigured =
+    paypalClientId && paypalClientId !== "" && paypalClientId !== "sandbox";
 
-      {/* Demo Mode Indicator */}
-      <Box className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
-        <Flex className="items-center">
-          <Box className="text-sm">
-            <strong>Demo Mode:</strong> This is a demonstration. No actual
-            payment will be processed.
-          </Box>
-        </Flex>
-      </Box>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+  // Check if backend is in demo mode (extract to avoid type narrowing issues)
+  const isBackendInDemoMode = isBackendDemoMode === true;
+
+  // PayPal is only fully configured if both frontend AND backend have credentials
+  // If backend is in demo mode, we should hide PayPal buttons and show demo button
+  const isPayPalFullyConfigured =
+    isFrontendPayPalConfigured && !isBackendInDemoMode;
+
+  return (
+    <PayPalScriptProvider
+      options={{
+        clientId: paypalClientId || "sb", // Use 'sb' as minimal placeholder, but PayPal won't work without real ID
+        currency: "USD",
+      }}
+    >
+      <Box className="min-h-screen bg-gray-50 max-md:p-4">
+        <Navbar />
+
+        <Form {...form}>
           <Flex className="max-w-5xl mx-auto mt-3 items-start max-md:items-center flex-col md:flex-row gap-6">
             {/* Left: Plan Info */}
             <Box className="max-md:w-full flex-1 bg-gradient-to-r from-indigo-100 to-red-50 rounded-lg shadow p-8">
@@ -278,8 +372,7 @@ const CheckoutPage = () => {
                 {plan?.title || "Plan Details"}
               </h2>
               <p className="text-lg mb-1">
-                {plan?.price ? `$${plan.price}` : "Free"} /{" "}
-                {plan?.duration || "Trial"}
+                {formatPrice(plan?.price)} / {plan?.duration || "Trial"}
               </p>
               <p className="mb-4">
                 {plan?.description || "Plan description not available"}
@@ -312,25 +405,10 @@ const CheckoutPage = () => {
                   <p className="text-sm text-gray-600">{userData.user.email}</p>
                 </Box>
               )}
-
-              {/* Debug Info (remove in production) */}
-              {process.env.NODE_ENV === "development" && (
-                <Box className="mt-4 p-3 bg-gray-100 border border-gray-300 rounded text-xs">
-                  <p>
-                    <strong>Debug:</strong> Plan Index: {finalPlanIndex}
-                  </p>
-                  <p>
-                    <strong>Plan Title:</strong> {plan?.title}
-                  </p>
-                  <p>
-                    <strong>Plan Price:</strong> {plan?.price}
-                  </p>
-                </Box>
-              )}
             </Box>
 
             {/* Right: Organization & Payment Details */}
-            <Box className="h-auto bg-gradient-to-r from-red-50 to-indigo-100 rounded-lg shadow p-8">
+            <Box className="h-auto bg-gradient-to-r from-red-50 to-indigo-100 rounded-lg shadow p-8 w-full md:w-auto">
               {createOrganization && (
                 <>
                   <h2 className="text-xl font-semibold mb-4 font-Outfit">
@@ -358,156 +436,221 @@ const CheckoutPage = () => {
                 </>
               )}
 
-              <h3 className="font-semibold mb-2">Payment Details</h3>
-              <Flex className="mb-4">
-                <Button variant="outline" className="flex-1 cursor-pointer">
-                  <img
-                    src="/checkout/stripe.svg"
-                    alt="stripe"
-                    className="w-14 h-8 cursor-pointer hover:scale-110 transition-all duration-300"
-                  />
-                </Button>
-                <Button variant="outline" className="flex-1 cursor-pointer">
-                  <img
-                    src="/checkout/gpay.webp"
-                    alt="googlepay"
-                    className="w-10 h-5 cursor-pointer hover:scale-110 transition-all duration-300"
-                  />
-                </Button>
-              </Flex>
+              <h3 className="font-semibold mb-4">Payment Method</h3>
 
-              <FormField
-                control={form.control}
-                name="cardholderName"
-                render={({ field }) => (
-                  <FormItem className="mb-2">
-                    <FormLabel className="font-normal">
-                      Cardholder Name *
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        className="border rounded-lg p-2 w-full bg-white h-12"
-                        placeholder="Name on card"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Show demo button if PayPal is not fully configured OR backend is in demo mode */}
+              {!isPayPalFullyConfigured || isBackendInDemoMode ? (
+                <>
+                  {/* Demo Payment Button - for testing without PayPal SDK */}
+                  <Box className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="font-semibold text-green-800 mb-2">
+                      Demo Payment Mode
+                    </p>
+                    <p className="text-green-700 text-sm mb-3">
+                      {isBackendInDemoMode
+                        ? "PayPal is not configured on the server. Use the demo payment button to test the complete flow."
+                        : "PayPal is not fully configured. Use the demo payment button to test the complete payment and organization creation flow."}
+                    </p>
+                    <Button
+                      onClick={async () => {
+                        if (!selectedPlan || !userData?.user) {
+                          toast.error("Missing plan or user information");
+                          return;
+                        }
 
-              <FormField
-                control={form.control}
-                name="cardNumber"
-                render={({ field }) => (
-                  <FormItem className="mb-2">
-                    <FormLabel className="font-normal">Card Number *</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="border rounded-lg p-2 w-full bg-white h-12"
-                        placeholder="1234 5678 9012 3456"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                        setIsProcessing(true);
+                        try {
+                          // Validate organization name if needed
+                          if (createOrganization) {
+                            const isValid = await form.trigger(
+                              "organizationName"
+                            );
+                            if (!isValid) {
+                              toast.error(
+                                "Please enter a valid organization name"
+                              );
+                              setIsProcessing(false);
+                              return;
+                            }
+                          }
 
-              <Flex className="gap-2 mb-4">
-                <FormField
-                  control={form.control}
-                  name="expiryMonth"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel className="font-normal">
-                        Expiry Month *
-                      </FormLabel>
-                      <FormControl>
-                        <select
-                          {...field}
-                          className="w-full bg-white rounded-lg border border-gray-100 px-4 py-3 text-sm focus:border-gray-400"
-                        >
-                          <option value="">MM</option>
-                          {Array.from({ length: 12 }, (_, i) => i + 1).map(
-                            (month) => (
-                              <option
-                                key={month}
-                                value={month.toString().padStart(2, "0")}
-                              >
-                                {month.toString().padStart(2, "0")}
-                              </option>
-                            )
-                          )}
-                        </select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                          // Create demo order
+                          const planPrice = parseFloat(
+                            selectedPlan.price.toString().replace("$", "")
+                          );
+
+                          const orderResponse =
+                            await createPayPalOrderMutation.mutateAsync({
+                              planId: selectedPlan.id,
+                              amount: planPrice,
+                              currency: "USD",
+                            });
+
+                          if (orderResponse.data?.orderId) {
+                            // Mark backend demo mode if we get a demo order
+                            if (
+                              orderResponse.data.orderId.startsWith(
+                                "demo_order_"
+                              )
+                            ) {
+                              setIsBackendDemoMode(true);
+                            }
+
+                            // Process demo order directly (bypass PayPal SDK)
+                            const formData = form.getValues();
+                            const captureResponse =
+                              await capturePayPalOrderMutation.mutateAsync({
+                                orderId: orderResponse.data.orderId,
+                                userId: userData.user.id,
+                                organizationName: createOrganization
+                                  ? formData.organizationName
+                                  : undefined,
+                                planId: selectedPlan.id,
+                              });
+
+                            if (captureResponse.data?.status === "COMPLETED") {
+                              toast.success(
+                                "Demo payment processed successfully!"
+                              );
+                              if (
+                                createOrganization &&
+                                captureResponse.data?.organization
+                              ) {
+                                toast.success(
+                                  "Organization created successfully!"
+                                );
+                              }
+                              setTimeout(() => {
+                                navigate("/dashboard");
+                              }, 1500);
+                            } else {
+                              toast.error(
+                                "Payment was not completed. Please try again."
+                              );
+                            }
+                          }
+                        } catch (error: any) {
+                          console.error("Demo payment error:", error);
+                          toast.error(
+                            error?.response?.data?.message ||
+                              error?.message ||
+                              "Failed to process demo payment"
+                          );
+                        } finally {
+                          setIsProcessing(false);
+                        }
+                      }}
+                      disabled={isProcessing || !selectedPlan}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white py-3"
+                    >
+                      {isProcessing
+                        ? "Processing Demo Payment..."
+                        : "Complete Demo Payment"}
+                    </Button>
+                    <p className="text-xs text-gray-500 mt-2 text-center">
+                      This simulates a successful payment and creates your
+                      organization
+                    </p>
+                  </Box>
+
+                  {/* Configuration Instructions */}
+                  {!isFrontendPayPalConfigured && (
+                    <Box className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <p className="font-semibold text-yellow-800 mb-2">
+                        PayPal Not Configured
+                      </p>
+                      <p className="text-yellow-700 text-sm mb-3">
+                        To enable real PayPal payments, please configure PayPal
+                        credentials.
+                      </p>
+                      <div className="text-xs text-yellow-600 bg-yellow-100 p-2 rounded">
+                        <p className="font-semibold mb-1">
+                          Steps to configure:
+                        </p>
+                        <ol className="list-decimal list-inside space-y-1">
+                          <li>
+                            Go to{" "}
+                            <a
+                              href="https://developer.paypal.com"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline"
+                            >
+                              PayPal Developer Dashboard
+                            </a>
+                          </li>
+                          <li>
+                            Create a sandbox app to get your Client ID and
+                            Secret
+                          </li>
+                          <li>
+                            Frontend: Add{" "}
+                            <code className="bg-yellow-200 px-1 rounded">
+                              VITE_PAYPAL_CLIENT_ID=your_client_id
+                            </code>{" "}
+                            to your .env file
+                          </li>
+                          <li>
+                            Backend: Add{" "}
+                            <code className="bg-yellow-200 px-1 rounded">
+                              PAYPAL_CLIENT_ID=your_client_id
+                            </code>{" "}
+                            and{" "}
+                            <code className="bg-yellow-200 px-1 rounded">
+                              PAYPAL_CLIENT_SECRET=your_secret
+                            </code>{" "}
+                            to your backend .env file
+                          </li>
+                          <li>Restart both frontend and backend servers</li>
+                        </ol>
+                      </div>
+                    </Box>
                   )}
-                />
+                </>
+              ) : (
+                <>
+                  {/* PayPal Buttons - Only show when fully configured */}
+                  <Box className="mb-4 bg-white rounded-lg p-4 border border-gray-200">
+                    <PayPalButtons
+                      createOrder={handlePayPalCreateOrder}
+                      onApprove={handlePayPalApprove}
+                      onError={handlePayPalError}
+                      onCancel={() => {
+                        toast.info("Payment cancelled");
+                        setIsProcessing(false);
+                      }}
+                      disabled={isProcessing}
+                      style={{
+                        layout: "vertical",
+                        color: "blue",
+                        shape: "rect",
+                        label: "paypal",
+                      }}
+                    />
+                  </Box>
 
-                <FormField
-                  control={form.control}
-                  name="expiryYear"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel className="font-normal">
-                        Expiry Year *
-                      </FormLabel>
-                      <FormControl>
-                        <select
-                          {...field}
-                          className="w-full bg-white rounded-lg border border-gray-100 px-4 py-3 text-sm focus:border-gray-400"
-                        >
-                          <option value="">YYYY</option>
-                          {Array.from(
-                            { length: 10 },
-                            (_, i) => new Date().getFullYear() + i
-                          ).map((year) => (
-                            <option key={year} value={year}>
-                              {year}
-                            </option>
-                          ))}
-                        </select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  {/* PayPal Info Box for Sandbox */}
+                  <Box className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs">
+                    <p className="font-semibold text-blue-800 mb-1">
+                      PayPal Sandbox Mode
+                    </p>
+                    <p className="text-blue-700">
+                      Use PayPal sandbox test accounts to complete the purchase.
+                      No real money will be charged.
+                    </p>
+                  </Box>
+                </>
+              )}
 
-                <FormField
-                  control={form.control}
-                  name="cvc"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel className="font-normal">CVC *</FormLabel>
-                      <FormControl>
-                        <Input
-                          className="border rounded-lg p-2 w-full bg-white h-12"
-                          placeholder="123"
-                          maxLength={4}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </Flex>
-
-              <div className="text-xs text-gray-500 mb-4">
-                By clicking "Complete Purchase" I agree to the company's Terms
-                of Service
+              <div className="text-xs text-gray-500 mt-4">
+                By completing your purchase, you agree to the company's Terms of
+                Service
               </div>
-
-              <Button type="submit" className="w-full" disabled={isProcessing}>
-                {isProcessing ? "Processing..." : "Complete Demo Purchase"}
-              </Button>
             </Box>
           </Flex>
-        </form>
-      </Form>
-    </Box>
+        </Form>
+      </Box>
+    </PayPalScriptProvider>
   );
 };
 
