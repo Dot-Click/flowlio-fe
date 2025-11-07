@@ -8,11 +8,16 @@ import { useQuery } from "@tanstack/react-query";
 export interface SubscriptionPlan {
   id: string;
   name: string;
+  slug?: string;
   description?: string;
+  customPlanName?: string | null; // Custom display name
   price: number;
   currency: string;
   interval: string;
-  features: string[];
+  billingCycle?: "days" | "monthly" | "yearly";
+  durationValue?: number | null;
+  durationType?: "days" | "monthly" | "yearly" | null;
+  features: string[] | any; // Can be array or object
   isActive: boolean;
   sortOrder: number;
   createdAt: string;

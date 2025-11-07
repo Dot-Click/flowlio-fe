@@ -3,6 +3,13 @@ import { Box } from "@/components/ui/box";
 import { Input } from "@/components/ui/input";
 import { Stack } from "@/components/ui/stack";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useState, useEffect } from "react";
 import { FaCheckCircle } from "react-icons/fa";
 import { MdDataSaverOn } from "react-icons/md";
@@ -24,8 +31,14 @@ const PLAN_LIST = [
 
 type PlanKey = "basic" | "standard" | "premium";
 type PlanState = {
+  id?: string; // Plan ID from database (for updates)
+  name: string; // Original plan name (from database)
+  customPlanName: string; // Custom display name (user-editable)
+  slug: string; // Plan slug (editable)
   subheading: string;
   price: string;
+  durationValue: string;
+  durationType: "days" | "monthly" | "yearly" | "";
   features: string[];
   newFeature: string;
   adding: boolean;
@@ -36,8 +49,14 @@ type PlansState = {
 };
 
 const initialPlanState: PlanState = {
+  id: undefined,
+  name: "",
+  customPlanName: "", // Custom display name
+  slug: "",
   subheading: "",
   price: "",
+  durationValue: "",
+  durationType: "",
   features: [""],
   newFeature: "",
   adding: false,
@@ -62,41 +81,219 @@ export const SubscriptionsHeader = () => {
 
   // Pre-populate form with fetched plans
   useEffect(() => {
+    console.log("🔄 useEffect triggered - fetchedPlans changed:", {
+      fetchedPlansCount: fetchedPlans.length,
+      fetchedPlans: fetchedPlans.map((p) => ({
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        customPlanName:
+          (p as any).customPlanName ?? (p as any).custom_plan_name,
+      })),
+    });
+
     if (fetchedPlans.length > 0) {
       const updatedPlans = { ...plans };
 
       fetchedPlans.forEach((plan) => {
-        const planKey = plan.name.toLowerCase() as PlanKey;
-        if (planKey in updatedPlans) {
+        // Match by slug instead of name to allow name changes
+        // First try to match by slug, then by name
+        const planSlug = (plan.slug || "").toLowerCase();
+        let planKey: PlanKey | null = null;
+
+        // Try to match slug to one of our plan keys
+        if (
+          planSlug === "basic" ||
+          planSlug === "standard" ||
+          planSlug === "premium"
+        ) {
+          planKey = planSlug as PlanKey;
+        } else {
+          // Fallback to matching by name
+          const planNameLower = (plan.name || "").toLowerCase();
+          if (
+            planNameLower === "basic" ||
+            planNameLower === "standard" ||
+            planNameLower === "premium"
+          ) {
+            planKey = planNameLower as PlanKey;
+          }
+        }
+
+        if (planKey && planKey in updatedPlans) {
+          // Handle both snake_case and camelCase from API
+          // Check all possible property names
+          const durationValue =
+            (plan as any).durationValue ?? (plan as any).duration_value ?? null;
+          const durationType =
+            (plan as any).durationType ?? (plan as any).duration_type ?? null;
+
           // Convert features object back to string array for UI
           const featureStrings = [];
 
           // Add custom features if they exist
           if (
-            plan.features.customFeatures &&
+            plan.features?.customFeatures &&
             plan.features.customFeatures.length > 0
           ) {
             featureStrings.push(...plan.features.customFeatures);
           }
 
+          // Format durationValue - ensure it's a string for the input
+          let formattedDurationValue = "";
+          if (durationValue !== null && durationValue !== undefined) {
+            // Convert to number first to handle string numbers, then back to string
+            const numValue = Number(durationValue);
+            if (!isNaN(numValue) && numValue >= 0) {
+              formattedDurationValue = numValue.toString();
+            }
+          }
+
+          // Format durationType - ensure it's a valid value or empty string
+          let formattedDurationType: "days" | "monthly" | "yearly" | "" = "";
+          if (
+            durationType &&
+            typeof durationType === "string" &&
+            (durationType === "days" ||
+              durationType === "monthly" ||
+              durationType === "yearly")
+          ) {
+            formattedDurationType = durationType;
+          }
+
+          // IMPORTANT: name and slug are IMMUTABLE (always "Basic"/"basic", "Standard"/"standard", "Premium"/"premium")
+          // Only customPlanName is user-editable and displayed on pricing page
+
+          // Get the original name from database (IMMUTABLE - e.g., "Basic", "Standard", "Premium")
+          const originalName =
+            plan.name && plan.name.trim() !== "" ? plan.name.trim() : "";
+
+          // Get the slug from database (IMMUTABLE - e.g., "basic", "standard", "premium")
+          const originalSlug =
+            plan.slug && plan.slug.trim() !== "" ? plan.slug.trim() : planKey;
+
+          // Get customPlanName from API - this is what user can edit and what displays on pricing page
+          // If customPlanName is null/empty, show empty string so user can type their own custom name
+          // DO NOT use original name as fallback - customPlanName should be independent
+          const apiCustomPlanName =
+            (plan as any).customPlanName ??
+            (plan as any).custom_plan_name ??
+            null;
+
+          console.log("🔍 Extracting customPlanName from plan:", {
+            planId: plan.id,
+            planName: plan.name,
+            apiCustomPlanName: apiCustomPlanName,
+            apiCustomPlanNameType: typeof apiCustomPlanName,
+            hasCustomPlanName: "customPlanName" in (plan as any),
+            hasCustomPlanNameSnake: "custom_plan_name" in (plan as any),
+            allPlanKeys: Object.keys(plan),
+          });
+
+          // Use customPlanName if it exists, otherwise empty string (user will type their own)
+          const customPlanName =
+            apiCustomPlanName !== null &&
+            apiCustomPlanName !== undefined &&
+            apiCustomPlanName !== "" &&
+            apiCustomPlanName.trim() !== ""
+              ? apiCustomPlanName.trim()
+              : ""; // Empty string - user will type their custom name independently
+
+          console.log("📥 Fetching plan data:", {
+            planId: plan.id,
+            originalName: originalName, // IMMUTABLE - "Basic", "Standard", "Premium"
+            originalSlug: originalSlug, // IMMUTABLE - "basic", "standard", "premium"
+            apiCustomPlanName: apiCustomPlanName, // Custom name from DB
+            finalCustomPlanName: customPlanName, // What user will see/edit in input
+            matchedPlanKey: planKey,
+          });
+
           updatedPlans[planKey] = {
+            id: plan.id, // Store plan ID for updates
+            name: originalName, // Original plan name (IMMUTABLE - "Basic", "Standard", "Premium")
+            customPlanName: customPlanName, // Custom display name (USER-EDITABLE - shows on pricing page)
+            slug: originalSlug, // Slug (IMMUTABLE - "basic", "standard", "premium")
             subheading: plan.description || "",
             price: plan.price.toString(),
+            durationValue: formattedDurationValue,
+            durationType: formattedDurationType,
             features: featureStrings.length > 0 ? featureStrings : [""],
             newFeature: "",
             adding: false,
           };
+
+          console.log("✅ Updated plan state:", {
+            planKey,
+            id: updatedPlans[planKey].id,
+            name: updatedPlans[planKey].name,
+            customPlanName: updatedPlans[planKey].customPlanName,
+            slug: updatedPlans[planKey].slug,
+          });
         }
       });
 
       setPlans(updatedPlans);
+
+      // Log final state to verify customPlanName is set
+      console.log("📋 Final plans state after fetch:", {
+        basic: {
+          name: updatedPlans.basic?.name,
+          customPlanName: updatedPlans.basic?.customPlanName,
+        },
+        standard: {
+          name: updatedPlans.standard?.name,
+          customPlanName: updatedPlans.standard?.customPlanName,
+        },
+        premium: {
+          name: updatedPlans.premium?.name,
+          customPlanName: updatedPlans.premium?.customPlanName,
+        },
+      });
     }
   }, [fetchedPlans]);
+
+  // Debug: Log current plans state when it changes
+  useEffect(() => {
+    console.log("🔄 Plans state updated:", {
+      basic: {
+        name: plans.basic.name,
+        customPlanName: plans.basic.customPlanName,
+        isPlanKey: plans.basic.customPlanName === "basic", // Should be false
+      },
+      standard: {
+        name: plans.standard.name,
+        customPlanName: plans.standard.customPlanName,
+        isPlanKey: plans.standard.customPlanName === "standard", // Should be false
+      },
+      premium: {
+        name: plans.premium.name,
+        customPlanName: plans.premium.customPlanName,
+        isPlanKey: plans.premium.customPlanName === "premium", // Should be false
+      },
+    });
+
+    // Warn if customPlanName matches planKey (this should never happen)
+    if (plans.basic.customPlanName === "basic") {
+      console.warn(
+        "⚠️ WARNING: customPlanName matches planKey 'basic' - this should not happen!"
+      );
+    }
+    if (plans.standard.customPlanName === "standard") {
+      console.warn(
+        "⚠️ WARNING: customPlanName matches planKey 'standard' - this should not happen!"
+      );
+    }
+    if (plans.premium.customPlanName === "premium") {
+      console.warn(
+        "⚠️ WARNING: customPlanName matches planKey 'premium' - this should not happen!"
+      );
+    }
+  }, [plans]);
 
   const handleInputChange = (
     planKey: PlanKey,
     field: keyof PlanState,
-    value: string
+    value: string | "days" | "monthly" | "yearly" | ""
   ) => {
     setPlans((prev) => ({
       ...prev,
@@ -185,6 +382,9 @@ export const SubscriptionsHeader = () => {
   ): { isValid: boolean; errors: string[] } => {
     const errors: string[] = [];
 
+    // customPlanName is optional - user can create plan without it and add it later
+    // No validation needed for customPlanName
+
     if (!plan.subheading.trim()) {
       errors.push("Subheading is required");
     }
@@ -195,6 +395,29 @@ export const SubscriptionsHeader = () => {
 
     if (plan.features.length === 0) {
       errors.push("At least one feature is required");
+    }
+
+    // Validate durationValue - REQUIRED
+    if (
+      !plan.durationValue ||
+      plan.durationValue.trim() === "" ||
+      isNaN(parseInt(plan.durationValue, 10)) ||
+      parseInt(plan.durationValue, 10) <= 0
+    ) {
+      errors.push("Duration value is required and must be a positive number");
+    }
+
+    // Validate durationType - REQUIRED
+    const validDurationTypes = ["days", "monthly", "yearly"] as const;
+    if (
+      !plan.durationType ||
+      !validDurationTypes.includes(
+        plan.durationType as (typeof validDurationTypes)[number]
+      )
+    ) {
+      errors.push(
+        "Duration type is required and must be 'days', 'monthly', or 'yearly'"
+      );
     }
 
     return {
@@ -258,17 +481,75 @@ export const SubscriptionsHeader = () => {
         featureMap.customFeatures = [];
       }
 
-      // Debug: Log the mapped features
-      console.log("Mapped Features:", featureMap);
-      console.log("Original Features:", features);
-      console.log("Valid Features:", validFeatures);
-      console.log("Unique Features:", uniqueFeatures);
-
       return featureMap;
     };
 
+    // Parse durationValue - convert to number if valid, otherwise null
+    const parsedDurationValue =
+      plan.durationValue &&
+      plan.durationValue !== "" &&
+      plan.durationValue.trim() !== "" &&
+      !isNaN(parseInt(plan.durationValue, 10))
+        ? parseInt(plan.durationValue, 10)
+        : null;
+
+    // Validate durationType - only include if it's a valid value, otherwise null
+    const validDurationType =
+      plan.durationType === "days" ||
+      plan.durationType === "monthly" ||
+      plan.durationType === "yearly"
+        ? plan.durationType
+        : null;
+
+    // Log the plan state before sending
+    console.log("Plan state before sending:", {
+      planKey,
+      planId: plan.id,
+      planName: plan.name,
+      customPlanName: plan.customPlanName,
+      planSlug: plan.slug,
+      fullPlan: plan,
+    });
+
+    // IMPORTANT: name and slug are IMMUTABLE - always use database values
+    // Only customPlanName is user-editable
+    // For new plans (no ID), use proper capitalized name and lowercase slug based on planKey
+    // For existing plans (has ID), use database values
+    const planName = plan.id
+      ? plan.name && plan.name.trim() !== ""
+        ? plan.name.trim()
+        : ""
+      : PLAN_LIST.find((p) => p.key === planKey)?.label ||
+        planKey.charAt(0).toUpperCase() + planKey.slice(1);
+    const planSlug = plan.id
+      ? plan.slug && plan.slug.trim() !== ""
+        ? plan.slug.trim()
+        : planKey
+      : planKey.toLowerCase(); // For new plans, use lowercase planKey as slug
+
+    // Handle customPlanName - validate and send the actual value (trimmed)
+    // This allows users to set customPlanName even when creating a new plan
+    // Validate: if provided, must be a non-empty string after trimming
+    let customPlanNameValue: string | null = null;
+    if (
+      plan.customPlanName !== undefined &&
+      plan.customPlanName !== null &&
+      plan.customPlanName !== ""
+    ) {
+      const trimmed = plan.customPlanName.trim();
+      // Only send if it's a non-empty string after trimming
+      if (trimmed.length > 0) {
+        customPlanNameValue = trimmed;
+      }
+      // If it's empty after trimming, send null (user cleared the field)
+    }
+    // If undefined/null, send null (field was never set)
+
     const planData = {
-      name: planKey,
+      id: plan.id, // Send plan ID if available (for updates)
+      name: planName, // Original plan name (IMMUTABLE - from database: "Basic", "Standard", "Premium")
+      slug: planSlug, // Slug (IMMUTABLE - from database: "basic", "standard", "premium")
+      customPlanName: customPlanNameValue, // Custom display name (USER-EDITABLE - what shows on pricing page)
       description: plan.subheading,
       price: parseFloat(plan.price),
       features: mapFeaturesToApi(plan.features),
@@ -276,21 +557,45 @@ export const SubscriptionsHeader = () => {
       sortOrder: 1,
       currency: "USD",
       billingCycle: "monthly" as const,
-      slug: planKey,
+      durationValue: parsedDurationValue,
+      durationType: validDurationType,
     };
+
+    console.log("Plan data being sent to API:", {
+      id: planData.id,
+      name: planData.name,
+      slug: planData.slug,
+      customPlanName: planData.customPlanName,
+      customPlanNameType: typeof planData.customPlanName,
+      customPlanNameUndefined: planData.customPlanName === undefined,
+      customPlanNameNull: planData.customPlanName === null,
+      customPlanNameEmpty: planData.customPlanName === "",
+      planStateCustomPlanName: plan.customPlanName,
+      hasId: !!planData.id,
+      isNewPlan: !planData.id,
+      planKey: planKey,
+    });
 
     try {
       const result = await upsertPlanMutation.mutateAsync(planData);
       const isUpdate = result.data?.isUpdate;
+
       toast.success(
         `${PLAN_LIST.find((p) => p.key === planKey)?.label} plan ${
           isUpdate ? "Updated" : "Created"
         } successfully`
       );
-      console.log(planData);
 
-      // Invalidate and refetch plans to update the table
-      queryClient.invalidateQueries({ queryKey: ["fetch plans"] });
+      // Invalidate and refetch plans to update the table and form
+      // Use a delay to ensure the database has committed the transaction
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      console.log("🔄 Invalidating and refetching plans after save...");
+      await queryClient.invalidateQueries({ queryKey: ["fetch plans"] });
+      await queryClient.refetchQueries({ queryKey: ["fetch plans"] });
+      console.log(
+        "✅ Plans refetched - useEffect should trigger with new data"
+      );
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to create plan";
@@ -357,6 +662,29 @@ export const SubscriptionsHeader = () => {
               {plan.label}
             </h1>
             <Stack className="mt-2 p-3 flex-1">
+              <label htmlFor="name" className="mb-1">
+                Custom Plan Name
+                <span className="text-xs text-gray-500 ml-2">
+                  (Optional - This will be displayed on pricing page if set)
+                </span>
+              </label>
+              <Input
+                type="text"
+                placeholder="Enter your custom display name (e.g., Basic, Pro Plan, etc.)"
+                className="bg-white h-12 border border-gray-200 placeholder:text-gray-400 shadow-none"
+                value={plans[plan.key as PlanKey].customPlanName || ""}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  handleInputChange(
+                    plan.key as PlanKey,
+                    "customPlanName",
+                    newValue
+                  );
+                }}
+              />
+              <label htmlFor="subheading" className="mt-3">
+                Subheading <span className="text-red-500">*</span>
+              </label>
               <Input
                 type="text"
                 placeholder="Enter Subheading"
@@ -369,6 +697,7 @@ export const SubscriptionsHeader = () => {
                     e.target.value
                   )
                 }
+                required
               />
               <label htmlFor="price" className="mt-3">
                 Set Price
@@ -394,6 +723,52 @@ export const SubscriptionsHeader = () => {
                   prefix="$"
                   style={{ fontSize: "1.5rem", lineHeight: "2rem" }}
                 />
+              </Flex>
+              <label htmlFor="duration" className="mt-3">
+                Set Duration <span className="text-red-500">*</span>
+              </label>
+              <Flex className="gap-2 items-center">
+                <Input
+                  type="number"
+                  placeholder="e.g., 7, 30, 365"
+                  className="bg-white h-10 border border-gray-200 placeholder:text-gray-400 shadow-none flex-1"
+                  value={plans[plan.key as PlanKey].durationValue}
+                  onChange={(e) =>
+                    handleInputChange(
+                      plan.key as PlanKey,
+                      "durationValue",
+                      e.target.value
+                    )
+                  }
+                  min="1"
+                  step="1"
+                  required
+                />
+                <Select
+                  value={
+                    plans[plan.key as PlanKey].durationType &&
+                    plans[plan.key as PlanKey].durationType !== ""
+                      ? plans[plan.key as PlanKey].durationType
+                      : undefined
+                  }
+                  onValueChange={(value: "days" | "monthly" | "yearly") =>
+                    handleInputChange(
+                      plan.key as PlanKey,
+                      "durationType",
+                      value
+                    )
+                  }
+                  required
+                >
+                  <SelectTrigger className="w-[140px] h-12 border border-gray-200">
+                    <SelectValue placeholder="Select type *" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="days">Days</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                  </SelectContent>
+                </Select>
               </Flex>
               <Box className="mt-4">
                 <h1 className="font-semibold mb-2">Included</h1>

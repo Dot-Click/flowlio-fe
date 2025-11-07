@@ -124,7 +124,7 @@ export const NotificationsDropdown: React.FC<{ className?: string }> = ({
 
       <DropdownMenuContent
         align="end"
-        className="max-w-[25rem] max-sm:w-[18rem] p-2"
+        className="max-w-[26rem] max-sm:w-[19rem] p-2"
       >
         <DropdownMenuLabel className="mb-2">
           <Flex className="justify-between items-center">
@@ -134,7 +134,7 @@ export const NotificationsDropdown: React.FC<{ className?: string }> = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-xs text-red-600 hover:text-red-800 p-1 h-auto"
+                  className="text-xs text-red-600 hover:text-red-800 p-1 h-auto cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation();
                     deleteAllMutation.mutate();
@@ -148,6 +148,8 @@ export const NotificationsDropdown: React.FC<{ className?: string }> = ({
                 to={
                   user?.user.role === "viewer"
                     ? "/viewer/viewer-support"
+                    : user?.user.role === "superadmin"
+                    ? "/superadmin/support-tickets"
                     : "/dashboard/support"
                 }
                 className="text-sm text-blue-600 hover:text-blue-800"

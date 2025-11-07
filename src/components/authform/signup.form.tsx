@@ -65,11 +65,6 @@ export const SignUpForm: FC = () => {
     setError(null);
 
     try {
-      console.log("🚀 Starting signup process...", {
-        email: data.email,
-        username: data.username,
-      });
-
       // Create the user account
       await authClient.signUp.email(
         {
@@ -79,11 +74,9 @@ export const SignUpForm: FC = () => {
         },
         {
           onRequest: () => {
-            console.log("📤 Signup request sent...");
             setIsLoading(true);
           },
           onSuccess: async () => {
-            console.log("✅ Signup successful!");
             toast.success(
               "Account created successfully! Please select a plan."
             );
@@ -99,17 +92,8 @@ export const SignUpForm: FC = () => {
             const hasPlanDetails = navigationState?.selectedPlan !== undefined;
             const redirectTo = navigationState?.redirectTo;
 
-            console.log("🔍 Navigation state:", navigationState);
-            console.log("🔍 Redirect to:", redirectTo);
-            console.log("🔍 Has plan details:", hasPlanDetails);
-            console.log("🔍 URL params:", { selectedPlan, fromCheckout });
-
             if (redirectTo === "checkout" && hasPlanDetails) {
               // User came from checkout, redirect back to checkout
-              console.log(
-                "🔄 Redirecting to checkout with plan:",
-                navigationState.selectedPlan
-              );
               navigate("/checkout", {
                 state: {
                   selectedPlan: navigationState.selectedPlan,
@@ -118,10 +102,6 @@ export const SignUpForm: FC = () => {
               });
             } else if (fromCheckout && selectedPlan) {
               // User came from checkout via URL params, redirect back to checkout
-              console.log(
-                "🔄 Redirecting to checkout with plan from URL:",
-                selectedPlan
-              );
               navigate("/checkout", {
                 state: {
                   selectedPlan: parseInt(selectedPlan),
@@ -130,10 +110,6 @@ export const SignUpForm: FC = () => {
               });
             } else if (navigationState?.selectedPlan !== undefined) {
               // Fallback: check navigation state directly
-              console.log(
-                "🔄 Redirecting to checkout with plan from navigation state:",
-                navigationState.selectedPlan
-              );
               navigate("/checkout", {
                 state: {
                   selectedPlan: navigationState.selectedPlan,
@@ -142,7 +118,6 @@ export const SignUpForm: FC = () => {
               });
             } else {
               // Regular signup flow, redirect to pricing
-              console.log("🔄 Redirecting to pricing (regular signup flow)");
               navigate("/pricing", {
                 state: {
                   fromSignup: true,

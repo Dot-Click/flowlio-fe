@@ -188,11 +188,14 @@ export type IPlan<T = {}> = {
   name: string;
   slug?: string;
   description: string;
+  customPlanName?: string | null; // Custom display name
   createdAt: Date;
   updatedAt: Date;
   price: number;
   currency?: string;
-  billingCycle?: string;
+  billingCycle?: "days" | "monthly" | "yearly";
+  durationValue?: number | null;
+  durationType?: "days" | "monthly" | "yearly" | null;
   features: PlanFeature;
   isActive?: boolean;
   sortOrder?: number;
@@ -289,8 +292,11 @@ export type CreatePlanRequest = {
   description: string;
   price: number;
   slug?: string;
+  customPlanName?: string | null; // Custom display name
   currency: string;
   billingCycle: string;
+  durationValue?: number | null;
+  durationType?: "days" | "monthly" | "yearly" | null;
   features: PlanFeature;
   isActive: boolean;
   sortOrder: number;

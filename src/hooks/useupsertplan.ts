@@ -7,12 +7,16 @@ import { IPlan } from "@/types";
 import { useMutation } from "@tanstack/react-query";
 
 export interface UpsertPlanRequest {
+  id?: string;
   name: string;
   slug?: string;
   description?: string;
+  customPlanName?: string | null; // Custom display name
   price: number;
   currency?: string;
-  billingCycle?: "monthly" | "yearly";
+  billingCycle?: "days" | "monthly" | "yearly";
+  durationValue?: number | null;
+  durationType?: "days" | "monthly" | "yearly" | null;
   features?: {
     maxUsers: number;
     maxProjects: number;

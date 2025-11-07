@@ -36,6 +36,54 @@ const defaultFeatures = [
   },
 ];
 
+// Function to format duration from database
+const formatDuration = (plan: any): string => {
+  // Handle both snake_case and camelCase from API
+  const durationValue = plan?.durationValue ?? plan?.duration_value;
+  const durationType = plan?.durationType ?? plan?.duration_type;
+
+  // Debug: Log the plan data to see what we're getting
+  console.log("Formatting duration for plan:", {
+    name: plan?.name,
+    durationValue: durationValue,
+    durationType: durationType,
+    billingCycle: plan?.billingCycle ?? plan?.billing_cycle,
+  });
+
+  // Check if durationValue and durationType exist and are valid
+  if (
+    durationValue !== null &&
+    durationValue !== undefined &&
+    durationType &&
+    durationType.trim() !== ""
+  ) {
+    const value = Number(durationValue); // Ensure it's a number
+
+    // Validate the value is a valid number
+    if (isNaN(value) || value <= 0) {
+      console.warn("Invalid durationValue:", durationValue);
+    } else {
+      const type = durationType.trim().toLowerCase();
+
+      if (type === "days") {
+        return value === 1 ? "1 Day" : `${value} Days`;
+      } else if (type === "monthly") {
+        return value === 1 ? "1 Month" : `${value} Months`;
+      } else if (type === "yearly") {
+        return value === 1 ? "1 Year" : `${value} Years`;
+      }
+    }
+  }
+
+  // Fallback to billingCycle if duration is not set
+  const billingCycle = plan?.billingCycle ?? plan?.billing_cycle;
+  if (billingCycle) {
+    return billingCycle === "monthly" ? "month" : billingCycle;
+  }
+
+  return "month"; // Default fallback
+};
+
 // Function to convert database features to display format
 const formatPlanFeatures = (planFeatures: any) => {
   if (!planFeatures) return [];
@@ -70,6 +118,21 @@ export const Pricing: FC<PricingProps> = ({
 
   // Debug: Log the plans response
   console.log("Plans Response:", plansResponse);
+  console.log(
+    "Plan 0 duration:",
+    plansResponse?.data?.[0]?.durationValue,
+    plansResponse?.data?.[0]?.durationType
+  );
+  console.log(
+    "Plan 1 duration:",
+    plansResponse?.data?.[1]?.durationValue,
+    plansResponse?.data?.[1]?.durationType
+  );
+  console.log(
+    "Plan 2 duration:",
+    plansResponse?.data?.[2]?.durationValue,
+    plansResponse?.data?.[2]?.durationType
+  );
 
   // Check if user came from signup
   const fromSignup = location.state?.fromSignup;
@@ -86,31 +149,40 @@ export const Pricing: FC<PricingProps> = ({
   // Compute planDetails inside the component using the fetched data
   const planDetails = [
     {
-      title: "Basic Plan (Free)",
+      title:
+        plansResponse?.data?.[0]?.customPlanName ||
+        plansResponse?.data?.[0]?.name ||
+        "Basic Plan",
       price: plansResponse?.data?.[0]?.price,
       description: plansResponse?.data?.[0]?.description,
-      duration: "7-Days Trial",
-      features: Array.isArray(plansResponse?.data?.[0]?.features)
-        ? plansResponse?.data?.[0]?.features
-        : [""],
+      duration: formatDuration(plansResponse?.data?.[0]),
+      durationValue: plansResponse?.data?.[0]?.durationValue,
+      durationType: plansResponse?.data?.[0]?.durationType,
+      features: formatPlanFeatures(plansResponse?.data?.[0]?.features),
     },
     {
-      title: "Pro Plan",
+      title:
+        plansResponse?.data?.[1]?.customPlanName ||
+        plansResponse?.data?.[1]?.name ||
+        "Pro Plan",
       price: plansResponse?.data?.[1]?.price,
       description: plansResponse?.data?.[1]?.description,
-      duration: "month",
-      features: Array.isArray(plansResponse?.data?.[1]?.features)
-        ? plansResponse?.data?.[1]?.features
-        : [""],
+      duration: formatDuration(plansResponse?.data?.[1]),
+      durationValue: plansResponse?.data?.[1]?.durationValue,
+      durationType: plansResponse?.data?.[1]?.durationType,
+      features: formatPlanFeatures(plansResponse?.data?.[1]?.features),
     },
     {
-      title: "Enterprise Plan",
+      title:
+        plansResponse?.data?.[2]?.customPlanName ||
+        plansResponse?.data?.[2]?.name ||
+        "Enterprise Plan",
       price: plansResponse?.data?.[2]?.price,
       description: plansResponse?.data?.[2]?.description,
-      duration: "6 months",
-      features: Array.isArray(plansResponse?.data?.[2]?.features)
-        ? plansResponse?.data?.[2]?.features
-        : [""],
+      duration: formatDuration(plansResponse?.data?.[2]),
+      durationValue: plansResponse?.data?.[2]?.durationValue,
+      durationType: plansResponse?.data?.[2]?.durationType,
+      features: formatPlanFeatures(plansResponse?.data?.[2]?.features),
     },
   ];
 
@@ -157,7 +229,9 @@ export const Pricing: FC<PricingProps> = ({
                 )}
               >
                 <Box className="text-lg font-semibold text-indigo-600 mb-4 text-center capitalize">
-                  {plansResponse?.data?.[selectedPlan]?.name} Features
+                  {plansResponse?.data?.[selectedPlan]?.customPlanName ||
+                    plansResponse?.data?.[selectedPlan]?.name}{" "}
+                  Features
                 </Box>
                 <Stack className="gap-3">
                   {formatPlanFeatures(
@@ -229,7 +303,7 @@ export const Pricing: FC<PricingProps> = ({
                     />
                     <Flex className="flex-col items-start gap-0">
                       <Box
-                        className={`text-[18px] font-semibold ${
+                        className={`text-[18px] font-semibold capitalize ${
                           selectedPlan === index
                             ? "text-white"
                             : "text-[#353333]"
@@ -255,7 +329,9 @@ export const Pricing: FC<PricingProps> = ({
                   }
                 >
                   <h1 className="font-semibold">$ {plan.price}</h1>
-                  <h1 className="font-light">/{plan.duration}</h1>
+                  <Flex>
+                    <h1 className="font-light">/{plan.duration}</h1>
+                  </Flex>
                 </Flex>
               </Flex>
 

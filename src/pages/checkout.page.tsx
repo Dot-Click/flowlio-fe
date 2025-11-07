@@ -498,15 +498,41 @@ const CheckoutPage = () => {
 
                             // Process demo order directly (bypass PayPal SDK)
                             const formData = form.getValues();
+
+                            // Ensure organization name is provided if creating organization
+                            const orgName = createOrganization
+                              ? formData.organizationName?.trim()
+                              : undefined;
+
+                            if (
+                              createOrganization &&
+                              (!orgName || orgName === "")
+                            ) {
+                              toast.error("Please enter an organization name");
+                              setIsProcessing(false);
+                              return;
+                            }
+
+                            console.log("[Demo Payment] Capturing order:", {
+                              orderId: orderResponse.data.orderId,
+                              userId: userData.user.id,
+                              organizationName: orgName,
+                              planId: selectedPlan.id,
+                              createOrganization,
+                            });
+
                             const captureResponse =
                               await capturePayPalOrderMutation.mutateAsync({
                                 orderId: orderResponse.data.orderId,
                                 userId: userData.user.id,
-                                organizationName: createOrganization
-                                  ? formData.organizationName
-                                  : undefined,
+                                organizationName: orgName,
                                 planId: selectedPlan.id,
                               });
+
+                            console.log(
+                              "[Demo Payment] Capture response:",
+                              captureResponse
+                            );
 
                             if (captureResponse.data?.status === "COMPLETED") {
                               toast.success(
@@ -524,10 +550,23 @@ const CheckoutPage = () => {
                                 navigate("/dashboard");
                               }, 1500);
                             } else {
+                              console.error(
+                                "[Demo Payment] Payment not completed:",
+                                captureResponse
+                              );
                               toast.error(
-                                "Payment was not completed. Please try again."
+                                captureResponse?.message ||
+                                  "Payment was not completed. Please try again."
                               );
                             }
+                          } else {
+                            console.error(
+                              "[Demo Payment] No order ID returned:",
+                              orderResponse
+                            );
+                            toast.error(
+                              "Failed to create order. Please try again."
+                            );
                           }
                         } catch (error: any) {
                           console.error("Demo payment error:", error);
