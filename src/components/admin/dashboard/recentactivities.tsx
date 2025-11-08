@@ -6,20 +6,45 @@ import { Link } from "react-router";
 import { cn } from "@/lib/utils";
 import type { FC } from "react";
 import { useFetchOrganizationActivities } from "@/hooks/useFetchOrganizationActivities";
+import { useDeleteActivity } from "@/hooks/useDeleteActivity";
 import { formatDistanceToNow } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { Center } from "@/components/ui/center";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export const RecentActivities: FC<BoxProps> = ({ className, ...props }) => {
   const { data: activitiesResponse, isLoading } =
     useFetchOrganizationActivities();
+  const { mutate: deleteActivity } = useDeleteActivity();
 
   const activitiesContent = activitiesResponse?.data?.activities || [];
 
   return (
     <ComponentWrapper className={cn(" rounded-lg", className)} {...props}>
       <Stack className="p-3 relative overflow-hidden">
-        <h1 className="text-lg font-medium"> Recent Activities</h1>
+        <Flex className="justify-between items-center mb-2">
+          <h1 className="text-lg font-medium"> Recent Activities</h1>
+          {activitiesContent.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-red-600 cursor-pointer hover:text-red-700 hover:bg-red-50 border-red-200 text-xs"
+              onClick={() => {
+                activitiesContent.forEach((activity) => {
+                  deleteActivity({
+                    id: activity.id,
+                    source: "recent",
+                  });
+                });
+                toast.success("Clearing all activities...");
+              }}
+              disabled={isLoading}
+            >
+              Clear All Activities
+            </Button>
+          )}
+        </Flex>
 
         <Box className="w-full h-0.5 bg-gray-200 rounded-full absolute top-14 left-0"></Box>
         <Box className="max-h-[21rem] overflow-auto scroll space-y-5 mt-5">

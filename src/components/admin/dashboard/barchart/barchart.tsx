@@ -146,7 +146,10 @@ export const BarChartComponent: FC<BoxProps> = ({ className, ...props }) => {
           </Flex>
 
           <ChartGuides className="gap-4 pt-1 max-md:mr-auto" />
-          <CalendarPopOver />
+          <CalendarPopOver
+            onDateRangeChange={handleDateRangeChange}
+            initialDateRange={dateRange || undefined}
+          />
         </Flex>
       </Stack>
 

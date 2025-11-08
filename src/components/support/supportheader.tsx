@@ -464,58 +464,77 @@ const SupportHeader = () => {
                 </Box>
               </Center>
             ) : (
-              <Box className="w-full space-y-3 max-h-[500px] overflow-y-auto">
-                {activitiesResponse?.data?.activities?.map((activity) => {
-                  const dateObj =
-                    typeof activity.date === "string"
-                      ? new Date(activity.date)
-                      : activity.date;
-                  const timeAgo = formatDistanceToNow(dateObj, {
-                    addSuffix: true,
-                  });
+              <>
+                <Flex className="justify-end mb-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                    onClick={() => {
+                      const activities =
+                        activitiesResponse?.data?.activities || [];
+                      activities.forEach((activity) => {
+                        deleteActivity({
+                          id: activity.id,
+                          source: activity.source || "recent",
+                        });
+                      });
+                      toast.success("Clearing all activities...");
+                    }}
+                    disabled={activitiesLoading}
+                  >
+                    Clear All Activities
+                  </Button>
+                </Flex>
+                <Box className="w-full space-y-3 max-h-[500px] overflow-y-auto">
+                  {activitiesResponse?.data?.activities?.map((activity) => {
+                    const dateObj =
+                      typeof activity.date === "string"
+                        ? new Date(activity.date)
+                        : activity.date;
+                    const timeAgo = formatDistanceToNow(dateObj, {
+                      addSuffix: true,
+                    });
 
-                  return (
-                    <Flex
-                      key={activity.id}
-                      className="items-start justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-                    >
-                      <Flex className="items-start gap-3 flex-1">
-                        <Box className="size-2.5 border outline outline-slate-300 outline-offset-1 bg-slate-200 rounded-full mt-1.5" />
-                        <Stack className="gap-1 flex-1">
-                          <Flex className="items-center gap-2">
-                            <h2 className="font-medium text-sm text-gray-800">
-                              {activity.user}
-                            </h2>
-                            <p className="text-xs text-slate-500">{timeAgo}</p>
-                          </Flex>
-                          <p className="text-sm text-slate-600">
-                            {activity.activity}
-                          </p>
-                        </Stack>
-                      </Flex>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
-                        onClick={() => {
-                          if (
-                            window.confirm(
-                              "Are you sure you want to delete this activity?"
-                            )
-                          ) {
+                    return (
+                      <Flex
+                        key={activity.id}
+                        className="items-start justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                      >
+                        <Flex className="items-start gap-3 flex-1">
+                          <Box className="size-2.5 border outline outline-slate-300 outline-offset-1 bg-slate-200 rounded-full mt-1.5" />
+                          <Stack className="gap-1 flex-1">
+                            <Flex className="items-center gap-2">
+                              <h2 className="font-medium text-sm text-gray-800">
+                                {activity.user}
+                              </h2>
+                              <p className="text-xs text-slate-500">
+                                {timeAgo}
+                              </p>
+                            </Flex>
+                            <p className="text-sm text-slate-600">
+                              {activity.activity}
+                            </p>
+                          </Stack>
+                        </Flex>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
+                          onClick={() => {
                             deleteActivity({
                               id: activity.id,
                               source: activity.source || "recent", // Default to "recent" if source not available
                             });
-                          }
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </Flex>
-                  );
-                })}
-              </Box>
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </Flex>
+                    );
+                  })}
+                </Box>
+              </>
             )}
           </>
         )}
@@ -756,29 +775,23 @@ const SupportHeader = () => {
                                   className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 cursor-pointer"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    if (
-                                      window.confirm(
-                                        "Are you sure you want to delete this ticket?"
-                                      )
-                                    ) {
-                                      deleteTicketMutation.mutate(
-                                        { id: ticket.id },
-                                        {
-                                          onSuccess: () => {
-                                            toast.success(
-                                              "Ticket deleted successfully"
-                                            );
-                                            refetchSentTickets();
-                                          },
-                                          onError: (error: any) => {
-                                            toast.error(
-                                              error.response?.data?.message ||
-                                                "Failed to delete ticket"
-                                            );
-                                          },
-                                        }
-                                      );
-                                    }
+                                    deleteTicketMutation.mutate(
+                                      { id: ticket.id },
+                                      {
+                                        onSuccess: () => {
+                                          toast.success(
+                                            "Ticket deleted successfully"
+                                          );
+                                          refetchSentTickets();
+                                        },
+                                        onError: (error: any) => {
+                                          toast.error(
+                                            error.response?.data?.message ||
+                                              "Failed to delete ticket"
+                                          );
+                                        },
+                                      }
+                                    );
                                   }}
                                 >
                                   Delete
@@ -1127,25 +1140,19 @@ const SupportHeader = () => {
                   variant="outline"
                   className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
                   onClick={() => {
-                    if (
-                      window.confirm(
-                        "Are you sure you want to delete this ticket?"
-                      )
-                    ) {
-                      deleteTicketMutation.mutate(selectedTicket.id, {
-                        onSuccess: () => {
-                          toast.success("Ticket deleted successfully");
-                          refetchSentTickets();
-                          handleCloseViewModal();
-                        },
-                        onError: (error: any) => {
-                          toast.error(
-                            error.response?.data?.message ||
-                              "Failed to delete ticket"
-                          );
-                        },
-                      });
-                    }
+                    deleteTicketMutation.mutate(selectedTicket.id, {
+                      onSuccess: () => {
+                        toast.success("Ticket deleted successfully");
+                        refetchSentTickets();
+                        handleCloseViewModal();
+                      },
+                      onError: (error: any) => {
+                        toast.error(
+                          error.response?.data?.message ||
+                            "Failed to delete ticket"
+                        );
+                      },
+                    });
                   }}
                 >
                   Delete Ticket

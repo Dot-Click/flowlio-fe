@@ -17,7 +17,8 @@ const pages = {
   "My Tasks": ["read", "update"],
   "Support Tickets": ["create", "read", "update", "delete"],
   "Payment Links": ["create", "read"],
-  "My Subscriptions": ["read"],
+  Notifications: ["read", "view", "update", "delete"],
+  // "My Subscriptions": ["read"],
   Settings: ["view", "update"],
 } as const;
 
@@ -36,6 +37,7 @@ export const superAdmin = ac.newRole({
   Invoices: ["create", "read", "update", "delete"],
   "AI Assist": ["use", "create", "read", "update", "delete"],
   Settings: ["view", "update"],
+  Notifications: ["read", "view", "update", "delete"],
   ...adminAc.statements,
 });
 
@@ -61,9 +63,10 @@ export const user = ac.newRole({
   Invoices: ["create", "read", "update", "delete"],
   "AI Assist": ["use", "create", "read", "update", "delete"],
   "Payment Links": ["create", "read"],
-  "My Subscriptions": ["read"],
+  // "My Subscriptions": ["read"],
   "Support Tickets": ["create", "read", "update", "delete"],
   Settings: ["view", "update"],
+  Notifications: ["read", "view", "update", "delete"],
 });
 
 // Viewer: Read-only access
@@ -76,6 +79,7 @@ export const viewer = ac.newRole({
   "AI Assist": ["use", "create", "read", "update", "delete"],
   "Support Tickets": ["create", "read"],
   Settings: ["view", "update"],
+  Notifications: ["read", "view", "update", "delete"],
 });
 
 // Operator: Limited management access
@@ -85,6 +89,7 @@ export const operator = ac.newRole({
   "My Tasks": ["read", "update"],
   "Support Tickets": ["create", "read", "update", "delete"],
   Settings: ["view", "update"],
+  Notifications: ["read", "view", "update", "delete"],
 });
 
 // Export roles for the adminClient plugin - using the correct structure

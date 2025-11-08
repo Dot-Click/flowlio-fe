@@ -63,6 +63,7 @@ const CheckoutPage = () => {
   const [isBackendDemoMode, setIsBackendDemoMode] = useState<boolean | null>(
     null
   );
+  const [checkingBackendMode, setCheckingBackendMode] = useState(true);
 
   const selectedPlanIndex = location.state?.selectedPlan ?? null;
   const createOrganization = location.state?.createOrganization;
@@ -146,6 +147,52 @@ const CheckoutPage = () => {
 
     window.scrollTo(0, 0);
   }, [plan, navigate, userData, userLoading, finalPlanIndex]);
+
+  // Check backend PayPal configuration on mount
+  useEffect(() => {
+    const checkBackendPayPalConfig = async () => {
+      if (!selectedPlan || !userData?.user) {
+        setCheckingBackendMode(false);
+        return;
+      }
+
+      try {
+        const planPrice = parseFloat(
+          selectedPlan.price.toString().replace("$", "")
+        );
+
+        // Try to create an order to check if backend is in demo mode
+        const response = await createPayPalOrderMutation.mutateAsync({
+          planId: selectedPlan.id,
+          amount: planPrice,
+          currency: "USD",
+        });
+
+        // Check if backend returned a demo order
+        if (
+          response.data?.orderId &&
+          response.data.orderId.startsWith("demo_order_")
+        ) {
+          setIsBackendDemoMode(true);
+        } else {
+          setIsBackendDemoMode(false);
+        }
+      } catch (error) {
+        // If error, assume demo mode
+        console.log(
+          "[Checkout] Backend PayPal check failed, assuming demo mode",
+          error
+        );
+        setIsBackendDemoMode(true);
+      } finally {
+        setCheckingBackendMode(false);
+      }
+    };
+
+    if (selectedPlan && userData?.user && checkingBackendMode) {
+      checkBackendPayPalConfig();
+    }
+  }, [selectedPlan, userData?.user]);
 
   // Handle PayPal order creation
   const handlePayPalCreateOrder = async (): Promise<string> => {
@@ -351,15 +398,22 @@ const CheckoutPage = () => {
 
   // PayPal is only fully configured if both frontend AND backend have credentials
   // If backend is in demo mode, we should hide PayPal buttons and show demo button
+  // Also show demo button while checking backend mode
   const isPayPalFullyConfigured =
-    isFrontendPayPalConfigured && !isBackendInDemoMode;
+    !checkingBackendMode && isFrontendPayPalConfigured && !isBackendInDemoMode;
+
+  // Only load PayPal SDK if PayPal is fully configured
+  // This prevents the popup from appearing when PayPal is not set up
+  const shouldLoadPayPalSDK = isPayPalFullyConfigured;
 
   return (
     <PayPalScriptProvider
       options={{
-        clientId: paypalClientId || "sb", // Use 'sb' as minimal placeholder, but PayPal won't work without real ID
+        clientId: shouldLoadPayPalSDK ? paypalClientId || "" : "sb", // Use 'sb' as minimal placeholder to prevent SDK errors
         currency: "USD",
+        disableFunding: "credit,card", // Disable credit card option for simplicity
       }}
+      deferLoading={!shouldLoadPayPalSDK} // Don't load SDK if not configured
     >
       <Box className="min-h-screen bg-gray-50 max-md:p-4">
         <Navbar />
@@ -438,8 +492,10 @@ const CheckoutPage = () => {
 
               <h3 className="font-semibold mb-4">Payment Method</h3>
 
-              {/* Show demo button if PayPal is not fully configured OR backend is in demo mode */}
-              {!isPayPalFullyConfigured || isBackendInDemoMode ? (
+              {/* Show demo button if PayPal is not fully configured OR backend is in demo mode OR still checking */}
+              {checkingBackendMode ||
+              !isPayPalFullyConfigured ||
+              isBackendInDemoMode ? (
                 <>
                   {/* Demo Payment Button - for testing without PayPal SDK */}
                   <Box className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
@@ -447,7 +503,9 @@ const CheckoutPage = () => {
                       Demo Payment Mode
                     </p>
                     <p className="text-green-700 text-sm mb-3">
-                      {isBackendInDemoMode
+                      {checkingBackendMode
+                        ? "Checking PayPal configuration..."
+                        : isBackendInDemoMode
                         ? "PayPal is not configured on the server. Use the demo payment button to test the complete flow."
                         : "PayPal is not fully configured. Use the demo payment button to test the complete payment and organization creation flow."}
                     </p>
@@ -579,10 +637,14 @@ const CheckoutPage = () => {
                           setIsProcessing(false);
                         }
                       }}
-                      disabled={isProcessing || !selectedPlan}
+                      disabled={
+                        isProcessing || !selectedPlan || checkingBackendMode
+                      }
                       className="w-full bg-green-600 hover:bg-green-700 text-white py-3"
                     >
-                      {isProcessing
+                      {checkingBackendMode
+                        ? "Checking Configuration..."
+                        : isProcessing
                         ? "Processing Demo Payment..."
                         : "Complete Demo Payment"}
                     </Button>
@@ -649,24 +711,26 @@ const CheckoutPage = () => {
               ) : (
                 <>
                   {/* PayPal Buttons - Only show when fully configured */}
-                  <Box className="mb-4 bg-white rounded-lg p-4 border border-gray-200">
-                    <PayPalButtons
-                      createOrder={handlePayPalCreateOrder}
-                      onApprove={handlePayPalApprove}
-                      onError={handlePayPalError}
-                      onCancel={() => {
-                        toast.info("Payment cancelled");
-                        setIsProcessing(false);
-                      }}
-                      disabled={isProcessing}
-                      style={{
-                        layout: "vertical",
-                        color: "blue",
-                        shape: "rect",
-                        label: "paypal",
-                      }}
-                    />
-                  </Box>
+                  {shouldLoadPayPalSDK && (
+                    <Box className="mb-4 bg-white rounded-lg p-4 border border-gray-200">
+                      <PayPalButtons
+                        createOrder={handlePayPalCreateOrder}
+                        onApprove={handlePayPalApprove}
+                        onError={handlePayPalError}
+                        onCancel={() => {
+                          toast.info("Payment cancelled");
+                          setIsProcessing(false);
+                        }}
+                        disabled={isProcessing}
+                        style={{
+                          layout: "vertical",
+                          color: "blue",
+                          shape: "rect",
+                          label: "paypal",
+                        }}
+                      />
+                    </Box>
+                  )}
 
                   {/* PayPal Info Box for Sandbox */}
                   <Box className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs">

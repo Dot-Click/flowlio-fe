@@ -138,7 +138,7 @@ const SuperAdminSupportTicketPage = lazy(
 const SuperAdminSettingsPage = lazy(
   () => import("./pages/superadminsettings.page")
 );
-// const NotificationsPage = lazy(() => import("./pages/notifications.page"));
+const NotificationsPage = lazy(() => import("./pages/notifications.page"));
 const ViewerLayout = lazy(() =>
   import("./layouts/viewer.layout").then((module) => ({
     default: module.ViewerLayout,
@@ -286,10 +286,10 @@ const AppRoutes = () => {
           element={<LazyWrapper component={SettingsPage} />}
           path="settings"
         />
-        {/* <Route
+        <Route
           element={<LazyWrapper component={NotificationsPage} />}
           path="notifications"
-        /> */}
+        />
         <Route
           element={<LazyWrapper component={TimeTrackingPage} />}
           path="time-tracking"
@@ -368,10 +368,10 @@ const AppRoutes = () => {
           path="support-tickets"
           element={<LazyWrapper component={SuperAdminSupportTicketPage} />}
         />
-        {/* <Route
+        <Route
           path="notifications"
           element={<LazyWrapper component={NotificationsPage} />}
-        /> */}
+        />
         <Route
           path="settings"
           element={<LazyWrapper component={SuperAdminSettingsPage} />}
@@ -424,10 +424,10 @@ const AppRoutes = () => {
           path="viewer-support"
           element={<LazyWrapper component={ViewerSupportsPage} />}
         />
-        {/* <Route
+        <Route
           path="notifications"
-          element={<LazyWrapper component={NotificationsPage} />}
-        /> */}
+          // element={<LazyWrapper component={NotificationsPage} />}
+        />
         <Route
           path="viewer-settings"
           element={<LazyWrapper component={ViewerSettingsPage} />}

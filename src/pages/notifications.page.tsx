@@ -1,5 +1,4 @@
 import { PageWrapper } from "@/components/common/pagewrapper";
-import { ComponentWrapper } from "@/components/common/componentwrapper";
 import { Box } from "@/components/ui/box";
 import { Flex } from "@/components/ui/flex";
 import { Stack } from "@/components/ui/stack";
@@ -13,10 +12,11 @@ import {
   useDeleteAllNotifications,
   type Notification,
 } from "@/hooks/useNotifications";
-import { format } from "date-fns";
-import { Bell, Trash2, Check, CheckCheck, X } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { Trash2, Check, CheckCheck, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
+import { Center } from "@/components/ui/center";
 import {
   Select,
   SelectContent,
@@ -86,35 +86,6 @@ const NotificationsPage = () => {
     }
   };
 
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case "user_subscribed":
-      case "new_company_registered":
-        return "🏢";
-      case "project_completed":
-        return "✅";
-      case "new_user_signed_up":
-        return "👤";
-      default:
-        return "🔔";
-    }
-  };
-
-  const getNotificationColor = (type: string) => {
-    switch (type) {
-      case "user_subscribed":
-        return "bg-blue-100 text-blue-800";
-      case "new_company_registered":
-        return "bg-green-100 text-green-800";
-      case "project_completed":
-        return "bg-purple-100 text-purple-800";
-      case "new_user_signed_up":
-        return "bg-orange-100 text-orange-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
   if (isLoading) {
     return (
       <PageWrapper className="mt-6 px-4">
@@ -145,190 +116,189 @@ const NotificationsPage = () => {
 
   return (
     <PageWrapper className="mt-6 px-4">
-      <Flex className="justify-between items-center mb-6">
-        <Flex className="items-center gap-3 mt-4">
-          <Bell className="w-6 h-6 text-gray-700" />
-          <h1 className="text-2xl font-semibold text-gray-900">
-            Notifications
-          </h1>
-          {pagination && pagination.totalNotifications > 0 && (
-            <Badge className="bg-blue-100 text-blue-800">
-              {pagination.totalNotifications}
-            </Badge>
-          )}
+      <Stack className="p-3 relative overflow-hidden">
+        <Flex className="justify-between items-center mb-2 max-sm:flex-col max-sm:gap-2">
+          <Flex className="items-center gap-3">
+            <h1 className="text-lg font-medium">Notifications</h1>
+            {pagination && pagination.totalNotifications > 0 && (
+              <Badge className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">
+                {pagination.totalNotifications}
+              </Badge>
+            )}
+          </Flex>
+
+          <Flex className="gap-2">
+            <Select
+              value={filter}
+              onValueChange={(v: "all" | "unread") => setFilter(v)}
+            >
+              <SelectTrigger className="w-28 h-8 text-xs border-gray-200 rounded-full cursor-pointer">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="unread">Unread</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {notifications.length > 0 && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleMarkAllAsRead}
+                  disabled={markAllAsReadMutation.isPending}
+                  className="h-8 text-xs border-gray-200 rounded-full cursor-pointer"
+                >
+                  <CheckCheck className="w-3 h-3 mr-1" />
+                  Mark All Read
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDeleteAll}
+                  disabled={deleteAllMutation.isPending}
+                  className="h-8 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 rounded-full cursor-pointer"
+                >
+                  <Trash2 className="w-3 h-3 mr-1" />
+                  Delete All
+                </Button>
+              </>
+            )}
+          </Flex>
         </Flex>
 
-        <Flex className="gap-2">
-          <Select
-            value={filter}
-            onValueChange={(v: "all" | "unread") => setFilter(v)}
-          >
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="unread">Unread</SelectItem>
-            </SelectContent>
-          </Select>
+        <Box className="w-full h-0.5 bg-gray-200 rounded-full absolute top-14 left-0 max-sm:top-24"></Box>
 
-          {notifications.length > 0 && (
-            <>
-              <Button
-                variant="outline"
-                onClick={handleMarkAllAsRead}
-                disabled={markAllAsReadMutation.isPending}
-                className="flex items-center gap-2"
-              >
-                <CheckCheck className="w-4 h-4" />
-                Mark All Read
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleDeleteAll}
-                disabled={deleteAllMutation.isPending}
-                className="flex items-center gap-2 text-red-600 hover:text-red-700"
-              >
-                <Trash2 className="w-4 h-4" />
-                Delete All
-              </Button>
-            </>
-          )}
-        </Flex>
-      </Flex>
+        <Box className="max-h-[calc(100vh-200px)] overflow-auto scroll space-y-3 mt-5">
+          {isLoading ? (
+            <Center className="py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+            </Center>
+          ) : notifications.length === 0 ? (
+            <Center className="py-8">
+              <p className="text-sm text-gray-500">
+                {filter === "unread"
+                  ? "No unread notifications"
+                  : "No notifications yet"}
+              </p>
+            </Center>
+          ) : (
+            notifications.map((notification: Notification) => {
+              const dateObj = new Date(notification.createdAt);
+              const timeAgo = formatDistanceToNow(dateObj, {
+                addSuffix: true,
+              });
 
-      <ComponentWrapper className="bg-white border border-gray-200 shadow-none">
-        {notifications.length === 0 ? (
-          <Box className="flex flex-col items-center justify-center py-16">
-            <Bell className="w-16 h-16 text-gray-300 mb-4" />
-            <p className="text-gray-500 text-lg font-medium">
-              {filter === "unread"
-                ? "No unread notifications"
-                : "No notifications yet"}
-            </p>
-            <p className="text-gray-400 text-sm mt-2">
-              You'll see notifications here when there are updates
-            </p>
-          </Box>
-        ) : (
-          <Stack className="gap-0 divide-y divide-gray-200">
-            {notifications.map((notification: Notification) => (
-              <Box
-                key={notification.id}
-                className={`p-4 hover:bg-gray-50 transition-colors ${
-                  !notification.read ? "bg-blue-50/30" : ""
-                }`}
-              >
-                <Flex className="justify-between items-start gap-4">
-                  <Flex className="gap-3 flex-1">
-                    <Box
-                      className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${getNotificationColor(
-                        notification.type
-                      )}`}
-                    >
-                      {getNotificationIcon(notification.type)}
-                    </Box>
-                    <Box className="flex-1">
-                      <Flex className="items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-gray-900">
-                          {notification.title}
-                        </h3>
-                        {!notification.read && (
-                          <Badge className="bg-blue-600 text-white text-xs">
-                            New
-                          </Badge>
-                        )}
-                      </Flex>
-                      <p className="text-gray-700 text-sm mb-2">
-                        {notification.message}
-                      </p>
-                      {notification.data &&
-                        Object.keys(notification.data).length > 0 && (
-                          <Box className="bg-gray-50 rounded-lg p-3 mt-2 text-xs">
-                            {Object.entries(notification.data).map(
-                              ([key, value]) => (
-                                <Flex
-                                  key={key}
-                                  className="justify-between mb-1 last:mb-0"
-                                >
-                                  <span className="font-medium text-gray-600">
-                                    {key}:
-                                  </span>
-                                  <span className="text-gray-700">
-                                    {String(value)}
-                                  </span>
-                                </Flex>
-                              )
-                            )}
-                          </Box>
-                        )}
-                      <p className="text-gray-400 text-xs mt-2">
-                        {format(
-                          new Date(notification.createdAt),
-                          "MMM dd, yyyy 'at' h:mm a"
-                        )}
-                      </p>
-                    </Box>
-                  </Flex>
-
-                  <Flex className="gap-2">
-                    {!notification.read && (
+              return (
+                <Box
+                  key={notification.id}
+                  className={`p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors ${
+                    !notification.read ? "bg-blue-50/30" : ""
+                  }`}
+                >
+                  <Flex className="items-start justify-between gap-3">
+                    <Flex className="items-start gap-3 flex-1">
+                      <Box className="size-2.5 border outline outline-slate-300 outline-offset-1 bg-slate-200 rounded-full mt-1.5" />
+                      <Stack className="gap-1 flex-1">
+                        <Flex className="items-center gap-2">
+                          <h2 className="font-medium text-sm text-gray-800">
+                            {notification.title}
+                          </h2>
+                          {!notification.read && (
+                            <Badge className="bg-blue-600 text-white text-xs px-1.5 py-0 rounded-full">
+                              New
+                            </Badge>
+                          )}
+                          <p className="text-xs text-slate-500">{timeAgo}</p>
+                        </Flex>
+                        <p className="text-sm text-slate-600">
+                          {notification.message}
+                        </p>
+                        {notification.data &&
+                          Object.keys(notification.data).length > 0 && (
+                            <Box className="mt-2 space-y-1">
+                              {Object.entries(notification.data).map(
+                                ([key, value]) => (
+                                  <Flex
+                                    key={key}
+                                    className="justify-between text-xs"
+                                  >
+                                    <span className="font-medium text-gray-600 capitalize">
+                                      {key.replace(/([A-Z])/g, " $1").trim()}:
+                                    </span>
+                                    <span className="text-gray-700">
+                                      {String(value)}
+                                    </span>
+                                  </Flex>
+                                )
+                              )}
+                            </Box>
+                          )}
+                      </Stack>
+                    </Flex>
+                    <Flex className="gap-1">
+                      {!notification.read && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleMarkAsRead(notification.id)}
+                          disabled={markAsReadMutation.isPending}
+                          className="h-8 w-8 p-0 text-gray-600 hover:text-gray-800"
+                          title="Mark as read"
+                        >
+                          <Check className="w-4 h-4" />
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleMarkAsRead(notification.id)}
-                        disabled={markAsReadMutation.isPending}
-                        className="h-8 w-8 p-0"
-                        title="Mark as read"
+                        onClick={() => handleDelete(notification.id)}
+                        disabled={deleteNotificationMutation.isPending}
+                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        title="Delete notification"
                       >
-                        <Check className="w-4 h-4" />
+                        <X className="w-4 h-4" />
                       </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(notification.id)}
-                      disabled={deleteNotificationMutation.isPending}
-                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                      title="Delete notification"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
+                    </Flex>
                   </Flex>
-                </Flex>
-              </Box>
-            ))}
-          </Stack>
-        )}
+                </Box>
+              );
+            })
+          )}
+        </Box>
 
         {/* Pagination */}
         {pagination && pagination.totalPages > 1 && (
-          <Flex className="justify-between items-center mt-6 pt-4 border-t border-gray-200">
+          <Flex className="justify-between items-center mt-4 pt-4 border-t border-gray-200">
             <p className="text-sm text-gray-600">
-              Page {pagination.currentPage} of {pagination.totalPages} (
-              {pagination.totalNotifications} total)
+              Page {pagination.currentPage} of {pagination.totalPages}
             </p>
             <Flex className="gap-2">
               <Button
                 variant="outline"
+                size="sm"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={!pagination.hasPrevPage || isLoading}
+                className="h-8 text-xs rounded-full"
               >
                 Previous
               </Button>
               <Button
                 variant="outline"
+                size="sm"
                 onClick={() =>
                   setPage((p) => Math.min(pagination.totalPages, p + 1))
                 }
                 disabled={!pagination.hasNextPage || isLoading}
+                className="h-8 text-xs rounded-full"
               >
                 Next
               </Button>
             </Flex>
           </Flex>
         )}
-      </ComponentWrapper>
+      </Stack>
     </PageWrapper>
   );
 };

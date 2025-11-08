@@ -11,7 +11,17 @@ import {
 } from "../ui/tooltip";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { FaRegTrashAlt } from "react-icons/fa";
+import {
+  FaRegTrashAlt,
+  FaInstagram,
+  FaTwitter,
+  FaFacebook,
+  FaLinkedin,
+  FaYoutube,
+  FaTiktok,
+  FaSnapchat,
+  FaPinterest,
+} from "react-icons/fa";
 import { Ellipsis, Eye, Pencil, Loader2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
@@ -22,18 +32,27 @@ import { useState } from "react";
 import { Stack } from "../ui/stack";
 import { useFetchOrganizationClients } from "@/hooks/usefetchclients";
 import { useDeleteClient } from "@/hooks/usedeleteclient";
+import { useUpdateClient } from "@/hooks/useupdateclient";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 // Mock data for fallback (will be replaced by API data)
 const mockData: Data[] = [
   {
     id: "1",
-    status: "New Lead",
-    name: "use Client",
-    email: "use@example.com",
-    phone: "+1234567890",
-    cpfcnpj: "000.000.000-00",
+    status: "No Data",
+    name: "No Data",
+    email: "No Data",
+    phone: "No Data",
+    cpfcnpj: "No Data",
+    socialMediaLinks: "No Data",
     address: "USA",
     businessIndustry: "Technology",
     createdAt: new Date().toISOString(),
@@ -68,6 +87,7 @@ export type Data = {
   createdAt: string;
   updatedAt: string;
   projects?: Project[];
+  socialMediaLinks?: string; // JSON string
 };
 
 export const ClientManagementTable = () => {
@@ -89,6 +109,28 @@ export const ClientManagementTable = () => {
   console.log("🔍 First client ID if exists:", clientsData?.data?.[0]?.id);
 
   const { mutate: deleteClient, isPending: isDeleting } = useDeleteClient();
+  const { mutate: updateClient, isPending: isUpdatingStatus } =
+    useUpdateClient();
+
+  const handleStatusChange = (clientId: string, newStatus: string) => {
+    updateClient(
+      {
+        clientId,
+        data: { status: newStatus },
+      },
+      {
+        onSuccess: () => {
+          toast.success("Client status updated successfully");
+          refetch();
+        },
+        onError: (error: any) => {
+          toast.error(
+            error?.response?.data?.error || "Failed to update client status"
+          );
+        },
+      }
+    );
+  };
 
   const openViewClientModal = (client: Data) => {
     setSelectedClient(client);
@@ -166,28 +208,84 @@ export const ClientManagementTable = () => {
     {
       id: "social",
       header: () => <Box className="text-center text-black">Social</Box>,
-      cell: ({ row }) => (
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="ghost"
-              className="w-8 h-8 p-0 flex items-center justify-center cursor-pointer"
-            >
-              <Ellipsis className="text-gray-600" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-full">
-            <Box className="text-sm font-semibold mb-2">Social Media</Box>
-            <Box className="mb-1">
-              <span className="font-medium">Email:</span> {row.original.email}
-            </Box>
-            <Box className="mb-1">
-              <span className="font-medium">Phone:</span>{" "}
-              {row.original.phone || "N/A"}
-            </Box>
-          </PopoverContent>
-        </Popover>
-      ),
+      cell: ({ row }) => {
+        const socialLinks = row.original.socialMediaLinks
+          ? typeof row.original.socialMediaLinks === "string"
+            ? JSON.parse(row.original.socialMediaLinks)
+            : row.original.socialMediaLinks
+          : [];
+
+        const socialIcons: Record<string, any> = {
+          instagram: FaInstagram,
+          twitter: FaTwitter,
+          facebook: FaFacebook,
+          linkedin: FaLinkedin,
+          youtube: FaYoutube,
+          tiktok: FaTiktok,
+          snapchat: FaSnapchat,
+          pinterest: FaPinterest,
+        };
+
+        const socialColors: Record<string, string> = {
+          instagram: "#E4405F",
+          twitter: "#1DA1F2",
+          facebook: "#1877F2",
+          linkedin: "#0077B5",
+          youtube: "#FF0000",
+          tiktok: "#000000",
+          snapchat: "#FFFC00",
+          pinterest: "#BD081C",
+        };
+
+        return (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                className="w-8 h-8 p-0 flex items-center justify-center cursor-pointer"
+              >
+                <Ellipsis className="text-gray-600" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64">
+              <Box className="text-sm font-semibold mb-3">Contact & Social</Box>
+              <Box className="mb-2">
+                <span className="font-medium text-xs">Email:</span>{" "}
+                <span className="text-xs">{row.original.email}</span>
+              </Box>
+              <Box className="mb-3">
+                <span className="font-medium text-xs">Phone:</span>{" "}
+                <span className="text-xs">{row.original.phone || "N/A"}</span>
+              </Box>
+              {Array.isArray(socialLinks) && socialLinks.length > 0 && (
+                <>
+                  <Box className="text-sm font-semibold mb-2 mt-3 pt-3 border-t">
+                    Social Media
+                  </Box>
+                  <Box className="flex flex-wrap gap-2">
+                    {socialLinks.map((link: any, index: number) => {
+                      const Icon = socialIcons[link.type] || FaInstagram;
+                      const color = socialColors[link.type] || "#000000";
+                      return (
+                        <a
+                          key={index}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 p-1.5 border border-gray-200 rounded hover:bg-gray-50 transition-colors"
+                          title={link.type}
+                        >
+                          <Icon className="w-4 h-4" style={{ color }} />
+                        </a>
+                      );
+                    })}
+                  </Box>
+                </>
+              )}
+            </PopoverContent>
+          </Popover>
+        );
+      },
     },
 
     {
@@ -250,18 +348,62 @@ export const ClientManagementTable = () => {
 
         const currentStyle = statusStyles[status] || defaultStyle;
 
+        const statusOptions: Array<{
+          value: typeof status;
+          label: string;
+        }> = [
+          { value: "New Lead", label: "New Lead" },
+          { value: "In Negotiation", label: "In Negotiation" },
+          { value: "Contract Signed", label: "Contract Signed" },
+          { value: "Project In Progress", label: "Project In Progress" },
+          { value: "Completed", label: "Completed" },
+          { value: "Inactive Client", label: "Inactive Client" },
+        ];
+
         return (
           <Center>
-            <Flex
-              className={`rounded-md capitalize w-38 h-10 gap-2 border justify-center items-center ${currentStyle.text}`}
+            <Select
+              value={status}
+              onValueChange={(newStatus) =>
+                handleStatusChange(row.original.id, newStatus)
+              }
+              disabled={isUpdatingStatus}
             >
-              <Center className="gap-2">
-                <Flex
-                  className={`w-2 h-2 items-start rounded-full ${currentStyle.dot}`}
-                />
-                <h1>{status || "Unknown"}</h1>
-              </Center>
-            </Flex>
+              <SelectTrigger
+                className={`rounded-md capitalize w-38 h-12 gap-2 border justify-center items-center ${currentStyle.text} cursor-pointer hover:opacity-90`}
+              >
+                <SelectValue>
+                  <Center className="gap-2">
+                    <Flex
+                      className={`w-2 h-2 items-start rounded-full ${currentStyle.dot}`}
+                    />
+                    <h1>{status || "Unknown"}</h1>
+                  </Center>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map((option) => {
+                  const optionStyle =
+                    statusStyles[option.value] || defaultStyle;
+                  return (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className="cursor-pointer"
+                    >
+                      <Flex
+                        className={`rounded-md capitalize gap-2 border justify-center items-center px-3 py-1 ${optionStyle.text}`}
+                      >
+                        <Flex
+                          className={`w-2 h-2 items-start rounded-full ${optionStyle.dot}`}
+                        />
+                        <span>{option.label}</span>
+                      </Flex>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
           </Center>
         );
       },
@@ -338,7 +480,7 @@ export const ClientManagementTable = () => {
 
   // Transform API data to match table format
   const tableData: Data[] =
-    clientsData?.data?.map((client) => ({
+    clientsData?.data?.map((client: any) => ({
       id: client.id,
       status: client.status,
       email: client.email,
@@ -350,6 +492,12 @@ export const ClientManagementTable = () => {
       image: client.image,
       createdAt: client.createdAt,
       updatedAt: client.updatedAt,
+      projects: client.projects || [], // Include projects from API
+      socialMediaLinks: client.socialMediaLinks
+        ? typeof client.socialMediaLinks === "string"
+          ? client.socialMediaLinks
+          : JSON.stringify(client.socialMediaLinks)
+        : undefined,
     })) || mockData;
 
   // Show loading state
@@ -388,7 +536,7 @@ export const ClientManagementTable = () => {
       {/* Edit Client Modal */}
       {selectedClient && (
         <GeneralModal open={props.open} onOpenChange={props.onOpenChange}>
-          <Box className="w-full bg-white rounded-xl shadow-lg p-6 gap-4">
+          <Box className="w-full h-[36rem] bg-white rounded-xl shadow-lg p-6 gap-4 overflow-y-auto">
             <Stack className="items-center">
               <Box className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mb-2">
                 <img
@@ -408,11 +556,85 @@ export const ClientManagementTable = () => {
               </span>
             </Stack>
 
+            {/* Social Media Links */}
+            {selectedClient.socialMediaLinks && (
+              <Box className="mt-6">
+                <span className="text-lg font-semibold text-gray-800 mb-2 block">
+                  Social Media
+                </span>
+                <Box className="flex flex-wrap gap-3">
+                  {(() => {
+                    try {
+                      const links =
+                        typeof selectedClient.socialMediaLinks === "string"
+                          ? JSON.parse(selectedClient.socialMediaLinks)
+                          : selectedClient.socialMediaLinks;
+
+                      const socialIcons: Record<string, any> = {
+                        instagram: FaInstagram,
+                        twitter: FaTwitter,
+                        facebook: FaFacebook,
+                        linkedin: FaLinkedin,
+                        youtube: FaYoutube,
+                        tiktok: FaTiktok,
+                        snapchat: FaSnapchat,
+                        pinterest: FaPinterest,
+                      };
+
+                      const socialColors: Record<string, string> = {
+                        instagram: "#E4405F",
+                        twitter: "#1DA1F2",
+                        facebook: "#1877F2",
+                        linkedin: "#0077B5",
+                        youtube: "#FF0000",
+                        tiktok: "#000000",
+                        snapchat: "#FFFC00",
+                        pinterest: "#BD081C",
+                      };
+
+                      return Array.isArray(links) && links.length > 0 ? (
+                        links.map((link: any, index: number) => {
+                          const Icon = socialIcons[link.type] || FaInstagram;
+                          const color = socialColors[link.type] || "#000000";
+                          return (
+                            <a
+                              key={index}
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                              <Icon className="w-5 h-5" style={{ color }} />
+                              <span className="text-sm text-gray-700 capitalize">
+                                {link.type}
+                              </span>
+                            </a>
+                          );
+                        })
+                      ) : (
+                        <Box className="text-center text-gray-500 text-sm">
+                          No social media links
+                        </Box>
+                      );
+                    } catch (err) {
+                      console.error("Error parsing social media links:", err);
+                      return (
+                        <Box className="text-center text-gray-500 text-sm">
+                          Unable to load social media links
+                        </Box>
+                      );
+                    }
+                  })()}
+                </Box>
+              </Box>
+            )}
+
             <Box className="mt-6">
               <span className="text-lg font-semibold text-gray-800 mb-2 block">
                 Projects
               </span>
-              {selectedClient.projects?.length !== 1 ? (
+              {!selectedClient.projects ||
+              selectedClient.projects.length === 0 ? (
                 <Box className="text-center text-gray-500">
                   No projects found
                 </Box>

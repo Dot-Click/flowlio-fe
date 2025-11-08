@@ -24,7 +24,52 @@ import { Stack } from "../ui/stack";
 import { useCreateClient } from "@/hooks/usecreateclient";
 import { useUpdateClient } from "@/hooks/useupdateclient";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus, X } from "lucide-react";
+import {
+  FaInstagram,
+  FaTwitter,
+  FaFacebook,
+  FaLinkedin,
+  FaYoutube,
+  FaTiktok,
+  FaSnapchat,
+  FaPinterest,
+} from "react-icons/fa";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+
+const socialMediaTypes = [
+  {
+    value: "instagram",
+    label: "Instagram",
+    icon: FaInstagram,
+    color: "#E4405F",
+  },
+  { value: "twitter", label: "Twitter/X", icon: FaTwitter, color: "#1DA1F2" },
+  { value: "facebook", label: "Facebook", icon: FaFacebook, color: "#1877F2" },
+  { value: "linkedin", label: "LinkedIn", icon: FaLinkedin, color: "#0077B5" },
+  { value: "youtube", label: "YouTube", icon: FaYoutube, color: "#FF0000" },
+  { value: "tiktok", label: "TikTok", icon: FaTiktok, color: "#000000" },
+  { value: "snapchat", label: "Snapchat", icon: FaSnapchat, color: "#FFFC00" },
+  {
+    value: "pinterest",
+    label: "Pinterest",
+    icon: FaPinterest,
+    color: "#BD081C",
+  },
+] as const;
+
+type SocialMediaType = (typeof socialMediaTypes)[number]["value"];
+
+interface SocialMediaLink {
+  type: SocialMediaType;
+  url: string;
+}
 
 const formSchema = z.object({
   fullname: z.string().min(2, {
@@ -45,6 +90,17 @@ const formSchema = z.object({
   industry: z.string().min(2, {
     message: "Must be a valid industry",
   }),
+  socialMediaLinks: z
+    .array(
+      z.object({
+        type: z.string(),
+        url: z
+          .string()
+          .url({ message: "Must be a valid URL" })
+          .or(z.literal("")),
+      })
+    )
+    .optional(),
 });
 
 interface ClientFormProps {
@@ -59,6 +115,7 @@ interface ClientFormProps {
     address?: string;
     status: string;
     image?: string;
+    socialMediaLinks?: string; // JSON string
   };
   onSuccess?: () => void;
   onClose?: () => void;
@@ -81,6 +138,21 @@ export const ClientForm = ({
   const [imageError, setImageError] = useState<string>("");
   const [isCompressing, setIsCompressing] = useState(false);
   const [isImageRemoved, setIsImageRemoved] = useState(false);
+  const [socialMediaLinks, setSocialMediaLinks] = useState<SocialMediaLink[]>(
+    () => {
+      if (client?.socialMediaLinks) {
+        try {
+          return typeof client.socialMediaLinks === "string"
+            ? JSON.parse(client.socialMediaLinks)
+            : client.socialMediaLinks;
+        } catch (error) {
+          console.error("Error parsing social media links:", error);
+          return [];
+        }
+      }
+      return [];
+    }
+  );
 
   const isPending = isCreating || isUpdating;
 
@@ -93,12 +165,18 @@ export const ClientForm = ({
       cpfcnpj: client?.cpfcnpj || "1234567890",
       address: client?.address || "123 Main St, Anytown, USA",
       industry: client?.businessIndustry || "Technology",
+      socialMediaLinks: client?.socialMediaLinks
+        ? JSON.parse(client.socialMediaLinks)
+        : [],
     },
   });
 
   // Update form when client data changes (for edit mode)
   useEffect(() => {
     if (client && mode === "edit") {
+      const parsedSocialLinks = client.socialMediaLinks
+        ? JSON.parse(client.socialMediaLinks)
+        : [];
       form.reset({
         fullname: client.name,
         email: client.email,
@@ -106,7 +184,9 @@ export const ClientForm = ({
         cpfcnpj: client.cpfcnpj || "1234567890",
         address: client.address || "123 Main St, Anytown, USA",
         industry: client.businessIndustry || "Technology",
+        socialMediaLinks: parsedSocialLinks,
       });
+      setSocialMediaLinks(parsedSocialLinks);
       setPdfPreview(client.image || null);
     }
   }, [client, mode, form]);
@@ -215,6 +295,9 @@ export const ClientForm = ({
       businessIndustry: values.industry,
       address: values.address,
       status: mode === "create" ? "New Lead" : client?.status || "New Lead",
+      socialMediaLinks: JSON.stringify(
+        socialMediaLinks.filter((link) => link.url.trim() !== "")
+      ),
     };
 
     if (mode === "edit") {
@@ -574,6 +657,130 @@ export const ClientForm = ({
                   </FormItem>
                 )}
               />
+            </Box>
+
+            {/* Social Media Links Section */}
+            <Box className="mt-6">
+              <Stack className="gap-4">
+                <h1 className="text-black text-xl font-medium">
+                  Social Media Links
+                </h1>
+                <Box className="space-y-4">
+                  {socialMediaLinks.map((link, index) => {
+                    const socialType = socialMediaTypes.find(
+                      (type) => type.value === link.type
+                    );
+                    const Icon = socialType?.icon || FaInstagram;
+                    const availableTypes = socialMediaTypes.filter(
+                      (type) =>
+                        !socialMediaLinks.some(
+                          (l, i) => l.type === type.value && i !== index
+                        )
+                    );
+
+                    return (
+                      <Box
+                        key={index}
+                        className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg bg-white"
+                      >
+                        <Select
+                          value={link.type}
+                          onValueChange={(value) => {
+                            const updated = [...socialMediaLinks];
+                            updated[index].type = value as SocialMediaType;
+                            setSocialMediaLinks(updated);
+                          }}
+                        >
+                          <SelectTrigger className="w-40 bg-white">
+                            <SelectValue>
+                              <Box className="flex items-center gap-2">
+                                {socialType && (
+                                  <>
+                                    <Icon
+                                      className="w-5 h-5"
+                                      style={{ color: socialType.color }}
+                                    />
+                                    <span>{socialType.label}</span>
+                                  </>
+                                )}
+                              </Box>
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableTypes.map((type) => {
+                              const TypeIcon = type.icon;
+                              return (
+                                <SelectItem key={type.value} value={type.value}>
+                                  <Box className="flex items-center gap-2">
+                                    <TypeIcon
+                                      className="w-4 h-4"
+                                      style={{ color: type.color }}
+                                    />
+                                    <span>{type.label}</span>
+                                  </Box>
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+
+                        <Input
+                          className="flex-1 bg-white rounded-full placeholder:text-gray-400"
+                          size="xl"
+                          type="url"
+                          placeholder="Enter social media URL"
+                          value={link.url}
+                          onChange={(e) => {
+                            const updated = [...socialMediaLinks];
+                            updated[index].url = e.target.value;
+                            setSocialMediaLinks(updated);
+                          }}
+                        />
+
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSocialMediaLinks(
+                              socialMediaLinks.filter((_, i) => i !== index)
+                            );
+                          }}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </Box>
+                    );
+                  })}
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      const availableTypes = socialMediaTypes.filter(
+                        (type) =>
+                          !socialMediaLinks.some(
+                            (link) => link.type === type.value
+                          )
+                      );
+                      if (availableTypes.length > 0) {
+                        setSocialMediaLinks([
+                          ...socialMediaLinks,
+                          { type: availableTypes[0].value, url: "" },
+                        ]);
+                      }
+                    }}
+                    disabled={
+                      socialMediaLinks.length >= socialMediaTypes.length
+                    }
+                    className="w-full border-dashed border-2 border-gray-300 hover:border-gray-400"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Social Media Link
+                  </Button>
+                </Box>
+              </Stack>
             </Box>
           </Box>
         </form>

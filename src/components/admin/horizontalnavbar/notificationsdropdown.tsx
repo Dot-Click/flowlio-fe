@@ -75,22 +75,27 @@ export const NotificationsDropdown: React.FC<{ className?: string }> = ({
     }
   };
 
-  const handleNotificationClick = (notification: any) => {
+  const handleNotificationClick = (notification: any, e?: React.MouseEvent) => {
+    // Prevent default behavior and stop propagation to avoid page refresh
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
     // Mark as read if not already read
     if (!notification.read) {
       markAsReadMutation.mutate(notification.id);
     }
 
-    // Navigate based on notification type and user role
-    if (notification.type.includes("support_ticket")) {
-      // Redirect viewers to viewer support page, others to regular support
-      if (user?.user.role === "viewer") {
-        navigate("/viewer/viewer-support");
-      } else {
-        navigate("/dashboard/support");
-      }
+    // Navigate to notifications page based on user role
+    const userRole = user?.user.role;
+    if (userRole === "superadmin" || userRole === "subadmin") {
+      navigate("/superadmin/notifications");
+    } else if (userRole === "viewer") {
+      // Check if viewer has notifications route, otherwise use dashboard
+      navigate("/dashboard/notifications");
     } else {
-      navigate("/dashboard");
+      navigate("/dashboard/notifications");
     }
   };
 
@@ -173,7 +178,7 @@ export const NotificationsDropdown: React.FC<{ className?: string }> = ({
                   "gap-3 items-start p-2 rounded-lg cursor-pointer hover:bg-gray-50",
                   !notification.read && "bg-blue-50"
                 )}
-                onClick={() => handleNotificationClick(notification)}
+                onClick={(e) => handleNotificationClick(notification, e)}
               >
                 <Center
                   className={cn(

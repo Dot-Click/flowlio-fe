@@ -12,7 +12,7 @@ import {
   SquareKanban,
   User,
   FlaskConical,
-  // Bell,
+  Bell,
 } from "lucide-react";
 import { useUser } from "@/providers/user.provider";
 
@@ -47,11 +47,11 @@ export const navItems: NavItem[] = [
     url: "/superadmin/support-tickets",
     icon: <MessageCircleQuestion />,
   },
-  // {
-  //   title: "Notifications",
-  //   url: "/superadmin/notifications",
-  //   icon: <Bell />,
-  // },
+  {
+    title: "Notifications",
+    url: "/superadmin/notifications",
+    icon: <Bell />,
+  },
   {
     title: "Settings",
     url: "/superadmin/settings",
@@ -70,6 +70,7 @@ export const SuperAdminLayout = () => {
         "/superadmin/companies",
         "/superadmin/subscriptions",
         "/superadmin/support-tickets",
+        "/superadmin/notifications",
         "/superadmin/settings",
       ];
 

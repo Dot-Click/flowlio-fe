@@ -8,11 +8,12 @@ import { Flex } from "../ui/flex";
 import { cn } from "@/lib/utils";
 import { Search } from "lucide-react";
 import { Input } from "../ui/input";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { CustomDropdown, CustomDropdownItem } from "../ui/custom-dropdown";
 import { useFetchTasks } from "@/hooks/usefetchtasks";
 import { useFetchOrganizationUsers } from "@/hooks/usefetchorganizationusers";
+import { useFetchProjects } from "@/hooks/usefetchprojects";
 import { useUpdateTaskStatus } from "@/hooks/useupdatetask";
 import { format } from "date-fns";
 import { TaskDetailsModal } from "./taskdetailsmodal";
@@ -21,16 +22,29 @@ export const TaskManagementHeader = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
   const [selectedTask, setSelectedTask] = useState<KanbanTask | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const hasInitializedProject = useRef(false);
 
   // Fetch real data
   const { data: tasksResponse } = useFetchTasks();
   const { data: usersResponse } = useFetchOrganizationUsers();
+  const { data: projectsResponse } = useFetchProjects();
   const updateTaskStatus = useUpdateTaskStatus();
 
   const realTasks = tasksResponse?.data || [];
   const users = usersResponse?.data?.userMembers || [];
+  const projects = projectsResponse?.data || [];
+
+  // Set first project as default when projects are loaded (only once)
+  // But allow user to select "All Projects" to see all tasks
+  useEffect(() => {
+    if (projects.length > 0 && !hasInitializedProject.current) {
+      setSelectedProjects([projects[0].id]);
+      hasInitializedProject.current = true;
+    }
+  }, [projects]);
 
   // Helper function to map API status to KanbanBoard status
   const mapStatusToKanban = (apiStatus: string) => {
@@ -68,19 +82,26 @@ export const TaskManagementHeader = () => {
       : initialTasks;
   const setTasks = () => {}; // No-op since we're using real data
 
-  // Filter tasks by search query and selected users
+  // Filter tasks by search query, selected users, and selected projects
+  // Show all tasks if no projects selected (user selected "All Projects")
   const filteredTasks = tasks.filter((task) => {
     const matchesSearch =
       task.title.toLowerCase().includes(search.toLowerCase()) ||
       task.project.toLowerCase().includes(search.toLowerCase());
 
-    // For real tasks, we need to check the original data for assigneeId
+    // For real tasks, we need to check the original data for assigneeId and projectId
     const realTask = realTasks.find((rt) => rt.id === task.id);
     const matchesUser =
       selectedUsers.length === 0 ||
       (realTask && selectedUsers.includes(realTask.assigneeId || ""));
 
-    return matchesSearch && matchesUser;
+    // If no projects selected, show all tasks (user selected "All Projects")
+    // Otherwise, only show tasks from selected projects
+    const matchesProject =
+      selectedProjects.length === 0 ||
+      (realTask && selectedProjects.includes(realTask.projectId || ""));
+
+    return matchesSearch && matchesUser && matchesProject;
   });
 
   const handleUserToggle = (userId: string) => {
@@ -88,6 +109,14 @@ export const TaskManagementHeader = () => {
       prev.includes(userId)
         ? prev.filter((id) => id !== userId)
         : [...prev, userId]
+    );
+  };
+
+  const handleProjectToggle = (projectId: string) => {
+    setSelectedProjects((prev) =>
+      prev.includes(projectId)
+        ? prev.filter((id) => id !== projectId)
+        : [...prev, projectId]
     );
   };
 
@@ -147,11 +176,51 @@ export const TaskManagementHeader = () => {
             />
           </Flex>
 
-          <Flex className="max-md:w-full justify-between">
+          <Flex className="max-md:w-full justify-between gap-2">
             {/* <CalendarComponent
               range={range}
               setRange={(range) => setRange(range as DateRange)}
             /> */}
+
+            <CustomDropdown
+              align="end"
+              className="w-56"
+              trigger={
+                <Button
+                  variant="ghost"
+                  aria-haspopup="dialog"
+                  className={cn(
+                    "cursor-pointer bg-white border border-gray-200 rounded-full h-10 w-36 text-black shadow-none flex p-3 justify-between overflow-hidden"
+                  )}
+                >
+                  <ChevronDown />
+                  {selectedProjects.length > 0
+                    ? selectedProjects.length === 1
+                      ? projects.find((p) => p.id === selectedProjects[0])
+                          ?.projectName || "Projects"
+                      : `${selectedProjects.length} Projects`
+                    : "Projects"}
+                </Button>
+              }
+            >
+              <CustomDropdownItem
+                checked={selectedProjects.length === 0}
+                onClick={() => setSelectedProjects([])}
+              >
+                All Projects
+              </CustomDropdownItem>
+              {projects.map((project) => (
+                <CustomDropdownItem
+                  key={project.id}
+                  checked={selectedProjects.includes(project.id)}
+                  onClick={() => handleProjectToggle(project.id)}
+                >
+                  {project.projectName.length > 10
+                    ? project.projectName.slice(0, 20) + "..."
+                    : project.projectName}
+                </CustomDropdownItem>
+              ))}
+            </CustomDropdown>
 
             <CustomDropdown
               align="end"
@@ -166,12 +235,10 @@ export const TaskManagementHeader = () => {
                 >
                   <ChevronDown />
                   {selectedUsers.length > 0
-                    ? selectedUsers
-                        .map(
-                          (user) =>
-                            users.find((u) => u.user?.id === user)?.firstname
-                        )
-                        .join(", ")
+                    ? selectedUsers.length === 1
+                      ? users.find((u) => u.user?.id === selectedUsers[0])
+                          ?.firstname || "Users"
+                      : `${selectedUsers.length} Users`
                     : "Users"}
                 </Button>
               }

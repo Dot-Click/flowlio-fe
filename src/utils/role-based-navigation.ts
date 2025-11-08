@@ -6,7 +6,7 @@ import { TbInvoice, TbReportSearch } from "react-icons/tb";
 import { LuUsers } from "react-icons/lu";
 import { SquareKanban, UserPen, Clock } from "lucide-react";
 import { GroupIcon, TaskManagementIcon } from "@/components/customeIcons";
-import { MessageCircleQuestion } from "lucide-react";
+import { MessageCircleQuestion, Bell } from "lucide-react";
 import type { NavItem } from "@/components/admin/appsidebar";
 
 /**
@@ -37,11 +37,11 @@ const viewerNavItems: NavItem[] = [
     title: "Support Tickets",
     icon: React.createElement(MessageCircleQuestion),
   },
-  // {
-  //   url: "/dashboard/notifications",
-  //   title: "Notifications",
-  //   icon: React.createElement(Bell),
-  // },
+  {
+    url: "/dashboard/notifications",
+    title: "Notifications",
+    icon: React.createElement(Bell),
+  },
   {
     url: "/dashboard/settings",
     title: "Settings",
@@ -78,11 +78,11 @@ const operatorNavItems: NavItem[] = [
     title: "Support Tickets",
     icon: React.createElement(MessageCircleQuestion),
   },
-  // {
-  //   url: "/dashboard/notifications",
-  //   title: "Notifications",
-  //   icon: React.createElement(Bell),
-  // },
+  {
+    url: "/dashboard/notifications",
+    title: "Notifications",
+    icon: React.createElement(Bell),
+  },
   {
     url: "/dashboard/settings",
     title: "Settings",
@@ -143,21 +143,21 @@ const userNavItems: NavItem[] = [
     title: "Invoices",
     icon: React.createElement(TbInvoice),
   },
-  {
-    url: "/dashboard/subscription",
-    title: "My Subscriptions",
-    icon: React.createElement(TbInvoice),
-  },
+  // {
+  //   url: "/dashboard/subscription",
+  //   title: "My Subscriptions",
+  //   icon: React.createElement(TbInvoice),
+  // },
   {
     url: "/dashboard/support",
     title: "Support Tickets",
     icon: React.createElement(MessageCircleQuestion),
   },
-  // {
-  //   url: "/dashboard/notifications",
-  //   title: "Notifications",
-  //   icon: React.createElement(Bell),
-  // },
+  {
+    url: "/dashboard/notifications",
+    title: "Notifications",
+    icon: React.createElement(Bell),
+  },
   {
     url: "/dashboard/settings",
     title: "Settings",
@@ -214,11 +214,11 @@ const subAdminNavItems: NavItem[] = [
     title: "Invoices",
     icon: React.createElement(TbInvoice),
   },
-  {
-    url: "/dashboard/subscription",
-    title: "My Subscriptions",
-    icon: React.createElement(TbInvoice),
-  },
+  // {
+  //   url: "/dashboard/subscription",
+  //   title: "My Subscriptions",
+  //   icon: React.createElement(TbInvoice),
+  // },
   {
     url: "/dashboard/time-tracking",
     title: "Time Tracking",
@@ -229,11 +229,11 @@ const subAdminNavItems: NavItem[] = [
     title: "Support Tickets",
     icon: React.createElement(MessageCircleQuestion),
   },
-  // {
-  //   url: "/dashboard/notifications",
-  //   title: "Notifications",
-  //   icon: React.createElement(Bell),
-  // },
+  {
+    url: "/dashboard/notifications",
+    title: "Notifications",
+    icon: React.createElement(Bell),
+  },
   {
     url: "/dashboard/settings",
     title: "Settings",
@@ -294,11 +294,11 @@ const superAdminNavItems: NavItem[] = [
     title: "Invoices",
     icon: React.createElement(TbInvoice),
   },
-  {
-    url: "/dashboard/subscription",
-    title: "My Subscriptions",
-    icon: React.createElement(TbInvoice),
-  },
+  // {
+  //   url: "/dashboard/subscription",
+  //   title: "My Subscriptions",
+  //   icon: React.createElement(TbInvoice),
+  // },
   {
     url: "/dashboard/support",
     title: "Support Tickets",
