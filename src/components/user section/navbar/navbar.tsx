@@ -35,59 +35,66 @@ export const Navbar: FC<NavbarProps> = ({
   const isPricingPage = isPricing || location.pathname === "/pricing";
 
   useEffect(() => {
-    if (navbarRef.current) {
-      // Initial animation
-      gsap.fromTo(
-        navbarRef.current,
-        {
-          y: -100,
-          opacity: 0,
-        },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          ease: "power3.out",
-        }
-      );
-
-      // Text animation for navigation items
-      const navItems = navbarRef.current.querySelectorAll("a, button");
-      gsap.fromTo(
-        navItems,
-        {
-          y: 20,
-          opacity: 0,
-        },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          stagger: 0.1,
-          ease: "back.out(1.7)",
-          delay: 0.3,
-        }
-      );
-
-      // Logo animation
-      const logo = navbarRef.current.querySelector("img");
-      if (logo) {
+    if (navbarRef.current && typeof gsap !== "undefined") {
+      try {
+        // Initial animation
         gsap.fromTo(
-          logo,
+          navbarRef.current,
           {
-            scale: 0.8,
-            rotation: -5,
+            y: -100,
             opacity: 0,
           },
           {
-            scale: 1,
-            rotation: 0,
+            y: 0,
             opacity: 1,
-            duration: 1.2,
-            ease: "elastic.out(1, 0.3)",
-            delay: 0.1,
+            duration: 1,
+            ease: "power3.out",
           }
         );
+
+        // Text animation for navigation items
+        const navItems = navbarRef.current.querySelectorAll("a, button");
+        if (navItems && navItems.length > 0) {
+          gsap.fromTo(
+            navItems,
+            {
+              y: 20,
+              opacity: 0,
+            },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.8,
+              stagger: 0.1,
+              ease: "back.out(1.7)",
+              delay: 0.3,
+            }
+          );
+        }
+
+        // Logo animation
+        const logo = navbarRef.current.querySelector("img");
+        if (logo) {
+          gsap.fromTo(
+            logo,
+            {
+              scale: 0.8,
+              rotation: -5,
+              opacity: 0,
+            },
+            {
+              scale: 1,
+              rotation: 0,
+              opacity: 1,
+              duration: 1.2,
+              ease: "elastic.out(1, 0.3)",
+              delay: 0.1,
+            }
+          );
+        }
+      } catch (error) {
+        // Silently fail if gsap animations fail - don't crash the component
+        console.warn("Navbar animation error:", error);
       }
     }
   }, []);

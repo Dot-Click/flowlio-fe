@@ -1,18 +1,20 @@
 import React from "react";
 
-type ErrorBoundaryState = { hasError: boolean; error?: any };
+type ErrorBoundaryState = { hasError: boolean; error?: any; retryKey: number };
+
+type ErrorBoundaryProps = React.PropsWithChildren;
 
 export class ErrorBoundary extends React.Component<
-  React.PropsWithChildren,
+  ErrorBoundaryProps,
   ErrorBoundaryState
 > {
-  constructor(props: React.PropsWithChildren) {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, retryKey: 0 };
   }
 
   static getDerivedStateFromError(error: any): ErrorBoundaryState {
-    return { hasError: true, error };
+    return { hasError: true, error, retryKey: 0 };
   }
 
   componentDidCatch(error: any, info: any) {
@@ -20,7 +22,17 @@ export class ErrorBoundary extends React.Component<
   }
 
   handleRetry = () => {
-    this.setState({ hasError: false, error: undefined });
+    // Reset error state and increment retry key to force remount
+    this.setState((prevState) => ({
+      hasError: false,
+      error: undefined,
+      retryKey: prevState.retryKey + 1,
+    }));
+  };
+
+  handleRefresh = () => {
+    // Force a full page refresh
+    window.location.reload();
   };
 
   render() {
@@ -40,17 +52,27 @@ export class ErrorBoundary extends React.Component<
                 </pre>
               </div>
             )}
-            <button
-              type="button"
-              onClick={this.handleRetry}
-              className="inline-flex items-center rounded-full bg-black px-4 py-2 text-white hover:bg-black/80 cursor-pointer transition-all duration-300"
-            >
-              Retry
-            </button>
+            <div className="flex gap-3 justify-center">
+              <button
+                type="button"
+                onClick={this.handleRetry}
+                className="inline-flex items-center rounded-full bg-black px-4 py-2 text-white hover:bg-black/80 cursor-pointer transition-all duration-300"
+              >
+                Retry
+              </button>
+              <button
+                type="button"
+                onClick={this.handleRefresh}
+                className="inline-flex items-center rounded-full bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300 cursor-pointer transition-all duration-300"
+              >
+                Refresh Page
+              </button>
+            </div>
           </div>
         </div>
       );
     }
-    return this.props.children;
+    // Use retryKey to force remount on retry
+    return <div key={this.state.retryKey}>{this.props.children}</div>;
   }
 }

@@ -6,7 +6,7 @@ import { Flex } from "@/components/ui/flex";
 import { Stack } from "@/components/ui/stack";
 import { useFetchPublicPlans } from "@/hooks/usefetchplans";
 import { cn } from "@/lib/utils";
-import { Check } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { FC, useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
 
@@ -111,7 +111,7 @@ export const Pricing: FC<PricingProps> = ({
   selectedPlan,
   setSelectedPlan,
 }) => {
-  const { data: plansResponse } = useFetchPublicPlans();
+  const { data: plansResponse, isLoading, isError } = useFetchPublicPlans();
   const navigate = useNavigate();
   const location = useLocation();
   const [isAnimating, setIsAnimating] = useState(false);
@@ -200,6 +200,47 @@ export const Pricing: FC<PricingProps> = ({
       setSelectedPlan(selectedPlan === planIndex ? null : planIndex);
     }
   };
+
+  // Show loading state while plans are being fetched
+  if (isLoading) {
+    return (
+      <Center className="flex-col min-h-[60vh] max-md:pb-10">
+        <Stack className="text-center justify-center items-center px-4 gap-6">
+          <Loader2 className="w-12 h-12 animate-spin text-[#F98618]" />
+          <Flex className="text-center text-black font-[100] max-w-2xl max-sm:w-full text-4xl max-sm:text-3xl">
+            Choose
+            <Box className=" text-[#F98618] font-semibold"> The Ideal Plan</Box>
+          </Flex>
+          <Box className="w-lg max-sm:w-full font-[200] text-black text-[15px]">
+            Loading our pricing plans...
+          </Box>
+        </Stack>
+      </Center>
+    );
+  }
+
+  // Show error state if plans failed to load
+  if (isError) {
+    return (
+      <Center className="flex-col min-h-[60vh] max-md:pb-10">
+        <Stack className="text-center justify-center items-center px-4 gap-6">
+          <Flex className="text-center text-black font-[100] max-w-2xl max-sm:w-full text-4xl max-sm:text-3xl">
+            Choose
+            <Box className=" text-[#F98618] font-semibold"> The Ideal Plan</Box>
+          </Flex>
+          <Box className="w-lg max-sm:w-full font-[200] text-red-600 text-[15px]">
+            Failed to load pricing plans. Please try again later.
+          </Box>
+          <Button
+            onClick={() => window.location.reload()}
+            className="bg-[#F98618] hover:bg-[#F98618]/80 text-white"
+          >
+            Retry
+          </Button>
+        </Stack>
+      </Center>
+    );
+  }
 
   return (
     <Center className="flex-col max-md:pb-10 ">
