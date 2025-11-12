@@ -81,17 +81,6 @@ export const SubscriptionsHeader = () => {
 
   // Pre-populate form with fetched plans
   useEffect(() => {
-    console.log("🔄 useEffect triggered - fetchedPlans changed:", {
-      fetchedPlansCount: fetchedPlans.length,
-      fetchedPlans: fetchedPlans.map((p) => ({
-        id: p.id,
-        name: p.name,
-        slug: p.slug,
-        customPlanName:
-          (p as any).customPlanName ?? (p as any).custom_plan_name,
-      })),
-    });
-
     if (fetchedPlans.length > 0) {
       const updatedPlans = { ...plans };
 
@@ -180,16 +169,6 @@ export const SubscriptionsHeader = () => {
             (plan as any).custom_plan_name ??
             null;
 
-          console.log("🔍 Extracting customPlanName from plan:", {
-            planId: plan.id,
-            planName: plan.name,
-            apiCustomPlanName: apiCustomPlanName,
-            apiCustomPlanNameType: typeof apiCustomPlanName,
-            hasCustomPlanName: "customPlanName" in (plan as any),
-            hasCustomPlanNameSnake: "custom_plan_name" in (plan as any),
-            allPlanKeys: Object.keys(plan),
-          });
-
           // Use customPlanName if it exists, otherwise empty string (user will type their own)
           const customPlanName =
             apiCustomPlanName !== null &&
@@ -198,15 +177,6 @@ export const SubscriptionsHeader = () => {
             apiCustomPlanName.trim() !== ""
               ? apiCustomPlanName.trim()
               : ""; // Empty string - user will type their custom name independently
-
-          console.log("📥 Fetching plan data:", {
-            planId: plan.id,
-            originalName: originalName, // IMMUTABLE - "Basic", "Standard", "Premium"
-            originalSlug: originalSlug, // IMMUTABLE - "basic", "standard", "premium"
-            apiCustomPlanName: apiCustomPlanName, // Custom name from DB
-            finalCustomPlanName: customPlanName, // What user will see/edit in input
-            matchedPlanKey: planKey,
-          });
 
           updatedPlans[planKey] = {
             id: plan.id, // Store plan ID for updates
@@ -221,57 +191,17 @@ export const SubscriptionsHeader = () => {
             newFeature: "",
             adding: false,
           };
-
-          console.log("✅ Updated plan state:", {
-            planKey,
-            id: updatedPlans[planKey].id,
-            name: updatedPlans[planKey].name,
-            customPlanName: updatedPlans[planKey].customPlanName,
-            slug: updatedPlans[planKey].slug,
-          });
         }
       });
 
       setPlans(updatedPlans);
 
       // Log final state to verify customPlanName is set
-      console.log("📋 Final plans state after fetch:", {
-        basic: {
-          name: updatedPlans.basic?.name,
-          customPlanName: updatedPlans.basic?.customPlanName,
-        },
-        standard: {
-          name: updatedPlans.standard?.name,
-          customPlanName: updatedPlans.standard?.customPlanName,
-        },
-        premium: {
-          name: updatedPlans.premium?.name,
-          customPlanName: updatedPlans.premium?.customPlanName,
-        },
-      });
     }
   }, [fetchedPlans]);
 
   // Debug: Log current plans state when it changes
   useEffect(() => {
-    console.log("🔄 Plans state updated:", {
-      basic: {
-        name: plans.basic.name,
-        customPlanName: plans.basic.customPlanName,
-        isPlanKey: plans.basic.customPlanName === "basic", // Should be false
-      },
-      standard: {
-        name: plans.standard.name,
-        customPlanName: plans.standard.customPlanName,
-        isPlanKey: plans.standard.customPlanName === "standard", // Should be false
-      },
-      premium: {
-        name: plans.premium.name,
-        customPlanName: plans.premium.customPlanName,
-        isPlanKey: plans.premium.customPlanName === "premium", // Should be false
-      },
-    });
-
     // Warn if customPlanName matches planKey (this should never happen)
     if (plans.basic.customPlanName === "basic") {
       console.warn(
@@ -501,16 +431,6 @@ export const SubscriptionsHeader = () => {
         ? plan.durationType
         : null;
 
-    // Log the plan state before sending
-    console.log("Plan state before sending:", {
-      planKey,
-      planId: plan.id,
-      planName: plan.name,
-      customPlanName: plan.customPlanName,
-      planSlug: plan.slug,
-      fullPlan: plan,
-    });
-
     // IMPORTANT: name and slug are IMMUTABLE - always use database values
     // Only customPlanName is user-editable
     // For new plans (no ID), use proper capitalized name and lowercase slug based on planKey
@@ -561,21 +481,6 @@ export const SubscriptionsHeader = () => {
       durationType: validDurationType,
     };
 
-    console.log("Plan data being sent to API:", {
-      id: planData.id,
-      name: planData.name,
-      slug: planData.slug,
-      customPlanName: planData.customPlanName,
-      customPlanNameType: typeof planData.customPlanName,
-      customPlanNameUndefined: planData.customPlanName === undefined,
-      customPlanNameNull: planData.customPlanName === null,
-      customPlanNameEmpty: planData.customPlanName === "",
-      planStateCustomPlanName: plan.customPlanName,
-      hasId: !!planData.id,
-      isNewPlan: !planData.id,
-      planKey: planKey,
-    });
-
     try {
       const result = await upsertPlanMutation.mutateAsync(planData);
       const isUpdate = result.data?.isUpdate;
@@ -590,19 +495,14 @@ export const SubscriptionsHeader = () => {
       // Use a delay to ensure the database has committed the transaction
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      console.log("🔄 Invalidating and refetching plans after save...");
       await queryClient.invalidateQueries({ queryKey: ["fetch plans"] });
       await queryClient.refetchQueries({ queryKey: ["fetch plans"] });
-      console.log(
-        "✅ Plans refetched - useEffect should trigger with new data"
-      );
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to create plan";
       toast.error("Failed to create plan", {
         description: errorMessage,
       });
-      console.error("Plan creation error:", error);
     } finally {
       // Reset loading state for this specific plan
       setSavingPlans((prev) => ({ ...prev, [planKey]: false }));

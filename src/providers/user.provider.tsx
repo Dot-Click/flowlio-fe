@@ -120,10 +120,6 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
     const currentUserId = authData?.user?.id;
 
     if (previousUserId && currentUserId !== previousUserId) {
-      console.log("🔄 User changed, clearing React Query cache...");
-      console.log("👤 Previous user:", previousUserId);
-      console.log("👤 Current user:", currentUserId);
-
       // Clear all queries except auth-related ones
       queryClient.removeQueries({ queryKey: ["user-profile"] });
       queryClient.removeQueries({ queryKey: ["get-current-org-user-members"] });
@@ -132,8 +128,6 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
       queryClient.removeQueries({ queryKey: ["project"] });
       queryClient.removeQueries({ queryKey: ["organization-clients"] });
       queryClient.removeQueries({ queryKey: ["organization-users"] });
-
-      console.log("✅ React Query cache cleared for user change");
     }
 
     setPreviousUserId(currentUserId || null);
@@ -149,7 +143,6 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
     // Clear data when no session exists (logout scenario)
     // Be more lenient - only clear if we're sure there's no session
     if (!authData?.user) {
-      console.log("🔒 No user found - clearing user data (logout scenario)");
       setData(null);
       setIsLoading(false);
 
@@ -170,20 +163,8 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
 
     // User is logged in - process session data
     if (authData?.user) {
-      console.log("🔑 Better Auth session data:", authData);
-      console.log("🔑 Session exists:", !!authData.session);
-      console.log("🔑 User exists:", !!authData.user);
-
       // Use fresh user profile data if available, otherwise fall back to Better Auth data
       if (userProfileData?.data) {
-        console.log("📋 Fresh user profile data:", userProfileData.data);
-        console.log("👤 User role from profile:", userProfileData.data.role);
-        console.log("🔑 Better Auth role:", authData.user.role);
-        console.log(
-          "🎯 Final role used:",
-          authData.user.role || userProfileData.data.role
-        );
-
         const enhancedData = {
           ...authData,
           user: {
@@ -194,14 +175,9 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
             isSuperAdmin: userProfileData.data.isSuperAdmin,
           },
         };
-        console.log("✨ Enhanced user data:", enhancedData);
         setData(enhancedData as unknown as Data);
         setIsLoading(false);
       } else {
-        console.log(
-          "⚠️ No fresh profile data, using Better Auth data:",
-          authData
-        );
         setData(authData as Data);
 
         // If we have Better Auth data but no profile data, still set loading to false
@@ -211,7 +187,6 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
     }
 
     if (error) {
-      console.error("❌ Better Auth error:", error);
       onError?.(error);
       if (refetchOnError) {
         setTimeout(() => {
@@ -233,7 +208,6 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
 
   // Function to force refresh user data (useful after login/logout)
   const forceRefreshUser = async () => {
-    console.log("🔄 Force refreshing user data...");
     setIsLoading(true);
 
     // Clear current data

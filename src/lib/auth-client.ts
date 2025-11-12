@@ -17,10 +17,6 @@ export const emailOTP = {
   signInWithOTP: authClient.signIn.emailOtp,
 };
 
-// Debug: Log available methods
-console.log("🔍 Available emailOtp methods:", Object.keys(authClient.emailOtp));
-console.log("🔍 Available authClient methods:", Object.keys(authClient));
-
 // Export the two factor methods for easy use
 export const twoFactor = {
   enable: authClient.twoFactor.enable,

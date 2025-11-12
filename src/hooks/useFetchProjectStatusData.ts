@@ -29,7 +29,6 @@ export const useFetchProjectStatusData = () => {
         "/projects/status-data"
       );
 
-      console.log("📊 Project status data received:", response.data);
       return response.data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -41,25 +40,10 @@ export const useFetchProjectStatusData = () => {
 export const transformToPieChartData = (
   statusCounts: ProjectStatusCounts
 ): ProjectStatusData[] => {
-  const { ongoing, delayed, finished, total, debug } = statusCounts;
-
-  console.log("🔄 Transforming pie chart data:", {
-    ongoing,
-    delayed,
-    finished,
-    total,
-  });
-
-  // Log debug information if available
-  if (debug) {
-    console.log("🔍 Debug info from backend:");
-    console.log("📊 All statuses found:", debug.allStatuses);
-    console.log("📊 Status counts breakdown:", debug.statusCounts);
-    console.log("📊 All projects:", debug.allProjects);
-  }
+  const { ongoing, delayed, finished, total } = statusCounts;
 
   if (total === 0) {
-    console.log("⚠️ No projects found, returning empty array");
+    console.error("⚠️ No projects found, returning empty array");
     return [];
   }
 
@@ -84,6 +68,5 @@ export const transformToPieChartData = (
     },
   ];
 
-  console.log("📊 Pie chart data:", pieData);
   return pieData;
 };

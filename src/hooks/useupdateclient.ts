@@ -41,19 +41,13 @@ export const useUpdateClient = () => {
       clientId: string;
       data: UpdateClientData;
     }): Promise<UpdateClientResponse> => {
-      console.log("🔍 Making API call to:", `/clients/${clientId}`);
-      console.log("🔍 With data:", data);
-
       const response = await axios.put(`/clients/${clientId}`, data);
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       // Invalidate and refetch clients data
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       queryClient.invalidateQueries({ queryKey: ["organization-clients"] });
-
-      // Log the operation type for debugging
-      console.log(`Client ${data.message.toLowerCase()}`);
     },
     onError: (error: any) => {
       console.error("Error updating client:", error);

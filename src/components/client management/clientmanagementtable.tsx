@@ -103,11 +103,6 @@ export const ClientManagementTable = () => {
     refetch,
   } = useFetchOrganizationClients();
 
-  // Debug: Log the clients data
-  console.log("🔍 Clients data received:", clientsData);
-  console.log("🔍 First client if exists:", clientsData?.data?.[0]);
-  console.log("🔍 First client ID if exists:", clientsData?.data?.[0]?.id);
-
   const { mutate: deleteClient, isPending: isDeleting } = useDeleteClient();
   const { mutate: updateClient, isPending: isUpdatingStatus } =
     useUpdateClient();

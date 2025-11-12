@@ -128,13 +128,6 @@ export const SignUpForm: FC = () => {
             setIsLoading(false);
           },
           onError: (ctx) => {
-            console.error("❌ Signup error:", ctx.error);
-            console.error("❌ Error details:", {
-              message: ctx.error.message,
-              code: ctx.error.code,
-              status: ctx.error.status,
-            });
-
             let errorMessage = "Signup failed. Please try again.";
 
             if (ctx.error.message) {

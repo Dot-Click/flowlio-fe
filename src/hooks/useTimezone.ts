@@ -9,7 +9,6 @@ export const useTimezone = () => {
   // Detect user's timezone
   useEffect(() => {
     const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    console.log("Detected timezone:", detectedTimezone);
     setTimezone(detectedTimezone);
   }, []);
 
@@ -18,15 +17,9 @@ export const useTimezone = () => {
     const timezoneToUpdate = newTimezone || timezone;
 
     if (!timezoneToUpdate || isUpdating || hasUpdated.current) {
-      console.log("Skipping timezone update:", {
-        timezoneToUpdate,
-        isUpdating,
-        hasUpdated: hasUpdated.current,
-      });
       return;
     }
 
-    console.log("Updating timezone to:", timezoneToUpdate);
     setIsUpdating(true);
     hasUpdated.current = true;
 
@@ -61,7 +54,6 @@ export const useTimezone = () => {
 
   // Manual trigger for testing
   const testTimezoneUpdate = () => {
-    console.log("Manual timezone test triggered");
     hasUpdated.current = false; // Reset flag for manual test
     updateUserTimezone();
   };

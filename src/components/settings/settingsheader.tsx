@@ -166,13 +166,6 @@ export const SettingsHeader = () => {
   // Update form with user data when available
   useEffect(() => {
     if (userData?.user) {
-      console.log("🔄 Updating form with user data:", {
-        name: userData.user.name,
-        email: userData.user.email,
-        phone: userData.user.phone,
-        address: userData.user.address,
-      });
-
       setValue("fullName", userData.user.name || "");
       setValue("email", userData.user.email || "");
       setValue("phone", userData.user.phone || "");
@@ -226,28 +219,15 @@ export const SettingsHeader = () => {
           values.address && values.address.trim() !== "" ? values.address : "",
       };
 
-      console.log(
-        "🔄 Updating profile with data:",
-        JSON.stringify(profileData, null, 2)
-      );
-      console.log("🔄 Profile data types:", {
-        name: typeof profileData.name,
-        email: typeof profileData.email,
-        phone: typeof profileData.phone,
-        address: typeof profileData.address,
-      });
-
       await updateProfileMutation.mutateAsync(profileData);
 
-      // Password fields are cleared separately in the password change handler
+      // Password fields are cleared separately in the password change handl  er
 
       // Force refetch user data to ensure form is updated
-      console.log("🔄 Profile updated, refetching user data...");
       await queryClient.invalidateQueries({ queryKey: ["user-profile"] });
 
       toast.success("Profile updated successfully!");
     } catch (error) {
-      console.error("❌ Error updating profile:", error);
       console.error("❌ Error details:", {
         message: error instanceof Error ? error.message : "Unknown error",
         stack: error instanceof Error ? error.stack : undefined,
@@ -257,8 +237,7 @@ export const SettingsHeader = () => {
       // Check if it's an axios error with response data
       if (error && typeof error === "object" && "response" in error) {
         const axiosError = error as any;
-        console.error("❌ Axios error response:", axiosError.response?.data);
-        console.error("❌ Axios error status:", axiosError.response?.status);
+        console.error("❌ Axios error response:", axiosError.response);
       }
 
       toast.error("Failed to update profile. Please try again.");
@@ -290,40 +269,20 @@ export const SettingsHeader = () => {
 
   // 2FA handlers
   const handleToggle2FA = async (enabled: boolean, password?: string) => {
-    console.log("🚨🚨🚨 handleToggle2FA FUNCTION CALLED! 🚨🚨🚨");
-    console.log("🚨 Arguments:", {
-      enabled,
-      password: password ? "***" : undefined,
-    });
-
     try {
-      console.log(
-        `🔄 handleToggle2FA called: enabled=${enabled}, hasPassword=${!!password}`
-      );
-      console.log(`🔄 handleToggle2FA function type:`, typeof handleToggle2FA);
-      console.log(`🔄 generateOTPMutation:`, generateOTPMutation);
-
       if (enabled) {
         if (password) {
           // Password provided - verify it and generate OTP
-          console.log("🔐 Password provided, generating OTP...");
           await generateOTPMutation.mutateAsync();
-          console.log("✅ OTP generation completed");
         } else {
           // Generate OTP when enabling 2FA
-          console.log("📧 No password provided, generating OTP directly...");
           await generateOTPMutation.mutateAsync();
-          console.log("✅ OTP generation completed");
         }
       } else {
         // Disable 2FA directly
-        console.log("❌ Disabling 2FA...");
         await disable2FAMutation.mutateAsync({ password: password || "" });
-        console.log("✅ 2FA disabled");
       }
     } catch (error) {
-      console.error("❌ Failed to toggle 2FA:", error);
-      console.error("❌ Error details:", error);
       toast.error("Failed to update 2FA settings. Please try again.");
       throw error;
     }
@@ -349,9 +308,7 @@ export const SettingsHeader = () => {
 
   const handleResendOTP = async () => {
     try {
-      console.log("🔄 Resending OTP...");
       await generateOTPMutation.mutateAsync();
-      console.log("✅ OTP resent successfully");
     } catch (error) {
       console.error("Failed to resend OTP:", error);
       throw error;
@@ -545,8 +502,6 @@ export const SettingsHeader = () => {
     }
 
     try {
-      console.log("🔐 Changing password...");
-
       const { error } = await authClient.changePassword({
         currentPassword: currentPassword,
         newPassword: newPassword,
@@ -554,7 +509,6 @@ export const SettingsHeader = () => {
       });
 
       if (error) {
-        console.error("❌ Password change error:", error);
         toast.error(
           (error as any)?.message ||
             "Failed to change password. Please check your current password."
@@ -562,7 +516,6 @@ export const SettingsHeader = () => {
         return;
       }
 
-      console.log("✅ Password changed successfully");
       toast.success(
         "Password changed successfully! You will be logged out from other devices for security."
       );

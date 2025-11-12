@@ -389,6 +389,8 @@ const CheckoutPage = () => {
 
   // Get PayPal client ID from environment
   // Note: Vite requires VITE_ prefix for environment variables to be exposed to client
+  // For live payments: Use your live PayPal Client ID from PayPal Developer Dashboard
+  // The PayPal SDK automatically detects live vs sandbox based on the client ID format
   const paypalClientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
   const isFrontendPayPalConfigured =
     paypalClientId && paypalClientId !== "" && paypalClientId !== "sandbox";

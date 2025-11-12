@@ -30,7 +30,6 @@ const SuperAdminDashboardPage = () => {
   const { data: allDataResponse } = useFetchAllData();
   const { data: totalInvoicesResponse } = useFetchTotalInvoices();
   const { data: overviewResponse } = useFetchSuperadminOverview();
-  console.log(overviewResponse, "check the overview response");
 
   // Use the new all-data approach for consistent counts
   const { totalCompanies, totalProjects } = allDataResponse?.data

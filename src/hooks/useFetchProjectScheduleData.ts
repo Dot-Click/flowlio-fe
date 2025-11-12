@@ -27,13 +27,10 @@ export const useFetchProjectScheduleData = () => {
     queryFn: async () => {
       const url = "/projects/schedule-data";
 
-      console.log("🔍 Fetching all project schedule data:", url);
-
       const response = await axios.get<ApiResponse<ProjectWithTaskCounts[]>>(
         url
       );
 
-      console.log("📊 Received data:", response.data);
       return response.data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

@@ -84,10 +84,6 @@ export const UniversalSupportTicket: FC<UniversalSupportTicketProps> = ({
   const { mutate: deleteSupportTicket } = useDeleteUniversalSupportTicket();
   const { data: assignmentOptions } = useAssignmentOptions();
 
-  // Debug logging
-  console.log("Assignment options data:", assignmentOptions);
-  console.log("Users in assignment options:", assignmentOptions?.data?.users);
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       const ticketData: CreateUniversalSupportTicketRequest = {
@@ -98,10 +94,6 @@ export const UniversalSupportTicket: FC<UniversalSupportTicketProps> = ({
         assignedToUser: values.assignedTo, // Map assignedTo to assignedToUser
         assignedToOrganization: values.assignedToOrganization,
       };
-
-      console.log("Submitting ticket data:", ticketData);
-      console.log("Assignment type:", assignmentType);
-      console.log("User role:", user?.user.role);
 
       await createSupportTicketMutation.mutateAsync(ticketData);
       form.reset();

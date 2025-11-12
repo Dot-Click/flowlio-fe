@@ -59,9 +59,7 @@ export const useFetchOrganizationClients = () => {
     queryKey: ["organization-clients"],
     queryFn: async () => {
       try {
-        console.log("🔍 Fetching organization clients...");
         const response = await axios.get<ClientsResponse>(`/clients`);
-        console.log("✅ Clients fetched successfully:", response.data);
         return response.data;
       } catch (error) {
         console.error("❌ Error fetching clients:", error);

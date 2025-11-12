@@ -48,24 +48,9 @@ export const useUpdateCalendarEvent = () => {
       id: string;
       data: UpdateCalendarEventRequest;
     }): Promise<UpdateCalendarEventResponse> => {
-      console.log("🚀🚀🚀 UPDATE CALENDAR EVENT MUTATION CALLED 🚀🚀🚀");
-      console.log("Event ID:", id);
-      console.log("Update data:", data);
-      console.log("API URL:", `/calendar-events/${id}`);
-      console.log("Axios base URL:", axios.defaults.baseURL);
-      console.log(
-        "Full URL will be:",
-        `${axios.defaults.baseURL}/calendar-events/${id}`
-      );
-
       try {
-        console.log("Making PUT request to update calendar event...");
         const response = await axios.put(`/calendar-events/${id}`, data);
-        console.log(
-          "✅ PUT request successful:",
-          response.status,
-          response.data
-        );
+
         return response.data;
       } catch (error) {
         console.error("❌ PUT request failed:", error);
@@ -80,20 +65,15 @@ export const useUpdateCalendarEvent = () => {
         throw error;
       }
     },
-    onSuccess: (data) => {
-      console.log("🎉 UPDATE CALENDAR EVENT SUCCESS:", data);
-      console.log("Invalidating and refetching calendar events...");
+    onSuccess: () => {
       // Invalidate and refetch calendar events
-      queryClient.invalidateQueries({ queryKey: ["calendar-events"] });
+      queryClient.invalidateQueries({ queryKey: ["calendar  -events"] });
       // Invalidate activities so the updated calendar event shows up
       queryClient.invalidateQueries({ queryKey: ["organization-activities"] });
 
       toast.success("Calendar event updated successfully!");
     },
     onError: (error: any) => {
-      console.error("💥 UPDATE CALENDAR EVENT ERROR:", error);
-      console.error("Error response:", error.response);
-      console.error("Error config:", error.config);
       const errorMessage =
         error.response?.data?.message || "Failed to update calendar event";
       toast.error(errorMessage);

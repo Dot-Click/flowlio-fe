@@ -42,14 +42,6 @@ const formatDuration = (plan: any): string => {
   const durationValue = plan?.durationValue ?? plan?.duration_value;
   const durationType = plan?.durationType ?? plan?.duration_type;
 
-  // Debug: Log the plan data to see what we're getting
-  console.log("Formatting duration for plan:", {
-    name: plan?.name,
-    durationValue: durationValue,
-    durationType: durationType,
-    billingCycle: plan?.billingCycle ?? plan?.billing_cycle,
-  });
-
   // Check if durationValue and durationType exist and are valid
   if (
     durationValue !== null &&
@@ -60,9 +52,7 @@ const formatDuration = (plan: any): string => {
     const value = Number(durationValue); // Ensure it's a number
 
     // Validate the value is a valid number
-    if (isNaN(value) || value <= 0) {
-      console.warn("Invalid durationValue:", durationValue);
-    } else {
+    if (!isNaN(value) && value > 0) {
       const type = durationType.trim().toLowerCase();
 
       if (type === "days") {
@@ -90,9 +80,6 @@ const formatPlanFeatures = (planFeatures: any) => {
 
   const features = [];
 
-  // Debug: Log the planFeatures to see what we're getting
-  console.log("Plan Features:", planFeatures);
-
   // Add custom features from database
   if (
     planFeatures.customFeatures &&
@@ -100,9 +87,6 @@ const formatPlanFeatures = (planFeatures: any) => {
   ) {
     features.push(...planFeatures.customFeatures);
   }
-
-  // Debug: Log the formatted features
-  console.log("Formatted Features:", features);
 
   return features;
 };
@@ -115,24 +99,6 @@ export const Pricing: FC<PricingProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const [isAnimating, setIsAnimating] = useState(false);
-
-  // Debug: Log the plans response
-  console.log("Plans Response:", plansResponse);
-  console.log(
-    "Plan 0 duration:",
-    plansResponse?.data?.[0]?.durationValue,
-    plansResponse?.data?.[0]?.durationType
-  );
-  console.log(
-    "Plan 1 duration:",
-    plansResponse?.data?.[1]?.durationValue,
-    plansResponse?.data?.[1]?.durationType
-  );
-  console.log(
-    "Plan 2 duration:",
-    plansResponse?.data?.[2]?.durationValue,
-    plansResponse?.data?.[2]?.durationType
-  );
 
   // Check if user came from signup
   const fromSignup = location.state?.fromSignup;

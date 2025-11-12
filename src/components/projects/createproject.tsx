@@ -148,9 +148,6 @@ export const CreateProject = () => {
   const finalOrganizationId =
     clientsOrgId || usersOrgId || userOrgId || fallbackOrgId;
 
-  // Debug logging
-  console.log("🔍 User data:", userData, clientsData, projectData);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -180,12 +177,6 @@ export const CreateProject = () => {
       !isLoadingUsers
     ) {
       const project = projectData.data;
-      console.log("🔄 Resetting form with project data:", {
-        clientId: project.clientId,
-        assignedTo: project.assignedTo,
-        clientsAvailable: Array.isArray(clientsData?.data),
-        usersAvailable: Array.isArray(usersData?.data),
-      });
 
       form.reset({
         name: project.projectName || "",
@@ -276,8 +267,6 @@ export const CreateProject = () => {
         organizationId: finalOrganizationId,
       };
 
-      console.log("🚀 Submitting project with data:", projectData);
-
       if (isEditMode && id) {
         updateProject({ id, data: projectData });
       } else {
@@ -305,13 +294,6 @@ export const CreateProject = () => {
       reader.readAsDataURL(file);
       reader.onload = () => {
         const result = reader.result as string;
-        console.log(
-          `File converted to base64. Size: ${(
-            result.length /
-            1024 /
-            1024
-          ).toFixed(2)}MB`
-        );
         resolve(result);
       };
       reader.onerror = (error) => {

@@ -142,13 +142,7 @@ export const usePerformance = () => {
 
   const logPerformanceReport = () => {
     const score = getPerformanceScore();
-    console.group("🚀 Performance Report");
-    console.log(`Overall Score: ${score}/100`);
-    console.log(`FCP: ${metrics.fcp?.toFixed(2)}ms`);
-    console.log(`LCP: ${metrics.lcp?.toFixed(2)}ms`);
-    console.log(`CLS: ${metrics.cls?.toFixed(3)}`);
-    console.log(`FID: ${metrics.fid?.toFixed(2)}ms`);
-    console.log(`TTFB: ${metrics.ttfb?.toFixed(2)}ms`);
+    console.group("🚀 Performance Report", `Overall Score: ${score}/100`);
     console.groupEnd();
   };
 

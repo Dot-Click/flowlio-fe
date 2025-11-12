@@ -64,7 +64,6 @@ export const VerifyEmailForm: FC = () => {
       toast.success("Password reset link sent! Please check your inbox.");
       // Don't navigate - user will click the link in email
     } catch (error: any) {
-      console.error("Error sending password reset link:", error);
       toast.error(
         error?.response?.data?.message ||
           "Failed to send reset link. Please try again."

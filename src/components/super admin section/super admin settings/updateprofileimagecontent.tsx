@@ -7,6 +7,8 @@ import { IoCloudUpload } from "react-icons/io5";
 import { useUpdateProfileImage } from "@/hooks/useupdateprofileimage";
 import { toast } from "sonner";
 import { Flex } from "@/components/ui/flex";
+import { useQueryClient } from "@tanstack/react-query";
+import { useUser } from "@/providers/user.provider";
 
 interface UpdateProfileImageContentProps {
   onClose: () => void;
@@ -23,6 +25,8 @@ export const UpdateProfileImageContent = ({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
+  const { refetchUser } = useUser();
 
   const updateProfileImageMutation = useUpdateProfileImage();
 
@@ -83,7 +87,15 @@ export const UpdateProfileImageContent = ({
     updateProfileImageMutation.mutate(
       { image: selectedFile },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
+          // Invalidate all user-related queries to ensure real-time updates
+          await queryClient.invalidateQueries({ queryKey: ["user-profile"] });
+          await queryClient.invalidateQueries({ queryKey: ["user"] });
+          await queryClient.invalidateQueries({ queryKey: ["getSession"] });
+
+          // Refetch user data to update UI immediately
+          await refetchUser();
+
           toast.success("Profile image updated successfully!");
           onClose();
           setSelectedFile(null);

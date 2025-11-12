@@ -199,12 +199,6 @@ export default function KanbanBoard({ filteredTasks }: KanbanBoardProps) {
   const { data: tasksResponse, isLoading, error } = useFetchViewerTasks();
   const updateTaskStatus = useUpdateTaskStatus();
 
-  console.log("🔄 Mutation state:", {
-    isPending: updateTaskStatus.isPending,
-    isError: updateTaskStatus.isError,
-    error: updateTaskStatus.error,
-  });
-
   // Convert backend tasks to display format
   const convertTasksToDisplay = (viewerTasks: ViewerTask[]): Task[] => {
     return viewerTasks.map((task) => ({
@@ -230,10 +224,7 @@ export default function KanbanBoard({ filteredTasks }: KanbanBoardProps) {
     const { active, over } = event;
     setActiveTask(null);
 
-    console.log("🎯 Drag end event:", { active: active.id, over: over?.id });
-
     if (!over) {
-      console.log("❌ No drop target");
       return;
     }
     if (active.id === over.id) {
@@ -243,17 +234,9 @@ export default function KanbanBoard({ filteredTasks }: KanbanBoardProps) {
 
     // If dropped on a column, update status
     const overStatus = STATUS_COLUMNS.find((col) => col === over.id);
-    console.log("🎯 Over status:", overStatus);
 
     if (overStatus) {
       const backendStatus = mapStatusToBackend(overStatus);
-      console.log("🎯 Backend status:", backendStatus);
-
-      // Update task status via API
-      console.log("🚀 Calling updateTaskStatus.mutate with:", {
-        taskId: active.id,
-        status: backendStatus,
-      });
 
       updateTaskStatus.mutate({
         taskId: active.id as string,

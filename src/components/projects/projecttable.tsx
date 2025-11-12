@@ -226,7 +226,6 @@ export const ProjectTable = () => {
             </Box>
           );
         } catch (error) {
-          console.error("Invalid date:", startDate);
           console.log(error);
           return <Box className="text-center">Invalid Date</Box>;
         }

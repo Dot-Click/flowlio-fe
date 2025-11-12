@@ -41,10 +41,6 @@ export const ProtectedRoute = ({
 
     // User is not authenticated
     if (!userData?.user) {
-      console.log(
-        "🔒 User not authenticated - storing redirect and navigating to sign-in"
-      );
-
       // Store the current page for redirect after login
       storeRedirectFrom(location.pathname);
 
@@ -64,9 +60,6 @@ export const ProtectedRoute = ({
     // Check role requirements
     if (requiredRole && user.role) {
       if (!hasRole(user.role, requiredRole)) {
-        console.log(
-          `🚫 Access denied. User role: ${user.role}, Required: ${requiredRole}`
-        );
         toast.error(`Access denied. Required role: ${requiredRole}`);
 
         // Redirect to a safe default page for the current user's role
@@ -92,17 +85,10 @@ export const ProtectedRoute = ({
 
     // Check organization requirements
     if (requiredOrganization && !user.organizationId) {
-      console.log(
-        "🚫 Organization access required but user has no organization"
-      );
       toast.error("Organization access required");
       navigate(-1); // Go back to previous page
       return;
     }
-
-    console.log(
-      "✅ User authenticated and authorized - rendering protected content"
-    );
   }, [
     userData,
     isLoading,

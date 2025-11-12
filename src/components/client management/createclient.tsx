@@ -281,11 +281,6 @@ export const ClientForm = ({
     }
     setImageError("");
 
-    // Debug: Log the client object and mode
-    console.log("Form submitted with mode:", mode);
-    console.log("Client object:", client);
-    console.log("Client ID:", client?.id);
-
     // Convert form data to match backend schema
     const clientData = {
       name: values.fullname,
@@ -305,7 +300,6 @@ export const ClientForm = ({
 
       // Ensure we have a valid client ID
       if (!client?.id) {
-        console.error("No client ID found for edit mode");
         toast.error("Client ID not found. Cannot update client.");
         return;
       }
@@ -318,10 +312,6 @@ export const ClientForm = ({
         compressImage(uploadedFile)
           .then((compressedBase64) => {
             setIsCompressing(false);
-            console.log("Calling updateClient with ID:", client.id);
-            console.log("Full client object:", client);
-            console.log("Client ID type:", typeof client.id);
-            console.log("Client ID value:", client.id);
 
             updateClient(
               {
@@ -334,25 +324,19 @@ export const ClientForm = ({
                   onSuccess?.();
                   onClose?.();
                 },
-                onError: (error) => {
-                  console.error("Error updating client:", error);
+                onError: (Error) => {
+                  console.error("Error updating client:", Error);
                   toast.error("Failed to update client. Please try again.");
                 },
               }
             );
           })
-          .catch((error) => {
+          .catch(() => {
             setIsCompressing(false);
-            console.error("Image compression failed:", error);
             toast.error("Failed to compress image. Please try again.");
           });
       } else if (isImageRemoved) {
         // Image was removed
-        console.log("Calling updateClient with ID:", client.id);
-        console.log("Full client object:", client);
-        console.log("Client ID type:", typeof client.id);
-        console.log("Client ID value:", client.id);
-
         updateClient(
           {
             clientId: client.id,
@@ -364,19 +348,14 @@ export const ClientForm = ({
               onSuccess?.();
               onClose?.();
             },
-            onError: (error) => {
-              console.error("Error updating client:", error);
+            onError: (Error) => {
+              console.error("Error updating client:", Error);
               toast.error("Failed to update client. Please try again.");
             },
           }
         );
       } else {
         // No image changes
-        console.log("Calling updateClient with ID:", client.id);
-        console.log("Full client object:", client);
-        console.log("Client ID type:", typeof client.id);
-        console.log("Client ID value:", client.id);
-
         updateClient(
           {
             clientId: client.id,
@@ -388,8 +367,7 @@ export const ClientForm = ({
               onSuccess?.();
               onClose?.();
             },
-            onError: (error) => {
-              console.error("Error updating client:", error);
+            onError: () => {
               toast.error("Failed to update client. Please try again.");
             },
           }
@@ -411,16 +389,14 @@ export const ClientForm = ({
                 onSuccess?.();
                 onClose?.();
               },
-              onError: (error) => {
-                console.error("Error creating client:", error);
+              onError: () => {
                 toast.error("Failed to create client. Please try again.");
               },
             }
           );
         })
-        .catch((error) => {
+        .catch(() => {
           setIsCompressing(false);
-          console.error("Image compression failed:", error);
           toast.error("Failed to compress image. Please try again.");
         });
     }
@@ -797,12 +773,6 @@ export const CreateClient = () => {
   // Check if we're in edit mode from navigation state
   const editMode = location.state?.mode === "edit";
   const clientData = location.state?.client;
-
-  // Debug: Log the navigation state
-  console.log("Location state:", location.state);
-  console.log("Edit mode:", editMode);
-  console.log("Client data:", clientData);
-  console.log("Client ID from navigation:", clientData?.id);
 
   return (
     <ClientForm

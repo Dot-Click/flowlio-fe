@@ -109,7 +109,6 @@ export const ResetPasswordForm: FC = () => {
       );
       navigate("/auth/signin");
     } catch (error: any) {
-      console.error("Error resetting password:", error);
       toast.error(
         error?.response?.data?.message ||
           "Failed to reset password. Please try again."

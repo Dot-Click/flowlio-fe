@@ -40,21 +40,6 @@ export const SuperAdminBarChartComponent: FC<BoxProps> = ({
       )
     : [];
 
-  // Debug: Check if data has actual values
-  console.log("📊 All Data Response:", allDataResponse);
-  console.log("📊 Chart Data:", chartData);
-  console.log("📊 Selected Year:", selectedYear);
-  console.log(
-    "📊 Organizations:",
-    allDataResponse?.data?.organizations?.length || 0
-  );
-  console.log("📊 Projects:", allDataResponse?.data?.projects?.length || 0);
-
-  // Check if any data has values > 0
-  const hasData = chartData.some(
-    (item) => item.companies > 0 || item.projectsCreated > 0
-  );
-  console.log("📊 Has Data:", hasData);
   const CustomDiamondDot = (props: any) => {
     const { cx, cy } = props;
     if (typeof cx !== "number" || typeof cy !== "number") return null;

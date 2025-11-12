@@ -123,21 +123,15 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
   });
 
   const handleToggle = async (enabled: boolean) => {
-    console.log(
-      `🔄 TwoFAModal handleToggle called: enabled=${enabled}, isEnabled=${isEnabled}`
-    );
-
     // First, notify parent to open the modal (this updates parent's isModalOpen state)
     // Call onToggle without password to just open the modal
     await onToggle(enabled);
 
     if (enabled && !isEnabled) {
       // Enabling 2FA - show password form first
-      console.log("📝 Showing password form for 2FA enable");
       setShowEnablePasswordForm(true);
     } else if (!enabled && isEnabled) {
       // Disabling 2FA - show password form
-      console.log("📝 Showing password form for 2FA disable");
       setShowPasswordForm(true);
     }
   };
@@ -171,23 +165,16 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
   ) => {
     setIsLoading(true);
     try {
-      console.log("🔐 Password verification started");
-      console.log("📞 Calling onToggle prop with password...");
-      console.log("📧 onToggle prop function:", typeof onToggle);
-
       // Call the onToggle prop directly, not the internal handleToggle
-      const result = await onToggle(true, values.password);
-      console.log("📧 onToggle prop result:", result);
+      await onToggle(true, values.password);
 
-      console.log("✅ Password verified, OTP should be sent");
       toast.success("Password verified! OTP sent to your email.");
       setShowEnablePasswordForm(false);
       setShowOTPForm(true);
-      console.log("📧 OTP form should now be visible");
     } catch (error) {
-      console.error("❌ Failed to verify password:", error);
-      console.error("❌ Error details:", error);
-      toast.error("Invalid password. Please try again.");
+      toast.error("Invalid password. Please try again.", {
+        description: error as string,
+      });
     } finally {
       setIsLoading(false);
     }

@@ -39,29 +39,18 @@ export default function TimeModal() {
   const activeTimeEntry = activeTimeEntries?.data?.[0];
   const isTracking = !!activeTimeEntry;
 
-  // Debug logging
-  console.log("🔍 TimeModal Debug:", {
-    activeTimeEntries: activeTimeEntries?.data,
-    activeTimeEntry,
-    isTracking,
-  });
-
   // Calculate elapsed time for active tracking
   const [elapsedTime, setElapsedTime] = useState(0);
 
   useEffect(() => {
-    console.log("⏰ Timer Effect:", { activeTimeEntry, isTracking });
-
     if (activeTimeEntry && isTracking) {
       const startTime = new Date(activeTimeEntry.startTime);
-      console.log("⏰ Start Time:", startTime);
 
       const updateElapsed = () => {
         const now = new Date();
         const elapsed = Math.floor(
           (now.getTime() - startTime.getTime()) / 1000
         );
-        console.log("⏰ Elapsed:", elapsed, "seconds");
         setElapsedTime(elapsed);
       };
 
@@ -69,7 +58,6 @@ export default function TimeModal() {
       const interval = setInterval(updateElapsed, 1000);
       return () => clearInterval(interval);
     } else {
-      console.log("⏰ No active tracking, resetting timer");
       setElapsedTime(0);
     }
   }, [activeTimeEntry, isTracking]);

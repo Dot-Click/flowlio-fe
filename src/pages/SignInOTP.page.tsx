@@ -42,7 +42,6 @@ export const SignInOTPPage: FC<SignInOTPPageProps> = ({
   // Automatically send OTP when email is available (only once)
   useEffect(() => {
     if (email && !otpSentRef.current) {
-      console.log("📧 Auto-sending OTP for sign-in:", email);
       otpSentRef.current = true; // Mark as sent
       generateOTPMutation.mutate({ email });
     }
@@ -105,11 +104,8 @@ export const SignInOTPPage: FC<SignInOTPPageProps> = ({
         const userProfile = profileResponse.data.data;
         const userRole = userProfile.role;
 
-        console.log("🎯 User role after OTP verification:", userRole);
-
         // Get comprehensive role-based redirect path
         const redirectPath = getRoleBasedRedirectPathAfterLogin(userRole);
-        console.log("🎯 Redirecting to:", redirectPath);
 
         // Refresh user context, then client-side navigate without reload
         await refetchUser();
@@ -143,9 +139,6 @@ export const SignInOTPPage: FC<SignInOTPPageProps> = ({
         }
 
         // Fallback to default dashboard if profile fetch fails
-        console.log(
-          "🎯 Fallback: Redirecting to default dashboard (client-side)"
-        );
         await refetchUser();
         navigate("/dashboard", { replace: true });
       }

@@ -55,16 +55,7 @@ export const ViewerSupportHeader = () => {
   const navigate = useNavigate();
 
   // Debug logging for viewer tickets
-  useEffect(() => {
-    console.log("ViewerSupportHeader - User:", user?.user);
-    console.log("ViewerSupportHeader - Tickets data:", ticketsData);
-    console.log("ViewerSupportHeader - Loading:", isLoading);
-    console.log("ViewerSupportHeader - Error:", error);
-    console.log(
-      "ViewerSupportHeader - Tickets count:",
-      ticketsData?.data?.tickets?.length || 0
-    );
-  }, [ticketsData, isLoading, error, user]);
+  useEffect(() => {}, [ticketsData, isLoading, error, user]);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {

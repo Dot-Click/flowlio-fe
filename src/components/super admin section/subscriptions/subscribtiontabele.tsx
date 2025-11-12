@@ -263,9 +263,6 @@ export const SubscribtionTabele = ({
   error = null,
 }: SubscriptionsHeaderProps) => {
   const [date, setDate] = useState<DateRange | undefined>();
-  // const { data: plansResponse, isLoading, error } = useFetchPlans();
-  // console.log(plansResponse);
-
   const { data: allOrganizationsResponse } = useFetchAllOrganizations();
 
   const plansData: Data[] =

@@ -60,7 +60,6 @@ export const BarChartComponent: FC<BoxProps> = ({ className, ...props }) => {
   const handleDateRangeChange = (
     newDateRange: { from: Date; to: Date } | null
   ) => {
-    console.log("📅 Date range changed:", newDateRange);
     setDateRange(newDateRange);
   };
 

@@ -27,27 +27,17 @@ export const SettingsTwoFactor = () => {
   // 2FA handlers
   const handleToggle2FA = async (enabled: boolean, password?: string) => {
     try {
-      console.log(
-        `🔄 Super Admin handleToggle2FA called: enabled=${enabled}, hasPassword=${!!password}`
-      );
-
       if (enabled) {
         if (password) {
           // Password provided - verify it and generate OTP
-          console.log("🔐 Password provided, generating OTP...");
           await generateOTPMutation.mutateAsync();
-          console.log("✅ OTP generation completed");
         } else {
           // Generate OTP when enabling 2FA
-          console.log("📧 No password provided, generating OTP directly...");
           await generateOTPMutation.mutateAsync();
-          console.log("✅ OTP generation completed");
         }
       } else {
         // Disable 2FA directly
-        console.log("❌ Disabling 2FA...");
         await disable2FAMutation.mutateAsync({ password: password || "" });
-        console.log("✅ 2FA disabled");
         // Close modal after successful disable
         setIsModalOpen(false);
       }

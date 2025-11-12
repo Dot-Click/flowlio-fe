@@ -122,33 +122,14 @@ const SupportHeader = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   useEffect(() => {
-    console.log("useEffect triggered, activeTab:", activeTab);
     if (activeTab === "submitted") {
-      console.log("Fetching submitted tickets...");
       refetchSubmitted();
     } else if (activeTab === "sent") {
-      console.log("Fetching sent tickets...");
       refetchSentTickets();
     }
   }, [activeTab, refetchSubmitted, refetchSentTickets]);
 
-  // Set current user ID from organization members data
-  useEffect(() => {
-    if (organizationMembersData?.data?.userMembers) {
-      // The hook already provides the organization members, no need for manual API call
-      console.log(
-        "Support Ticket - Organization members:",
-        organizationMembers.length,
-        organizationMembers
-      );
-    }
-  }, [organizationMembersData, organizationMembers.length]);
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("Form values:", values);
-    console.log("assignedTo value:", values.assignedTo);
-    console.log("organizationMembers:", organizationMembers);
-
     try {
       const ticketData: CreateUniversalSupportTicketRequest = {
         subject: values.subject,
@@ -162,12 +143,8 @@ const SupportHeader = () => {
         assignedToOrganization: undefined,
       };
 
-      console.log("Sending ticket data:", ticketData);
-      console.log("createTicketMutation:", createTicketMutation);
-
       await createTicketMutation.mutateAsync(ticketData);
 
-      console.log("Ticket created successfully, resetting form...");
       form.reset();
       modalProps.onOpenChange(false);
       // Refresh the appropriate tab

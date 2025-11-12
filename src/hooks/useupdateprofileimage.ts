@@ -40,8 +40,10 @@ export const useUpdateProfileImage = () => {
     },
     onSuccess: () => {
       // Invalidate and refetch user profile data
+      queryClient.invalidateQueries({ queryKey: ["user-profile"] });
       queryClient.invalidateQueries({ queryKey: ["user profile"] });
       queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
       queryClient.invalidateQueries({ queryKey: ["getSession"] });
     },
   });

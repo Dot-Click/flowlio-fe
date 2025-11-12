@@ -57,16 +57,6 @@ export const CustomCalendarHeader = () => {
     // Convert to ISO string for comparison
     const weekStartISO = weekStart.toISOString();
 
-    console.log("🔍 Event Debug:", {
-      title: event.title,
-      originalDate: event.date,
-      eventDate: eventDate.toISOString(),
-      eventDateLocal: eventDate.toLocaleDateString(),
-      weekStart: weekStartISO,
-      weekStartLocal: weekStart.toLocaleDateString(),
-      day: eventDate.getDay(),
-    });
-
     return {
       ...event,
       day: eventDate.getDay(),
@@ -139,23 +129,6 @@ export const CustomCalendarHeader = () => {
   // Filter events based on view mode
   const weekKey = getStartOfWeek(currentWeek).toISOString();
   const weekEvents = events.filter((e: any) => e.weekStart === weekKey);
-
-  console.log("🔍 Week Filter Debug:", {
-    currentWeek: currentWeek.toISOString(),
-    currentWeekLocal: currentWeek.toLocaleDateString(),
-    weekKey,
-    weekKeyLocal: new Date(weekKey).toLocaleDateString(),
-    totalEvents: events.length,
-    weekEvents: weekEvents.length,
-    eventWeekStarts: events.map((e) => ({
-      title: e.title,
-      weekStart: e.weekStart,
-      weekStartLocal: new Date(e.weekStart).toLocaleDateString(),
-      matches: e.weekStart === weekKey,
-    })),
-    startOfWeek: startOfWeek.toISOString(),
-    endOfWeek: endOfWeek.toISOString(),
-  });
 
   // Day view events
   const dayEvents = events.filter((event: any) => {
@@ -353,15 +326,7 @@ export const CustomCalendarHeader = () => {
         modalProps={editEventModalProps}
         eventToEdit={editEvent}
         onSave={(updatedEvent: CustomEvent) => {
-          console.log("🎯 EVENT MODAL SAVE TRIGGERED");
-          console.log("Edit event:", editEvent);
-          console.log("Updated event data:", updatedEvent);
-
           if (editEvent?.id) {
-            console.log(
-              "✅ Event has ID, calling update mutation:",
-              editEvent.id
-            );
             updateEventMutation.mutate({
               id: editEvent.id,
               data: {
@@ -389,7 +354,6 @@ export const CustomCalendarHeader = () => {
             });
           } else {
             console.error("❌ No event ID found, cannot update event");
-            console.error("Edit event:", editEvent);
           }
           setEditEvent(null);
           editEventModalProps.onOpenChange(false);

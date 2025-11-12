@@ -17,35 +17,7 @@ import "./index.css";
 //   });
 // }
 
-// Performance monitoring
-if (process.env.NODE_ENV === "development") {
-  // Log performance metrics in development
-  window.addEventListener("load", () => {
-    setTimeout(() => {
-      const navigation = performance.getEntriesByType(
-        "navigation"
-      )[0] as PerformanceNavigationTiming;
-      if (navigation) {
-        console.group("🚀 Initial Load Performance");
-        console.log(
-          `TTFB: ${navigation.responseStart - navigation.requestStart}ms`
-        );
-        console.log(
-          `DOM Content Loaded: ${
-            navigation.domContentLoadedEventEnd -
-            navigation.domContentLoadedEventStart
-          }ms`
-        );
-        console.log(
-          `Load Complete: ${
-            navigation.loadEventEnd - navigation.loadEventStart
-          }ms`
-        );
-        console.groupEnd();
-      }
-    }, 1000);
-  });
-}
+// Performance monitoring removed - console logs cleaned up
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

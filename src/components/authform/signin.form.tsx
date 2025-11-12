@@ -84,9 +84,8 @@ export const SignInForm: FC = () => {
         onRequest: () => {
           setIsLoading(true);
         },
-        onSuccess: async (ctx) => {
+        onSuccess: async () => {
           setError(null);
-          console.log("Sign-in success context:", ctx);
 
           try {
             // Wait for Better Auth session to be established
@@ -110,8 +109,8 @@ export const SignInForm: FC = () => {
                 // Log out the user session that was created
                 try {
                   await authClient.signOut();
-                } catch (signOutError) {
-                  console.error("Error signing out:", signOutError);
+                } catch (error) {
+                  console.error("Error signing out:", error);
                 }
 
                 setIsLoading(false);
@@ -120,14 +119,9 @@ export const SignInForm: FC = () => {
             }
 
             const userProfile = profileResponse.data.data;
-            console.log("User profile:", userProfile);
 
             // Check if user has 2FA enabled
             if (userProfile.twoFactorEnabled) {
-              console.log(
-                "🔐 User has 2FA enabled, redirecting to OTP verification"
-              );
-
               // Store email for OTP verification
               sessionStorage.setItem("otpEmail", email);
               setIsLoading(false);
@@ -144,14 +138,11 @@ export const SignInForm: FC = () => {
             const redirectPath = getRoleBasedRedirectPathAfterLogin(
               userProfile.role
             );
-            console.log("🎯 Redirecting to:", redirectPath);
 
             // Refresh user context to avoid stale state, then client-side navigate
             await refetchUser();
             navigate(redirectPath, { replace: true });
           } catch (error) {
-            console.error("Error fetching user profile:", error);
-
             // Check if organization is deactivated or trial expired
             if ((error as any).response?.status === 403) {
               const errorCode = (error as any).response?.data?.code;
@@ -168,8 +159,9 @@ export const SignInForm: FC = () => {
                 // Log out the user session that was created
                 try {
                   await authClient.signOut();
-                } catch (signOutError) {
-                  console.error("Error signing out:", signOutError);
+                } catch (error) {
+                  console.error("Error signing out:", error);
+                  // Error signing out - silently fail
                 }
 
                 setIsLoading(false);
@@ -179,8 +171,6 @@ export const SignInForm: FC = () => {
 
             // Check if it's a 401 error (unauthorized) - might indicate 2FA is required
             if ((error as any).response?.status === 401) {
-              console.log("🔐 401 error - user might have 2FA enabled");
-
               // Store email for OTP verification
               sessionStorage.setItem("otpEmail", email);
 

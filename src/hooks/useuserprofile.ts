@@ -44,7 +44,6 @@ export const useUserProfile = (options?: { enabled?: boolean }) => {
   return useQuery<ApiResponse<UserProfile>, ErrorWithMessage>({
     queryKey: ["user-profile"],
     queryFn: async () => {
-      console.log("🔄 Fetching user profile...");
       const response = await axios.get<ApiResponse<UserProfile>>(
         "/user/profile",
         {
@@ -54,7 +53,6 @@ export const useUserProfile = (options?: { enabled?: boolean }) => {
           },
         }
       );
-      console.log("📋 Profile response:", response.data);
       return response.data;
     },
     retry: 1,

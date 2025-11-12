@@ -18,7 +18,6 @@ export const storeLastVisitedPage = (pathname: string): void => {
     }
 
     localStorage.setItem(LAST_VISITED_KEY, pathname);
-    console.log("📍 Stored last visited page:", pathname);
   } catch (error) {
     console.error("Error storing last visited page:", error);
   }
@@ -30,7 +29,6 @@ export const storeLastVisitedPage = (pathname: string): void => {
 export const getLastVisitedPage = (): string | null => {
   try {
     const lastVisited = localStorage.getItem(LAST_VISITED_KEY);
-    console.log("📍 Retrieved last visited page:", lastVisited);
     return lastVisited;
   } catch (error) {
     console.error("Error retrieving last visited page:", error);
@@ -45,7 +43,6 @@ export const clearLastVisitedPage = (): void => {
   try {
     localStorage.removeItem(LAST_VISITED_KEY);
     localStorage.removeItem(REDIRECT_FROM_KEY);
-    console.log("📍 Cleared last visited page");
   } catch (error) {
     console.error("Error clearing last visited page:", error);
   }
@@ -57,7 +54,6 @@ export const clearLastVisitedPage = (): void => {
 export const storeRedirectFrom = (pathname: string): void => {
   try {
     localStorage.setItem(REDIRECT_FROM_KEY, pathname);
-    console.log("🔄 Stored redirect from:", pathname);
   } catch (error) {
     console.error("Error storing redirect from:", error);
   }
@@ -71,7 +67,6 @@ export const getAndClearRedirectFrom = (): string | null => {
     const redirectFrom = localStorage.getItem(REDIRECT_FROM_KEY);
     if (redirectFrom) {
       localStorage.removeItem(REDIRECT_FROM_KEY);
-      console.log("🔄 Retrieved redirect from:", redirectFrom);
     }
     return redirectFrom;
   } catch (error) {
@@ -102,10 +97,6 @@ export const getRoleBasedRedirectPathAfterLogin = (
   const redirectFrom = getAndClearRedirectFrom();
   if (redirectFrom) {
     if (!validateAccess || isPathAccessibleForRole(redirectFrom, userRole)) {
-      console.log(
-        "🎯 Redirect path after login (from ProtectedRoute):",
-        redirectFrom
-      );
       return redirectFrom;
     }
   }
@@ -113,7 +104,6 @@ export const getRoleBasedRedirectPathAfterLogin = (
   const lastVisited = getLastVisitedPage();
   if (lastVisited) {
     if (!validateAccess || isPathAccessibleForRole(lastVisited, userRole)) {
-      console.log("🎯 Redirect path after login (last visited):", lastVisited);
       return lastVisited;
     }
   }
@@ -137,12 +127,6 @@ export const getRoleBasedRedirectPathAfterLogin = (
       break;
   }
 
-  console.log(
-    "🎯 Redirect path after login (role-based):",
-    defaultPath,
-    "for role:",
-    userRole
-  );
   return defaultPath;
 };
 
@@ -157,7 +141,6 @@ export const getRedirectPathAfterLogin = (): string => {
   // Priority order: redirect from ProtectedRoute > last visited > dashboard
   const redirectPath = redirectFrom || lastVisited || "/dashboard";
 
-  console.log("🎯 Redirect path after login:", redirectPath);
   return redirectPath;
 };
 

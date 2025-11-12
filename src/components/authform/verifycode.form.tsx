@@ -77,7 +77,6 @@ export const VerifyCodeForm: FC = () => {
         },
       });
     } catch (error: any) {
-      console.error("Error verifying code:", error);
       toast.error(
         error?.response?.data?.message || "Invalid code. Please try again."
       );
@@ -109,7 +108,6 @@ export const VerifyCodeForm: FC = () => {
 
       toast.success("Reset code sent again! Please check your inbox.");
     } catch (error: any) {
-      console.error("Error resending code:", error);
       toast.error(
         error?.response?.data?.message ||
           "Failed to resend code. Please try again."

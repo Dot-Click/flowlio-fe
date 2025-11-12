@@ -35,11 +35,9 @@ export const RoleBasedRedirect: FC<RoleBasedRedirectProps> = ({
     if (!userData?.user) return;
 
     const userRole = userData.user.role;
-    console.log("🎯 RoleBasedRedirect - User role:", userRole);
 
     // Get comprehensive role-based redirect path
     const redirectPath = getRoleBasedRedirectPathAfterLogin(userRole);
-    console.log("🎯 RoleBasedRedirect - Redirecting to:", redirectPath);
 
     // Call onRedirect callback if provided
     if (onRedirect) {

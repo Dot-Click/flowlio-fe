@@ -26,11 +26,9 @@ export const useRoleBasedRedirect = () => {
     }
 
     const userRole = userData.user.role;
-    console.log("🎯 useRoleBasedRedirect - User role:", userRole);
 
     // Get comprehensive role-based redirect path
     const redirectPath = getRoleBasedRedirectPathAfterLogin(userRole);
-    console.log("🎯 useRoleBasedRedirect - Redirecting to:", redirectPath);
 
     // Navigate to the appropriate path
     navigate(redirectPath, { replace: true });

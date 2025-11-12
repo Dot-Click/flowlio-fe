@@ -6,21 +6,15 @@ import { useUser } from "@/providers/user.provider";
 export const useGenerateSignInOTP = () => {
   return useMutation({
     mutationFn: async ({ email }: { email: string }) => {
-      console.log(`🚀 Generating sign-in OTP for: ${email}`);
-
       const result = await authClient.emailOtp.sendVerificationOtp({
         email: email,
         type: "email-verification",
       });
 
-      console.log(`📧 Sign-in OTP generation result:`, result);
-
       if (result.error) {
-        console.error(`❌ Sign-in OTP generation failed:`, result.error);
         throw new Error(result.error.message || "Failed to send OTP");
       }
 
-      console.log(`✅ Sign-in OTP generated successfully for ${email}`);
       return result.data;
     },
     onError: (error: any) => {
@@ -34,8 +28,6 @@ export const useGenerateSignInOTP = () => {
 export const useVerifySignInOTP = () => {
   return useMutation({
     mutationFn: async ({ email, otp }: { email: string; otp: string }) => {
-      console.log(`🔍 Verifying sign-in OTP for: ${email}, OTP: ${otp}`);
-
       // For sign-in with OTP, we need to use the correct Better Auth flow
       try {
         // First verify the OTP
@@ -44,16 +36,11 @@ export const useVerifySignInOTP = () => {
           otp: otp,
         });
 
-        console.log(`🔍 Verify OTP result:`, verifyResult);
-
         if (verifyResult.error) {
-          console.error(`❌ OTP verification failed:`, verifyResult.error);
           throw new Error(
             verifyResult.error.message || "Invalid or expired OTP"
           );
         }
-
-        console.log(`✅ OTP verified successfully for ${email}`);
 
         // After successful OTP verification, we need to establish a session
         // The backend should handle session creation after OTP verification
@@ -62,22 +49,10 @@ export const useVerifySignInOTP = () => {
 
         try {
           const sessionResult = await authClient.getSession();
-          console.log(
-            `🔍 Current session after OTP verification:`,
-            sessionResult
-          );
 
           if (sessionResult.data) {
-            console.log(`✅ Session found after OTP verification for ${email}`);
             return sessionResult.data;
           } else {
-            console.log(`⚠️ No session found after OTP verification`);
-
-            // Try to manually sign in the user after OTP verification
-            console.log(
-              "🔍 Attempting to sign in user after OTP verification..."
-            );
-
             // Try to use the regular sign-in method with OTP as password
             try {
               const signInResult = await authClient.signIn.email({
@@ -85,13 +60,7 @@ export const useVerifySignInOTP = () => {
                 password: otp, // Use OTP as password
               });
 
-              console.log(
-                `🔍 SignIn with OTP as password result:`,
-                signInResult
-              );
-
               if (signInResult.data) {
-                console.log(`✅ Sign-in with OTP successful for ${email}`);
                 return signInResult.data;
               } else {
                 console.log(
@@ -100,15 +69,10 @@ export const useVerifySignInOTP = () => {
 
                 // Fallback: try to refresh the session
                 const refreshResult = await authClient.getSession();
-                console.log(`🔍 Session refresh result:`, refreshResult);
 
                 if (refreshResult.data) {
-                  console.log(`✅ Session refreshed successfully for ${email}`);
                   return refreshResult.data;
                 } else {
-                  console.log(
-                    `⚠️ Session refresh failed, returning verification result`
-                  );
                   return verifyResult.data;
                 }
               }
@@ -117,15 +81,10 @@ export const useVerifySignInOTP = () => {
 
               // Fallback: try to refresh the session
               const refreshResult = await authClient.getSession();
-              console.log(`🔍 Session refresh result:`, refreshResult);
 
               if (refreshResult.data) {
-                console.log(`✅ Session refreshed successfully for ${email}`);
                 return refreshResult.data;
               } else {
-                console.log(
-                  `⚠️ Session refresh failed, returning verification result`
-                );
                 return verifyResult.data;
               }
             }
@@ -156,21 +115,15 @@ export const useGenerateOTP = () => {
         throw new Error("User email not found");
       }
 
-      console.log(`🚀 Generating OTP for user: ${user.user.email}`);
-
       const result = await authClient.emailOtp.sendVerificationOtp({
         email: user.user.email,
         type: "email-verification",
       });
 
-      console.log(`📧 OTP generation result:`, result);
-
       if (result.error) {
-        console.error(`❌ OTP generation failed:`, result.error);
         throw new Error(result.error.message || "Failed to send OTP");
       }
 
-      console.log(`✅ OTP generated successfully for ${user.user.email}`);
       return result.data;
     },
     onError: (error: any) => {
@@ -190,9 +143,6 @@ export const useVerifyOTP = () => {
         throw new Error("User email not found");
       }
 
-      console.log(`🔍 Verifying OTP for user: ${user.user.email}, OTP: ${otp}`);
-      console.log(`🔍 OTP length: ${otp.length}, type: ${typeof otp}`);
-
       // Try different verification approaches
       try {
         const result = await authClient.emailOtp.verifyEmail({
@@ -200,24 +150,12 @@ export const useVerifyOTP = () => {
           otp: otp,
         });
 
-        console.log(`🔍 OTP verification result:`, result);
-
         if (result.error) {
-          console.error(`❌ OTP verification failed:`, result.error);
-          console.error(`❌ Error details:`, {
-            code: result.error.code,
-            message: result.error.message,
-            status: result.error.status,
-          });
-
-          // Method 2: Try signInWithOTP as fallback
-          console.log("🔍 Trying signInWithOTP method as fallback...");
           try {
             const signInResult = await authClient.signIn.emailOtp({
               email: user.user.email,
               otp: otp,
             });
-            console.log(`🔍 SignIn OTP result:`, signInResult);
 
             if (signInResult.error) {
               throw new Error(
@@ -225,9 +163,6 @@ export const useVerifyOTP = () => {
               );
             }
 
-            console.log(
-              `✅ OTP verified successfully via signIn for ${user.user.email}`
-            );
             return signInResult.data;
           } catch (signInError) {
             console.error(`❌ SignIn OTP also failed:`, signInError);
@@ -235,7 +170,6 @@ export const useVerifyOTP = () => {
           }
         }
 
-        console.log(`✅ OTP verified successfully for ${user.user.email}`);
         return result.data;
       } catch (error) {
         console.error(`❌ OTP verification error:`, error);
