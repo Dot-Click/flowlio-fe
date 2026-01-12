@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useEffect, useState } from "react";
-import { authClient } from "@/providers/user.provider";
+import { authClient, useUser } from "@/providers/user.provider";
 import type { FC } from "react";
 import { z } from "zod";
 import { Box } from "../ui/box";
@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { Anchor } from "../ui/anchor";
 import { Flex } from "../ui/flex";
 import { IoEye, IoEyeOff } from "react-icons/io5";
+import { usePlanSelectionStore } from "@/store/planSelection.store";
 
 const formSchema = z.object({
   username: z.string().min(1, { message: "Required field" }),
@@ -46,6 +47,22 @@ export const SignUpForm: FC = () => {
     document.title = "Sign Up - Flowlio";
   }, []);
   const navigate = useNavigate();
+  const { refetchUser } = useUser();
+  const { selectedPlanIndex, selectedPlanId } = usePlanSelectionStore();
+
+  // Check if plan is selected, if not redirect to pricing
+  useEffect(() => {
+    if (selectedPlanIndex === null || !selectedPlanId) {
+      // No plan selected, redirect to pricing first
+      toast.info("Please select a plan first");
+      navigate("/pricing", {
+        state: {
+          fromSignup: true,
+        },
+        replace: true,
+      });
+    }
+  }, [selectedPlanIndex, selectedPlanId, navigate]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -54,9 +71,9 @@ export const SignUpForm: FC = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       rememberMe: true,
-      createpassword: "Test@123",
-      email: `test${Date.now()}@gmail.com`,
-      username: `test${Date.now()}`,
+      createpassword: "",
+      email: ``,
+      username: ``,
     },
   });
 
@@ -75,66 +92,58 @@ export const SignUpForm: FC = () => {
         {
           onRequest: () => {
             setIsLoading(true);
+            console.log("🔄 Signup request initiated for:", data.email);
           },
-          onSuccess: async () => {
-            toast.success(
-              "Account created successfully! Please select a plan."
-            );
+          onSuccess: async (response) => {
+            console.log("✅ Signup successful, response:", response);
+            toast.success("Account created successfully!");
 
-            // Check if user came from checkout with a plan selection
-            const location = window.location;
-            const urlParams = new URLSearchParams(location.search);
-            const selectedPlan = urlParams.get("plan");
-            const fromCheckout = urlParams.get("fromCheckout");
+            // SIMPLIFIED FLOW: Just wait for session, then redirect based on store
+            // Wait for Better Auth session to be established
+            await new Promise((resolve) => setTimeout(resolve, 1500));
 
-            // Check if we have plan details in the navigation state
-            const navigationState = window.history.state?.usr;
-            const hasPlanDetails = navigationState?.selectedPlan !== undefined;
-            const redirectTo = navigationState?.redirectTo;
-
-            if (redirectTo === "checkout" && hasPlanDetails) {
-              // User came from checkout, redirect back to checkout
-              navigate("/checkout", {
-                state: {
-                  selectedPlan: navigationState.selectedPlan,
-                  createOrganization: true,
-                },
-              });
-            } else if (fromCheckout && selectedPlan) {
-              // User came from checkout via URL params, redirect back to checkout
-              navigate("/checkout", {
-                state: {
-                  selectedPlan: parseInt(selectedPlan),
-                  createOrganization: true,
-                },
-              });
-            } else if (navigationState?.selectedPlan !== undefined) {
-              // Fallback: check navigation state directly
-              navigate("/checkout", {
-                state: {
-                  selectedPlan: navigationState.selectedPlan,
-                  createOrganization: true,
-                },
-              });
-            } else {
-              // Regular signup flow, redirect to pricing
-              navigate("/pricing", {
-                state: {
-                  fromSignup: true,
-                },
-              });
+            // Refetch user data to ensure session is loaded (silently, don't block on errors)
+            try {
+              await refetchUser();
+            } catch (error) {
+              console.error("Error refetching user:", error);
+              // Continue anyway - session might still be established
             }
 
+            // SIMPLIFIED: Check store for plan ID - that's our source of truth
+            if (selectedPlanId) {
+              console.log("✅ Plan ID in store, redirecting to checkout");
+              navigate("/checkout", {
+                state: {
+                  fromSignup: true,
+                  pendingPayment: false,
+                },
+                replace: true,
+              });
+              setIsLoading(false);
+              return;
+            }
+
+            // If no plan in store, redirect to pricing
+            console.log("⚠️ No plan ID in store, redirecting to pricing");
+            navigate("/pricing", {
+              state: {
+                fromSignup: true,
+                pendingAccount: true,
+              },
+              replace: true,
+            });
             setIsLoading(false);
+            return;
           },
-          onError: (ctx) => {
+          onError: (ctx: any) => {
             let errorMessage = "Signup failed. Please try again.";
 
-            if (ctx.error.message) {
+            if (ctx?.error?.message) {
               errorMessage = ctx.error.message;
-            } else if (ctx.error.status === 500) {
+            } else if (ctx?.error?.status === 500) {
               errorMessage = "Server error. Please try again later.";
-            } else if (ctx.error.status === 400) {
+            } else if (ctx?.error?.status === 400) {
               errorMessage =
                 "Invalid signup data. Please check your information.";
             }

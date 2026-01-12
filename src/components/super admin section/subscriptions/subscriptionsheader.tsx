@@ -15,7 +15,9 @@ import { FaCheckCircle } from "react-icons/fa";
 import { MdDataSaverOn } from "react-icons/md";
 import { Flex } from "@/components/ui/flex";
 import { IoTrashSharp } from "react-icons/io5";
+import { IoSettingsOutline } from "react-icons/io5";
 import { SubscribtionTabele } from "./subscribtiontabele";
+import { PlanAccessModal, PlanAccessSettings } from "./PlanAccessModal";
 import { useUpsertPlan } from "@/hooks/useupsertplan";
 import { useDeleteCustomFeatures } from "@/hooks/usedeletecustomfeatures";
 import { toast } from "sonner";
@@ -30,6 +32,7 @@ const PLAN_LIST = [
 ];
 
 type PlanKey = "basic" | "standard" | "premium";
+
 type PlanState = {
   id?: string; // Plan ID from database (for updates)
   name: string; // Original plan name (from database)
@@ -39,13 +42,27 @@ type PlanState = {
   price: string;
   durationValue: string;
   durationType: "days" | "monthly" | "yearly" | "";
+  trialDays: string; // Trial days (0 = no trial, any number = trial days)
   features: string[];
   newFeature: string;
   adding: boolean;
+  accessSettings: PlanAccessSettings; // Plan access configuration
 };
 
 type PlansState = {
   [key in PlanKey]: PlanState;
+};
+
+const initialAccessSettings: PlanAccessSettings = {
+  maxUsers: 0,
+  maxProjects: 0,
+  maxStorage: 0,
+  maxTasks: 0,
+  aiAssist: false,
+  prioritySupport: false,
+  calendarAccess: false,
+  taskManagement: false,
+  timeTracking: false,
 };
 
 const initialPlanState: PlanState = {
@@ -57,9 +74,11 @@ const initialPlanState: PlanState = {
   price: "",
   durationValue: "",
   durationType: "",
+  trialDays: "7", // Default 7 days trial
   features: [""],
   newFeature: "",
   adding: false,
+  accessSettings: { ...initialAccessSettings },
 };
 
 export const SubscriptionsHeader = () => {
@@ -77,6 +96,24 @@ export const SubscriptionsHeader = () => {
     basic: false,
     standard: false,
     premium: false,
+  });
+
+  // Track original features from database to distinguish between saved and new features
+  const [originalFeatures, setOriginalFeatures] = useState<
+    Record<PlanKey, string[]>
+  >({
+    basic: [],
+    standard: [],
+    premium: [],
+  });
+
+  // Modal state for plan access configuration
+  const [accessModalOpen, setAccessModalOpen] = useState<{
+    open: boolean;
+    planKey: PlanKey | null;
+  }>({
+    open: false,
+    planKey: null,
   });
 
   // Pre-populate form with fetched plans
@@ -116,9 +153,11 @@ export const SubscriptionsHeader = () => {
             (plan as any).durationValue ?? (plan as any).duration_value ?? null;
           const durationType =
             (plan as any).durationType ?? (plan as any).duration_type ?? null;
+          const trialDays =
+            (plan as any).trialDays ?? (plan as any).trial_days ?? 7;
 
           // Convert features object back to string array for UI
-          const featureStrings = [];
+          const featureStrings: string[] = [];
 
           // Add custom features if they exist
           if (
@@ -150,6 +189,15 @@ export const SubscriptionsHeader = () => {
             formattedDurationType = durationType;
           }
 
+          // Format trialDays - ensure it's a string for the input
+          let formattedTrialDays = "7"; // Default to 7
+          if (trialDays !== null && trialDays !== undefined) {
+            const numValue = Number(trialDays);
+            if (!isNaN(numValue) && numValue >= 0) {
+              formattedTrialDays = numValue.toString();
+            }
+          }
+
           // IMPORTANT: name and slug are IMMUTABLE (always "Basic"/"basic", "Standard"/"standard", "Premium"/"premium")
           // Only customPlanName is user-editable and displayed on pricing page
 
@@ -178,6 +226,19 @@ export const SubscriptionsHeader = () => {
               ? apiCustomPlanName.trim()
               : ""; // Empty string - user will type their custom name independently
 
+          // Load access settings from plan features
+          const accessSettings: PlanAccessSettings = {
+            maxUsers: plan.features?.maxUsers ?? 1,
+            maxProjects: plan.features?.maxProjects ?? 1,
+            maxStorage: plan.features?.maxStorage ?? 1,
+            maxTasks: plan.features?.maxTasks ?? 1,
+            aiAssist: plan.features?.aiAssist ?? false,
+            prioritySupport: plan.features?.prioritySupport ?? false,
+            calendarAccess: plan.features?.calendarAccess ?? false,
+            taskManagement: plan.features?.taskManagement ?? false,
+            timeTracking: plan.features?.timeTracking ?? false,
+          };
+
           updatedPlans[planKey] = {
             id: plan.id, // Store plan ID for updates
             name: originalName, // Original plan name (IMMUTABLE - "Basic", "Standard", "Premium")
@@ -187,10 +248,18 @@ export const SubscriptionsHeader = () => {
             price: plan.price.toString(),
             durationValue: formattedDurationValue,
             durationType: formattedDurationType,
+            trialDays: formattedTrialDays,
             features: featureStrings.length > 0 ? featureStrings : [""],
             newFeature: "",
             adding: false,
+            accessSettings: accessSettings,
           };
+
+          // Store original features from database for this plan
+          setOriginalFeatures((prev) => ({
+            ...prev,
+            [planKey]: featureStrings.length > 0 ? [...featureStrings] : [],
+          }));
         }
       });
 
@@ -256,19 +325,18 @@ export const SubscriptionsHeader = () => {
   const handleRemoveFeature = async (planKey: PlanKey, idx: number) => {
     const featureToRemove = plans[planKey].features[idx];
 
-    // Check if this is a custom feature (not a predefined one)
-    const predefinedFeatures = [
-      "AI Assist",
-      "Priority Support",
-      "Custom Branding",
-      "API Access",
-      "",
-    ];
-    const isCustomFeature = !predefinedFeatures.includes(featureToRemove);
+    // Check if this feature exists in the original features from database
+    const isFeatureInDatabase =
+      originalFeatures[planKey].includes(featureToRemove);
 
-    if (isCustomFeature) {
+    // If feature exists in database, delete it from database
+    if (isFeatureInDatabase) {
       // Find the plan ID from fetched plans
-      const plan = fetchedPlans.find((p) => p.name.toLowerCase() === planKey);
+      const plan = fetchedPlans.find((p) => {
+        const planSlug = (p.slug || "").toLowerCase();
+        const planNameLower = (p.name || "").toLowerCase();
+        return planSlug === planKey || planNameLower === planKey;
+      });
 
       if (plan) {
         try {
@@ -277,21 +345,32 @@ export const SubscriptionsHeader = () => {
             featuresToDelete: [featureToRemove],
           });
 
+          // Remove from original features tracking
+          setOriginalFeatures((prev) => ({
+            ...prev,
+            [planKey]: prev[planKey].filter((f) => f !== featureToRemove),
+          }));
+
           toast.success(
-            `Custom feature "${featureToRemove}" deleted successfully`
+            `Feature "${featureToRemove}" deleted from database successfully`
           );
         } catch (error) {
           const errorMessage =
             error instanceof Error ? error.message : "Unknown error";
           toast.error(
-            `Failed to delete custom feature "${featureToRemove}": ${errorMessage}`
+            `Failed to delete feature "${featureToRemove}": ${errorMessage}`
           );
           return; // Don't update local state if API call failed
         }
       }
+    } else {
+      // Feature is newly added (not in database), just remove from local state
+      toast.info(
+        `Feature "${featureToRemove}" removed (not saved to database yet)`
+      );
     }
 
-    // Update local state
+    // Update local state (remove from UI)
     setPlans((prev) => {
       const features = prev[planKey].features.filter(
         (_: string, i: number) => i !== idx
@@ -306,6 +385,193 @@ export const SubscriptionsHeader = () => {
   const upsertPlanMutation = useUpsertPlan();
   const deleteCustomFeaturesMutation = useDeleteCustomFeatures();
   const queryClient = useQueryClient();
+
+  // Handler to update access settings and save to database
+  const handleUpdateAccessSettings = async (
+    planKey: PlanKey,
+    settings: PlanAccessSettings
+  ) => {
+    // Get the current plan and update with new settings
+    const currentPlan = plans[planKey];
+    const updatedPlan = {
+      ...currentPlan,
+      accessSettings: settings,
+    };
+
+    // Update local state
+    setPlans((prev) => ({
+      ...prev,
+      [planKey]: updatedPlan,
+    }));
+
+    // Check if plan has required data to save
+    if (!updatedPlan.id && (!updatedPlan.subheading || !updatedPlan.price)) {
+      toast.info(
+        "Access settings saved locally. Please complete plan details and click Save to persist to database."
+      );
+      return;
+    }
+
+    // Check if any other plan is currently being saved
+    const isAnyPlanSaving = Object.values(savingPlans).some(
+      (isSaving) => isSaving
+    );
+    if (isAnyPlanSaving) {
+      toast.error("Please wait for the current save operation to complete");
+      throw new Error("Another plan is currently being saved");
+    }
+
+    // Set loading state
+    setSavingPlans((prev) => ({ ...prev, [planKey]: true }));
+
+    try {
+      // Use the same save logic as handleSavePlan
+      const validation = validatePlan(updatedPlan);
+      if (!validation.isValid) {
+        const errorMessage = validation.errors.join(", ");
+        toast.error("Cannot save access settings", {
+          description: errorMessage,
+        });
+        setSavingPlans((prev) => ({ ...prev, [planKey]: false }));
+        throw new Error(errorMessage);
+      }
+
+      // Map features with updated access settings
+      const mapFeaturesToApi = (
+        features: string[],
+        accessSettings: PlanAccessSettings
+      ) => {
+        const featureMap: PlanFeature = {
+          maxUsers: accessSettings.maxUsers,
+          maxProjects: accessSettings.maxProjects,
+          maxStorage: accessSettings.maxStorage,
+          maxTasks: accessSettings.maxTasks,
+          aiAssist: accessSettings.aiAssist,
+          prioritySupport: accessSettings.prioritySupport,
+          calendarAccess: accessSettings.calendarAccess,
+          taskManagement: accessSettings.taskManagement,
+          timeTracking: accessSettings.timeTracking,
+          customFeatures: [],
+        } as PlanFeature;
+
+        const validFeatures = features.filter(
+          (feature) => feature.trim() !== ""
+        );
+        const uniqueFeatures = [...new Set(validFeatures)];
+
+        uniqueFeatures.forEach((feature) => {
+          if (feature.trim() !== "") {
+            featureMap.customFeatures?.push(feature.trim());
+          }
+        });
+
+        if (!featureMap.customFeatures) {
+          featureMap.customFeatures = [];
+        }
+
+        return featureMap;
+      };
+
+      const parsedDurationValue =
+        updatedPlan.durationValue &&
+        updatedPlan.durationValue !== "" &&
+        updatedPlan.durationValue.trim() !== "" &&
+        !isNaN(parseInt(updatedPlan.durationValue, 10))
+          ? parseInt(updatedPlan.durationValue, 10)
+          : null;
+
+      const validDurationType =
+        updatedPlan.durationType === "days" ||
+        updatedPlan.durationType === "monthly" ||
+        updatedPlan.durationType === "yearly"
+          ? updatedPlan.durationType
+          : null;
+
+      const planName = updatedPlan.id
+        ? updatedPlan.name && updatedPlan.name.trim() !== ""
+          ? updatedPlan.name.trim()
+          : ""
+        : PLAN_LIST.find((p) => p.key === planKey)?.label ||
+          planKey.charAt(0).toUpperCase() + planKey.slice(1);
+      const planSlug = updatedPlan.id
+        ? updatedPlan.slug && updatedPlan.slug.trim() !== ""
+          ? updatedPlan.slug.trim()
+          : planKey
+        : planKey.toLowerCase();
+
+      let customPlanNameValue: string | null = null;
+      if (
+        updatedPlan.customPlanName !== undefined &&
+        updatedPlan.customPlanName !== null &&
+        updatedPlan.customPlanName !== ""
+      ) {
+        const trimmed = updatedPlan.customPlanName.trim();
+        if (trimmed.length > 0) {
+          customPlanNameValue = trimmed;
+        }
+      }
+
+      // Parse trialDays - convert to number if valid, otherwise default to 7
+      const parsedTrialDays =
+        updatedPlan.trialDays &&
+        updatedPlan.trialDays !== "" &&
+        updatedPlan.trialDays.trim() !== "" &&
+        !isNaN(parseInt(updatedPlan.trialDays, 10)) &&
+        parseInt(updatedPlan.trialDays, 10) >= 0
+          ? parseInt(updatedPlan.trialDays, 10)
+          : 7;
+
+      const planData = {
+        id: updatedPlan.id,
+        name: planName,
+        slug: planSlug,
+        customPlanName: customPlanNameValue,
+        description: updatedPlan.subheading,
+        price: parseFloat(updatedPlan.price),
+        features: mapFeaturesToApi(updatedPlan.features, settings),
+        isActive: true,
+        sortOrder: 1,
+        currency: "USD",
+        billingCycle: "monthly" as const,
+        durationValue: parsedDurationValue,
+        durationType: validDurationType,
+        trialDays: parsedTrialDays,
+      };
+
+      const result = await upsertPlanMutation.mutateAsync(planData);
+      const isUpdate = result.data?.isUpdate;
+
+      toast.success(
+        `Access settings for ${
+          PLAN_LIST.find((p) => p.key === planKey)?.label
+        } plan ${isUpdate ? "updated" : "saved"} successfully`
+      );
+
+      // Update originalFeatures
+      const savedFeatures = updatedPlan.features.filter((f) => f.trim() !== "");
+      setOriginalFeatures((prev) => ({
+        ...prev,
+        [planKey]: [...savedFeatures],
+      }));
+
+      // Invalidate and refetch plans
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      await queryClient.invalidateQueries({ queryKey: ["fetch plans"] });
+      await queryClient.refetchQueries({ queryKey: ["fetch plans"] });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to save access settings";
+      toast.error("Failed to save access settings", {
+        description: errorMessage,
+      });
+      // Re-throw error so modal can handle it
+      throw error;
+    } finally {
+      setSavingPlans((prev) => ({ ...prev, [planKey]: false }));
+    }
+  };
 
   const validatePlan = (
     plan: PlanState
@@ -382,17 +648,22 @@ export const SubscriptionsHeader = () => {
     }
 
     // Map dynamic features to API structure
-    const mapFeaturesToApi = (features: string[]) => {
+    const mapFeaturesToApi = (
+      features: string[],
+      accessSettings: PlanAccessSettings
+    ) => {
       const featureMap: PlanFeature = {
-        maxUsers: 1,
-        maxProjects: 1,
-        maxStorage: 1,
-        aiAssist: false,
-        prioritySupport: false,
-        customBranding: false,
-        apiAccess: false,
+        maxUsers: accessSettings.maxUsers,
+        maxProjects: accessSettings.maxProjects,
+        maxStorage: accessSettings.maxStorage,
+        maxTasks: accessSettings.maxTasks,
+        aiAssist: accessSettings.aiAssist,
+        prioritySupport: accessSettings.prioritySupport,
+        calendarAccess: accessSettings.calendarAccess,
+        taskManagement: accessSettings.taskManagement,
+        timeTracking: accessSettings.timeTracking,
         customFeatures: [], // Initialize custom features array
-      };
+      } as PlanFeature;
 
       // Filter out empty strings and duplicates
       const validFeatures = features.filter((feature) => feature.trim() !== "");
@@ -465,6 +736,16 @@ export const SubscriptionsHeader = () => {
     }
     // If undefined/null, send null (field was never set)
 
+    // Parse trialDays - convert to number if valid, otherwise default to 7
+    const parsedTrialDays =
+      plan.trialDays &&
+      plan.trialDays !== "" &&
+      plan.trialDays.trim() !== "" &&
+      !isNaN(parseInt(plan.trialDays, 10)) &&
+      parseInt(plan.trialDays, 10) >= 0
+        ? parseInt(plan.trialDays, 10)
+        : 7;
+
     const planData = {
       id: plan.id, // Send plan ID if available (for updates)
       name: planName, // Original plan name (IMMUTABLE - from database: "Basic", "Standard", "Premium")
@@ -472,13 +753,14 @@ export const SubscriptionsHeader = () => {
       customPlanName: customPlanNameValue, // Custom display name (USER-EDITABLE - what shows on pricing page)
       description: plan.subheading,
       price: parseFloat(plan.price),
-      features: mapFeaturesToApi(plan.features),
+      features: mapFeaturesToApi(plan.features, plan.accessSettings),
       isActive: true,
       sortOrder: 1,
       currency: "USD",
       billingCycle: "monthly" as const,
       durationValue: parsedDurationValue,
       durationType: validDurationType,
+      trialDays: parsedTrialDays,
     };
 
     try {
@@ -490,6 +772,14 @@ export const SubscriptionsHeader = () => {
           isUpdate ? "Updated" : "Created"
         } successfully`
       );
+
+      // Update originalFeatures to track newly saved features
+      // Filter out empty strings from features
+      const savedFeatures = plan.features.filter((f) => f.trim() !== "");
+      setOriginalFeatures((prev) => ({
+        ...prev,
+        [planKey]: [...savedFeatures],
+      }));
 
       // Invalidate and refetch plans to update the table and form
       // Use a delay to ensure the database has committed the transaction
@@ -558,9 +848,23 @@ export const SubscriptionsHeader = () => {
             key={plan.key}
             className="w-[350px] max-md:w-full max-md:flex-1 min-h-[400px] bg-white rounded-md border border-gray-200 flex-1 overflow-hidden gap-0"
           >
-            <h1 className="text-black bg-[#F3F5F5] text-xl font-medium border-b border-gray-200 p-3">
-              {plan.label}
-            </h1>
+            <Flex className="items-center justify-between bg-[#F3F5F5] border-b border-gray-200 p-3">
+              <h1 className="text-black text-xl font-medium">{plan.label}</h1>
+              <button
+                type="button"
+                onClick={() =>
+                  setAccessModalOpen({
+                    open: true,
+                    planKey: plan.key as PlanKey,
+                  })
+                }
+                className="p-2 hover:bg-gray-200 rounded-full transition-all duration-200 cursor-pointer hover:rotate-45"
+                aria-label="Configure plan access"
+                title="Configure plan access settings"
+              >
+                <IoSettingsOutline className="text-[#1797B9] text-xl" />
+              </button>
+            </Flex>
             <Stack className="mt-2 p-3 flex-1">
               <label htmlFor="name" className="mb-1">
                 Custom Plan Name
@@ -670,6 +974,27 @@ export const SubscriptionsHeader = () => {
                   </SelectContent>
                 </Select>
               </Flex>
+              <label htmlFor="trialDays" className="mt-3">
+                Trial Days
+                <span className="text-xs text-gray-500 ml-2">
+                  (0 = No Trial, Any number = Trial days)
+                </span>
+              </label>
+              <Input
+                type="number"
+                placeholder="e.g., 7, 14, 0"
+                className="bg-white h-12 border border-gray-200 placeholder:text-gray-400 shadow-none"
+                value={plans[plan.key as PlanKey].trialDays}
+                onChange={(e) =>
+                  handleInputChange(
+                    plan.key as PlanKey,
+                    "trialDays",
+                    e.target.value
+                  )
+                }
+                min="0"
+                step="1"
+              />
               <Box className="mt-4">
                 <h1 className="font-semibold mb-2">Included</h1>
                 <Stack className="gap-2">
@@ -773,6 +1098,28 @@ export const SubscriptionsHeader = () => {
         isLoading={isLoading}
         error={error}
       />
+
+      {/* Plan Access Configuration Modal */}
+      {accessModalOpen.planKey && (
+        <PlanAccessModal
+          open={accessModalOpen.open}
+          onOpenChange={(open) =>
+            setAccessModalOpen({
+              open,
+              planKey: open ? accessModalOpen.planKey : null,
+            })
+          }
+          planName={
+            PLAN_LIST.find((p) => p.key === accessModalOpen.planKey)?.label ||
+            accessModalOpen.planKey
+          }
+          accessSettings={plans[accessModalOpen.planKey].accessSettings}
+          onSave={(settings) =>
+            handleUpdateAccessSettings(accessModalOpen.planKey!, settings)
+          }
+          isSaving={savingPlans[accessModalOpen.planKey] || false}
+        />
+      )}
     </PageWrapper>
   );
 };

@@ -43,11 +43,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
+import { useTranslation } from "react-i18next";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { useUpdateProject } from "@/hooks/useupdateproject";
 
 // Use the Project interface from the hook
 export type Data = Project;
 
 export const ProjectTable = () => {
+  const { t } = useTranslation();
   // Fetch projects from API
   const { data: projectsData, isLoading, error } = useFetchProjects();
   const queryClient = useQueryClient();
@@ -151,6 +161,8 @@ export const ProjectTable = () => {
   const commentsWithReplies = commentsData?.data || [];
   const { mutate: handleDeleteProject, isPending: isDeletingProject } =
     useDeleteProject();
+  const { mutate: updateProject, isPending: isUpdatingStatus } =
+    useUpdateProject();
 
   // Delete confirmation handler
   const handleDeleteClick = (project: { id: string; name: string }) => {
@@ -178,6 +190,28 @@ export const ProjectTable = () => {
     setProjectToDelete(null);
   };
 
+  // Handle status change
+  const handleStatusChange = (projectId: string, newStatus: string) => {
+    updateProject(
+      {
+        id: projectId,
+        data: {
+          status: newStatus as "pending" | "completed" | "ongoing" | "delayed",
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success("Project status updated successfully");
+        },
+        onError: (error: any) => {
+          toast.error(
+            error?.response?.data?.error || "Failed to update project status"
+          );
+        },
+      }
+    );
+  };
+
   const columns: ColumnDef<Data>[] = [
     {
       id: "select",
@@ -188,7 +222,9 @@ export const ProjectTable = () => {
 
     {
       accessorKey: "projectName",
-      header: () => <Box className="text-black p-1">Project Name</Box>,
+      header: () => (
+        <Box className="text-black p-1">{t("projects.projectName")}</Box>
+      ),
       cell: ({ row }) => (
         <Box className="capitalize p-1 w-30 max-sm:w-full">
           {row.original.projectName.length > 28
@@ -199,14 +235,18 @@ export const ProjectTable = () => {
     },
     {
       accessorKey: "clientName",
-      header: () => <Box className="text-black text-center">Client</Box>,
+      header: () => (
+        <Box className="text-black text-center">{t("projects.client")}</Box>
+      ),
       cell: ({ row }) => (
         <Box className="capitalize text-center">{row.original.clientName}</Box>
       ),
     },
     {
       accessorKey: "assignedProject",
-      header: () => <Box className="text-black text-center">Assigned To</Box>,
+      header: () => (
+        <Box className="text-black text-center">{t("projects.assignedTo")}</Box>
+      ),
       cell: ({ row }) => (
         <Box className="capitalize text-center">
           {row.original.assignedProject}
@@ -216,7 +256,9 @@ export const ProjectTable = () => {
 
     {
       accessorKey: "startDate",
-      header: () => <Box className="text-center text-black">Start Date</Box>,
+      header: () => (
+        <Box className="text-center text-black">{t("common.startDate")}</Box>
+      ),
       cell: ({ row }) => {
         const startDate = row.original.startDate;
         try {
@@ -251,7 +293,9 @@ export const ProjectTable = () => {
 
     {
       accessorKey: "endDate",
-      header: () => <Box className="text-center text-black">End Date</Box>,
+      header: () => (
+        <Box className="text-center text-black">{t("common.endDate")}</Box>
+      ),
       cell: ({ row }) => {
         const endDate = row.original.endDate;
         try {
@@ -270,7 +314,9 @@ export const ProjectTable = () => {
 
     {
       accessorKey: "progress",
-      header: () => <Box className="text-center text-black">Progress</Box>,
+      header: () => (
+        <Box className="text-center text-black">{t("projects.progress")}</Box>
+      ),
       cell: ({ row }) => {
         return (
           <Center className="text-center">
@@ -282,12 +328,15 @@ export const ProjectTable = () => {
     },
     {
       accessorKey: "status",
-      header: () => <Box className="text-center text-black">Status</Box>,
+      header: () => (
+        <Box className="text-center text-black">{t("projects.status")}</Box>
+      ),
       cell: ({ row }) => {
         const status = row.original.status as
           | "pending"
           | "completed"
-          | "ongoing";
+          | "ongoing"
+          | "delayed";
 
         const statusStyles: Record<
           typeof status,
@@ -305,20 +354,74 @@ export const ProjectTable = () => {
             text: "text-white bg-[#005FA4] border-none rounded-full",
             dot: "bg-white",
           },
+          delayed: {
+            text: "text-white bg-[#EF5350] border-none rounded-full",
+            dot: "bg-white",
+          },
         };
+
+        // Default style if status is not found
+        const defaultStyle = {
+          text: "text-white bg-gray-500 border-none rounded-full",
+          dot: "bg-white",
+        };
+
+        const currentStyle = statusStyles[status] || defaultStyle;
+
+        const statusOptions: Array<{
+          value: typeof status;
+          label: string;
+        }> = [
+          { value: "pending", label: "Pending" },
+          { value: "ongoing", label: "Ongoing" },
+          { value: "delayed", label: "Delayed" },
+          { value: "completed", label: "Completed" },
+        ];
 
         return (
           <Center>
-            <Flex
-              className={`rounded-md capitalize w-32 h-10 gap-2 border items-center ${statusStyles[status].text}`}
+            <Select
+              value={status}
+              onValueChange={(newStatus) =>
+                handleStatusChange(row.original.id, newStatus)
+              }
+              disabled={isUpdatingStatus}
             >
-              <Flex className="ml-5.5">
-                <Flex
-                  className={`w-2 h-2 rounded-full ${statusStyles[status].dot}`}
-                />
-                <span>{status}</span>
-              </Flex>
-            </Flex>
+              <SelectTrigger
+                className={`rounded-md capitalize w-32 h-10 gap-2 border justify-center items-center ${currentStyle.text} cursor-pointer hover:opacity-90`}
+              >
+                <SelectValue>
+                  <Center className="gap-2">
+                    <Flex
+                      className={`w-2 h-2 items-start rounded-full ${currentStyle.dot}`}
+                    />
+                    <span>{status || "Unknown"}</span>
+                  </Center>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map((option) => {
+                  const optionStyle =
+                    statusStyles[option.value] || defaultStyle;
+                  return (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className="cursor-pointer"
+                    >
+                      <Flex
+                        className={`rounded-md capitalize gap-2 border justify-center items-center px-3 py-1 ${optionStyle.text}`}
+                      >
+                        <Flex
+                          className={`w-2 h-2 items-start rounded-full ${optionStyle.dot}`}
+                        />
+                        <span>{option.label}</span>
+                      </Flex>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
           </Center>
         );
       },
@@ -326,7 +429,9 @@ export const ProjectTable = () => {
 
     {
       accessorKey: "actions",
-      header: () => <Box className="text-center text-black">Actions</Box>,
+      header: () => (
+        <Box className="text-center text-black">{t("common.actions")}</Box>
+      ),
       cell: ({ row }) => {
         return (
           <Center className="space-x-2">

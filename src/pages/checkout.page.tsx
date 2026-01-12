@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router";
 import { Box } from "@/components/ui/box";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { Navbar } from "@/components/user section/navbar/navbar";
 import { Flex } from "@/components/ui/flex";
 import { Input } from "@/components/ui/input";
@@ -19,11 +19,15 @@ import {
   FormControl,
 } from "@/components/ui/form";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import {
   useCreatePayPalOrder,
   useCapturePayPalOrder,
 } from "@/hooks/usePayPalPayment";
+import { usePlanSelectionStore } from "@/store/planSelection.store";
+import type { IPlan } from "@/types";
+import { useSubscriptionStatus } from "@/hooks/usesubscription";
+import { AlertCircle } from "lucide-react";
 
 // Function to convert database features to display format
 const formatPlanFeatures = (planFeatures: any) => {
@@ -56,7 +60,11 @@ const CheckoutPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { data: userData, isLoading: userLoading } = useUser();
-  const { data: plansResponse } = useFetchPublicPlans();
+  const { data: plansResponse, isLoading: plansLoading } =
+    useFetchPublicPlans();
+  const { data: subscriptionStatus } = useSubscriptionStatus({
+    enabled: !!userData?.user, // Only check if user is logged in
+  });
   const createPayPalOrderMutation = useCreatePayPalOrder();
   const capturePayPalOrderMutation = useCapturePayPalOrder();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -65,64 +73,115 @@ const CheckoutPage = () => {
   );
   const [checkingBackendMode, setCheckingBackendMode] = useState(true);
 
-  const selectedPlanIndex = location.state?.selectedPlan ?? null;
-  const createOrganization = location.state?.createOrganization;
+  // Get plan from store (primary source)
+  const {
+    selectedPlanIndex: storePlanIndex,
+    selectedPlanId: storePlanId,
+    organizationName: storeOrgName,
+  } = usePlanSelectionStore();
+
+  const selectedPlanIndex = location.state?.selectedPlan ?? storePlanIndex;
+  const createOrganization =
+    location.state?.createOrganization ??
+    location.state?.pendingPayment ??
+    false;
+  const fromSignup = location.state?.fromSignup ?? false;
+  const pendingPayment = location.state?.pendingPayment ?? false;
+  const pendingPlanId = location.state?.selectedPlanId ?? null;
+  const pendingOrgData = location.state?.pendingOrganizationData ?? null;
 
   // Fallback: check URL parameters if navigation state is lost
   const urlParams = new URLSearchParams(location.search);
   const fallbackPlanIndex = urlParams.get("plan");
   const finalPlanIndex =
     selectedPlanIndex ??
+    storePlanIndex ??
     (fallbackPlanIndex ? parseInt(fallbackPlanIndex) : null);
 
-  // Get plan details with dynamic features from database
-  const planDetails = [
-    {
-      title: plansResponse?.data?.[0]?.name || "Basic Plan (Free)",
-      price: plansResponse?.data?.[0]?.price || "Free",
-      description:
-        plansResponse?.data?.[0]?.description ||
-        "Personal use and small projects",
-      duration: "7-Days Trial",
-      features: formatPlanFeatures(plansResponse?.data?.[0]?.features),
-    },
-    {
-      title: plansResponse?.data?.[1]?.name || "Pro Plan",
-      price: plansResponse?.data?.[1]?.price || "$29",
-      description:
-        plansResponse?.data?.[1]?.description ||
-        "Professional teams and growing businesses",
-      duration: "month",
-      features: formatPlanFeatures(plansResponse?.data?.[1]?.features),
-    },
-    {
-      title: plansResponse?.data?.[2]?.name || "Enterprise Plan",
-      price: plansResponse?.data?.[2]?.price || "$99",
-      description:
-        plansResponse?.data?.[2]?.description ||
-        "Large organizations with complex needs",
-      duration: "6 months",
-      features: formatPlanFeatures(plansResponse?.data?.[2]?.features),
-    },
-  ];
+  // Get plans array
+  const plansArray = (plansResponse?.data as IPlan[]) || [];
 
-  // Get the selected plan with better fallback logic
-  const plan = finalPlanIndex !== null ? planDetails[finalPlanIndex] : null;
-  const selectedPlan = plansResponse?.data?.find(
-    (_, index) => index === finalPlanIndex
+  // Get plan ID to use - prioritize store
+  const planIdToUse =
+    storePlanId || pendingPlanId || pendingOrgData?.planId || null;
+
+  // Get the selected plan
+  const selectedPlan =
+    finalPlanIndex !== null && plansArray.length > 0
+      ? plansArray[finalPlanIndex]
+      : planIdToUse
+      ? plansArray.find((p: IPlan) => p.id === planIdToUse) || null
+      : null;
+
+  // Get plan details with dynamic features from database - memoize to prevent unnecessary re-renders
+  const planDetails = useMemo(() => {
+    const plans = plansResponse?.data || [];
+    return plans.map((plan: IPlan) => {
+      const trialDays = plan.trialDays ?? 7;
+      const durationText =
+        trialDays > 0
+          ? `${trialDays}-Day${trialDays !== 1 ? "s" : ""} Trial`
+          : "No Trial";
+
+      return {
+        title: plan.name || "Plan",
+        price: plan.price || "Free",
+        description: plan.description || "Plan description",
+        duration: durationText,
+        trialDays: trialDays,
+        features: formatPlanFeatures(plan.features),
+      };
+    });
+  }, [plansResponse?.data]);
+
+  // Get the selected plan with better fallback logic - memoize to prevent unnecessary re-renders
+  const plan = useMemo(
+    () => (finalPlanIndex !== null ? planDetails[finalPlanIndex] : null),
+    [finalPlanIndex, planDetails]
   );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      organizationName: "",
+      organizationName: pendingOrgData?.organizationName || storeOrgName || "",
     },
   });
 
+  // Use ref to track if we've already handled redirects to prevent infinite loops
+  const hasHandledRedirect = useRef(false);
+  const hasCheckedAuth = useRef(false);
+
   useEffect(() => {
-    if (!plan) {
+    // Reset redirect flag when key dependencies change
+    if (finalPlanIndex !== null || planIdToUse) {
+      hasHandledRedirect.current = false;
+    }
+  }, [finalPlanIndex, planIdToUse]);
+
+  useEffect(() => {
+    // Wait for plans to load
+    if (plansLoading) {
+      return;
+    }
+
+    // Check if we have a plan
+    if (!selectedPlan && !planIdToUse) {
+      // Prevent multiple redirects
+      if (hasHandledRedirect.current) {
+        return;
+      }
+      hasHandledRedirect.current = true;
+
       // If no plan, redirect back to pricing
-      navigate("/pricing");
+      toast.info("Please select a plan first");
+      navigate("/pricing", {
+        state: {
+          fromSignup: fromSignup,
+          fromSignin: !fromSignup,
+          pendingAccount: pendingPayment || fromSignup,
+        },
+        replace: true, // Use replace to prevent back button issues
+      });
       return;
     }
 
@@ -131,68 +190,75 @@ const CheckoutPage = () => {
       return; // Still loading, wait
     }
 
+    // If coming from signup, wait for user data to be available
+    if (fromSignup) {
+      // If user data is still loading or not available yet, wait
+      if (!userData?.user) {
+        // Give it a moment for session to establish after signup
+        return;
+      }
+      // User is loaded, allow to proceed
+      window.scrollTo(0, 0);
+      hasCheckedAuth.current = true;
+      return;
+    }
+
+    // Prevent multiple auth checks and redirects
+    if (hasCheckedAuth.current) {
+      return;
+    }
+
     // If user is not authenticated after loading is complete, redirect to signup
     if (!userData?.user) {
+      hasCheckedAuth.current = true;
+      hasHandledRedirect.current = true;
+
       toast.info("Please sign up or login to complete your purchase");
       // Redirect to signup with plan information
       navigate("/auth/signup", {
         state: {
-          selectedPlan: finalPlanIndex,
+          selectedPlan: finalPlanIndex ?? storePlanIndex,
           redirectTo: "checkout",
           planDetails: plan,
         },
+        replace: true, // Use replace to prevent back button issues
       });
       return;
     }
 
+    // User is authenticated and plan is selected
+    hasCheckedAuth.current = true;
     window.scrollTo(0, 0);
-  }, [plan, navigate, userData, userLoading, finalPlanIndex]);
+  }, [
+    // Removed 'plan' and 'navigate' from dependencies as they cause unnecessary re-runs
+    userData?.user?.id, // Only track user ID, not entire userData object
+    userLoading,
+    plansLoading,
+    finalPlanIndex,
+    selectedPlan?.id, // Only track plan ID, not entire plan object
+    planIdToUse,
+    fromSignup,
+    pendingPayment,
+    storePlanIndex,
+    // Keep navigate for closure but it's stable
+    navigate,
+  ]);
 
-  // Check backend PayPal configuration on mount
+  // DEMO MODE REMOVED - No need to check for demo mode in production
+  // Check backend PayPal configuration on mount (simplified - no demo mode check)
   useEffect(() => {
-    const checkBackendPayPalConfig = async () => {
-      if (!selectedPlan || !userData?.user) {
-        setCheckingBackendMode(false);
-        return;
-      }
-
-      try {
-        const planPrice = parseFloat(
-          selectedPlan.price.toString().replace("$", "")
-        );
-
-        // Try to create an order to check if backend is in demo mode
-        const response = await createPayPalOrderMutation.mutateAsync({
-          planId: selectedPlan.id,
-          amount: planPrice,
-          currency: "USD",
-        });
-
-        // Check if backend returned a demo order
-        if (
-          response.data?.orderId &&
-          response.data.orderId.startsWith("demo_order_")
-        ) {
-          setIsBackendDemoMode(true);
-        } else {
-          setIsBackendDemoMode(false);
-        }
-      } catch (error) {
-        // If error, assume demo mode
-        console.log(
-          "[Checkout] Backend PayPal check failed, assuming demo mode",
-          error
-        );
-        setIsBackendDemoMode(true);
-      } finally {
-        setCheckingBackendMode(false);
-      }
-    };
-
-    if (selectedPlan && userData?.user && checkingBackendMode) {
-      checkBackendPayPalConfig();
+    // Simply mark as not checking since demo mode is removed
+    // Set immediately if we have the required data, don't wait
+    if (selectedPlan && userData?.user) {
+      setCheckingBackendMode(false);
+      setIsBackendDemoMode(false); // Always false in production
+    } else if (!userLoading && !plansLoading) {
+      // If loading is complete but we don't have plan/user yet, still mark as not checking
+      // This prevents indefinite waiting
+      setCheckingBackendMode(false);
+      setIsBackendDemoMode(false);
     }
-  }, [selectedPlan, userData?.user]);
+  }, [selectedPlan, userData?.user, userLoading, plansLoading]);
 
   // Handle PayPal order creation
   const handlePayPalCreateOrder = async (): Promise<string> => {
@@ -245,28 +311,9 @@ const CheckoutPage = () => {
 
       console.log("[PayPal] Order created:", response.data);
 
-      // Check if backend is in demo mode (returns demo order IDs)
-      if (
-        response.data?.orderId &&
-        response.data.orderId.startsWith("demo_order_")
-      ) {
-        console.log(
-          "[PayPal] Demo order detected - Backend is in demo mode. PayPal SDK cannot process demo orders."
-        );
-        // Mark backend as demo mode
-        setIsBackendDemoMode(true);
-        // Don't return the demo order ID to PayPal SDK - it will cause an error
-        // Instead, throw an error that will be caught and the user can use the demo button
-        const errorMsg =
-          "PayPal is not configured on the server. Please use the 'Complete Demo Payment' button below.";
-        console.error("[PayPal] Error:", errorMsg);
-        toast.error(errorMsg);
-        throw new Error(errorMsg);
-      }
-
-      // If we get a real PayPal order ID, backend has PayPal configured
+      // DEMO MODE REMOVED - Only real PayPal orders in production
+      // If we get a PayPal order ID, return it
       if (response.data?.orderId) {
-        setIsBackendDemoMode(false);
         return response.data.orderId;
       }
 
@@ -316,9 +363,10 @@ const CheckoutPage = () => {
           toast.success("Organization created successfully!");
         }
 
-        // Redirect to dashboard after successful setup
+        // Reload page to refresh session with updated organizationId
+        // This ensures the session is updated with the new organization data
         setTimeout(() => {
-          navigate("/dashboard");
+          window.location.href = "/dashboard";
         }, 1500);
       } else {
         toast.error("Payment was not completed. Please try again.");
@@ -339,13 +387,14 @@ const CheckoutPage = () => {
     console.error("[PayPal] SDK Error:", error);
     console.error("[PayPal] Error details:", JSON.stringify(error, null, 2));
 
-    // Check if error is related to demo orders
+    // DEMO MODE REMOVED - Handle PayPal errors normally
+    // Check if error is related to invalid resource (order not found, etc.)
     if (
       error?.err === "INVALID_RESOURCE_ID" ||
       error?.message?.includes("INVALID_RESOURCE_ID")
     ) {
       const errorMessage =
-        "Demo orders cannot be processed through PayPal. Please use the 'Complete Demo Payment' button instead.";
+        "PayPal order not found or invalid. Please try again or contact support.";
       toast.error(errorMessage);
       setIsProcessing(false);
       return;
@@ -366,6 +415,110 @@ const CheckoutPage = () => {
     setIsProcessing(false);
   };
 
+  // DEMO PAYMENT COMMENTED OUT FOR PRODUCTION - Only real payments allowed
+  // Handle demo payment
+  // const handleDemoPayment = async () => {
+  //   if (!selectedPlan || !userData?.user) {
+  //     toast.error("Missing plan or user information");
+  //     return;
+  //   }
+
+  //   setIsProcessing(true);
+  //   try {
+  //     // Validate organization name if needed
+  //     if (createOrganization) {
+  //       const isValid = await form.trigger("organizationName");
+  //       if (!isValid) {
+  //         toast.error("Please enter a valid organization name");
+  //         setIsProcessing(false);
+  //         return;
+  //       }
+  //     }
+
+  //     // Create demo order - force demo mode
+  //     const planPrice = parseFloat(
+  //       selectedPlan.price.toString().replace("$", "")
+  //     );
+
+  //     const orderResponse = await createPayPalOrderMutation.mutateAsync({
+  //       planId: selectedPlan.id,
+  //       amount: planPrice,
+  //       currency: "USD",
+  //       // demoMode: true, // Force demo mode for demo payment button
+  //     });
+
+  //     if (orderResponse.data?.orderId) {
+  //       // Mark backend demo mode if we get a demo order
+  //       if (orderResponse.data.orderId.startsWith("demo_order_")) {
+  //         setIsBackendDemoMode(true);
+  //       }
+
+  //       // Process demo order directly (bypass PayPal SDK)
+  //       const formData = form.getValues();
+
+  //       // Ensure organization name is provided if creating organization
+  //       const orgName = createOrganization
+  //         ? formData.organizationName?.trim()
+  //         : undefined;
+
+  //       if (createOrganization && (!orgName || orgName === "")) {
+  //         toast.error("Please enter an organization name");
+  //         setIsProcessing(false);
+  //         return;
+  //       }
+
+  //       console.log("[Demo Payment] Capturing order:", {
+  //         orderId: orderResponse.data.orderId,
+  //         userId: userData.user.id,
+  //         organizationName: orgName,
+  //         planId: selectedPlan.id,
+  //         createOrganization,
+  //       });
+
+  //       const captureResponse = await capturePayPalOrderMutation.mutateAsync({
+  //         orderId: orderResponse.data.orderId,
+  //         userId: userData.user.id,
+  //         organizationName: orgName,
+  //         planId: selectedPlan.id,
+  //       });
+
+  //       console.log("[Demo Payment] Capture response:", captureResponse);
+
+  //       if (captureResponse.data?.status === "COMPLETED") {
+  //         toast.success("Demo payment processed successfully!");
+  //         if (createOrganization && captureResponse.data?.organization) {
+  //           toast.success("Organization created successfully!");
+  //         }
+  //         // Reload page to refresh session with updated organizationId
+  //         setTimeout(() => {
+  //           window.location.href = "/dashboard";
+  //         }, 1500);
+  //       } else {
+  //         console.error(
+  //           "[Demo Payment] Payment not completed:",
+  //           captureResponse
+  //         );
+  //         toast.error(
+  //           captureResponse?.message ||
+  //             "Payment was not completed. Please try again."
+  //         );
+  //       }
+  //     } else {
+  //       console.error("[Demo Payment] No order ID returned:", orderResponse);
+  //       toast.error("Failed to create order. Please try again.");
+  //     }
+  //   } catch (error: any) {
+  //     console.error("Demo payment error:", error);
+  //     toast.error(
+  //       error?.response?.data?.message ||
+  //         error?.message ||
+  //         "Failed to process demo payment"
+  //     );
+  //   } finally {
+  //     setIsProcessing(false);
+  //   }
+  // };
+
   // Format price for display
   const formatPrice = (price: string | number | undefined): string => {
     if (!price || price === "Free") return "Free";
@@ -374,13 +527,13 @@ const CheckoutPage = () => {
     return `$${priceStr}`;
   };
 
-  if (!plan || userLoading) {
+  if (!selectedPlan || (userLoading && !fromSignup)) {
     return (
       <Box className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">
-            {userLoading ? "Checking authentication..." : "Loading..."}
+            {userLoading ? "Checking authentication..." : "Loading plan..."}
           </p>
         </div>
       </Box>
@@ -392,8 +545,19 @@ const CheckoutPage = () => {
   // For live payments: Use your live PayPal Client ID from PayPal Developer Dashboard
   // The PayPal SDK automatically detects live vs sandbox based on the client ID format
   const paypalClientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
+  const paypalMode = import.meta.env.VITE_PAYPAL_MODE || "live"; // Default to live for production
   const isFrontendPayPalConfigured =
-    paypalClientId && paypalClientId !== "" && paypalClientId !== "sandbox";
+    typeof paypalClientId === "string" && paypalClientId.trim().length > 0;
+
+  // Debug log to verify PayPal env loading (shows only length for safety)
+  console.log("[PayPal Config Check]", {
+    hasClientId: isFrontendPayPalConfigured,
+    clientIdLength: paypalClientId?.length || 0,
+    paypalMode: paypalMode,
+    // Check if client ID looks like sandbox (sandbox IDs often start with specific patterns)
+    isLikelySandbox:
+      paypalClientId?.startsWith("sb-") || paypalClientId?.includes("sandbox"),
+  });
 
   // Check if backend is in demo mode (extract to avoid type narrowing issues)
   const isBackendInDemoMode = isBackendDemoMode === true;
@@ -408,30 +572,63 @@ const CheckoutPage = () => {
   // This prevents the popup from appearing when PayPal is not set up
   const shouldLoadPayPalSDK = isPayPalFullyConfigured;
 
+  // IMPORTANT: Never use "sb" placeholder as it forces sandbox mode!
+  // Only initialize PayPal SDK with the actual client ID when ready
+  // This prevents sandbox mode from being cached on first load
+  const paypalOptions =
+    shouldLoadPayPalSDK && paypalClientId
+      ? {
+          clientId: paypalClientId,
+          currency: "USD",
+          disableFunding: "credit,card" as const,
+        }
+      : { clientId: "", currency: "USD" as const }; // Use empty string, not "sb" to avoid sandbox detection
+
   return (
     <PayPalScriptProvider
-      options={{
-        clientId: shouldLoadPayPalSDK ? paypalClientId || "" : "sb", // Use 'sb' as minimal placeholder to prevent SDK errors
-        currency: "USD",
-        disableFunding: "credit,card", // Disable credit card option for simplicity
-      }}
-      deferLoading={!shouldLoadPayPalSDK} // Don't load SDK if not configured
+      options={paypalOptions}
+      deferLoading={!shouldLoadPayPalSDK || !paypalClientId} // Don't load SDK until we have real client ID
+      key={`paypal-${paypalClientId || "disabled"}-${shouldLoadPayPalSDK}`} // Force re-initialization when client ID or config changes
     >
       <Box className="min-h-screen bg-gray-50 max-md:p-4">
         <Navbar />
+
+        {/* Trial Expired Message Banner */}
+        {subscriptionStatus?.data?.trialExpired && (
+          <Box className="max-w-5xl mx-auto mt-4 mb-4">
+            <Flex className="items-center gap-3 bg-orange-50 border border-orange-200 rounded-lg p-4">
+              <AlertCircle
+                className="text-orange-600 flex-shrink-0"
+                size={24}
+              />
+              <Box className="flex-1">
+                <h3 className="font-semibold text-orange-900 mb-1">
+                  Trial Period Ended
+                </h3>
+                <p className="text-orange-700 text-sm mt-1">
+                  Your trial period has ended. Please purchase a subscription to
+                  continue using our services.
+                </p>
+              </Box>
+            </Flex>
+          </Box>
+        )}
 
         <Form {...form}>
           <Flex className="max-w-5xl mx-auto mt-3 items-start max-md:items-center flex-col md:flex-row gap-6">
             {/* Left: Plan Info */}
             <Box className="max-md:w-full flex-1 bg-gradient-to-r from-indigo-100 to-red-50 rounded-lg shadow p-8">
               <h2 className="text-2xl font-bold mb-2">
-                {plan?.title || "Plan Details"}
+                {plan?.title || selectedPlan?.name || "Plan Details"}
               </h2>
               <p className="text-lg mb-1">
-                {formatPrice(plan?.price)} / {plan?.duration || "Trial"}
+                {formatPrice(plan?.price || selectedPlan?.price)} /{" "}
+                {plan?.duration || "Trial"}
               </p>
               <p className="mb-4">
-                {plan?.description || "Plan description not available"}
+                {plan?.description ||
+                  selectedPlan?.description ||
+                  "Plan description not available"}
               </p>
 
               {plan?.features && plan.features.length > 0 ? (
@@ -464,7 +661,7 @@ const CheckoutPage = () => {
             </Box>
 
             {/* Right: Organization & Payment Details */}
-            <Box className="h-auto bg-gradient-to-r from-red-50 to-indigo-100 rounded-lg shadow p-8 w-full md:w-auto">
+            <Box className="h-auto bg-gradient-to-r from-red-50 to-indigo-100 rounded-lg shadow p-8 w-full md:w-1/2">
               {createOrganization && (
                 <>
                   <h2 className="text-xl font-semibold mb-4 font-Outfit">
@@ -494,13 +691,14 @@ const CheckoutPage = () => {
 
               <h3 className="font-semibold mb-4">Payment Method</h3>
 
+              {/* DEMO PAYMENT COMMENTED OUT FOR PRODUCTION - Only real PayPal payments allowed */}
               {/* Show demo button if PayPal is not fully configured OR backend is in demo mode OR still checking */}
-              {checkingBackendMode ||
+              {/* {checkingBackendMode ||
               !isPayPalFullyConfigured ||
               isBackendInDemoMode ? (
                 <>
                   {/* Demo Payment Button - for testing without PayPal SDK */}
-                  <Box className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+              {/* <Box className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
                     <p className="font-semibold text-green-800 mb-2">
                       Demo Payment Mode
                     </p>
@@ -512,137 +710,11 @@ const CheckoutPage = () => {
                         : "PayPal is not fully configured. Use the demo payment button to test the complete payment and organization creation flow."}
                     </p>
                     <Button
-                      onClick={async () => {
-                        if (!selectedPlan || !userData?.user) {
-                          toast.error("Missing plan or user information");
-                          return;
-                        }
-
-                        setIsProcessing(true);
-                        try {
-                          // Validate organization name if needed
-                          if (createOrganization) {
-                            const isValid = await form.trigger(
-                              "organizationName"
-                            );
-                            if (!isValid) {
-                              toast.error(
-                                "Please enter a valid organization name"
-                              );
-                              setIsProcessing(false);
-                              return;
-                            }
-                          }
-
-                          // Create demo order
-                          const planPrice = parseFloat(
-                            selectedPlan.price.toString().replace("$", "")
-                          );
-
-                          const orderResponse =
-                            await createPayPalOrderMutation.mutateAsync({
-                              planId: selectedPlan.id,
-                              amount: planPrice,
-                              currency: "USD",
-                            });
-
-                          if (orderResponse.data?.orderId) {
-                            // Mark backend demo mode if we get a demo order
-                            if (
-                              orderResponse.data.orderId.startsWith(
-                                "demo_order_"
-                              )
-                            ) {
-                              setIsBackendDemoMode(true);
-                            }
-
-                            // Process demo order directly (bypass PayPal SDK)
-                            const formData = form.getValues();
-
-                            // Ensure organization name is provided if creating organization
-                            const orgName = createOrganization
-                              ? formData.organizationName?.trim()
-                              : undefined;
-
-                            if (
-                              createOrganization &&
-                              (!orgName || orgName === "")
-                            ) {
-                              toast.error("Please enter an organization name");
-                              setIsProcessing(false);
-                              return;
-                            }
-
-                            console.log("[Demo Payment] Capturing order:", {
-                              orderId: orderResponse.data.orderId,
-                              userId: userData.user.id,
-                              organizationName: orgName,
-                              planId: selectedPlan.id,
-                              createOrganization,
-                            });
-
-                            const captureResponse =
-                              await capturePayPalOrderMutation.mutateAsync({
-                                orderId: orderResponse.data.orderId,
-                                userId: userData.user.id,
-                                organizationName: orgName,
-                                planId: selectedPlan.id,
-                              });
-
-                            console.log(
-                              "[Demo Payment] Capture response:",
-                              captureResponse
-                            );
-
-                            if (captureResponse.data?.status === "COMPLETED") {
-                              toast.success(
-                                "Demo payment processed successfully!"
-                              );
-                              if (
-                                createOrganization &&
-                                captureResponse.data?.organization
-                              ) {
-                                toast.success(
-                                  "Organization created successfully!"
-                                );
-                              }
-                              setTimeout(() => {
-                                navigate("/dashboard");
-                              }, 1500);
-                            } else {
-                              console.error(
-                                "[Demo Payment] Payment not completed:",
-                                captureResponse
-                              );
-                              toast.error(
-                                captureResponse?.message ||
-                                  "Payment was not completed. Please try again."
-                              );
-                            }
-                          } else {
-                            console.error(
-                              "[Demo Payment] No order ID returned:",
-                              orderResponse
-                            );
-                            toast.error(
-                              "Failed to create order. Please try again."
-                            );
-                          }
-                        } catch (error: any) {
-                          console.error("Demo payment error:", error);
-                          toast.error(
-                            error?.response?.data?.message ||
-                              error?.message ||
-                              "Failed to process demo payment"
-                          );
-                        } finally {
-                          setIsProcessing(false);
-                        }
-                      }}
+                      onClick={handleDemoPayment}
                       disabled={
                         isProcessing || !selectedPlan || checkingBackendMode
                       }
-                      className="w-full bg-green-600 hover:bg-green-700 text-white py-3"
+                      className="w-full bg-green-600 hover:bg-green-700 text-white py-3 cursor-pointer"
                     >
                       {checkingBackendMode
                         ? "Checking Configuration..."
@@ -654,88 +726,119 @@ const CheckoutPage = () => {
                       This simulates a successful payment and creates your
                       organization
                     </p>
+                  </Box> */}
+
+              {/* Configuration Instructions - Show error if PayPal not configured */}
+              {!isPayPalFullyConfigured && (
+                <Box className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="font-semibold text-yellow-800 mb-2">
+                    PayPal Not Configured
+                  </p>
+                  <p className="text-yellow-700 text-sm mb-3">
+                    To enable real PayPal payments, please configure PayPal
+                    credentials.
+                  </p>
+                  <div className="text-xs text-yellow-600 bg-yellow-100 p-2 rounded">
+                    <p className="font-semibold mb-1">Steps to configure:</p>
+                    <ol className="list-decimal list-inside space-y-1">
+                      <li>
+                        Go to{" "}
+                        <a
+                          href="https://developer.paypal.com"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline"
+                        >
+                          PayPal Developer Dashboard
+                        </a>
+                      </li>
+                      <li>
+                        Create a <strong>LIVE</strong> app (not sandbox) to get
+                        your Client ID and Secret
+                      </li>
+                      <li>
+                        Frontend: Add{" "}
+                        <code className="bg-yellow-200 px-1 rounded">
+                          VITE_PAYPAL_CLIENT_ID=your_live_client_id
+                        </code>{" "}
+                        and{" "}
+                        <code className="bg-yellow-200 px-1 rounded">
+                          VITE_PAYPAL_MODE=live
+                        </code>{" "}
+                        to your .env file
+                      </li>
+                      <li>
+                        Backend: Add{" "}
+                        <code className="bg-yellow-200 px-1 rounded">
+                          PAYPAL_CLIENT_ID=your_live_client_id
+                        </code>
+                        ,{" "}
+                        <code className="bg-yellow-200 px-1 rounded">
+                          PAYPAL_CLIENT_SECRET=your_live_secret
+                        </code>
+                        , and{" "}
+                        <code className="bg-yellow-200 px-1 rounded">
+                          PAYPAL_MODE=live
+                        </code>{" "}
+                        to your backend .env file
+                      </li>
+                      <li>Restart both frontend and backend servers</li>
+                    </ol>
+                  </div>
+                </Box>
+              )}
+              {/* </> */}
+              {/* ) : null} */}
+              {/* DEMO MODE REMOVED - Only show PayPal buttons when configured */}
+              {isPayPalFullyConfigured && shouldLoadPayPalSDK && (
+                <>
+                  {/* Warning if sandbox mode detected but should be live */}
+                  {(paypalMode !== "live" ||
+                    paypalClientId?.startsWith("sb-") ||
+                    paypalClientId?.includes("sandbox")) && (
+                    <Box className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="font-semibold text-red-800 mb-2">
+                        ⚠️ Sandbox Mode Detected
+                      </p>
+                      <p className="text-red-700 text-sm mb-2">
+                        Your PayPal is configured in sandbox mode. For real
+                        payments, you need:
+                      </p>
+                      <ul className="text-xs text-red-600 list-disc list-inside space-y-1">
+                        <li>
+                          A <strong>LIVE</strong> PayPal Client ID (not sandbox)
+                        </li>
+                        <li>
+                          Frontend: <code>VITE_PAYPAL_MODE=live</code> in .env
+                        </li>
+                        <li>
+                          Backend: <code>PAYPAL_MODE=live</code> in .env
+                        </li>
+                      </ul>
+                    </Box>
+                  )}
+                  {/* PayPal Buttons - Only show when fully configured */}
+                  <Box className="mb-4 bg-white rounded-lg p-4 border border-gray-200">
+                    <PayPalButtons
+                      createOrder={handlePayPalCreateOrder}
+                      onApprove={handlePayPalApprove}
+                      onError={handlePayPalError}
+                      onCancel={() => {
+                        toast.info("Payment cancelled");
+                        setIsProcessing(false);
+                      }}
+                      disabled={isProcessing}
+                      style={{
+                        layout: "vertical",
+                        color: "blue",
+                        shape: "rect",
+                        label: "paypal",
+                      }}
+                    />
                   </Box>
 
-                  {/* Configuration Instructions */}
-                  {!isFrontendPayPalConfigured && (
-                    <Box className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <p className="font-semibold text-yellow-800 mb-2">
-                        PayPal Not Configured
-                      </p>
-                      <p className="text-yellow-700 text-sm mb-3">
-                        To enable real PayPal payments, please configure PayPal
-                        credentials.
-                      </p>
-                      <div className="text-xs text-yellow-600 bg-yellow-100 p-2 rounded">
-                        <p className="font-semibold mb-1">
-                          Steps to configure:
-                        </p>
-                        <ol className="list-decimal list-inside space-y-1">
-                          <li>
-                            Go to{" "}
-                            <a
-                              href="https://developer.paypal.com"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="underline"
-                            >
-                              PayPal Developer Dashboard
-                            </a>
-                          </li>
-                          <li>
-                            Create a sandbox app to get your Client ID and
-                            Secret
-                          </li>
-                          <li>
-                            Frontend: Add{" "}
-                            <code className="bg-yellow-200 px-1 rounded">
-                              VITE_PAYPAL_CLIENT_ID=your_client_id
-                            </code>{" "}
-                            to your .env file
-                          </li>
-                          <li>
-                            Backend: Add{" "}
-                            <code className="bg-yellow-200 px-1 rounded">
-                              PAYPAL_CLIENT_ID=your_client_id
-                            </code>{" "}
-                            and{" "}
-                            <code className="bg-yellow-200 px-1 rounded">
-                              PAYPAL_CLIENT_SECRET=your_secret
-                            </code>{" "}
-                            to your backend .env file
-                          </li>
-                          <li>Restart both frontend and backend servers</li>
-                        </ol>
-                      </div>
-                    </Box>
-                  )}
-                </>
-              ) : (
-                <>
-                  {/* PayPal Buttons - Only show when fully configured */}
-                  {shouldLoadPayPalSDK && (
-                    <Box className="mb-4 bg-white rounded-lg p-4 border border-gray-200">
-                      <PayPalButtons
-                        createOrder={handlePayPalCreateOrder}
-                        onApprove={handlePayPalApprove}
-                        onError={handlePayPalError}
-                        onCancel={() => {
-                          toast.info("Payment cancelled");
-                          setIsProcessing(false);
-                        }}
-                        disabled={isProcessing}
-                        style={{
-                          layout: "vertical",
-                          color: "blue",
-                          shape: "rect",
-                          label: "paypal",
-                        }}
-                      />
-                    </Box>
-                  )}
-
                   {/* PayPal Info Box for Sandbox */}
-                  <Box className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs">
+                  {/* <Box className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs">
                     <p className="font-semibold text-blue-800 mb-1">
                       PayPal Sandbox Mode
                     </p>
@@ -743,7 +846,7 @@ const CheckoutPage = () => {
                       Use PayPal sandbox test accounts to complete the purchase.
                       No real money will be charged.
                     </p>
-                  </Box>
+                  </Box> */}
                 </>
               )}
 

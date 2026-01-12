@@ -9,6 +9,7 @@ interface CreatePayPalOrderRequest {
   planId: string;
   amount: number;
   currency?: string;
+  // demoMode?: boolean; // COMMENTED OUT FOR PRODUCTION - Only real payments allowed
 }
 
 interface CreatePayPalOrderResponse {

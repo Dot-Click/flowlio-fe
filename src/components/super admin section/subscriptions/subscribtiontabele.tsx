@@ -17,99 +17,10 @@ import { useState } from "react";
 import { DateRange } from "react-day-picker";
 import { IPlan } from "@/types";
 import { useFetchAllOrganizations } from "@/hooks/usefetchallorganizations";
+import { SubscriptionHistoryModal } from "./SubscriptionHistoryModal";
+import { SubscriptionAuditModal } from "./SubscriptionAuditModal";
+import { AlertTriangle } from "lucide-react";
 
-// const data: Data[] = [
-//   {
-//     id: "1",
-//     amount: 3,
-//     status: "active",
-//     companyName: "Innovate Labs",
-//     lastbilledon: new Date("2025-03-01T00:00:00"),
-//     startDate: new Date("2025-02-21T00:00:00"),
-//     expiredate: new Date("2025-03-01T00:00:00"),
-//     subscribtionplan: "Basic",
-//   },
-//   {
-//     id: "2",
-//     amount: 30,
-//     companyName: "Innovate Labs",
-//     status: "inActive",
-//     lastbilledon: new Date("2025-03-01T00:00:00"),
-//     startDate: new Date("2025-04-09T00:00:00"),
-//     expiredate: new Date("2025-06-01T00:00:00"),
-//     subscribtionplan: "Standard",
-//   },
-//   {
-//     id: "3",
-//     amount: 10,
-//     companyName: "Innovate Labs",
-//     status: "active",
-//     lastbilledon: new Date("2025-03-01T00:00:00"),
-//     startDate: new Date("2025-01-14T00:00:00"),
-//     expiredate: new Date("2025-02-01T00:00:00"),
-//     subscribtionplan: "Premium",
-//   },
-//   {
-//     id: "4",
-//     amount: 3,
-//     companyName: "Innovate Labs",
-//     status: "inActive",
-//     lastbilledon: new Date("2025-03-01T00:00:00"),
-//     startDate: new Date("2025-02-12T00:00:00"),
-//     expiredate: new Date("2025-06-01T00:00:00"),
-//     subscribtionplan: "Basic",
-//   },
-//   {
-//     id: "5",
-//     amount: 3,
-//     companyName: "Innovate Labs",
-//     status: "active",
-//     lastbilledon: new Date("2025-03-01T00:00:00"),
-//     startDate: new Date("2025-03-10T00:00:00"),
-//     expiredate: new Date("2025-04-01T00:00:00"),
-//     subscribtionplan: "Standard",
-//   },
-//   {
-//     id: "6",
-//     amount: 12,
-//     companyName: "Innovate Labs",
-//     status: "inActive",
-//     lastbilledon: new Date("2025-03-01T00:00:00"),
-//     startDate: new Date("2025-04-04T00:00:00"),
-//     expiredate: new Date("2025-05-11T00:00:00"),
-//     subscribtionplan: "Premium",
-//   },
-//   {
-//     id: "7",
-//     amount: 3,
-//     companyName: "Innovate Labs",
-//     status: "active",
-//     lastbilledon: new Date("2025-03-01T00:00:00"),
-//     startDate: new Date("2025-01-01T00:00:00"),
-//     expiredate: new Date("2025-06-01T00:00:00"),
-//     subscribtionplan: "Basic",
-//   },
-//   {
-//     id: "8",
-//     amount: 24,
-//     companyName: "Innovate Labs",
-//     status: "inActive",
-//     lastbilledon: new Date("2025-03-01T00:00:00"),
-//     startDate: new Date("2025-01-01T00:00:00"),
-//     expiredate: new Date("2025-06-01T00:00:00"),
-//     subscribtionplan: "Standard",
-//   },
-//   {
-//     id: "9",
-//     amount: 13,
-//     companyName: "Innovate Labs",
-//     status: "inActive",
-//     lastbilledon: new Date("2025-03-01T00:00:00"),
-//     startDate: new Date("2025-01-01T00:00:00"),
-//     expiredate: new Date("2025-06-01T00:00:00"),
-//     subscribtionplan: "Premium",
-//   },
-// ];
 export interface SubscriptionsHeaderProps {
   fetchedPlans?: IPlan[];
   isLoading?: boolean;
@@ -119,7 +30,7 @@ export interface SubscriptionsHeaderProps {
 export type Data = {
   id: string;
   amount: number;
-  status: "active" | "inActive";
+  status: "active" | "inActive" | "non  active";
   lastbilledon: Date;
   subscribtionplan: string;
   companyName: string;
@@ -225,32 +136,63 @@ export const columns: ColumnDef<Data>[] = [
     accessorKey: "status",
     header: () => <Box className="text-center text-black">Status</Box>,
     cell: ({ row }) => {
-      const status = row.original.status as "active" | "inActive";
+      const status = row.original.status as
+        | "active"
+        | "inActive"
+        | "non active";
 
-      const statusStyles: Record<typeof status, { text: string; dot: string }> =
-        {
-          active: {
-            text: "text-white bg-[#00A400] border-none rounded-full",
-            dot: "bg-white",
-          },
-          inActive: {
-            text: "text-white bg-[#F98618] border-none rounded-full",
-            dot: "bg-white",
-          },
-        };
+      const statusStyles: Record<string, { text: string; dot: string }> = {
+        active: {
+          text: "text-white bg-[#00A400] border-none rounded-full",
+          dot: "bg-white",
+        },
+        inActive: {
+          text: "text-white bg-[#F98618] border-none rounded-full",
+          dot: "bg-white",
+        },
+        "non active": {
+          text: "text-white bg-[#F98618] border-none rounded-full",
+          dot: "bg-white",
+        },
+      };
+
+      const currentStatus = statusStyles[status] || statusStyles["non active"];
 
       return (
         <Center>
           <Flex
-            className={`rounded-md capitalize w-28 h-10 gap-2 border items-center ${statusStyles[status].text}`}
+            className={`rounded-md capitalize w-28 h-10 gap-2 border items-center justify-center ${currentStatus.text}`}
           >
-            <Flex className="ml-5.5">
-              <Flex
-                className={`w-2 h-2 rounded-full ${statusStyles[status].dot}`}
-              />
-              <span>{status}</span>
-            </Flex>
+            <Flex className={`w-2 h-2 rounded-full ${currentStatus.dot}`} />
+            <Box>{status}</Box>
           </Flex>
+        </Center>
+      );
+    },
+  },
+  {
+    id: "actions",
+    header: () => <Box className="text-center text-black">Actions</Box>,
+    cell: ({ row, table }) => {
+      const organizationId = row.original.id;
+      const handleViewHistory = () => {
+        // Access the table meta to get the onViewHistory callback
+        const meta = table.options.meta as any;
+        if (meta?.onViewHistory) {
+          meta.onViewHistory(organizationId, row.original.companyName);
+        }
+      };
+
+      return (
+        <Center>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleViewHistory}
+            className="cursor-pointer"
+          >
+            View History
+          </Button>
         </Center>
       );
     },
@@ -263,7 +205,19 @@ export const SubscribtionTabele = ({
   error = null,
 }: SubscriptionsHeaderProps) => {
   const [date, setDate] = useState<DateRange | undefined>();
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  const [auditModalOpen, setAuditModalOpen] = useState(false);
+  const [selectedOrganizationId, setSelectedOrganizationId] = useState<
+    string | null
+  >(null);
+  const [selectedCompanyName, setSelectedCompanyName] = useState<string>("");
   const { data: allOrganizationsResponse } = useFetchAllOrganizations();
+
+  const handleViewHistory = (organizationId: string, companyName: string) => {
+    setSelectedOrganizationId(organizationId);
+    setSelectedCompanyName(companyName);
+    setHistoryModalOpen(true);
+  };
 
   const plansData: Data[] =
     fetchedPlans?.map((plan: IPlan) => ({
@@ -277,38 +231,97 @@ export const SubscribtionTabele = ({
       subscribtionplan: plan.name,
     })) || [];
 
-  const activeOrgSubscriptions: Data[] = Array.isArray(
+  // Get all subscriptions (both active and non-active) from organizations
+  const allOrgSubscriptions: Data[] = Array.isArray(
     allOrganizationsResponse?.data
   )
-    ? (allOrganizationsResponse!.data as any[])
-        .filter((org) => org.subscriptionStatus === "active")
-        .map((org) => {
-          const planName = org.subscriptionPlan?.name || "N/A";
-          const planPrice = org.subscriptionPlan?.price;
-          const amount = planPrice ? parseFloat(String(planPrice)) : 0;
-          const start = org.subscriptionStartDate
-            ? new Date(org.subscriptionStartDate)
-            : new Date(org.createdAt);
-          const expire = org.trialEndsAt
-            ? new Date(org.trialEndsAt)
-            : new Date(new Date(start).getTime() + 30 * 24 * 60 * 60 * 1000);
-          return {
-            id: org.id,
-            amount,
-            status: "active",
-            companyName: org.name || "N/A",
-            lastbilledon: start,
-            startDate: start,
-            expiredate: expire,
-            subscribtionplan: planName,
-          } as Data;
-        })
+    ? (allOrganizationsResponse!.data as any[]).map((org) => {
+        // Check if user has pending payment
+        const userOrganizations = org.userOrganizations as
+          | Array<{
+              role?: string;
+              user?: {
+                status?: string;
+                selectedPlanId?: string;
+                pendingOrganizationData?: any;
+              };
+            }>
+          | undefined;
+
+        const ownerUser = userOrganizations?.find(
+          (uo) => uo.role === "owner"
+        )?.user;
+        const userStatus = ownerUser?.status;
+
+        // Get organization subscriptionStatus (case-insensitive)
+        const orgSubscriptionStatus = org.subscriptionStatus?.toLowerCase();
+
+        // Get active subscription from subscriptions array (if available)
+        const activeSubscription = org.subscriptions?.find(
+          (sub: any) => sub.status === "active"
+        );
+
+        // Determine status based on multiple factors (priority order):
+        // 1. Check if subscription record exists and is active (most reliable)
+        // 2. Check if organization subscriptionStatus is "active"
+        // 3. Check if user has pending payment
+        // 4. Use organization subscriptionStatus as fallback
+
+        // Check subscription record status (most reliable indicator)
+        const subscriptionRecordActive =
+          activeSubscription?.status === "active";
+
+        // Check organization subscriptionStatus
+        const orgStatusActive = orgSubscriptionStatus === "active";
+
+        // If either subscription record or org status is active, show active
+        const isActive = subscriptionRecordActive || orgStatusActive;
+
+        // Check if user has pending payment (only if not active)
+        const hasPendingPayment =
+          !isActive &&
+          (userStatus === "pending" ||
+            !userStatus ||
+            userStatus === null ||
+            userStatus === undefined);
+
+        // Determine final subscription status
+        const subscriptionStatus = isActive
+          ? "active"
+          : hasPendingPayment
+          ? "non active"
+          : orgSubscriptionStatus || "inActive";
+
+        const planName = org.subscriptionPlan?.name || "N/A";
+        const planPrice = org.subscriptionPlan?.price;
+        const amount = planPrice ? parseFloat(String(planPrice)) : 0;
+        const start = org.subscriptionStartDate
+          ? new Date(org.subscriptionStartDate)
+          : new Date(org.createdAt);
+        // Use subscriptionEndDate (updated on renewal) instead of trialEndsAt
+        // This ensures renewals are reflected in the table
+        const expire = org.subscriptionEndDate
+          ? new Date(org.subscriptionEndDate)
+          : org.trialEndsAt
+          ? new Date(org.trialEndsAt)
+          : new Date(new Date(start).getTime() + 30 * 24 * 60 * 60 * 1000);
+        return {
+          id: org.id,
+          amount,
+          status: subscriptionStatus as "active" | "inActive" | "non active",
+          companyName: org.name || "N/A",
+          lastbilledon: start,
+          startDate: start,
+          expiredate: expire,
+          subscribtionplan: planName,
+        } as Data;
+      })
     : [];
 
-  // Prefer real active subscriptions from organizations; then plans; then mock
+  // Prefer real subscriptions from organizations; then plans; then mock
   const tableData =
-    activeOrgSubscriptions.length > 0
-      ? activeOrgSubscriptions
+    allOrgSubscriptions.length > 0
+      ? allOrgSubscriptions
       : plansData.length > 0
       ? plansData
       : [];
@@ -349,8 +362,22 @@ export const SubscribtionTabele = ({
     <Box>
       <Center className="justify-between">
         <Stack className="gap-1">
-          <h1 className="text-black text-2xl max-sm:text-xl font-medium">
-            Active Subscriptions
+          <Flex className="items-center gap-3">
+            <h1 className="text-black text-2xl max-sm:text-xl font-medium">
+              All Subscriptions
+            </h1>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setAuditModalOpen(true)}
+              className="border-orange-200 text-orange-600 hover:bg-orange-50 hover:text-orange-700 cursor-pointer"
+            >
+              <AlertTriangle className="h-4 w-4 mr-2" />
+              Audit Payment
+            </Button>
+          </Flex>
+          <h1 className="text-gray-500 text-sm max-sm:text-xs">
+            Showing active and non-active subscriptions
           </h1>
         </Stack>
 
@@ -399,6 +426,25 @@ export const SubscribtionTabele = ({
         enableGlobalFilter={false}
         onRowClick={(row) => console.log("Row clicked:", row.original)}
         enableSubscriptionsTable={true}
+        meta={{
+          onViewHistory: handleViewHistory,
+        }}
+      />
+
+      {/* Subscription History Modal */}
+      {historyModalOpen && selectedOrganizationId && (
+        <SubscriptionHistoryModal
+          open={historyModalOpen}
+          onOpenChange={setHistoryModalOpen}
+          organizationId={selectedOrganizationId}
+          companyName={selectedCompanyName}
+        />
+      )}
+
+      {/* Subscription Audit Modal */}
+      <SubscriptionAuditModal
+        open={auditModalOpen}
+        onOpenChange={setAuditModalOpen}
       />
     </Box>
   );

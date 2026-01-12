@@ -1,7 +1,8 @@
 import { IoArrowBack } from "react-icons/io5";
 import { PageWrapper } from "../common/pagewrapper";
 import { Box } from "../ui/box";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams, useSearchParams } from "react-router";
+import { GuidedFlowModal } from "../common/GuidedFlowModal";
 import { Center } from "../ui/center";
 import { Stack } from "../ui/stack";
 import { Button } from "../ui/button";
@@ -40,46 +41,51 @@ import { useFetchOrganizationUsers } from "../../hooks/usefetchorganizationdata"
 import { useFetchAllOrganizations } from "../../hooks/usefetchallorganizations";
 import { useUser } from "../../providers/user.provider";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Project Name must be at least 2 characters.",
-  }),
-  projectNumber: z.string().min(1, {
-    message: "Project Number is required.",
-  }),
-  clientId: z.string().min(1, {
-    message: "Please select a client.",
-  }),
-  startDate: z.string().min(1, {
-    message: "Start Date is required.",
-  }),
-  endDate: z.string().min(1, {
-    message: "End Date is required.",
-  }),
-  assignedTo: z.string().min(1, {
-    message: "Please select a team member to assign.",
-  }),
-  description: z.string().optional(),
-  address: z.string().min(2, {
-    message: "Address must be at least 2 characters.",
-  }),
-  contractfile: z.string().optional(),
-  projectFiles: z
-    .array(
-      z.object({
-        file: z.string(),
-        type: z.string(),
-        name: z.string(),
-      })
-    )
-    .optional(),
-});
+const formSchema = z
+  .object({
+    name: z.string().min(2, {
+      message: "Project Name must be at least 2 characters.",
+    }),
+    projectNumber: z.string().optional(),
+    clientId: z.string().optional(),
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
+    assignedTo: z.string().optional(),
+    description: z.string().optional(),
+    address: z.string().optional(),
+    contractfile: z.string().optional(),
+    projectFiles: z
+      .array(
+        z.object({
+          file: z.string(),
+          type: z.string(),
+          name: z.string(),
+        })
+      )
+      .optional(),
+  })
+  .refine(
+    (data) => {
+      if (!data.startDate || !data.endDate) return true;
+      const start = new Date(data.startDate);
+      const end = new Date(data.endDate);
+      return end >= start;
+    },
+    {
+      message: "End Date must be after or equal to Start Date.",
+      path: ["endDate"],
+    }
+  );
 
 export const CreateProject = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const isEditMode = Boolean(id);
+  const clientIdFromUrl = searchParams.get("clientId");
 
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [pdfPreview, setPdfPreview] = useState<string | null>(null);
@@ -91,6 +97,8 @@ export const CreateProject = () => {
       preview: string;
     }>
   >([]);
+  const [showGuidedFlow, setShowGuidedFlow] = useState(false);
+  const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
 
   // Get user authentication data
   const { data: userData, isLoading: isLoadingUser } = useUser();
@@ -153,8 +161,8 @@ export const CreateProject = () => {
     defaultValues: {
       name: "",
       projectNumber: "",
-      clientId: "",
-      startDate: new Date().toISOString(),
+      clientId: clientIdFromUrl || "",
+      startDate: "",
       endDate: "",
       assignedTo: "",
       description: "",
@@ -163,6 +171,13 @@ export const CreateProject = () => {
       projectFiles: [],
     },
   });
+
+  // Pre-fill clientId from URL if provided
+  useEffect(() => {
+    if (clientIdFromUrl && !isEditMode) {
+      form.setValue("clientId", clientIdFromUrl);
+    }
+  }, [clientIdFromUrl, isEditMode, form]);
 
   // Populate form with project data when in edit mode
   // Wait for all data to be loaded before resetting the form
@@ -184,7 +199,7 @@ export const CreateProject = () => {
         clientId: project.clientId || "",
         startDate: project.startDate
           ? new Date(project.startDate).toISOString()
-          : new Date().toISOString(),
+          : "",
         endDate: project.endDate ? new Date(project.endDate).toISOString() : "",
         assignedTo: project.assignedTo || "",
         description: project.description || "",
@@ -233,17 +248,13 @@ export const CreateProject = () => {
       // Check if user has organization ID
       if (!finalOrganizationId) {
         console.error("No organization ID found for user");
-        toast.error(
-          "You need to be part of an organization to create projects"
-        );
+        toast.error(t("projects.organizationRequired"));
         return;
       }
 
       // Check file size before processing
       if (uploadedFile && uploadedFile.size > 10 * 1024 * 1024) {
-        toast.error(
-          "File size must be less than 10MB. Please choose a smaller file."
-        );
+        toast.error(t("projects.fileTooLargeToast"));
         return;
       }
 
@@ -258,19 +269,39 @@ export const CreateProject = () => {
 
       // Include file data if uploaded
       const projectData = {
-        ...values,
-        contractfile: uploadedFile
-          ? await convertFileToBase64(uploadedFile)
-          : undefined,
-        projectFiles:
-          convertedProjectFiles.length > 0 ? convertedProjectFiles : undefined,
+        name: values.name,
+        ...(values.projectNumber && { projectNumber: values.projectNumber }),
+        ...(values.clientId && { clientId: values.clientId }),
+        ...(values.startDate && { startDate: values.startDate }),
+        ...(values.endDate && { endDate: values.endDate }),
+        ...(values.assignedTo && { assignedTo: values.assignedTo }),
+        ...(values.description && { description: values.description }),
+        ...(values.address && { address: values.address }),
+        ...(uploadedFile && {
+          contractfile: await convertFileToBase64(uploadedFile),
+        }),
+        ...(convertedProjectFiles.length > 0 && {
+          projectFiles: convertedProjectFiles,
+        }),
         organizationId: finalOrganizationId,
       };
 
       if (isEditMode && id) {
         updateProject({ id, data: projectData });
       } else {
-        createProject(projectData);
+        createProject(projectData, {
+          onSuccess: (response) => {
+            if (response?.data?.id) {
+              setCreatedProjectId(response.data.id);
+              setShowGuidedFlow(true);
+            } else {
+              navigate("/dashboard/project");
+            }
+          },
+          onError: () => {
+            // Error handling is done by the hook
+          },
+        });
       }
     } catch (error) {
       console.error("Error preparing project data:", error);
@@ -310,9 +341,15 @@ export const CreateProject = () => {
       setUploadedFile(null);
       setPdfPreview(null);
       setProjectFiles([]);
-      navigate("/dashboard/project");
+
+      // Only auto-navigate for edit mode or update success
+      // For create mode, navigation is handled by the guided flow modal
+      if (isEditMode || updateSuccess) {
+        navigate("/dashboard/project");
+      }
+      // For create mode, don't navigate here - let the modal handle it
     }
-  }, [createSuccess, updateSuccess, form, navigate]);
+  }, [createSuccess, updateSuccess, form, navigate, isEditMode]);
 
   const onDropPdf = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -350,10 +387,15 @@ export const CreateProject = () => {
         errors.forEach((error) => {
           if (error.code === "file-too-large") {
             toast.error(
-              `File "${file.name}" is too large. Maximum size is 10MB.`
+              t("projects.fileTooLargeDropzone", { name: file.name })
             );
           } else {
-            toast.error(`Error with file "${file.name}": ${error.message}`);
+            toast.error(
+              t("projects.fileErrorDropzone", {
+                name: file.name,
+                message: error.message,
+              })
+            );
           }
         });
       });
@@ -367,18 +409,20 @@ export const CreateProject = () => {
         onClick={() => navigate(-1)}
       >
         <IoArrowBack />
-        <p className="text-black">Back</p>
+        <p className="text-black">{t("common.back")}</p>
       </Box>
 
       <Center className="justify-between mt-6 max-sm:flex-col max-sm:items-start gap-2 relative">
         <Stack className="gap-0">
           <h1 className="text-black text-xl font-medium">
-            {isEditMode ? "Edit Project" : "Create Project"}
+            {isEditMode
+              ? t("projects.editProject")
+              : t("projects.createProject")}
           </h1>
           <h1 className="text-gray-500">
             {isEditMode
-              ? "Update the project details below"
-              : "Fill the details to create a new project"}
+              ? t("projects.Updatetheprojectdetailsbelow")
+              : t("projects.createProjectDesc")}
           </h1>
         </Stack>
       </Center>
@@ -389,7 +433,7 @@ export const CreateProject = () => {
           <p className="text-red-600 text-sm">
             {(createError || updateError || projectError)?.name ||
               (createError || updateError || projectError)?.message ||
-              "An error occurred"}
+              t("projects.errorOccurred")}
           </p>
         </Box>
       )}
@@ -397,7 +441,9 @@ export const CreateProject = () => {
       {(createSuccess || updateSuccess) && (
         <Box className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
           <p className="text-green-600 text-sm">
-            Project {isEditMode ? "updated" : "created"} successfully!
+            {t("projects.project")}{" "}
+            {isEditMode ? t("projects.updated") : t("projects.created")}{" "}
+            {t("projects.successfully")}!
           </p>
         </Box>
       )}
@@ -405,7 +451,7 @@ export const CreateProject = () => {
       {usersError && (
         <Box className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
           <p className="text-red-600 text-sm">
-            Error loading users: {usersError.message}
+            {t("projects.errorLoadingUsers")}: {usersError.message}
           </p>
         </Box>
       )}
@@ -413,7 +459,7 @@ export const CreateProject = () => {
       {userOrgError && (
         <Box className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
           <p className="text-red-600 text-sm">
-            Error loading organization: {userOrgError.message}
+            {t("projects.errorLoadingOrganization")}: {userOrgError.message}
           </p>
         </Box>
       )}
@@ -421,7 +467,7 @@ export const CreateProject = () => {
       {isLoadingUserOrg && (
         <Box className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <p className="text-blue-600 text-sm">
-            Loading your organization information...
+            {t("projects.loadingOrganization")}
           </p>
         </Box>
       )}
@@ -429,7 +475,7 @@ export const CreateProject = () => {
       {isLoadingProject && (
         <Box className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <p className="text-blue-600 text-sm">
-            Loading project information...
+            {t("projects.loadingProject")}
           </p>
         </Box>
       )}
@@ -450,11 +496,11 @@ export const CreateProject = () => {
           >
             {isCreating || isUpdating
               ? isEditMode
-                ? "Updating..."
-                : "Creating..."
+                ? t("projects.updating...")
+                : t("projects.creating...")
               : isEditMode
-              ? "Update Project"
-              : "Save Project"}
+              ? t("projects.updateProject")
+              : t("projects.saveProject")}
           </Button>
           <Box className="bg-white/80 rounded-xl border border-gray-200 p-6 gap-4 grid grid-cols-1">
             <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
@@ -465,7 +511,7 @@ export const CreateProject = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Project Name:
+                        {t("projects.projectNameLabel")}
                         <span className="text-red-500 text-sm">*</span>
                       </FormLabel>
                       <FormControl>
@@ -473,7 +519,7 @@ export const CreateProject = () => {
                           className="bg-white rounded-full placeholder:text-gray-400"
                           size="lg"
                           type="text"
-                          placeholder="Enter Project Name"
+                          placeholder={t("projects.enterProjectName")}
                           {...field}
                         />
                       </FormControl>
@@ -487,14 +533,11 @@ export const CreateProject = () => {
                   name="projectNumber"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
-                        Project Number:
-                        <span className="text-red-500 text-sm">*</span>
-                      </FormLabel>
+                      <FormLabel>{t("projects.projectNumberLabel")}</FormLabel>
                       <FormControl>
                         <Input
                           className="bg-white rounded-full placeholder:text-gray-400"
-                          placeholder="Enter Project Number"
+                          placeholder={t("projects.enterProjectNumber")}
                           type="number"
                           size="lg"
                           {...field}
@@ -518,10 +561,10 @@ export const CreateProject = () => {
                       className="size-12"
                     />
                     <p className="text-gray-800 text-lg font-medium underline">
-                      Click to upload Project PDF
+                      {t("projects.uploadProjectPdfCta")}
                     </p>
                     <p className="text-gray-600 text-sm font-medium">
-                      PDF files only
+                      {t("projects.pdfFilesOnly")}
                     </p>
                     <input {...getPdfInputProps()} />
                   </Center>
@@ -579,7 +622,7 @@ export const CreateProject = () => {
                             ?.file.size || 0) >
                             10 * 1024 * 1024 && (
                             <Box className="mt-1 text-xs text-red-600">
-                              ⚠️ File is too large. Maximum size is 10MB.
+                              ⚠️ {t("projects.fileTooLargeWarning")}
                             </Box>
                           )}
                         </Box>
@@ -596,11 +639,13 @@ export const CreateProject = () => {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project Description:</FormLabel>
+                    <FormLabel>
+                      {t("projects.projectDescriptionLabel")}
+                    </FormLabel>
                     <FormControl>
                       <Textarea
                         className="bg-white rounded-md placeholder:text-gray-400 h-32"
-                        placeholder="Enter Project Description"
+                        placeholder={t("projects.enterProjectDescription")}
                         rows={6}
                         cols={18}
                         {...field}
@@ -617,15 +662,14 @@ export const CreateProject = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="mt-4 -mb-4 max-md:mt-0 max-md:-mb-0">
-                      Address:
-                      <span className="text-red-500 text-sm">*</span>
+                      {t("projects.addressLabel")}
                     </FormLabel>
                     <FormControl>
                       <Input
                         className="bg-white rounded-full placeholder:text-gray-400"
                         size="lg"
                         type="text"
-                        placeholder="Enter Address"
+                        placeholder={t("projects.enterAddress")}
                         {...field}
                       />
                     </FormControl>
@@ -641,7 +685,7 @@ export const CreateProject = () => {
                 name="startDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Start Date</FormLabel>
+                    <FormLabel>{t("projects.startDateLabel")}</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl className="h-12">
@@ -657,7 +701,7 @@ export const CreateProject = () => {
                             {field.value ? (
                               format(new Date(field.value), "PPP")
                             ) : (
-                              <span>Pick a date</span>
+                              <span>{t("projects.pickDate")}</span>
                             )}
                           </Button>
                         </FormControl>
@@ -688,7 +732,7 @@ export const CreateProject = () => {
                 name="endDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>End Date</FormLabel>
+                    <FormLabel>{t("projects.endDateLabel")}</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl className="h-12">
@@ -705,7 +749,7 @@ export const CreateProject = () => {
                             {field.value ? (
                               format(new Date(field.value), "PPP")
                             ) : (
-                              <span>Pick a date</span>
+                              <span>{t("projects.pickDate")}</span>
                             )}
                           </Button>
                         </FormControl>
@@ -738,10 +782,7 @@ export const CreateProject = () => {
                 name="clientId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Assign Client:
-                      <span className="text-red-500 text-sm">*</span>
-                    </FormLabel>
+                    <FormLabel>{t("projects.assignClientLabel")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
@@ -755,8 +796,8 @@ export const CreateProject = () => {
                           <SelectValue
                             placeholder={
                               isLoadingClients
-                                ? "Loading clients..."
-                                : "Select Client"
+                                ? t("projects.loadingClients")
+                                : t("projects.selectClient")
                             }
                           />
                         </SelectTrigger>
@@ -781,10 +822,7 @@ export const CreateProject = () => {
                 name="assignedTo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Assign Team Member:
-                      <span className="text-red-500 text-sm">*</span>
-                    </FormLabel>
+                    <FormLabel>{t("projects.assignTeamMemberLabel")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
@@ -798,8 +836,8 @@ export const CreateProject = () => {
                           <SelectValue
                             placeholder={
                               isLoadingUsers
-                                ? "Loading users..."
-                                : "Select User"
+                                ? t("projects.loadingUsers")
+                                : t("projects.selectUser")
                             }
                           />
                         </SelectTrigger>
@@ -826,13 +864,13 @@ export const CreateProject = () => {
                 name="contractfile"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Contract File:</FormLabel>
+                    <FormLabel>{t("projects.contractFileLabel")}</FormLabel>
                     <FormControl>
                       <Input
                         className="bg-white rounded-full placeholder:text-gray-400"
                         size="lg"
                         type="file"
-                        placeholder="Enter Contract File"
+                        placeholder={t("projects.enterContractFile")}
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
@@ -851,6 +889,26 @@ export const CreateProject = () => {
           </Box>
         </form>
       </Form>
+
+      {/* Guided Flow Modal - Suggest creating task after project creation */}
+      {!isEditMode && (
+        <GuidedFlowModal
+          open={showGuidedFlow}
+          onOpenChange={setShowGuidedFlow}
+          title="Project Created Successfully!"
+          description="Excellent! Your project is set up. Would you like to create a task for this project?"
+          nextAction={{
+            label: "Create Task",
+            route: createdProjectId
+              ? `/dashboard/task-management/create-task?projectId=${createdProjectId}`
+              : "/dashboard/task-management/create-task",
+            description: "Start breaking down work into actionable tasks",
+          }}
+          onSkip={() => {
+            navigate("/dashboard/project");
+          }}
+        />
+      )}
     </PageWrapper>
   );
 };

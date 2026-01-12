@@ -3,7 +3,7 @@ import {
   type ApiResponse,
   type ErrorWithMessage,
 } from "@/configs/axios.config";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 
@@ -15,6 +15,9 @@ export interface SubscriptionStatus {
   message: string;
   requiresSubscription: boolean;
   redirectTo?: string;
+  isTrial?: boolean;
+  trialDaysRemaining?: number;
+  trialExpired?: boolean;
 }
 
 export interface SubscriptionResponse {
@@ -63,6 +66,7 @@ export const useSubscriptionGuard = (
   useEffect(() => {
     if (!isLoading && data?.data && data.data.requiresSubscription) {
       // Use the redirectTo from the API response, or fallback to the provided redirectTo
+      // If trial expired, redirect to checkout instead of pricing
       const targetRedirect = data.data.redirectTo || redirectTo;
       navigate(targetRedirect);
     }
@@ -74,5 +78,21 @@ export const useSubscriptionGuard = (
     error,
     hasActiveSubscription:
       data?.data?.hasSubscription && !data.data.requiresSubscription,
+    trialExpired: data?.data?.trialExpired || false,
   };
+};
+
+export const useCancelSubscription = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<ApiResponse<any>, ErrorWithMessage, void>({
+    mutationFn: async () => {
+      const response = await axios.post(`/subscriptions/cancel`);
+      return response.data;
+    },
+    onSuccess: () => {
+      // Invalidate subscription status query to refetch updated data
+      queryClient.invalidateQueries({ queryKey: ["subscription-status"] });
+    },
+  });
 };

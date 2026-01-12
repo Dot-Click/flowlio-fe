@@ -4,14 +4,19 @@ import { axios, type ErrorWithMessage } from "@/configs/axios.config";
 // Request data interface
 interface CreateProjectData {
   name: string;
-  projectNumber: string;
-  clientId: string;
-  startDate: string;
-  endDate: string;
-  assignedTo: string;
+  projectNumber?: string;
+  clientId?: string;
+  startDate?: string;
+  endDate?: string;
+  assignedTo?: string;
   description?: string;
-  address: string;
+  address?: string;
   contractfile?: string;
+  projectFiles?: Array<{
+    file: string;
+    type: string;
+    name: string;
+  }>;
   organizationId: string;
 }
 
@@ -71,6 +76,10 @@ export const useCreateProject = () => {
       queryClient.invalidateQueries({
         queryKey: ["organization-total-clients"],
       });
+
+      // Invalidate chart queries for real-time updates
+      queryClient.invalidateQueries({ queryKey: ["project-schedule-data"] });
+      queryClient.invalidateQueries({ queryKey: ["project-status-data"] });
     },
     onError: (error) => {
       console.error("Error creating project:", error);

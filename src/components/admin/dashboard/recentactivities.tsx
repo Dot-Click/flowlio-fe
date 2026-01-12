@@ -6,26 +6,30 @@ import { Link } from "react-router";
 import { cn } from "@/lib/utils";
 import type { FC } from "react";
 import { useFetchOrganizationActivities } from "@/hooks/useFetchOrganizationActivities";
-import { useDeleteActivity } from "@/hooks/useDeleteActivity";
+// import { useDeleteActivity } from "@/hooks/useDeleteActivity";
 import { formatDistanceToNow } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { Center } from "@/components/ui/center";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 export const RecentActivities: FC<BoxProps> = ({ className, ...props }) => {
+  const { t } = useTranslation();
   const { data: activitiesResponse, isLoading } =
     useFetchOrganizationActivities();
-  const { mutate: deleteActivity } = useDeleteActivity();
+  // const { mutate: deleteActivity } = useDeleteActivity();
 
   const activitiesContent = activitiesResponse?.data?.activities || [];
 
   return (
-    <ComponentWrapper className={cn(" rounded-lg", className)} {...props}>
+    <ComponentWrapper className={cn("rounded-lg", className)} {...props}>
       <Stack className="p-3 relative overflow-hidden">
         <Flex className="justify-between items-center mb-2">
-          <h1 className="text-lg font-medium"> Recent Activities</h1>
-          {activitiesContent.length > 0 && (
+          <h1 className="text-lg font-medium">
+            {" "}
+            {t("dashboard.recentActivities")}
+          </h1>
+          {/* Clear All Activities button - Commented out as requested */}
+          {/* {activitiesContent.length > 0 && (
             <Button
               variant="outline"
               size="sm"
@@ -43,7 +47,7 @@ export const RecentActivities: FC<BoxProps> = ({ className, ...props }) => {
             >
               Clear All Activities
             </Button>
-          )}
+          )} */}
         </Flex>
 
         <Box className="w-full h-0.5 bg-gray-200 rounded-full absolute top-14 left-0"></Box>
@@ -76,7 +80,9 @@ export const RecentActivities: FC<BoxProps> = ({ className, ...props }) => {
             })
           ) : (
             <Center className="py-8">
-              <p className="text-sm text-gray-500">No recent activities</p>
+              <p className="text-sm text-gray-500">
+                {t("dashboard.noRecentActivities")}
+              </p>
             </Center>
           )}
         </Box>

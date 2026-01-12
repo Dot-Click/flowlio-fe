@@ -27,6 +27,8 @@ const sanitizeDomain = (domain: string) => {
 // deployment issue solving
 export const backendDomain =
   import.meta.env.VITE_BACKEND_DOMAIN || "http://localhost:3000";
+// Export as backendURL for Better Auth (needs base URL without /api)
+export const backendURL = backendDomain;
 export const url = sanitizeDomain(backendDomain);
 
 export const axios = ax.create({

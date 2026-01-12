@@ -16,14 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Mail, Shield, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation } from "react-router";
-
-const otpSchema = z.object({
-  otp: z.string().min(6, "OTP must be 6 digits").max(6, "OTP must be 6 digits"),
-});
-
-const passwordSchema = z.object({
-  password: z.string().min(1, "Password is required"),
-});
+import { useTranslation } from "react-i18next";
 
 interface TwoFAModalProps {
   isEnabled: boolean;
@@ -46,6 +39,7 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
   userEmail,
   open,
 }) => {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [showOTPForm, setShowOTPForm] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
@@ -53,6 +47,18 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
   const [showSuccessState, setShowSuccessState] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const [canResend, setCanResend] = useState(false);
+
+  // Create schemas with translations
+  const otpSchema = z.object({
+    otp: z
+      .string()
+      .min(6, t("settings.validation.otpMustBe6Digits"))
+      .max(6, t("settings.validation.otpMustBe6Digits")),
+  });
+
+  const passwordSchema = z.object({
+    password: z.string().min(1, t("settings.validation.passwordRequired")),
+  });
 
   const modalProps = useGeneralModalDisclosure({ open });
 
@@ -98,8 +104,23 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
       form.reset();
       enablePasswordForm.reset();
       passwordForm.reset();
+    } else {
+      // When modal opens, automatically show the appropriate form based on 2FA status
+      if (isEnabled) {
+        // 2FA is enabled - show password form for disabling
+        setShowPasswordForm(true);
+        setShowOTPForm(false);
+        setShowEnablePasswordForm(false);
+        setShowSuccessState(false);
+      } else {
+        // 2FA is disabled - show enable password form
+        setShowEnablePasswordForm(true);
+        setShowOTPForm(false);
+        setShowPasswordForm(false);
+        setShowSuccessState(false);
+      }
     }
-  }, [open]);
+  }, [open, isEnabled]);
 
   const form = useForm<z.infer<typeof otpSchema>>({
     resolver: zodResolver(otpSchema),
@@ -140,7 +161,7 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
     setIsLoading(true);
     try {
       await onVerifyOTP(values.otp);
-      toast.success("2FA enabled successfully!");
+      toast.success(t("settings.twoFactorAuthenticationEnabled"));
 
       // Show success state
       setShowSuccessState(true);
@@ -154,7 +175,9 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
       }, 2000); // Wait 2 seconds to show success
     } catch (error) {
       console.error("OTP verification failed:", error);
-      toast.error("Invalid OTP. Please try again.");
+      const errorMessage =
+        error instanceof Error ? error.message : t("settings.invalidOTP");
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -168,12 +191,16 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
       // Call the onToggle prop directly, not the internal handleToggle
       await onToggle(true, values.password);
 
-      toast.success("Password verified! OTP sent to your email.");
+      toast.success(t("settings.passwordVerifiedDesc"));
       setShowEnablePasswordForm(false);
       setShowOTPForm(true);
     } catch (error) {
-      toast.error("Invalid password. Please try again.", {
-        description: error as string,
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : t("settings.invalidPasswordDesc");
+      toast.error(t("settings.invalidPassword"), {
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
@@ -186,13 +213,13 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
     setIsLoading(true);
     try {
       await onDisable2FA(values.password);
-      toast.success("2FA disabled successfully!");
+      toast.success(t("settings.twoFactorAuthenticationDisabled"));
       setShowPasswordForm(false);
       onClose();
       passwordForm.reset();
     } catch (error) {
       console.error("Failed to disable 2FA:", error);
-      toast.error("Invalid password. Please try again.");
+      toast.error(t("settings.invalidPasswordDesc"));
     } finally {
       setIsLoading(false);
     }
@@ -203,10 +230,10 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
       await onResendOTP();
       setCountdown(30); // 30 seconds cooldown
       setCanResend(false);
-      toast.success("OTP sent successfully!");
+      toast.success(t("settings.otpSentDesc"));
     } catch (error) {
       console.error("Failed to resend OTP:", error);
-      toast.error("Failed to resend OTP. Please try again.");
+      toast.error(t("settings.failedToResendOTPDesc"));
     }
   };
 
@@ -227,15 +254,14 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
               location.pathname === "/superadmin/settings" ? "hidden" : ""
             }`}
           >
-            Two-Factor Authentication
+            {t("settings.twoFactorAuthentication")}
           </span>
           <h1
             className={`text-md max-md:text-sm ${
               location.pathname === "/superadmin/settings" ? "hidden" : ""
             }`}
           >
-            Add an extra layer of security to your account with email
-            verification.
+            {t("settings.twoFactorAuthenticationDesc")}
           </h1>
         </Stack>
         <Switch
@@ -270,10 +296,10 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
               </Center>
               <Stack className="gap-2">
                 <h2 className="text-xl font-bold text-gray-900">
-                  Verify Your Email
+                  {t("settings.verifyYourEmail")}
                 </h2>
                 <p className="text-gray-600">
-                  We've sent a 6-digit verification code to
+                  {t("settings.verifyYourEmailDesc")}
                 </p>
                 <p className="font-semibold text-gray-900">{userEmail}</p>
               </Stack>
@@ -285,7 +311,7 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
             >
               <Stack className="gap-2">
                 <label className="text-sm font-medium text-gray-700">
-                  Enter Verification Code
+                  {t("settings.enterVerificationCode")}
                 </label>
                 <Input
                   {...form.register("otp")}
@@ -311,7 +337,9 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
                   disabled={!canResend || isLoading}
                   className="text-blue-600 hover:text-blue-800"
                 >
-                  {canResend ? "Resend Code" : `Resend in ${countdown}s`}
+                  {canResend
+                    ? t("settings.resendCode")
+                    : `${t("settings.resendIn")} ${countdown}s`}
                 </Button>
               </Center>
 
@@ -327,14 +355,16 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
                   disabled={isLoading}
                   className="flex-1"
                 >
-                  Cancel
+                  {t("settings.cancel")}
                 </Button>
                 <Button
                   type="submit"
                   className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
                   disabled={isLoading || form.watch("otp").length !== 6}
                 >
-                  {isLoading ? "Verifying..." : "Verify & Enable"}
+                  {isLoading
+                    ? t("settings.verifying")
+                    : t("settings.verifyAndEnable")}
                 </Button>
               </Flex>
             </form>
@@ -348,10 +378,10 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
               </Center>
               <Stack className="gap-2">
                 <h2 className="text-xl font-bold text-gray-900">
-                  Enable Two-Factor Authentication
+                  {t("settings.enableTwoFactorAuthentication")}
                 </h2>
                 <p className="text-gray-600">
-                  Enter your password to confirm enabling 2FA
+                  {t("settings.enableTwoFactorAuthenticationDesc")}
                 </p>
               </Stack>
             </Stack>
@@ -364,12 +394,12 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
             >
               <Stack className="gap-2">
                 <label className="text-sm font-medium text-gray-700">
-                  Password
+                  {t("settings.password")}
                 </label>
                 <Input
                   {...enablePasswordForm.register("password")}
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder={t("settings.enterYourPassword")}
                   className="w-full"
                 />
                 {enablePasswordForm.formState.errors.password && (
@@ -390,14 +420,16 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
                     enablePasswordForm.reset();
                   }}
                 >
-                  Cancel
+                  {t("settings.cancel")}
                 </Button>
                 <Button
                   type="submit"
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Verifying..." : "Verify & Continue"}
+                  {isLoading
+                    ? t("settings.verifying")
+                    : t("settings.verifyAndContinue")}
                 </Button>
               </Flex>
             </form>
@@ -410,12 +442,14 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </Center>
               <Stack className="gap-2">
-                <h2 className="text-xl font-bold text-gray-900">Success!</h2>
+                <h2 className="text-xl font-bold text-gray-900">
+                  {t("settings.success")}
+                </h2>
                 <p className="text-gray-600">
-                  Two-factor authentication has been enabled successfully.
+                  {t("settings.twoFactorAuthenticationEnabledDesc")}
                 </p>
                 <p className="text-sm text-gray-500">
-                  Your account is now protected with an extra layer of security.
+                  {t("settings.twoFactorAuthenticationEnabledDesc2")}
                 </p>
               </Stack>
             </Stack>
@@ -429,10 +463,10 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
               </Center>
               <Stack className="gap-2">
                 <h2 className="text-xl font-bold text-gray-900">
-                  Disable Two-Factor Authentication
+                  {t("settings.disableTwoFactorAuthentication")}
                 </h2>
                 <p className="text-gray-600">
-                  Enter your password to confirm disabling 2FA
+                  {t("settings.disableTwoFactorAuthenticationDesc")}
                 </p>
               </Stack>
             </Stack>
@@ -443,12 +477,12 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
             >
               <Stack className="gap-2">
                 <label className="text-sm font-medium text-gray-700">
-                  Enter Your Password
+                  {t("settings.enterYourPassword")}
                 </label>
                 <Input
                   {...passwordForm.register("password")}
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder={t("settings.enterYourPassword")}
                   className="text-center h-12"
                 />
                 {passwordForm.formState.errors.password && (
@@ -470,14 +504,16 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
                   disabled={isLoading}
                   className="flex-1"
                 >
-                  Cancel
+                  {t("settings.cancel")}
                 </Button>
                 <Button
                   type="submit"
                   className="flex-1 bg-red-600 hover:bg-red-700 text-white"
                   disabled={isLoading || !passwordForm.watch("password")}
                 >
-                  {isLoading ? "Disabling..." : "Disable 2FA"}
+                  {isLoading
+                    ? t("settings.disabling")
+                    : t("settings.disable2FA")}
                 </Button>
               </Flex>
             </form>
@@ -495,12 +531,14 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
               </Center>
               <Stack className="gap-2">
                 <h2 className="text-xl font-bold text-gray-900">
-                  {isEnabled ? "2FA Enabled" : "2FA Disabled"}
+                  {isEnabled
+                    ? t("settings.twoFactorAuthenticationEnabled")
+                    : t("settings.twoFactorAuthenticationDisabled")}
                 </h2>
                 <p className="text-gray-600">
                   {isEnabled
-                    ? "Your account is protected with two-factor authentication."
-                    : "Enable two-factor authentication to secure your account."}
+                    ? t("settings.twoFactorAuthenticationEnabledDesc")
+                    : t("settings.twoFactorAuthenticationDisabledDesc")}
                 </p>
               </Stack>
             </Stack>
@@ -512,7 +550,7 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
                 onClick={() => onClose()}
                 className="flex-1"
               >
-                Close
+                {t("settings.close")}
               </Button>
               {!isEnabled && (
                 <Button
@@ -521,7 +559,7 @@ export const TwoFAModal: FC<TwoFAModalProps> = ({
                   disabled={isLoading}
                   className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
                 >
-                  Enable 2FA
+                  {t("settings.enable2FA")}
                 </Button>
               )}
             </Flex>

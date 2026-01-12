@@ -35,6 +35,7 @@ const DashboardLayout = lazy(() =>
 const ResetpasswordPage = lazy(() => import("./pages/resetpassword.page"));
 const VerifyEmailPage = lazy(() => import("./pages/verifyemail.page"));
 const VerifyCodePage = lazy(() => import("./pages/verifycode.page"));
+const UnsubscribePage = lazy(() => import("./pages/unsubscribe.page"));
 const AiAssistPage = lazy(() =>
   import("./pages/aiassist.page").then((module) => ({
     default: module.AiAssistPage,
@@ -132,11 +133,19 @@ const SuperAdminSubscriptionsPage = lazy(() =>
     default: module.SuperAdminSubscriptionsPage,
   }))
 );
+const SuperAdminNewsletterPage = lazy(() =>
+  import("./pages/superadminnewsletter.page").then((module) => ({
+    default: module.SuperAdminNewsletterPage,
+  }))
+);
 const SuperAdminSupportTicketPage = lazy(
   () => import("./pages/superadminsupportticket.page")
 );
 const SuperAdminSettingsPage = lazy(
   () => import("./pages/superadminsettings.page")
+);
+const SuperAdminUsersPage = lazy(
+  () => import("./pages/superadminusers.page")
 );
 const NotificationsPage = lazy(() => import("./pages/notifications.page"));
 const ViewerLayout = lazy(() =>
@@ -234,6 +243,12 @@ const AppRoutes = () => {
         />
         <Route path="signup" element={<LazyWrapper component={SignupPage} />} />
       </Route>
+
+      {/* Unsubscribe page - public, no auth layout */}
+      <Route
+        path="/unsubscribe"
+        element={<LazyWrapper component={UnsubscribePage} />}
+      />
 
       {/* Checkout page - no auth layout, just the page */}
       <Route
@@ -365,6 +380,10 @@ const AppRoutes = () => {
           element={<LazyWrapper component={SuperAdminSubscriptionsPage} />}
         />
         <Route
+          path="newsletter"
+          element={<LazyWrapper component={SuperAdminNewsletterPage} />}
+        />
+        <Route
           path="support-tickets"
           element={<LazyWrapper component={SuperAdminSupportTicketPage} />}
         />
@@ -379,6 +398,10 @@ const AppRoutes = () => {
         <Route
           path="demo-accounts"
           element={<LazyWrapper component={SuperAdminDemoAccountsPage} />}
+        />
+        <Route
+          path="users"
+          element={<LazyWrapper component={SuperAdminUsersPage} />}
         />
         <Route
           index

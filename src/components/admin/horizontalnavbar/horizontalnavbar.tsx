@@ -5,9 +5,11 @@ import { ProjectSelector } from "./projectselector";
 // import { FaqDropdown } from "./faqdropdown";
 import { Box } from "@/components/ui/box";
 import { SearchBox } from "./searchbox";
+import { QuickActions } from "./quickactions";
 import { useLocation } from "react-router";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/providers/user.provider";
+import { CompactLanguageSwitcher } from "../../common/CompactLanguageSwitcher";
 
 export const HorizontalNavbar = () => {
   const { pathname } = useLocation();
@@ -15,8 +17,8 @@ export const HorizontalNavbar = () => {
   return (
     <Box
       className={cn(
-        "pt-5 items-center grid max-md:grid-cols-[auto_auto_1fr_auto_auto_auto] grid-cols-[1fr_auto_auto_auto_auto] gap-2",
-        pathname !== "/dashboard" && "gap-0.5",
+        "pt-5 items-center grid max-md:grid-cols-[auto_auto_1fr_auto_auto_auto] grid-cols-[1fr_auto_auto_auto_auto_auto] gap-2",
+        pathname !== "/dashboard" && "gap-1",
         pathname === "/superadmin" && "gap-1",
         pathname === "/viewer" && "gap-1.5"
       )}
@@ -37,9 +39,12 @@ export const HorizontalNavbar = () => {
       )}
 
       {pathname === "/superadmin" && <SearchBox />}
+      <CompactLanguageSwitcher />
 
-      {/* Show subscription status for dashboard routes */}
-      {/* {pathname.startsWith("/dashboard") && <SubscriptionStatus />} */}
+      {/* Quick Actions - Show only on dashboard routes */}
+      {(pathname === "/dashboard" || pathname.startsWith("/dashboard")) && (
+        <QuickActions />
+      )}
 
       <NotificationsDropdown className="max-lg:ml-auto" />
       {/* <FaqDropdown className="max-md:hidden" /> */}

@@ -11,8 +11,10 @@ import {
   Settings,
   SquareKanban,
   User,
+  Users,
   FlaskConical,
   Bell,
+  Mail,
 } from "lucide-react";
 import { useUser } from "@/providers/user.provider";
 
@@ -33,9 +35,19 @@ export const navItems: NavItem[] = [
     icon: <User />,
   },
   {
+    title: "Users",
+    url: "/superadmin/users",
+    icon: <Users />,
+  },
+  {
     title: "Subscriptions",
     url: "/superadmin/subscriptions",
     icon: <BadgeCent />,
+  },
+  {
+    title: "Newsletter",
+    url: "/superadmin/newsletter",
+    icon: <Mail />,
   },
   {
     title: "Demo Accounts",

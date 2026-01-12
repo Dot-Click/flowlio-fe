@@ -27,7 +27,10 @@ export const Footer = () => {
         <Flex className="container mx-auto max-w-5xl justify-between items-start flex-wrap gap-8">
           {/* Column 1: Logo, text, and language */}
           <Center className="w-full md:w-1/4  items-start flex-col">
-            <img src={Logo} alt="Flowlio" className="h-18 w-auto mb-4" />
+            <FooterLink href="https://www.dotvizion.com">
+              <img src={Logo} alt="Dotvizion" className="h-18 w-auto mb-4" />
+            </FooterLink>
+
             <p className="text-gray-400 mb-6 text-sm">
               Streamline your project management with Flowlio's powerful tools
               for task management, calendar integration, and team collaboration.
@@ -46,7 +49,7 @@ export const Footer = () => {
               <FooterLink href="#">How It Works</FooterLink>
               <FooterLink href="#">Use Cases</FooterLink>
               <FooterLink href="#">Integrations</FooterLink>
-              <FooterLink href="#">Pricing</FooterLink>
+              <FooterLink href="/pricing">Pricing</FooterLink>
             </Flex>
           </Center>
 
@@ -64,7 +67,7 @@ export const Footer = () => {
           <Center className="w-full sm:w-1/2 md:w-auto items-start flex-col max-sm:items-center">
             <h3 className="font-semibold text-cyan-400 mb-4">Stay in Touch</h3>
             <Flex className="flex-col space-y-2 text-gray-400 items-start max-sm:items-center">
-              <span>support@flowlio.com</span>
+              <span>info@dotvizion.com</span>
               <span>Available 24/7 through our platform</span>
             </Flex>
           </Center>
@@ -73,6 +76,7 @@ export const Footer = () => {
       <Box className="bg-[#3F3F3F] text-white py-4 px-4 sm:px-6 lg:px-8">
         <Flex className="container mx-auto max-w-5xl justify-between items-start flex-wrap gap-8">
           <span>© 2025 Flowlio. All rights reserved.</span>
+          <span className="text-gray-400 hover:text-white transition-colors duration-300">Flowlio is a product by <FooterLink href="https://www.dotvizion.com">Dotvizion</FooterLink></span>
           <Flex className="text-white space-x-4 items-center">
             <Link
               to="/privacy-policy"
