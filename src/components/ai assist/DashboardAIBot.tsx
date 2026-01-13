@@ -14,6 +14,8 @@ import {
 import { AITaskCreator } from "../task management/AITaskCreator";
 import { Textarea } from "../ui/textarea";
 import { useCreateTask } from "@/hooks/usecreatetask";
+import { useWeeklyProjectSummary } from "@/hooks/useWeeklyProjectSummary";
+import { Loader2 } from "lucide-react";
 
 interface Message {
   id: string;
@@ -39,6 +41,7 @@ export const DashboardAIBot = () => {
   const [userInput, setUserInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const createTask = useCreateTask();
+  const weeklySummary = useWeeklyProjectSummary();
 
   const aiOptions: AIOption[] = [
     {
@@ -60,11 +63,9 @@ export const DashboardAIBot = () => {
       description: "Get AI-generated weekly project summaries",
       icon: <FileText className="w-5 h-5" />,
       action: () => {
-        addBotMessage(
-          "Weekly Project Summary feature is coming soon! Stay tuned. 🚀"
-        );
+        handleWeeklySummary();
       },
-      available: false,
+      available: true,
     },
     {
       id: "insights",
@@ -247,6 +248,216 @@ export const DashboardAIBot = () => {
         ))}
       </Stack>
     );
+  };
+
+  const handleWeeklySummary = async () => {
+    // Show loading message
+    const loadingMessageId = Date.now().toString();
+    const loadingMessage: Message = {
+      id: loadingMessageId,
+      type: "bot",
+      content: (
+        <Flex className="items-center gap-2">
+          <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+          <span>
+            ⏳ Generating your weekly project summary... This may take a moment.
+          </span>
+        </Flex>
+      ),
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, loadingMessage]);
+    setActiveOption("weekly-summary");
+
+    try {
+      const response = await weeklySummary.refetch();
+
+      // Remove loading message
+      setMessages((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
+
+      if (response.data?.success && response.data.data) {
+        const summaryData = response.data.data;
+
+        // Format the summary nicely
+        const summaryContent = (
+          <Stack className="gap-3 text-sm">
+            {/* Executive Summary */}
+            <Box className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+              <h4 className="font-semibold text-blue-900 mb-2">
+                📊 Executive Summary
+              </h4>
+              <p className="text-gray-700 whitespace-pre-wrap">
+                {summaryData.summary}
+              </p>
+            </Box>
+
+            {/* Metrics */}
+            <Box className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+              <h4 className="font-semibold text-gray-900 mb-2">
+                📈 Key Metrics
+              </h4>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <span className="text-gray-600">Total Projects:</span>
+                  <span className="font-semibold ml-2">
+                    {summaryData.metrics.totalProjects}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Active Projects:</span>
+                  <span className="font-semibold ml-2">
+                    {summaryData.metrics.activeProjects}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Total Tasks:</span>
+                  <span className="font-semibold ml-2">
+                    {summaryData.metrics.totalTasks}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Completed:</span>
+                  <span className="font-semibold ml-2 text-green-600">
+                    {summaryData.metrics.completedTasks}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-600">In Progress:</span>
+                  <span className="font-semibold ml-2 text-blue-600">
+                    {summaryData.metrics.inProgressTasks}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Total Hours:</span>
+                  <span className="font-semibold ml-2">
+                    {summaryData.metrics.totalHours.toFixed(1)}h
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Billable Hours:</span>
+                  <span className="font-semibold ml-2 text-green-600">
+                    {summaryData.metrics.billableHours.toFixed(1)}h
+                  </span>
+                </div>
+              </div>
+            </Box>
+
+            {/* Highlights */}
+            {summaryData.highlights && summaryData.highlights.length > 0 && (
+              <Box className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                <h4 className="font-semibold text-yellow-900 mb-2">
+                  ✨ Key Highlights
+                </h4>
+                <ul className="list-disc list-inside space-y-1 text-gray-700">
+                  {summaryData.highlights.map(
+                    (highlight: string, idx: number) => (
+                      <li key={idx}>{highlight}</li>
+                    )
+                  )}
+                </ul>
+              </Box>
+            )}
+
+            {/* Project Breakdown */}
+            {summaryData.projectBreakdown &&
+              summaryData.projectBreakdown.length > 0 && (
+                <Box className="bg-purple-50 p-3 rounded-lg border border-purple-200">
+                  <h4 className="font-semibold text-purple-900 mb-2">
+                    📋 Project Breakdown
+                  </h4>
+                  <Stack className="gap-2">
+                    {summaryData.projectBreakdown.slice(0, 5).map(
+                      (
+                        project: {
+                          projectName: string;
+                          projectNumber: string;
+                          summary: string;
+                          progress: number;
+                          tasksCompleted: number;
+                          hoursSpent: number;
+                        },
+                        idx: number
+                      ) => (
+                        <Box
+                          key={idx}
+                          className="bg-white p-2 rounded border border-purple-100"
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-semibold text-sm">
+                              {project.projectName}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {project.projectNumber}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-600 mb-1">
+                            {project.summary}
+                          </p>
+                          <div className="flex gap-3 text-xs text-gray-500">
+                            <span>Progress: {project.progress}%</span>
+                            <span>Completed: {project.tasksCompleted}</span>
+                            <span>Hours: {project.hoursSpent.toFixed(1)}h</span>
+                          </div>
+                        </Box>
+                      )
+                    )}
+                  </Stack>
+                </Box>
+              )}
+
+            {/* Recommendations */}
+            {summaryData.recommendations &&
+              summaryData.recommendations.length > 0 && (
+                <Box className="bg-green-50 p-3 rounded-lg border border-green-200">
+                  <h4 className="font-semibold text-green-900 mb-2">
+                    💡 Recommendations
+                  </h4>
+                  <ul className="list-disc list-inside space-y-1 text-gray-700">
+                    {summaryData.recommendations.map(
+                      (rec: string, idx: number) => (
+                        <li key={idx}>{rec}</li>
+                      )
+                    )}
+                  </ul>
+                </Box>
+              )}
+
+            {/* Period */}
+            <Box className="text-xs text-gray-500 text-center pt-2 border-t">
+              Period: {new Date(summaryData.period.start).toLocaleDateString()}{" "}
+              - {new Date(summaryData.period.end).toLocaleDateString()}
+            </Box>
+          </Stack>
+        );
+
+        addBotMessage(summaryContent);
+
+        // Reset after showing summary
+        setTimeout(() => {
+          setActiveOption(null);
+          addBotMessage("What else can I help you with?");
+          setTimeout(() => {
+            addBotMessage(renderOptions());
+          }, 500);
+        }, 5000);
+      } else {
+        addBotMessage(
+          "❌ Sorry, I couldn't generate the weekly summary. Please try again later."
+        );
+      }
+    } catch (error: any) {
+      // Remove loading message on error
+      setMessages((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
+
+      console.error("Error generating weekly summary:", error);
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Unknown error occurred";
+      addBotMessage(
+        `❌ Sorry, I encountered an error while generating the weekly summary:\n\n${errorMessage}\n\nPlease try again later.`
+      );
+    }
   };
 
   const handleTaskGenerated = async (taskData: {
