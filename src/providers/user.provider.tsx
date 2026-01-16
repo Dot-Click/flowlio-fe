@@ -158,14 +158,10 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
       // Clear session persistence data on logout
       clearLastVisitedPage();
 
-      // Also clear React Query cache when logging out
-      queryClient.removeQueries({ queryKey: ["user-profile"] });
-      queryClient.removeQueries({ queryKey: ["get-current-org-user-members"] });
-      queryClient.removeQueries({ queryKey: ["get-all-user-members"] });
-      queryClient.removeQueries({ queryKey: ["projects"] });
-      queryClient.removeQueries({ queryKey: ["project"] });
-      queryClient.removeQueries({ queryKey: ["organization-clients"] });
-      queryClient.removeQueries({ queryKey: ["organization-users"] });
+      // Cancel all ongoing queries and clear cache when logging out
+      queryClient.cancelQueries();
+      queryClient.clear();
+      queryClient.removeQueries();
 
       return;
     }
