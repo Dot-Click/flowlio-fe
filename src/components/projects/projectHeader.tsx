@@ -3,13 +3,19 @@ import { ProjectTable } from "./projecttable";
 import { Center } from "../ui/center";
 import { Stack } from "../ui/stack";
 import { Button } from "../ui/button";
-import { CirclePlus } from "lucide-react";
+import { CirclePlus, Eye } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
+import GranttChart from "../Grantt/granttchart";
+import { Box } from "../ui/box";
+import { Flex } from "../ui/flex";
+import { useState } from "react";
 
 export const ProjectHeader = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [showGranttChart, setShowGranttChart] = useState(false);
+
   return (
     <PageWrapper className="mt-6">
       <Center className="justify-between px-4 py-6 max-sm:flex-col max-sm:items-start gap-2">
@@ -22,6 +28,15 @@ export const ProjectHeader = () => {
           </h1>
         </Stack>
 
+        <Flex>
+        <Button
+          variant="outline"
+          className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
+          onClick={() =>  !showGranttChart ? setShowGranttChart(true) : setShowGranttChart(false)}
+        >
+          <Eye className="fill-white text-black size-5" />
+          {showGranttChart ? "Hide Project Grantt" : "View Project Grantt"}
+        </Button>
         <Button
           variant="outline"
           className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
@@ -30,9 +45,16 @@ export const ProjectHeader = () => {
           <CirclePlus className="fill-white text-black size-5" />
           {t("projects.createNewProject")}
         </Button>
+
+        </Flex>
       </Center>
 
-      <ProjectTable />
+
+      {!showGranttChart && <ProjectTable />}
+
+      <Box className="p-4">
+        {showGranttChart && <GranttChart />}
+      </Box>
     </PageWrapper>
   );
 };
