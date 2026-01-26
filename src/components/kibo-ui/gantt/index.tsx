@@ -186,12 +186,13 @@ const getDateByMousePosition = (context: GanttContextProps, mouseX: number) => {
   return actualDate;
 };
 
-const createInitialTimelineData = (today: Date) => {
+const createInitialTimelineData = (date: Date = new Date(), yearCount: number = 1) => {
   const data: TimelineData = [];
+  const startYear = date.getFullYear();
 
-  data.push(
-    { year: today.getFullYear(), quarters: new Array(4).fill(null) },
-  );
+  for (let i = 0; i < yearCount; i++) {
+    data.push({ year: startYear + i, quarters: new Array(4).fill(null) });
+  }
 
   for (const yearObj of data) {
     yearObj.quarters = new Array(4).fill(null).map((_, quarterIndex) => ({
@@ -527,29 +528,23 @@ export const GanttSidebarItem: FC<GanttSidebarItemProps> = ({
   );
 };
 
-export const GanttSidebarHeader: FC = () => (
-  <div
-    className="sticky top-0 z-10 flex shrink-0 items-end justify-between gap-2.5 border-border/50 border-b bg-backdrop/90 p-2.5 font-medium text-muted-foreground text-xs backdrop-blur-sm"
-    style={{ height: "var(--gantt-header-height)" }}
-  >
-    {/* <Checkbox className="shrink-0" /> */}
-    <p className="flex-1">Projects Grantt Chart</p>
-    {/* <p className="shrink-0">Duration</p> */}
-  </div>
-);
-
 export type GanttSidebarGroupProps = {
-  children: ReactNode;
-  name: string;
+  children?: ReactNode;
+  name?: string;
   className?: string;
 };
 
-export const GanttSidebarGroup: FC<GanttSidebarGroupProps> = ({
-  children,
+export const GanttSidebarHeader: FC<GanttSidebarGroupProps> = ({
   name,
+  children,
   className,
 }) => (
-  <div className={className}>
+  <div
+    className="sticky top-0 z-10 flex shrink-0 items-end justify-between gap-2.5 border-border/50 border-b bg-backdrop/90 font-medium text-muted-foreground text-xs backdrop-blur-sm"
+    style={{ height: "var(--gantt-header-height)" }}
+  >
+    {/* <Checkbox className="shrink-0" /> */}
+    <div className={cn(className, "w-full")}>
     <Center className="justify-between w-full flex-1">
       
     <Box
@@ -569,16 +564,50 @@ export const GanttSidebarGroup: FC<GanttSidebarGroupProps> = ({
     </Center>
     <div className="divide-y divide-border/50">{children}</div>
   </div>
+    {/* <p className="flex-1">Grantt Chart</p> */}
+    {/* <p className="shrink-0">Duration</p> */}
+  </div>
+);
+
+
+
+export const GanttSidebarGroup: FC<GanttSidebarGroupProps> = ({
+  children,
+  // name,
+  className,
+}) => (
+  <div className={className}>
+    <Center className="justify-between w-full flex-1">
+      
+    {/* <Box
+      className="p-2 font-medium text-muted-foreground text-xs"
+      style={{ height: "var(--gantt-row-height)" }}
+    >
+      {name}
+      
+    </Box>
+    <Box
+      className="p-2  font-medium text-muted-foreground text-xs"
+      style={{ height: "var(--gantt-row-height)" }}
+    >
+      Duration
+      
+    </Box> */}
+    </Center>
+    <div className="divide-y divide-border/50">{children}</div>
+  </div>
 );
 
 export type GanttSidebarProps = {
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
+  name?: string; // Add name prop to sidebar
 };
 
 export const GanttSidebar: FC<GanttSidebarProps> = ({
   children,
   className,
+  name,
 }) => (
   <div
     className={cn(
@@ -587,7 +616,7 @@ export const GanttSidebar: FC<GanttSidebarProps> = ({
     )}
     data-roadmap-ui="gantt-sidebar"
   >
-    <GanttSidebarHeader />
+    <GanttSidebarHeader name={name} />
     <div className="space-y-4">{children}</div>
   </div>
 );
@@ -994,13 +1023,18 @@ export const GanttFeatureItem: FC<GanttFeatureItemProps> = ({
 export type GanttFeatureListGroupProps = {
   children: ReactNode;
   className?: string;
+  id: string;
 };
 
 export const GanttFeatureListGroup: FC<GanttFeatureListGroupProps> = ({
   children,
   className,
+  id,
 }) => (
-  <div className={className} style={{ paddingTop: "var(--gantt-row-height)" }}>
+  <div 
+    className={cn("droppable-lane", className)} 
+    id={id}
+  >
     {children}
   </div>
 );
@@ -1091,7 +1125,7 @@ export const GanttFeatureList: FC<GanttFeatureListProps> = ({
   children,
 }) => (
   <div
-    className={cn("absolute top-0 left-0 h-full w-max space-y-4", className)}
+    className={cn("absolute top-0 left-0 h-full w-max", className)}
     style={{ marginTop: "var(--gantt-header-height)" }}
   >
     {children}
@@ -1175,6 +1209,8 @@ GanttMarker.displayName = "GanttMarker";
 export type GanttProviderProps = {
   range?: Range;
   zoom?: number;
+  initialDate?: Date;
+  yearCount?: number;
   onAddItem?: (date: Date) => void;
   children: ReactNode;
   className?: string;
@@ -1183,14 +1219,20 @@ export type GanttProviderProps = {
 export const GanttProvider: FC<GanttProviderProps> = ({
   zoom = 100,
   range = "monthly",
+  initialDate = new Date(),
+  yearCount = 1,
   onAddItem,
   children,
   className,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [timelineData, _setTimelineData] = useState<TimelineData>(
-    createInitialTimelineData(new Date())
+  const [timelineData, setTimelineData] = useState<TimelineData>(
+    createInitialTimelineData(initialDate, yearCount)
   );
+
+  useEffect(() => {
+    setTimelineData(createInitialTimelineData(initialDate, yearCount));
+  }, [initialDate, yearCount]);
   const [, setScrollX] = useGanttScrollX();
   const [sidebarWidth, setSidebarWidth] = useState(0);
 

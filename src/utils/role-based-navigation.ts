@@ -8,11 +8,7 @@ import { SquareKanban, UserPen, Clock } from "lucide-react";
 import { GroupIcon, TaskManagementIcon } from "@/components/customeIcons";
 import { MessageCircleQuestion, Bell } from "lucide-react";
 import type { NavItem } from "@/components/admin/appsidebar";
-
-/**
- * Role-based navigation system for PlanFlo
- * Based on the permission system defined in backend
- */
+import { BadgeDollarSign } from "lucide-react";
 
 // Viewer navigation items (read-only access)
 // Can view: Dashboard, Projects, My Tasks, Support Tickets, Settings
@@ -146,7 +142,7 @@ const userNavItems: NavItem[] = [
   {
     url: "/dashboard/subscription",
     title: "My Subscriptions",
-    icon: React.createElement(TbInvoice),
+    icon: React.createElement(BadgeDollarSign),
   },
   {
     url: "/dashboard/support",
