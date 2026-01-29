@@ -51,10 +51,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { ProjectFilter } from "./ProjectFilter";
+import { useFetchCustomFields } from "@/hooks/usecustomfields";
 import { useUpdateProject } from "@/hooks/useupdateproject";
 
 // Use the Project interface from the hook
-export type Data = Project;
+export type Data = Project & { customFields?: Record<string, any> };
 
 export const ProjectTable = () => {
   const { t } = useTranslation();
@@ -212,6 +214,36 @@ export const ProjectTable = () => {
     );
   };
 
+  // Fetch custom fields
+  const { data: customFieldsData } = useFetchCustomFields("project");
+  const [filters, setFilters] = useState<Record<string, any>>({});
+
+  // Filter logic
+  const filteredData = transformedData.filter((project) => {
+    // Apply custom field filters
+    if (Object.keys(filters).length > 0) {
+      for (const [key, value] of Object.entries(filters)) {
+        const projectValue = project.customFields?.[key];
+        
+        // Handle "ALL_VALUES_RESET"
+        if (value === "ALL_VALUES_RESET") continue;
+
+        if (value === undefined || value === null || value === "") continue;
+
+        // Exact match for select/boolean
+        if (projectValue !== value && typeof value !== 'string') return false;
+        
+        // Partial match for text string
+        if (typeof value === 'string' && typeof projectValue === 'string') {
+             if (!projectValue.toLowerCase().includes(value.toLowerCase())) return false;
+        } else if (projectValue != value) {
+             return false;
+        }
+      }
+    }
+    return true;
+  });
+
   const columns: ColumnDef<Data>[] = [
     {
       id: "select",
@@ -219,7 +251,6 @@ export const ProjectTable = () => {
       cell: ({ row }) => <Box className="text-center">{row.index + 1}</Box>,
       enableSorting: false,
     },
-
     {
       accessorKey: "projectName",
       header: () => (
@@ -233,6 +264,7 @@ export const ProjectTable = () => {
         </Box>
       ),
     },
+    // ... other standard columns
     {
       accessorKey: "clientName",
       header: () => (
@@ -253,7 +285,6 @@ export const ProjectTable = () => {
         </Box>
       ),
     },
-
     {
       accessorKey: "startDate",
       header: () => (
@@ -290,7 +321,6 @@ export const ProjectTable = () => {
         }
       },
     },
-
     {
       accessorKey: "endDate",
       header: () => (
@@ -311,7 +341,6 @@ export const ProjectTable = () => {
         }
       },
     },
-
     {
       accessorKey: "progress",
       header: () => (
@@ -426,13 +455,29 @@ export const ProjectTable = () => {
         );
       },
     },
-
+    // Dynamic Custom Columns
+    ...(customFieldsData?.data.map(field => ({
+      accessorKey: `customFields.${field.id}`,
+      id: field.id,
+      header: () => (
+        <Box className="text-center text-black p-1">{field.name}</Box>
+      ),
+      cell: ({ row }: { row: any }) => {
+         const val = row.original.customFields?.[field.id];
+         return (
+            <Box className="text-center p-1 capitalize">
+               {val !== undefined && val !== null ? String(val) : "-"}
+            </Box>
+         );
+      }
+    })) || []),
     {
       accessorKey: "actions",
       header: () => (
-        <Box className="text-center text-black">{t("common.actions")}</Box>
+         <Box className="text-center text-black">{t("common.actions")}</Box>
       ),
-      cell: ({ row }) => {
+       // ... existing actions cell
+       cell: ({ row }) => {
         return (
           <Center className="space-x-2">
             <TooltipProvider>
@@ -514,11 +559,15 @@ export const ProjectTable = () => {
           </Center>
         );
       },
-    },
+    }
   ];
 
   return (
     <>
+      <Box className="flex justify-end px-4 mb-2">
+         <ProjectFilter onFilterChange={setFilters} />
+      </Box>
+
       {isLoading ? (
         <Box className="flex items-center justify-center p-8">
           <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
@@ -527,7 +576,7 @@ export const ProjectTable = () => {
       ) : (
         <>
           <ReusableTable
-            data={transformedData}
+            data={filteredData}
             columns={columns}
             // searchInput={false}
             enablePaymentLinksCalender={true}
