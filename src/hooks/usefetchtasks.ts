@@ -23,6 +23,7 @@ export interface Task {
   }>;
   createdAt: string;
   updatedAt: string;
+  parentId?: string;
   // Project data
   projectId: string;
   projectName: string;

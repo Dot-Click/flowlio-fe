@@ -32,6 +32,8 @@ export type Task = {
     size: number;
     type: string;
   }>;
+  parentId?: string;
+  parentTitle?: string;
 };
 
 export const initialTasks: Task[] = [];

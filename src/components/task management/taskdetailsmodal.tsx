@@ -40,6 +40,8 @@ interface TaskDetailsModalProps {
       size: number;
       type: string;
     }>;
+    parentId?: string;
+    parentTitle?: string;
   };
   isOpen: boolean;
   onClose: () => void;
@@ -55,6 +57,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
   );
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showCreateSubtaskModal, setShowCreateSubtaskModal] = useState(false);
   const { data: commentsResponse } = useFetchProjectComments(
     task.projectId || ""
   );
@@ -139,6 +142,17 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
             >
               <Trash2 className="w-4 h-4" />
             </Button>
+            {!task.parentId && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowCreateSubtaskModal(true)}
+                className="hover:bg-green-50 border-green-200 text-green-600 hover:text-green-700 cursor-pointer h-8 px-3 rounded-full text-xs font-medium gap-1"
+                title="Add Subtask"
+              >
+                + Subtask
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"
@@ -280,6 +294,27 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                 </span>
               </Box>
 
+              {/* Task Level */}
+              <Box className="bg-white rounded-xl p-4 border border-gray-200">
+                <h3 className="font-semibold text-gray-900 mb-3">Task Level</h3>
+                <span
+                  className={cn(
+                    "inline-flex items-center px-3 py-1 rounded-full text-sm font-medium",
+                    task.parentId
+                      ? "bg-purple-100 text-purple-800"
+                      : "bg-blue-100 text-blue-800"
+                  )}
+                >
+                  {task.parentId ? "Subtask" : "Main Task"}
+                </span>
+                {task.parentId && task.parentTitle && (
+                  <Box className="mt-3">
+                    <p className="text-xs text-gray-500 mb-1">Related to Main Task:</p>
+                    <p className="text-sm font-medium text-purple-700">{task.parentTitle}</p>
+                  </Box>
+                )}
+              </Box>
+
               {/* Project Info */}
               <Box className="bg-white rounded-xl p-4 border border-gray-200">
                 <h3 className="font-semibold text-gray-900 mb-3">Project</h3>
@@ -381,6 +416,21 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
             isModal={true}
             onClose={() => {
               setShowEditModal(false);
+              // Close the details modal and let parent refresh
+              onClose();
+            }}
+          />
+        </Box>
+      )}
+
+      {/* Create Subtask Modal */}
+      {showCreateSubtaskModal && (
+        <Box>
+          <CreateTask
+            parentId={task.id}
+            isModal={true}
+            onClose={() => {
+              setShowCreateSubtaskModal(false);
               // Close the details modal and let parent refresh
               onClose();
             }}

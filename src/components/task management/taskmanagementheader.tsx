@@ -78,6 +78,10 @@ export const TaskManagementHeader = () => {
           assigneeImage: task.assigneeImage,
           creatorName: task.creatorName,
           attachments: task.attachments,
+          parentId: task.parentId,
+          parentTitle: task.parentId
+            ? realTasks.find((rt) => rt.id === task.parentId)?.title
+            : undefined,
         }))
       : initialTasks;
   const setTasks = () => {}; // No-op since we're using real data
@@ -286,6 +290,8 @@ export const TaskManagementHeader = () => {
             assigneeImage: selectedTask.assigneeImage,
             creatorName: selectedTask.creatorName,
             attachments: selectedTask.attachments,
+            parentId: selectedTask.parentId,
+            parentTitle: selectedTask.parentTitle,
           }}
           isOpen={isModalOpen}
           onClose={handleCloseModal}

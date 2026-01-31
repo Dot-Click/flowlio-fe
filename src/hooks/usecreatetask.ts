@@ -17,6 +17,7 @@ export interface CreateTaskRequest {
     size: number;
     type: string;
   }>;
+  parentId?: string;
 }
 
 export interface CreateTaskResponse {

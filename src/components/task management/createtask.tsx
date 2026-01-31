@@ -43,6 +43,7 @@ import { useFetchTaskById } from "@/hooks/usefetchtasks";
 
 interface CreateTaskProps {
   taskId?: string; // If provided, component works in edit mode
+  parentId?: string; // If provided, component handles subtask creation
   onClose?: () => void; // For modal mode
   isModal?: boolean; // If true, renders as modal instead of page
 }
@@ -58,10 +59,12 @@ const formSchema = z.object({
   assignedTo: z.string().optional(),
   startDate: z.date().optional(),
   endDate: z.date().optional(),
+  parentId: z.string().optional(),
 });
 
 export const CreateTask = ({
   taskId,
+  parentId: parentIdFromProps,
   onClose,
   isModal = false,
 }: CreateTaskProps = {}) => {
@@ -71,6 +74,8 @@ export const CreateTask = ({
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [fileType, setFileType] = useState<string | null>(null);
+  const parentIdFromUrl = searchParams.get("parentId");
+  const parentId = parentIdFromProps || parentIdFromUrl;
 
   // Extract URL parameters
   const titleFromUrl = searchParams.get("title");
@@ -98,6 +103,7 @@ export const CreateTask = ({
       assignedTo: assignedToFromUrl || "",
       startDate: startDateFromUrl ? new Date(startDateFromUrl) : new Date(),
       endDate: endDateFromUrl ? new Date(endDateFromUrl) : new Date(),
+      parentId: parentId || "",
     },
   });
 
@@ -115,6 +121,7 @@ export const CreateTask = ({
       if (task.endDate) {
         form.setValue("endDate", new Date(task.endDate));
       }
+      form.setValue("parentId", task.parentId || "");
     }
   }, [isEditMode, taskData, form]);
 
@@ -138,6 +145,9 @@ export const CreateTask = ({
     if (endDateFromUrl) {
       form.setValue("endDate", new Date(endDateFromUrl));
     }
+    if (parentIdFromUrl) {
+      form.setValue("parentId", parentIdFromUrl);
+    }
   }, [
     projectIdFromUrl,
     titleFromUrl,
@@ -145,6 +155,7 @@ export const CreateTask = ({
     assignedToFromUrl,
     startDateFromUrl,
     endDateFromUrl,
+    parentIdFromUrl,
   ]);
 
   // Convert file to base64 for upload
@@ -298,11 +309,13 @@ export const CreateTask = ({
       <Center className="justify-between mt-4 max-sm:flex-col max-sm:items-start gap-2 relative">
         <Stack className="gap-0">
           <h1 className="text-black text-xl font-medium">
-            {isEditMode ? "Edit Task" : "New Task"}
+            {isEditMode ? "Edit Task" : parentId ? "New Subtask" : "New Task"}
           </h1>
           <h1 className="text-gray-500">
             {isEditMode
               ? "Update task details and keep your team aligned."
+              : parentId
+              ? "Create a subtask to break down your main objective."
               : "Create and assign tasks to keep your team aligned and productive."}
           </h1>
         </Stack>
@@ -322,8 +335,21 @@ export const CreateTask = ({
                 : "Update Task"
               : createTask.isPending
               ? "Creating..."
+              : parentId
+              ? "Save Subtask"
               : "Save Task"}
           </Button>
+
+          {(isModal || isEditMode) && onClose && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="bg-white text-black border border-gray-200 rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer absolute top-18 right-40 max-md:top-20 max-md:right-2"
+            >
+              Cancel
+            </Button>
+          )}
 
           {/* AI Task Creator */}
           {/* <AITaskCreator
