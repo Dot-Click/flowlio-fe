@@ -29,7 +29,7 @@ import {
 } from "../ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import { Calendar } from "../ui/calendar";
 import { CalendarIcon } from "../customeIcons";
 import { useCreateTask } from "@/hooks/usecreatetask";
@@ -48,19 +48,30 @@ interface CreateTaskProps {
   isModal?: boolean; // If true, renders as modal instead of page
 }
 
-const formSchema = z.object({
-  title: z.string().min(2, {
-    message: "Task title must be at least 2 characters.",
-  }),
-  description: z.string().optional(),
-  projectId: z.string().min(1, {
-    message: "Please select a project.",
-  }),
-  assignedTo: z.string().optional(),
-  startDate: z.date().optional(),
-  endDate: z.date().optional(),
-  parentId: z.string().optional(),
-});
+const formSchema = z
+  .object({
+    title: z.string().min(2, {
+      message: "Task title must be at least 2 characters.",
+    }),
+    description: z.string().optional(),
+    projectId: z.string().min(1, {
+      message: "Please select a project.",
+    }),
+    assignedTo: z.string().optional(),
+    startDate: z.date().optional(),
+    endDate: z.date().optional(),
+    parentId: z.string().optional(),
+  })
+  .refine(
+    (data) =>
+      !data.startDate ||
+      !data.endDate ||
+      startOfDay(data.endDate) >= startOfDay(data.startDate),
+    {
+      message: "End date must be on or after start date.",
+      path: ["endDate"],
+    }
+  );
 
 export const CreateTask = ({
   taskId,
@@ -106,6 +117,18 @@ export const CreateTask = ({
       parentId: parentId || "",
     },
   });
+
+  const watchedStartDate = form.watch("startDate");
+  const todayStart = startOfDay(new Date());
+
+  // When start date changes to after end date, set end date to start date
+  useEffect(() => {
+    const start = form.getValues("startDate");
+    const end = form.getValues("endDate");
+    if (start && end && startOfDay(end) < startOfDay(start)) {
+      form.setValue("endDate", start);
+    }
+  }, [watchedStartDate, form]);
 
   // Pre-fill form with task data if in edit mode
   useEffect(() => {
@@ -572,6 +595,7 @@ export const CreateTask = ({
                           selected={field.value}
                           onSelect={field.onChange}
                           initialFocus
+                          disabled={(date) => date < todayStart}
                         />
                       </PopoverContent>
                     </Popover>
@@ -652,6 +676,9 @@ export const CreateTask = ({
                           selected={field.value}
                           onSelect={field.onChange}
                           initialFocus
+                          disabled={(date) =>
+                            date < startOfDay(watchedStartDate || new Date())
+                          }
                         />
                       </PopoverContent>
                     </Popover>
