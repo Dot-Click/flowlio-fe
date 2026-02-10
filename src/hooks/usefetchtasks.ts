@@ -42,6 +42,9 @@ export interface Task {
   clientName?: string;
   clientEmail?: string;
   clientImage?: string;
+  // Dependencies
+  startAfter?: string | null;
+  finishBefore?: string | null;
 }
 
 export interface GetTasksResponse {
@@ -73,6 +76,22 @@ export const useFetchTasks = (params?: {
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+export const useFetchTasksByAssignee = (assigneeId: string | undefined) => {
+  return useQuery({
+    queryKey: ["tasks", { assignedTo: assigneeId }],
+    queryFn: async (): Promise<GetTasksResponse> => {
+      const searchParams = new URLSearchParams();
+      if (assigneeId) searchParams.append("assignedTo", assigneeId);
+      const url = `/tasks/all?${searchParams.toString()}`;
+      const response = await axios.get(url);
+      return response.data;
+    },
+    enabled: !!assigneeId,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 };
 

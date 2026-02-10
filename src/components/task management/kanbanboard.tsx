@@ -34,6 +34,8 @@ export type Task = {
   }>;
   parentId?: string;
   parentTitle?: string;
+  startAfter?: string | null;
+  finishBefore?: string | null;
 };
 
 export const initialTasks: Task[] = [];

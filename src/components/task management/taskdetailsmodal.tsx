@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   X,
   Calendar,
@@ -10,6 +10,7 @@ import {
   Eye,
   Trash2,
   Edit,
+  Link2,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,20 @@ import { Box } from "../ui/box";
 import { Flex } from "../ui/flex";
 import { Center } from "../ui/center";
 import { CreateTask } from "./createtask";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
+
+type TaskForMap = {
+  id: string;
+  title: string;
+  status: string;
+  startAfter?: string | null;
+  finishBefore?: string | null;
+};
 
 interface TaskDetailsModalProps {
   task: {
@@ -42,13 +57,19 @@ interface TaskDetailsModalProps {
     }>;
     parentId?: string;
     parentTitle?: string;
+    startAfter?: string | null;
+    finishBefore?: string | null;
   };
+  allTasks: TaskForMap[];
+  onOpenTask: (taskId: string) => void;
   isOpen: boolean;
   onClose: () => void;
 }
 
 export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
   task,
+  allTasks,
+  onOpenTask,
   isOpen,
   onClose,
 }) => {
@@ -62,6 +83,22 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
     task.projectId || ""
   );
   const deleteTask = useDeleteTask();
+
+  const taskMap = useMemo(() => {
+    const map: Record<string, TaskForMap> = {};
+    for (const t of allTasks) {
+      map[t.id] = t;
+    }
+    return map;
+  }, [allTasks]);
+
+  const startAfterTask = task.startAfter
+    ? taskMap[task.startAfter] ?? null
+    : null;
+  const finishBeforeTask = task.finishBefore
+    ? taskMap[task.finishBefore] ?? null
+    : null;
+  const hasDependencies = !!startAfterTask || !!finishBeforeTask;
 
   if (!isOpen) return null;
 
@@ -360,6 +397,63 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                       {task.assigneeName}
                     </span>
                   </Flex>
+                </Box>
+              )}
+
+              {/* Dependencies */}
+              {hasDependencies && (
+                <Box className="bg-white rounded-xl p-4 border border-gray-200">
+                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <Link2 className="w-4 h-4" />
+                    Dependencies
+                  </h3>
+                  <Box className="space-y-3 border-t border-gray-100 pt-3">
+                    {startAfterTask && (
+                      <Box>
+                        <p className="text-xs text-gray-500 mb-1">
+                          Start After
+                        </p>
+                        {startAfterTask.status !== "Completed" ? (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    onOpenTask(startAfterTask.id)
+                                  }
+                                  className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline cursor-pointer text-left"
+                                >
+                                  {startAfterTask.title}
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                Complete this task before starting.
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => onOpenTask(startAfterTask.id)}
+                            className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline cursor-pointer text-left"
+                          >
+                            {startAfterTask.title}
+                          </button>
+                        )}
+                      </Box>
+                    )}
+                    {finishBeforeTask && (
+                      <Box>
+                        <p className="text-xs text-gray-500 mb-1">
+                          Finish Before
+                        </p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {finishBeforeTask.title}
+                        </p>
+                      </Box>
+                    )}
+                  </Box>
                 </Box>
               )}
             </Box>

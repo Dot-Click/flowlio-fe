@@ -18,6 +18,8 @@ export interface CreateTaskRequest {
     type: string;
   }>;
   parentId?: string;
+  startAfter?: string | null;
+  finishBefore?: string | null;
 }
 
 export interface CreateTaskResponse {

@@ -7,7 +7,7 @@ import { Stack } from "../ui/stack";
 import { Button } from "../ui/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useRef, useMemo } from "react";
 import { useDropzone } from "react-dropzone";
 import {
   Form,
@@ -38,7 +38,7 @@ import { useFetchProjects } from "@/hooks/usefetchprojects";
 import { useFetchOrganizationUsers } from "@/hooks/usefetchorganizationusers";
 import { CreateTaskRequest } from "@/hooks/usecreatetask";
 import { toast } from "sonner";
-import { useFetchTaskById } from "@/hooks/usefetchtasks";
+import { useFetchTaskById, useFetchTasksByAssignee } from "@/hooks/usefetchtasks";
 // import { AITaskCreator } from "./AITaskCreator";
 
 interface CreateTaskProps {
@@ -61,6 +61,8 @@ const formSchema = z
     startDate: z.date().optional(),
     endDate: z.date().optional(),
     parentId: z.string().optional(),
+    startAfter: z.string().optional(),
+    finishBefore: z.string().optional(),
   })
   .refine(
     (data) =>
@@ -70,6 +72,26 @@ const formSchema = z
     {
       message: "End date must be on or after start date.",
       path: ["endDate"],
+    }
+  )
+  .refine(
+    (data) =>
+      !data.startAfter ||
+      !data.finishBefore ||
+      data.startAfter !== data.finishBefore,
+    {
+      message: "Start After and Finish Before cannot be the same task.",
+      path: ["finishBefore"],
+    }
+  )
+  .refine(
+    (data) =>
+      !data.startAfter ||
+      !data.finishBefore ||
+      data.startAfter !== data.finishBefore,
+    {
+      message: "Start After and Finish Before cannot be the same task.",
+      path: ["startAfter"],
     }
   );
 
@@ -115,11 +137,44 @@ export const CreateTask = ({
       startDate: startDateFromUrl ? new Date(startDateFromUrl) : new Date(),
       endDate: endDateFromUrl ? new Date(endDateFromUrl) : new Date(),
       parentId: parentId || "",
+      startAfter: "",
+      finishBefore: "",
     },
   });
 
+  const assignedTo = form.watch("assignedTo");
+  const {
+    data: assignedUserTasksResponse,
+    isLoading: isDependencyOptionsLoading,
+  } = useFetchTasksByAssignee(assignedTo || undefined);
+  const assignedUserTasks = assignedUserTasksResponse?.data ?? [];
+
+  const dependencyOptions = useMemo(() => {
+    if (isEditMode && taskId) {
+      return assignedUserTasks.filter((t) => t.id !== taskId);
+    }
+    return assignedUserTasks;
+  }, [assignedUserTasks, isEditMode, taskId]);
+
   const watchedStartDate = form.watch("startDate");
   const todayStart = startOfDay(new Date());
+  const prevAssignedToRef = useRef(assignedTo);
+  const hasResetDependenciesForEditRef = useRef(false);
+
+  // When taskId changes (e.g. opening a different task), allow reset again
+  useEffect(() => {
+    if (!isEditMode || !taskId) return;
+    hasResetDependenciesForEditRef.current = false;
+  }, [taskId, isEditMode]);
+
+  // When assignedTo changes, clear dependent Start After / Finish Before and re-fetch options
+  useEffect(() => {
+    if (prevAssignedToRef.current !== assignedTo) {
+      prevAssignedToRef.current = assignedTo;
+      form.setValue("startAfter", "");
+      form.setValue("finishBefore", "");
+    }
+  }, [assignedTo, form]);
 
   // When start date changes to after end date, set end date to start date
   useEffect(() => {
@@ -130,7 +185,7 @@ export const CreateTask = ({
     }
   }, [watchedStartDate, form]);
 
-  // Pre-fill form with task data if in edit mode
+  // Pre-fill form with task data if in edit mode (basic fields first so assignee fetch runs)
   useEffect(() => {
     if (isEditMode && taskData?.data) {
       const task = taskData.data;
@@ -147,6 +202,52 @@ export const CreateTask = ({
       form.setValue("parentId", task.parentId || "");
     }
   }, [isEditMode, taskData, form]);
+
+  // Reset form with dependency values once options are loaded (edit mode only)
+  useEffect(() => {
+    if (!isEditMode || !taskData?.data || !taskId) return;
+    const task = taskData.data;
+    const assigneeId = task.assigneeId || "";
+    if (assignedTo !== assigneeId) return;
+    if (isDependencyOptionsLoading || !assignedUserTasksResponse) return;
+    if (hasResetDependenciesForEditRef.current) return;
+
+    hasResetDependenciesForEditRef.current = true;
+
+    const safeStartAfter =
+      task.startAfter &&
+      task.startAfter !== taskId &&
+      assignedUserTasks.some((t) => t.id === task.startAfter)
+        ? task.startAfter
+        : "";
+    const safeFinishBefore =
+      task.finishBefore &&
+      task.finishBefore !== taskId &&
+      assignedUserTasks.some((t) => t.id === task.finishBefore)
+        ? task.finishBefore
+        : "";
+
+    form.reset({
+      title: task.title || "",
+      description: task.description || "",
+      projectId: task.projectId || "",
+      assignedTo: assigneeId,
+      startDate: task.startDate ? new Date(task.startDate) : new Date(),
+      endDate: task.endDate ? new Date(task.endDate) : new Date(),
+      parentId: task.parentId || "",
+      startAfter: safeStartAfter,
+      finishBefore: safeFinishBefore,
+    });
+  }, [
+    isEditMode,
+    taskData,
+    taskId,
+    assignedTo,
+    assignedUserTasks,
+    assignedUserTasksResponse,
+    isDependencyOptionsLoading,
+    form,
+  ]);
 
   // Pre-fill form fields from URL if provided
   useEffect(() => {
@@ -237,6 +338,8 @@ export const CreateTask = ({
           startDate: values.startDate?.toISOString(),
           endDate: values.endDate?.toISOString(),
           attachments: attachmentData ? [attachmentData] : undefined,
+          startAfter: values.startAfter || null,
+          finishBefore: values.finishBefore || null,
         };
 
         updateTask.mutate(
@@ -268,6 +371,8 @@ export const CreateTask = ({
           startDate: values.startDate?.toISOString(),
           endDate: values.endDate?.toISOString(),
           attachments: attachmentData ? [attachmentData] : undefined,
+          startAfter: values.startAfter || null,
+          finishBefore: values.finishBefore || null,
         };
         console.log("Task data", taskData);
 
@@ -612,7 +717,7 @@ export const CreateTask = ({
                     <FormLabel>Assign To:</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value || undefined}
                     >
                       <FormControl className="w-full h-12">
                         <SelectTrigger
@@ -632,6 +737,83 @@ export const CreateTask = ({
                             {userMember.firstname} {userMember.lastname} (
                             {userMember.email})
                             {!userMember.user?.id && " (No user account)"}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </Box>
+
+            <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1 mt-3 max-sm:mt-0">
+              <FormField
+                control={form.control}
+                name="startAfter"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Start After</FormLabel>
+                    <Select
+                      value={field.value && dependencyOptions.some((t) => t.id === field.value) ? field.value : undefined}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        form.trigger(["startAfter", "finishBefore"]);
+                      }}
+                      disabled={
+                        !assignedTo ||
+                        (!!assignedTo && isDependencyOptionsLoading)
+                      }
+                    >
+                      <FormControl className="w-full h-12">
+                        <SelectTrigger
+                          size="lg"
+                          className="bg-gray-100 border border-gray-200 rounded-full w-full h-12 placeholder:text-gray-100 disabled:opacity-60"
+                        >
+                          <SelectValue placeholder="Select task (optional)" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="w-full">
+                        {dependencyOptions.map((task) => (
+                          <SelectItem key={task.id} value={task.id}>
+                            {task.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="finishBefore"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Finish Before</FormLabel>
+                    <Select
+                      value={field.value && dependencyOptions.some((t) => t.id === field.value) ? field.value : undefined}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        form.trigger(["startAfter", "finishBefore"]);
+                      }}
+                      disabled={
+                        !assignedTo ||
+                        (!!assignedTo && isDependencyOptionsLoading)
+                      }
+                    >
+                      <FormControl className="w-full h-12">
+                        <SelectTrigger
+                          size="lg"
+                          className="bg-gray-100 border border-gray-200 rounded-full w-full h-12 placeholder:text-gray-100 disabled:opacity-60"
+                        >
+                          <SelectValue placeholder="Select task (optional)" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="w-full">
+                        {dependencyOptions.map((task) => (
+                          <SelectItem key={task.id} value={task.id}>
+                            {task.title}
                           </SelectItem>
                         ))}
                       </SelectContent>

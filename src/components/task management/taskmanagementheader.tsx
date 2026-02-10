@@ -82,6 +82,8 @@ export const TaskManagementHeader = () => {
           parentTitle: task.parentId
             ? realTasks.find((rt) => rt.id === task.parentId)?.title
             : undefined,
+          startAfter: task.startAfter ?? undefined,
+          finishBefore: task.finishBefore ?? undefined,
         }))
       : initialTasks;
   const setTasks = () => {}; // No-op since we're using real data
@@ -292,6 +294,13 @@ export const TaskManagementHeader = () => {
             attachments: selectedTask.attachments,
             parentId: selectedTask.parentId,
             parentTitle: selectedTask.parentTitle,
+            startAfter: selectedTask.startAfter,
+            finishBefore: selectedTask.finishBefore,
+          }}
+          allTasks={tasks}
+          onOpenTask={(taskId) => {
+            const t = tasks.find((x) => x.id === taskId);
+            if (t) setSelectedTask(t);
           }}
           isOpen={isModalOpen}
           onClose={handleCloseModal}
