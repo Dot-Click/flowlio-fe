@@ -311,15 +311,27 @@ const AppRoutes = () => {
         />
         <Route element={<LazyWrapper component={UserLayout} />} path="user" />
         <Route
-          element={<LazyWrapper component={AddUserMembersPage} />}
+          element={
+            <SubAdminRoute>
+              <LazyWrapper component={AddUserMembersPage} />
+            </SubAdminRoute>
+          }
           path="user-management/add-user-members"
         />
         <Route
-          element={<LazyWrapper component={UserManagementPage} />}
+          element={
+            <SubAdminRoute>
+              <LazyWrapper component={UserManagementPage} />
+            </SubAdminRoute>
+          }
           path="user-management"
         />
         <Route
-          element={<LazyWrapper component={PaymentLinksPage} />}
+          element={
+            <SubAdminRoute>
+              <LazyWrapper component={PaymentLinksPage} />
+            </SubAdminRoute>
+          }
           path="payment-links"
         />
         <Route
@@ -327,15 +339,27 @@ const AppRoutes = () => {
           path="support"
         />
         <Route
-          element={<LazyWrapper component={InvoicePage} />}
+          element={
+            <SubAdminRoute>
+              <LazyWrapper component={InvoicePage} />
+            </SubAdminRoute>
+          }
           path="invoice"
         />
         <Route
-          element={<LazyWrapper component={ClientManagementPage} />}
+          element={
+            <SubAdminRoute>
+              <LazyWrapper component={ClientManagementPage} />
+            </SubAdminRoute>
+          }
           path="client-management"
         />
         <Route
-          element={<LazyWrapper component={CreateClient} />}
+          element={
+            <SubAdminRoute>
+              <LazyWrapper component={CreateClient} />
+            </SubAdminRoute>
+          }
           path="client-management/create-client"
         />
         <Route

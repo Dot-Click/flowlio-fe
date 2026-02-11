@@ -55,20 +55,14 @@ export const subAdmin = ac.newRole({
   Settings: ["view", "update"],
 });
 
-// User: Basic access - can view dashboard and settings
+// User (Member): No access to financial/sensitive - Invoices, Payment Links, Client Management, User Management restricted to Admin/Manager only
 export const user = ac.newRole({
   Dashboard: ["view"],
-  "Client Management": ["create", "read", "update", "delete", "impersonate"],
-  "User Management": adminAc.statements.user,
   TimeTracking: ["read", "update"],
-  "Sub Admin Management": ["create", "read", "update", "delete", "impersonate"],
   Projects: ["create", "read", "update", "delete"],
   "Task Management": ["create", "read", "update", "delete"],
   Calender: ["create", "read", "update", "delete"],
-  Invoices: ["create", "read", "update", "delete"],
   "AI Assist": ["use", "create", "read", "update", "delete"],
-  "Payment Links": ["create", "read"],
-  // "My Subscriptions": ["read"],
   "Support Tickets": ["create", "read", "update", "delete"],
   Settings: ["view", "update"],
   Notifications: ["read", "view", "update", "delete"],

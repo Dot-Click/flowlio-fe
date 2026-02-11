@@ -86,8 +86,7 @@ const operatorNavItems: NavItem[] = [
   },
 ];
 
-// User navigation items (basic user)
-// Can view: Dashboard, My Tasks, Settings
+// User (Member) navigation items - no Invoices, Payment Links, Client Management, User Management (Admin/Manager only)
 const userNavItems: NavItem[] = [
   {
     title: "Dashboard",
@@ -105,16 +104,6 @@ const userNavItems: NavItem[] = [
     icon: React.createElement(TaskManagementIcon),
   },
   {
-    url: "/dashboard/user-management",
-    title: "User Management",
-    icon: React.createElement(LuUsers),
-  },
-  {
-    url: "/dashboard/client-management",
-    title: "Client Management",
-    icon: React.createElement(UserPen),
-  },
-  {
     url: "/dashboard/calender",
     title: "Calender",
     icon: React.createElement(IoCalendarOutline),
@@ -128,16 +117,6 @@ const userNavItems: NavItem[] = [
     url: "/dashboard/ai-assist",
     title: "AI Assistance",
     icon: React.createElement(LuWandSparkles),
-  },
-  {
-    url: "/dashboard/payment-links",
-    title: "Payment Links",
-    icon: React.createElement(TbReportSearch),
-  },
-  {
-    url: "/dashboard/invoice",
-    title: "Invoices",
-    icon: React.createElement(TbInvoice),
   },
   {
     url: "/dashboard/subscription",
