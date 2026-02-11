@@ -126,6 +126,7 @@ export const CreateTask = ({
   const { data: projectsResponse } = useFetchProjects();
   const { data: usersResponse } = useFetchOrganizationUsers();
   const { data: taskData } = useFetchTaskById(taskId || "");
+  const { data: parentTaskData } = useFetchTaskById(parentId || "");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -184,6 +185,13 @@ export const CreateTask = ({
       form.setValue("endDate", start);
     }
   }, [watchedStartDate, form]);
+
+  // When in subtask mode, pre-fill project from parent task
+  useEffect(() => {
+    if (parentId && parentTaskData?.data?.projectId) {
+      form.setValue("projectId", parentTaskData.data.projectId);
+    }
+  }, [parentId, parentTaskData?.data?.projectId, form]);
 
   // Pre-fill form with task data if in edit mode (basic fields first so assignee fetch runs)
   useEffect(() => {
@@ -371,6 +379,7 @@ export const CreateTask = ({
           startDate: values.startDate?.toISOString(),
           endDate: values.endDate?.toISOString(),
           attachments: attachmentData ? [attachmentData] : undefined,
+          parentId: values.parentId || undefined,
           startAfter: values.startAfter || null,
           finishBefore: values.finishBefore || null,
         };
@@ -545,6 +554,7 @@ export const CreateTask = ({
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        disabled={!!parentId}
                       >
                         <FormControl className="w-full h-12">
                           <SelectTrigger

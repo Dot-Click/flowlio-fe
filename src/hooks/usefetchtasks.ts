@@ -111,3 +111,16 @@ export const useFetchTaskById = (taskId: string) => {
     gcTime: 10 * 60 * 1000, // 10 minutes
   });
 };
+
+export const useFetchSubtasks = (parentTaskId: string | undefined) => {
+  return useQuery({
+    queryKey: ["tasks", "subtasks", parentTaskId],
+    queryFn: async (): Promise<GetTasksResponse> => {
+      const response = await axios.get(`/tasks/${parentTaskId}/subtasks`);
+      return response.data;
+    },
+    enabled: !!parentTaskId,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+  });
+};
