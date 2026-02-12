@@ -140,6 +140,80 @@ const userNavItems: NavItem[] = [
   },
 ];
 
+// User as organization owner (purchaser): same as user + Invoices, Payment Links, Client Management, User Management
+const userOrgOwnerNavItems: NavItem[] = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: React.createElement(SquareKanban),
+  },
+  {
+    url: "/dashboard/project",
+    title: "Projects",
+    icon: React.createElement(GroupIcon),
+  },
+  {
+    url: "/dashboard/task-management",
+    title: "Tasks Management",
+    icon: React.createElement(TaskManagementIcon),
+  },
+  {
+    url: "/dashboard/user-management",
+    title: "User Management",
+    icon: React.createElement(LuUsers),
+  },
+  {
+    url: "/dashboard/client-management",
+    title: "Client Management",
+    icon: React.createElement(UserPen),
+  },
+  {
+    url: "/dashboard/calender",
+    title: "Calender",
+    icon: React.createElement(IoCalendarOutline),
+  },
+  {
+    url: "/dashboard/time-tracking",
+    title: "Time Tracking",
+    icon: React.createElement(Clock),
+  },
+  {
+    url: "/dashboard/ai-assist",
+    title: "AI Assistance",
+    icon: React.createElement(LuWandSparkles),
+  },
+  {
+    url: "/dashboard/payment-links",
+    title: "Payment Links",
+    icon: React.createElement(TbReportSearch),
+  },
+  {
+    url: "/dashboard/invoice",
+    title: "Invoices",
+    icon: React.createElement(TbInvoice),
+  },
+  {
+    url: "/dashboard/subscription",
+    title: "My Subscriptions",
+    icon: React.createElement(BadgeDollarSign),
+  },
+  {
+    url: "/dashboard/support",
+    title: "Support Tickets",
+    icon: React.createElement(MessageCircleQuestion),
+  },
+  {
+    url: "/dashboard/notifications",
+    title: "Notifications",
+    icon: React.createElement(Bell),
+  },
+  {
+    url: "/dashboard/settings",
+    title: "Settings",
+    icon: React.createElement(IoSettingsOutline),
+  },
+];
+
 // Sub Admin navigation items (same as super admin but without sub admin creation)
 // Can access: All features except creating sub admins
 const subAdminNavItems: NavItem[] = [
@@ -292,11 +366,19 @@ const superAdminNavItems: NavItem[] = [
 ];
 
 /**
- * Get navigation items based on user role
+ * Get navigation items based on user role (and org owner flag for role "user").
+ * Organization owner (user + isOrganizationOwner) sees Invoices, Payment Links, Client Management, User Management.
  * @param role - User role (superadmin, subadmin, operator, viewer, user)
+ * @param isOrganizationOwner - If true and role is "user", show financial/admin pages (sidebar)
  * @returns Array of navigation items for the role
  */
-export const getNavigationItemsByRole = (role: string): NavItem[] => {
+export const getNavigationItemsByRole = (
+  role: string,
+  isOrganizationOwner?: boolean
+): NavItem[] => {
+  if (role === "user" && isOrganizationOwner === true) {
+    return userOrgOwnerNavItems;
+  }
   switch (role) {
     case "superadmin":
       return superAdminNavItems;
@@ -313,13 +395,18 @@ export const getNavigationItemsByRole = (role: string): NavItem[] => {
 };
 
 /**
- * Check if user has access to a specific route
+ * Check if user has access to a specific route (respects isOrganizationOwner for role "user").
  * @param role - User role
  * @param route - Route to check access for
+ * @param isOrganizationOwner - If true and role is "user", allow financial/admin routes
  * @returns boolean indicating if user has access
  */
-export const hasRouteAccess = (role: string, route: string): boolean => {
-  const navItems = getNavigationItemsByRole(role);
+export const hasRouteAccess = (
+  role: string,
+  route: string,
+  isOrganizationOwner?: boolean
+): boolean => {
+  const navItems = getNavigationItemsByRole(role, isOrganizationOwner);
   return navItems.some((item) => {
     if (item.url === route) return true;
     if (item.subItems) {

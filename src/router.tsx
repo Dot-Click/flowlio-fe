@@ -6,6 +6,7 @@ import {
   SuperAdminRoute,
   SubAdminRoute,
   ViewerRoute,
+  AdminManagerOrOrgOwnerRoute,
 } from "./components/common/ProtectedRoute";
 import {
   useSessionPersistence,
@@ -312,25 +313,25 @@ const AppRoutes = () => {
         <Route element={<LazyWrapper component={UserLayout} />} path="user" />
         <Route
           element={
-            <SubAdminRoute>
+            <AdminManagerOrOrgOwnerRoute>
               <LazyWrapper component={AddUserMembersPage} />
-            </SubAdminRoute>
+            </AdminManagerOrOrgOwnerRoute>
           }
           path="user-management/add-user-members"
         />
         <Route
           element={
-            <SubAdminRoute>
+            <AdminManagerOrOrgOwnerRoute>
               <LazyWrapper component={UserManagementPage} />
-            </SubAdminRoute>
+            </AdminManagerOrOrgOwnerRoute>
           }
           path="user-management"
         />
         <Route
           element={
-            <SubAdminRoute>
+            <AdminManagerOrOrgOwnerRoute>
               <LazyWrapper component={PaymentLinksPage} />
-            </SubAdminRoute>
+            </AdminManagerOrOrgOwnerRoute>
           }
           path="payment-links"
         />
@@ -340,25 +341,25 @@ const AppRoutes = () => {
         />
         <Route
           element={
-            <SubAdminRoute>
+            <AdminManagerOrOrgOwnerRoute>
               <LazyWrapper component={InvoicePage} />
-            </SubAdminRoute>
+            </AdminManagerOrOrgOwnerRoute>
           }
           path="invoice"
         />
         <Route
           element={
-            <SubAdminRoute>
+            <AdminManagerOrOrgOwnerRoute>
               <LazyWrapper component={ClientManagementPage} />
-            </SubAdminRoute>
+            </AdminManagerOrOrgOwnerRoute>
           }
           path="client-management"
         />
         <Route
           element={
-            <SubAdminRoute>
+            <AdminManagerOrOrgOwnerRoute>
               <LazyWrapper component={CreateClient} />
-            </SubAdminRoute>
+            </AdminManagerOrOrgOwnerRoute>
           }
           path="client-management/create-client"
         />

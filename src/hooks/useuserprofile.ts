@@ -15,6 +15,8 @@ interface UserProfile {
   twoFactorEnabled: boolean;
   image: string | null;
   isSuperAdmin: boolean;
+  /** True when user is the account purchaser (organization owner); returned by backend */
+  isOrganizationOwner?: boolean;
   role: string;
   subadminId: string | null;
   status?: string | null; // User status: "pending" | "active"

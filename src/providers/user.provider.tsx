@@ -33,6 +33,8 @@ type Data = {
     role: Role;
     subadminId: string;
     isSuperAdmin: boolean;
+    /** Set true for account purchaser (org owner); allows Invoices, Payment Links, Client Management, User Management */
+    isOrganizationOwner?: boolean;
     organizationId?: string;
     organization?: {
       id: string;

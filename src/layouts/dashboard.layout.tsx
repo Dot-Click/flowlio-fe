@@ -37,9 +37,12 @@ export const DashboardLayout = () => {
         return;
       }
 
-      // For all other users (operators, regular users), stay in dashboard
+      // For all other users (operators, regular users, org owners), stay in dashboard
       const userRole = user.role || "user";
-      const roleBasedNavItems = getNavigationItemsByRole(userRole);
+      const roleBasedNavItems = getNavigationItemsByRole(
+        userRole,
+        user.isOrganizationOwner
+      );
       setNavItems(roleBasedNavItems);
     }
   }, [userData, isLoading, navigate]);

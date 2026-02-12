@@ -1,6 +1,11 @@
 import { defaultStatements, adminAc } from "better-auth/plugins/admin/access";
 import { createAccessControl } from "better-auth/plugins/access";
 
+/**
+ * Role-based permissions. Note: Invoices, Payment Links, Client Management, User Management
+ * are also allowed for role "user" when isOrganizationOwner === true (org owner / purchaser).
+ * That condition is enforced in frontend route guards (AdminManagerOrOrgOwnerRoute) and in backend API checks.
+ */
 const pages = {
   ...defaultStatements,
   Dashboard: ["view"],
@@ -55,7 +60,7 @@ export const subAdmin = ac.newRole({
   Settings: ["view", "update"],
 });
 
-// User (Member): No access to financial/sensitive - Invoices, Payment Links, Client Management, User Management restricted to Admin/Manager only
+// User (Member): No access to financial/sensitive unless isOrganizationOwner (see comment above)
 export const user = ac.newRole({
   Dashboard: ["view"],
   TimeTracking: ["read", "update"],
