@@ -33,6 +33,7 @@ const DashboardLayout = lazy(() =>
     default: module.DashboardLayout,
   }))
 );
+
 const ResetpasswordPage = lazy(() => import("./pages/resetpassword.page"));
 const VerifyEmailPage = lazy(() => import("./pages/verifyemail.page"));
 const VerifyCodePage = lazy(() => import("./pages/verifycode.page"));
