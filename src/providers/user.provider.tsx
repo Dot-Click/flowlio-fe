@@ -177,7 +177,8 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
           user: {
             ...authData.user,
             ...userProfileData.data,
-            role: authData.user.role || userProfileData.data.role, // Use Better Auth role first, fallback to profile
+            // Prefer profile role so backend-updated role (e.g. viewer→user after Org Manager promote) wins over session
+            role: userProfileData.data.role || authData.user.role,
             subadminId: userProfileData.data.subadminId,
             isSuperAdmin: userProfileData.data.isSuperAdmin,
           },
