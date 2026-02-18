@@ -455,7 +455,7 @@ export const UserManagementTable = ({
                     {orgManagerModal.member?.name}
                   </span>{" "}
                   Organization Manager? They will have access to Invoices,
-                  Payment Links, Client Management, and User Management.
+                  Payment Links, and Client Management.
                 </>
               ) : (
                 <>

@@ -41,7 +41,8 @@ export const DashboardLayout = () => {
       const userRole = user.role || "user";
       const roleBasedNavItems = getNavigationItemsByRole(
         userRole,
-        user.isOrganizationOwner
+        user.isOrganizationOwner,
+        user.isOrganizationManager
       );
       setNavItems(roleBasedNavItems);
     }

@@ -17,6 +17,8 @@ interface UserProfile {
   isSuperAdmin: boolean;
   /** True when user is the account purchaser (organization owner); returned by backend */
   isOrganizationOwner?: boolean;
+  /** True when user is an organization manager; returned by backend */
+  isOrganizationManager?: boolean;
   role: string;
   subadminId: string | null;
   status?: string | null; // User status: "pending" | "active"
@@ -62,7 +64,7 @@ export const useUserProfile = (options?: { enabled?: boolean }) => {
             "Cache-Control": "no-cache",
             Pragma: "no-cache",
           },
-        }
+        },
       );
       return response.data;
     },

@@ -365,19 +365,32 @@ const superAdminNavItems: NavItem[] = [
   },
 ];
 
+// User as organization manager: same as owner but without User Management
+const userOrgManagerNavItems: NavItem[] = userOrgOwnerNavItems.filter(
+  (item) => item.title !== "User Management",
+);
+
 /**
- * Get navigation items based on user role (and org owner flag for role "user").
+ * Get navigation items based on user role (and org owner/manager flags for role "user").
  * Organization owner (user + isOrganizationOwner) sees Invoices, Payment Links, Client Management, User Management.
+ * Organization manager (user + isOrganizationManager) sees all except User Management.
  * @param role - User role (superadmin, subadmin, operator, viewer, user)
  * @param isOrganizationOwner - If true and role is "user", show financial/admin pages (sidebar)
+ * @param isOrganizationManager - If true and role is "user", show financial/admin pages except User Management
  * @returns Array of navigation items for the role
  */
 export const getNavigationItemsByRole = (
   role: string,
-  isOrganizationOwner?: boolean
+  isOrganizationOwner?: boolean,
+  isOrganizationManager?: boolean,
 ): NavItem[] => {
-  if (role === "user" && isOrganizationOwner === true) {
-    return userOrgOwnerNavItems;
+  if (role === "user") {
+    if (isOrganizationOwner === true) {
+      return userOrgOwnerNavItems;
+    }
+    if (isOrganizationManager === true) {
+      return userOrgManagerNavItems;
+    }
   }
   switch (role) {
     case "superadmin":
@@ -404,9 +417,14 @@ export const getNavigationItemsByRole = (
 export const hasRouteAccess = (
   role: string,
   route: string,
-  isOrganizationOwner?: boolean
+  isOrganizationOwner?: boolean,
+  isOrganizationManager?: boolean,
 ): boolean => {
-  const navItems = getNavigationItemsByRole(role, isOrganizationOwner);
+  const navItems = getNavigationItemsByRole(
+    role,
+    isOrganizationOwner,
+    isOrganizationManager,
+  );
   return navItems.some((item) => {
     if (item.url === route) return true;
     if (item.subItems) {
@@ -445,7 +463,7 @@ export const getRolePageTitle = (role: string): string => {
  */
 export const getRoleWelcomeMessage = (
   role: string,
-  userName: string
+  userName: string,
 ): string => {
   switch (role) {
     case "superadmin":

@@ -7,6 +7,7 @@ import {
   SubAdminRoute,
   ViewerRoute,
   AdminManagerOrOrgOwnerRoute,
+  OrgOwnerOnlyRoute,
 } from "./components/common/ProtectedRoute";
 import {
   useSessionPersistence,
@@ -314,17 +315,17 @@ const AppRoutes = () => {
         <Route element={<LazyWrapper component={UserLayout} />} path="user" />
         <Route
           element={
-            <AdminManagerOrOrgOwnerRoute>
+            <OrgOwnerOnlyRoute>
               <LazyWrapper component={AddUserMembersPage} />
-            </AdminManagerOrOrgOwnerRoute>
+            </OrgOwnerOnlyRoute>
           }
           path="user-management/add-user-members"
         />
         <Route
           element={
-            <AdminManagerOrOrgOwnerRoute>
+            <OrgOwnerOnlyRoute>
               <LazyWrapper component={UserManagementPage} />
-            </AdminManagerOrOrgOwnerRoute>
+            </OrgOwnerOnlyRoute>
           }
           path="user-management"
         />

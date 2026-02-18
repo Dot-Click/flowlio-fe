@@ -35,6 +35,8 @@ type Data = {
     isSuperAdmin: boolean;
     /** Set true for account purchaser (org owner); allows Invoices, Payment Links, Client Management, User Management */
     isOrganizationOwner?: boolean;
+    /** Allows same access as owner except User Management */
+    isOrganizationManager?: boolean;
     organizationId?: string;
     organization?: {
       id: string;
@@ -181,6 +183,7 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
             role: userProfileData.data.role || authData.user.role,
             subadminId: userProfileData.data.subadminId,
             isSuperAdmin: userProfileData.data.isSuperAdmin,
+            isOrganizationManager: userProfileData.data.isOrganizationManager,
           },
         };
         setData(enhancedData as unknown as Data);
