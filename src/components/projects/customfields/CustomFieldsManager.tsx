@@ -20,8 +20,12 @@ import { Trash2, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 
-export const CustomFieldsManager = () => {
-  const { data: customFieldsData, isLoading } = useFetchCustomFields("project");
+interface CustomFieldsManagerProps {
+  entityType?: "project" | "client";
+}
+
+export const CustomFieldsManager = ({ entityType = "project" }: CustomFieldsManagerProps) => {
+  const { data: customFieldsData, isLoading } = useFetchCustomFields(entityType);
   const { mutate: createField, isPending: isCreating } = useCreateCustomField();
   const { mutate: deleteField, isPending: isDeleting } = useDeleteCustomField();
 
@@ -46,7 +50,7 @@ export const CustomFieldsManager = () => {
         name: newFieldName,
         type: newFieldType,
         options: newFieldType === "select" ? newFieldOptions : undefined,
-        entityType: "project",
+        entityType: entityType,
       },
       {
         onSuccess: () => {

@@ -33,6 +33,7 @@ import { Stack } from "../ui/stack";
 import { useFetchOrganizationClients } from "@/hooks/usefetchclients";
 import { useDeleteClient } from "@/hooks/usedeleteclient";
 import { useUpdateClient } from "@/hooks/useupdateclient";
+import { useFetchCustomFields } from "@/hooks/usecustomfields";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
 import {
@@ -88,6 +89,7 @@ export type Data = {
   updatedAt: string;
   projects?: Project[];
   socialMediaLinks?: string; // JSON string
+  customFields?: Record<string, any>;
 };
 
 export const ClientManagementTable = () => {
@@ -102,6 +104,9 @@ export const ClientManagementTable = () => {
     error,
     refetch,
   } = useFetchOrganizationClients();
+
+  // Fetch custom field definitions for clients
+  const { data: customFieldsData } = useFetchCustomFields("client");
 
   const { mutate: deleteClient, isPending: isDeleting } = useDeleteClient();
   const { mutate: updateClient, isPending: isUpdatingStatus } =
@@ -408,6 +413,35 @@ export const ClientManagementTable = () => {
       },
     },
 
+    // Dynamic Custom Columns
+    ...(customFieldsData?.data.map((field) => ({
+      accessorKey: `customFields.${field.id}`,
+      id: field.id,
+      header: () => (
+        <Box className="text-center text-black p-1">{field.name}</Box>
+      ),
+      cell: ({ row }: { row: any }) => {
+        const val = row.original.customFields?.[field.id];
+
+        let displayValue = val;
+        if (field.type === "boolean") {
+          displayValue = val === "true" || val === true ? "Yes" : "No";
+        } else if (field.type === "date" && val) {
+          try {
+            displayValue = new Date(val).toLocaleDateString();
+          } catch (e) {
+            displayValue = val;
+          }
+        }
+
+        return (
+          <Box className="text-center p-1 capitalize">
+            {displayValue !== undefined && displayValue !== null && displayValue !== "" ? String(displayValue) : "-"}
+          </Box>
+        );
+      },
+    })) || []),
+
     {
       accessorKey: "actions",
       header: () => <Box className="text-center text-black">Actions</Box>,
@@ -497,6 +531,7 @@ export const ClientManagementTable = () => {
           ? client.socialMediaLinks
           : JSON.stringify(client.socialMediaLinks)
         : undefined,
+      customFields: client.customFields || {},
     })) || mockData;
 
   // Show loading state
@@ -627,6 +662,50 @@ export const ClientManagementTable = () => {
                 </Box>
               </Box>
             )}
+
+            {/* Custom Fields Section */}
+            {customFieldsData?.data &&
+              customFieldsData.data.length > 0 &&
+              selectedClient.customFields &&
+              Object.keys(selectedClient.customFields).length > 0 && (
+                <Box className="mt-6">
+                  <span className="text-lg font-semibold text-gray-800 mb-2 block">
+                    Custom Fields
+                  </span>
+                  <Box className="grid grid-cols-2 gap-4">
+                    {customFieldsData.data.map((field) => {
+                      const value = selectedClient.customFields?.[field.id];
+                      if (value === undefined || value === null || value === "")
+                        return null;
+
+                      let displayValue = value;
+                      if (field.type === "boolean") {
+                        displayValue = value === "true" || value === true ? "Yes" : "No";
+                      } else if (field.type === "date" && value) {
+                        try {
+                          displayValue = new Date(value).toLocaleDateString();
+                        } catch (e) {
+                          displayValue = value;
+                        }
+                      }
+
+                      return (
+                        <Box
+                          key={field.id}
+                          className="p-3 border border-gray-100 rounded-lg bg-gray-50/50"
+                        >
+                          <span className="text-xs font-medium text-gray-500 block">
+                            {field.name}
+                          </span>
+                          <span className="text-sm text-gray-800 font-semibold">
+                            {displayValue}
+                          </span>
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                </Box>
+              )}
 
             <Box className="mt-6">
               <span className="text-lg font-semibold text-gray-800 mb-2 block">

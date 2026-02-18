@@ -73,7 +73,7 @@ export const ProjectHeader = () => {
       <GeneralModal {...customFieldsModal}>
         <Box className="p-1">
           <h2 className="text-xl font-semibold mb-4">Manage Custom Fields</h2>
-          <CustomFieldsManager />
+          <CustomFieldsManager entityType="project" />
         </Box>
       </GeneralModal>
     </PageWrapper>
