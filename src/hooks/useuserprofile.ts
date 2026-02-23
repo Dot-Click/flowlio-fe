@@ -51,6 +51,8 @@ interface UserProfile {
     isDemo: boolean;
     passwordChanged: boolean;
   } | null;
+  /** For role "client": the client record id for API calls (projects, tasks, invoices) */
+  clientId?: string | null;
 }
 
 export const useUserProfile = (options?: { enabled?: boolean }) => {

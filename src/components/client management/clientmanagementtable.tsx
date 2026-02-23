@@ -22,7 +22,7 @@ import {
   FaSnapchat,
   FaPinterest,
 } from "react-icons/fa";
-import { Ellipsis, Eye, Pencil, Loader2 } from "lucide-react";
+import { Ellipsis, Eye, Pencil, Loader2, KeyRound } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
   GeneralModal,
@@ -43,6 +43,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+// import { GrantAccessModal } from "./GrantAccessModal";
 
 // Mock data for fallback (will be replaced by API data)
 const mockData: Data[] = [
@@ -95,6 +96,7 @@ export type Data = {
 export const ClientManagementTable = () => {
   const props = useGeneralModalDisclosure();
   const [selectedClient, setSelectedClient] = useState<Data | null>(null);
+  // const [grantAccessClient, setGrantAccessClient] = useState<Data | null>(null);
   const navigate = useNavigate();
 
   // Fetch clients from API
@@ -487,6 +489,23 @@ export const ClientManagementTable = () => {
                 <TooltipTrigger asChild>
                   <Button
                     variant="outline"
+                    className="bg-amber-500 border-none w-9 h-9 hover:bg-amber-600 cursor-pointer rounded-md text-white"
+                    // onClick={() => setGrantAccessClient(row.original)}
+                  >
+                    <KeyRound className="text-white size-5 " />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="mb-2">
+                  <p>Grant portal access</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
                     className="bg-[#A50403] border-none w-9 h-9 hover:bg-[#A50403]/80 cursor-pointer rounded-md "
                     onClick={() =>
                       handleDeleteClient(row.original.id, row.original.name)
@@ -560,6 +579,18 @@ export const ClientManagementTable = () => {
 
   return (
     <>
+      {/* {grantAccessClient && (
+        <GrantAccessModal
+          open={!!grantAccessClient}
+          onOpenChange={(open) => !open && setGrantAccessClient(null)}
+          clientId={grantAccessClient.id}
+          clientName={grantAccessClient.name}
+          onSuccess={() => {
+            refetch();
+            setGrantAccessClient(null);
+          }}
+        />
+      )} */}
       <ReusableTable
         data={tableData}
         columns={columns}

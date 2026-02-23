@@ -9,9 +9,28 @@ import { GroupIcon, TaskManagementIcon } from "@/components/customeIcons";
 import { MessageCircleQuestion, Bell } from "lucide-react";
 import type { NavItem } from "@/components/admin/appsidebar";
 import { BadgeDollarSign } from "lucide-react";
+import { FolderOpen, ListTodo, FileText } from "lucide-react";
 
-// Viewer navigation items (read-only access)
-// Can view: Dashboard, Projects, My Tasks, Support Tickets, Settings
+// Client portal: three sections – Project Management, Task Management, Invoices
+const clientNavItems: NavItem[] = [
+  {
+    title: "Project Management",
+    url: "/clients/projects",
+    icon: React.createElement(FolderOpen),
+  },
+  {
+    title: "Task Management",
+    url: "/clients/tasks",
+    icon: React.createElement(ListTodo),
+  },
+  {
+    title: "Invoices",
+    url: "/clients/invoices",
+    icon: React.createElement(FileText),
+  },
+]; 
+
+
 const viewerNavItems: NavItem[] = [
   {
     title: "Viewer",
@@ -401,6 +420,8 @@ export const getNavigationItemsByRole = (
       return operatorNavItems;
     case "viewer":
       return viewerNavItems;
+    case "client":
+      return clientNavItems;
     case "user":
     default:
       return userNavItems;

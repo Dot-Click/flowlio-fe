@@ -10,7 +10,7 @@ import { DemoPasswordGuard } from "./demopasswordguard";
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  requiredRole?: "superadmin" | "subadmin" | "operator" | "viewer" | "user";
+  requiredRole?: "superadmin" | "subadmin" | "operator" | "viewer" | "user" | "client";
   requiredOrganization?: boolean;
 }
 
@@ -20,10 +20,13 @@ const ROLE_HIERARCHY: Record<string, number> = {
   operator: 3,
   subadmin: 4,
   superadmin: 5,
+  // client is separate: only exact match, no hierarchy
+  client: -1,
 };
 
 const hasRole = (userRole: string, requiredRole: string): boolean => {
-  return ROLE_HIERARCHY[userRole] >= ROLE_HIERARCHY[requiredRole];
+  if (requiredRole === "client") return userRole === "client";
+  return (ROLE_HIERARCHY[userRole] ?? 0) >= (ROLE_HIERARCHY[requiredRole] ?? 0);
 };
 
 export const ProtectedRoute = ({
@@ -70,6 +73,9 @@ export const ProtectedRoute = ({
             break;
           case "viewer":
             fallbackPath = "/viewer";
+            break;
+          case "client":
+            fallbackPath = "/clients";
             break;
           case "subadmin":
           case "operator":
@@ -154,6 +160,11 @@ export const ViewerRoute = ({ children }: { children: ReactNode }) => (
 
 export const UserRoute = ({ children }: { children: ReactNode }) => (
   <ProtectedRoute requiredRole="user">{children}</ProtectedRoute>
+);
+
+/** Client portal: only role "client" can access /clients */
+export const ClientRoute = ({ children }: { children: ReactNode }) => (
+  <ProtectedRoute requiredRole="client">{children}</ProtectedRoute>
 );
 
 /** Allow: superadmin, subadmin, or user with isOrganizationOwner (Invoices, Payment Links, Client Management, User Management) */

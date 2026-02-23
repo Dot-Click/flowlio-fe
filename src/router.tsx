@@ -1,11 +1,12 @@
 import { lazy } from "react";
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { LazyWrapper } from "./components/common/LazyWrapper";
 import {
   ProtectedRoute,
   SuperAdminRoute,
   SubAdminRoute,
   ViewerRoute,
+  ClientRoute,
   AdminManagerOrOrgOwnerRoute,
   OrgOwnerOnlyRoute,
 } from "./components/common/ProtectedRoute";
@@ -435,6 +436,18 @@ const AppRoutes = () => {
           element={<LazyWrapper component={SuperAdminDashboardPage} />}
         />
         <Route path="*" element={<LazyWrapper component={NotFound} />} />
+      </Route>
+
+      {/* Client portal - same layout as dashboard (sidebar + navbar), requires client role */}
+      <Route
+        path="/clients"
+        element={
+          <ClientRoute>
+            <LazyWrapper component={DashboardLayout} />
+          </ClientRoute>
+        }
+      >
+       
       </Route>
 
       {/* Viewer layout - requires viewer role */}

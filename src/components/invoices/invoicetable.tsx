@@ -7,6 +7,8 @@ import { Checkbox } from "../ui/checkbox";
 import { Flex } from "../ui/flex";
 import { CircleCheck, FileText, Download, Trash2 } from "lucide-react";
 import { useFetchInvoices, Invoice } from "@/hooks/usefetchinvoices";
+import { useFetchClientInvoices } from "@/hooks/useFetchClientPortalData";
+import { useUser } from "@/providers/user.provider";
 import { useDeleteInvoice } from "@/hooks/usedeleteinvoice";
 import { useGenerateInvoicePDF } from "@/hooks/usegenerateinvoicepdf";
 import { useCallback } from "react";
@@ -158,7 +160,16 @@ interface InvoiceTableProps {
 }
 
 export const InvoiceTable = ({ onTableStateChange }: InvoiceTableProps) => {
-  const { data: invoicesData, isLoading, error } = useFetchInvoices();
+  const { data: userData } = useUser();
+  const isClient = userData?.user?.role === "client";
+  const clientId = userData?.user?.clientId ?? userData?.user?.id ?? null;
+
+  const orgInvoices = useFetchInvoices();
+  const clientInvoices = useFetchClientInvoices(isClient ? clientId : null);
+
+  const invoicesData = isClient ? clientInvoices.data : orgInvoices.data;
+  const isLoading = isClient ? clientInvoices.isLoading : orgInvoices.isLoading;
+  const error = isClient ? clientInvoices.error : orgInvoices.error;
 
   // Memoize the callback to prevent infinite loops
   const handleTableStateChange = useCallback(

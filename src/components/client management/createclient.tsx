@@ -113,6 +113,7 @@ const formSchema = z.object({
     )
     .optional(),
   customFields: z.record(z.any()).optional(),
+  portalPassword: z.string().optional(),
 });
 
 interface ClientFormProps {
@@ -187,6 +188,7 @@ export const ClientForm = ({
         ? JSON.parse(client.socialMediaLinks)
         : [],
       customFields: client?.customFields || {},
+      portalPassword: "",
     },
   });
 
@@ -311,6 +313,14 @@ export const ClientForm = ({
     // Image upload is optional
     setImageError("");
 
+    // Validate password for create mode
+    if (mode === "create") {
+      if (!values.portalPassword || values.portalPassword.length < 8) {
+        toast.error("Password must be at least 8 characters.");
+        return;
+      }
+    }
+
     // Convert form data to match backend schema
     const clientData = {
       name: values.fullname,
@@ -324,6 +334,7 @@ export const ClientForm = ({
         socialMediaLinks.filter((link) => link.url.trim() !== "")
       ),
       customFields: values.customFields,
+      ...(mode === "create" && { password: values.portalPassword }),
     };
 
     if (mode === "edit") {
@@ -689,6 +700,39 @@ export const ClientForm = ({
                 )}
               />
             </Box>
+
+            {/* Grant Portal Access - Create mode only */}
+            {mode === "create" && (
+              <Box className="mt-6 p-4 border border-gray-200 rounded-xl bg-gray-50/80">
+                <Stack className="gap-4">
+                  <h1 className="text-black text-xl font-medium">
+                    Client Portal Access
+                  </h1>
+                  <p className="text-gray-600 text-sm">
+                    Every client will have portal access to view projects, tasks & invoices
+                  </p>
+                  <FormField
+                    control={form.control}
+                    name="portalPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Portal password (required)</FormLabel>
+                        <FormControl>
+                          <Input
+                            className="bg-white rounded-full placeholder:text-gray-400 max-w-md"
+                            size="xl"
+                            type="password"
+                            placeholder="Min. 8 characters"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </Stack>
+              </Box>
+            )}
 
             {/* Social Media Links Section */}
             <Box className="mt-6">

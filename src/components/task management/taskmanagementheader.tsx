@@ -14,12 +14,21 @@ import { CustomDropdown, CustomDropdownItem } from "../ui/custom-dropdown";
 import { useFetchTasks } from "@/hooks/usefetchtasks";
 import { useFetchOrganizationUsers } from "@/hooks/usefetchorganizationusers";
 import { useFetchProjects } from "@/hooks/usefetchprojects";
+import {
+  useFetchClientTasks,
+  useFetchClientProjects,
+} from "@/hooks/useFetchClientPortalData";
+import { useUser } from "@/providers/user.provider";
 import { useUpdateTaskStatus } from "@/hooks/useupdatetask";
 import { format } from "date-fns";
 import { TaskDetailsModal } from "./taskdetailsmodal";
 
 export const TaskManagementHeader = () => {
   const navigate = useNavigate();
+  const { data: userData } = useUser();
+  const isClient = userData?.user?.role === "client";
+  const clientId = userData?.user?.clientId ?? userData?.user?.id ?? null;
+
   const [search, setSearch] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
@@ -27,14 +36,20 @@ export const TaskManagementHeader = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const hasInitializedProject = useRef(false);
 
-  // Fetch real data
-  const { data: tasksResponse } = useFetchTasks();
-  const { data: usersResponse } = useFetchOrganizationUsers();
-  const { data: projectsResponse } = useFetchProjects();
+  const orgTasks = useFetchTasks();
+  const clientTasks = useFetchClientTasks(isClient ? clientId : null);
+  const orgUsers = useFetchOrganizationUsers();
+  const orgProjects = useFetchProjects();
+  const clientProjects = useFetchClientProjects(isClient ? clientId : null);
+
+  const tasksResponse = isClient ? clientTasks.data : orgTasks.data;
+  const usersResponse = orgUsers.data;
+  const projectsResponse = isClient ? clientProjects.data : orgProjects.data;
+
   const updateTaskStatus = useUpdateTaskStatus();
 
   const realTasks = tasksResponse?.data || [];
-  const users = usersResponse?.data?.userMembers || [];
+  const users = isClient ? [] : (usersResponse?.data?.userMembers || []);
   const projects = projectsResponse?.data || [];
 
   // Set first project as default when projects are loaded (only once)
@@ -160,14 +175,16 @@ export const TaskManagementHeader = () => {
             </h1>
           </Stack>
 
-          <Button
-            variant="outline"
-            className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
-            onClick={() => navigate("/dashboard/task-management/create-task")}
-          >
-            <CirclePlus className="fill-white text-black size-5" />
-            Create Task
-          </Button>
+          {!isClient && (
+            <Button
+              variant="outline"
+              className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
+              onClick={() => navigate("/dashboard/task-management/create-task")}
+            >
+              <CirclePlus className="fill-white text-black size-5" />
+              Create Task
+            </Button>
+          )}
         </Center>
 
         <Flex className="justify-between max-sm:items-start flex-col lg:flex-row items-center w-full gap-4">

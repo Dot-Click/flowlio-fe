@@ -63,6 +63,8 @@ type Data = {
       organizationSize?: string;
       planId?: string;
     } | null;
+    /** For role "client": the client record id used for client-scoped API calls */
+    clientId?: string | null;
   };
   session: SessionObject["session"];
 };
@@ -184,6 +186,7 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
             subadminId: userProfileData.data.subadminId,
             isSuperAdmin: userProfileData.data.isSuperAdmin,
             isOrganizationManager: userProfileData.data.isOrganizationManager,
+            clientId: userProfileData.data.clientId,
           },
         };
         setData(enhancedData as unknown as Data);

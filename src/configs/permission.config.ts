@@ -96,6 +96,14 @@ export const operator = ac.newRole({
   Notifications: ["read", "view", "update", "delete"],
 });
 
+// Client: Portal access only - projects, tasks, invoices for their own data
+export const client = ac.newRole({
+  Dashboard: ["view"],
+  Projects: ["read"],
+  "Task Management": ["read"],
+  Invoices: ["read"],
+});
+
 // Export roles for the adminClient plugin - using the correct structure
 export const roles = {
   superadmin: superAdmin,
@@ -103,4 +111,5 @@ export const roles = {
   user: user,
   viewer: viewer,
   operator: operator,
+  client: client,
 };

@@ -28,6 +28,8 @@ import { Stack } from "../ui/stack";
 import { useNavigate } from "react-router";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { useFetchProjects, type Project } from "@/hooks/usefetchprojects";
+import { useFetchClientProjects } from "@/hooks/useFetchClientPortalData";
+import { useUser } from "@/providers/user.provider";
 import { toast } from "sonner";
 import { useDeleteProject } from "@/hooks/usedeleteproject";
 import { useQueryClient } from "@tanstack/react-query";
@@ -60,8 +62,17 @@ export type Data = Project & { customFields?: Record<string, any> };
 
 export const ProjectTable = () => {
   const { t } = useTranslation();
-  // Fetch projects from API
-  const { data: projectsData, isLoading, error } = useFetchProjects();
+  const { data: userData } = useUser();
+  const isClient = userData?.user?.role === "client";
+  const clientId = userData?.user?.clientId ?? userData?.user?.id ?? null;
+
+  const orgProjects = useFetchProjects();
+  const clientProjects = useFetchClientProjects(isClient ? clientId : null);
+
+  const projectsData = isClient ? clientProjects.data : orgProjects.data;
+  const isLoading = isClient ? clientProjects.isLoading : orgProjects.isLoading;
+  const error = isClient ? clientProjects.error : orgProjects.error;
+
   const queryClient = useQueryClient();
 
   // Handle API errors
