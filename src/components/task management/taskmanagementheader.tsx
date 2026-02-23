@@ -14,20 +14,14 @@ import { CustomDropdown, CustomDropdownItem } from "../ui/custom-dropdown";
 import { useFetchTasks } from "@/hooks/usefetchtasks";
 import { useFetchOrganizationUsers } from "@/hooks/usefetchorganizationusers";
 import { useFetchProjects } from "@/hooks/usefetchprojects";
-import {
-  useFetchClientTasks,
-  useFetchClientProjects,
-} from "@/hooks/useFetchClientPortalData";
-import { useUser } from "@/providers/user.provider";
+// removed client-specific hooks
 import { useUpdateTaskStatus } from "@/hooks/useupdatetask";
 import { format } from "date-fns";
 import { TaskDetailsModal } from "./taskdetailsmodal";
 
 export const TaskManagementHeader = () => {
   const navigate = useNavigate();
-  const { data: userData } = useUser();
-  const isClient = userData?.user?.role === "client";
-  const clientId = userData?.user?.clientId ?? userData?.user?.id ?? null;
+  // client-specific logic removed
 
   const [search, setSearch] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
@@ -37,19 +31,17 @@ export const TaskManagementHeader = () => {
   const hasInitializedProject = useRef(false);
 
   const orgTasks = useFetchTasks();
-  const clientTasks = useFetchClientTasks(isClient ? clientId : null);
   const orgUsers = useFetchOrganizationUsers();
   const orgProjects = useFetchProjects();
-  const clientProjects = useFetchClientProjects(isClient ? clientId : null);
 
-  const tasksResponse = isClient ? clientTasks.data : orgTasks.data;
+  const tasksResponse = orgTasks.data;
   const usersResponse = orgUsers.data;
-  const projectsResponse = isClient ? clientProjects.data : orgProjects.data;
+  const projectsResponse = orgProjects.data;
 
   const updateTaskStatus = useUpdateTaskStatus();
 
   const realTasks = tasksResponse?.data || [];
-  const users = isClient ? [] : (usersResponse?.data?.userMembers || []);
+  const users = usersResponse?.data?.userMembers || [];
   const projects = projectsResponse?.data || [];
 
   // Set first project as default when projects are loaded (only once)
@@ -175,7 +167,6 @@ export const TaskManagementHeader = () => {
             </h1>
           </Stack>
 
-          {!isClient && (
             <Button
               variant="outline"
               className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
@@ -184,7 +175,6 @@ export const TaskManagementHeader = () => {
               <CirclePlus className="fill-white text-black size-5" />
               Create Task
             </Button>
-          )}
         </Center>
 
         <Flex className="justify-between max-sm:items-start flex-col lg:flex-row items-center w-full gap-4">

@@ -1,5 +1,5 @@
 import { lazy } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router";
+import { BrowserRouter,  Route, Routes } from "react-router";
 import { LazyWrapper } from "./components/common/LazyWrapper";
 import {
   ProtectedRoute,
