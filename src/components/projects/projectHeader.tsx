@@ -66,7 +66,7 @@ export const ProjectHeader = () => {
       </Center>
 
 
-      {(!showGranttChart || isClient) && <ProjectTable />}
+      {(!showGranttChart || isClient) && <ProjectTable isClient={isClient} />}
 
       {!isClient && (
         <Box className="p-4">

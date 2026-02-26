@@ -52,7 +52,13 @@ import {
 } from "../ui/select";
 import { useUpdateProject } from "@/hooks/useupdateproject";
 
+import { useUser } from "@/providers/user.provider";
+
 export const ProjectView = () => {
+  const { data: userData } = useUser();
+  const user = userData?.user;
+  const isClient = user?.role === "client";
+
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -688,19 +694,21 @@ export const ProjectView = () => {
                   </span>
                 </Box>
                 <Box className="flex items-center gap-3">
-                  <Input
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={editProgress || 0}
-                    onChange={(e) => {
-                      const value = Number(e.target.value);
-                      if (isNaN(value)) return;
-                      setEditProgress(Math.max(0, Math.min(100, value)));
-                    }}
-                    className="w-24 bg-white"
-                    placeholder="0"
-                  />
+                  {!isClient && (
+                    <Input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={editProgress || 0}
+                      onChange={(e) => {
+                        const value = Number(e.target.value);
+                        if (isNaN(value)) return;
+                        setEditProgress(Math.max(0, Math.min(100, value)));
+                      }}
+                      className="w-24 bg-white"
+                      placeholder="0"
+                    />
+                  )}
                   <Progress
                     value={editProgress}
                     className="h-3 bg-gray-200 flex-1"
@@ -740,13 +748,27 @@ export const ProjectView = () => {
                 </Stack>
               </Box>
 
-              <Button
-                onClick={handleQuickUpdate}
-                disabled={isUpdating}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
-              >
-                {isUpdating ? "Saving..." : "Save Changes"}
-              </Button>
+              {!isClient && (
+                <Button
+                  onClick={handleQuickUpdate}
+                  disabled={isUpdating}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
+                >
+                  {isUpdating ? "Saving..." : "Save Changes"}
+                </Button>
+              )}
+
+              {isClient && editStatus === "completed" && (
+                <Button
+                  onClick={() => {
+                    handleAddComment("I approve this project completion.");
+                    toast.success("Project approved!");
+                  }}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+                >
+                  Approve Project
+                </Button>
+              )}
 
               <Box className="p-4 bg-white/70 rounded-lg border border-gray-100">
                 <Box className="flex justify-between items-center">
@@ -781,14 +803,16 @@ export const ProjectView = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 p-6">
-              <Button
-                variant="outline"
-                className="w-full justify-start bg-white hover:bg-purple-50 border-purple-200 text-purple-700 cursor-pointer"
-                onClick={handleEdit}
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Project
-              </Button>
+              {!isClient && (
+                <Button
+                  variant="outline"
+                  className="w-full justify-start bg-white hover:bg-purple-50 border-purple-200 text-purple-700 cursor-pointer"
+                  onClick={handleEdit}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Project
+                </Button>
+              )}
 
               <Button
                 variant="outline"

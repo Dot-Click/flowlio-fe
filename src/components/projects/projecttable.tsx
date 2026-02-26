@@ -59,12 +59,13 @@ import { useUpdateProject } from "@/hooks/useupdateproject";
 // Use the Project interface from the hook
 export type Data = Project & { customFields?: Record<string, any> };
 
-export const ProjectTable = () => {
+export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
   const { t } = useTranslation();
   const orgProjects = useFetchProjects();
   const projectsData = orgProjects.data;
   const isLoading = orgProjects.isLoading;
   const error = orgProjects.error;
+  console.log("Fetched projects data:", isClient);
 
   const queryClient = useQueryClient();
 
@@ -228,7 +229,7 @@ export const ProjectTable = () => {
     if (Object.keys(filters).length > 0) {
       for (const [key, value] of Object.entries(filters)) {
         const projectValue = project.customFields?.[key];
-        
+
         // Handle "ALL_VALUES_RESET"
         if (value === "ALL_VALUES_RESET") continue;
 
@@ -236,12 +237,12 @@ export const ProjectTable = () => {
 
         // Exact match for select/boolean
         if (projectValue !== value && typeof value !== 'string') return false;
-        
+
         // Partial match for text string
         if (typeof value === 'string' && typeof projectValue === 'string') {
-             if (!projectValue.toLowerCase().includes(value.toLowerCase())) return false;
+          if (!projectValue.toLowerCase().includes(value.toLowerCase())) return false;
         } else if (projectValue != value) {
-             return false;
+          return false;
         }
       }
     }
@@ -405,11 +406,11 @@ export const ProjectTable = () => {
           value: typeof status;
           label: string;
         }> = [
-          { value: "pending", label: "Pending" },
-          { value: "ongoing", label: "Ongoing" },
-          { value: "delayed", label: "Delayed" },
-          { value: "completed", label: "Completed" },
-        ];
+            { value: "pending", label: "Pending" },
+            { value: "ongoing", label: "Ongoing" },
+            { value: "delayed", label: "Delayed" },
+            { value: "completed", label: "Completed" },
+          ];
 
         return (
           <Center>
@@ -467,21 +468,21 @@ export const ProjectTable = () => {
         <Box className="text-center text-black p-1">{field.name}</Box>
       ),
       cell: ({ row }: { row: any }) => {
-         const val = row.original.customFields?.[field.id];
-         return (
-            <Box className="text-center p-1 capitalize">
-               {val !== undefined && val !== null ? String(val) : "-"}
-            </Box>
-         );
+        const val = row.original.customFields?.[field.id];
+        return (
+          <Box className="text-center p-1 capitalize">
+            {val !== undefined && val !== null ? String(val) : "-"}
+          </Box>
+        );
       }
     })) || []),
     {
       accessorKey: "actions",
       header: () => (
-         <Box className="text-center text-black">{t("common.actions")}</Box>
+        <Box className="text-center text-black">{t("common.actions")}</Box>
       ),
-       // ... existing actions cell
-       cell: ({ row }) => {
+      // ... existing actions cell
+      cell: ({ row }) => {
         return (
           <Center className="space-x-2">
             <TooltipProvider>
@@ -569,7 +570,7 @@ export const ProjectTable = () => {
   return (
     <>
       <Box className="flex justify-end px-4 mb-2">
-         <ProjectFilter onFilterChange={setFilters} />
+        <ProjectFilter onFilterChange={setFilters} />
       </Box>
 
       {isLoading ? (

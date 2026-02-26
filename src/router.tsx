@@ -186,6 +186,10 @@ const CreateClient = lazy(() =>
 );
 const SubscriptionsPage = lazy(() => import("./pages/subscriptions.page"));
 
+const ClientProjectsPage = lazy(() => import("./pages/clientprojects.page"));
+const ClientTasksPage = lazy(() => import("./pages/clienttasks.page"));
+const ClientInvoicesPage = lazy(() => import("./pages/clientinvoices.page"));
+
 // Main app routes component
 const AppRoutes = () => {
   // Track page visits for session persistence
@@ -447,7 +451,11 @@ const AppRoutes = () => {
           </ClientRoute>
         }
       >
-       
+        <Route index element={<LazyWrapper component={ViewermyProjectsPage} />} />
+        <Route path="projects" element={<LazyWrapper component={ClientProjectsPage} />} />
+        <Route path="projects/view/:id" element={<LazyWrapper component={ProjectViewPage} />} />
+        <Route path="tasks" element={<LazyWrapper component={ClientTasksPage} />} />
+        <Route path="invoices" element={<LazyWrapper component={ClientInvoicesPage} />} />
       </Route>
 
       {/* Viewer layout - requires viewer role */}

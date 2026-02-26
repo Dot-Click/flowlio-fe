@@ -186,7 +186,8 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
             subadminId: userProfileData.data.subadminId,
             isSuperAdmin: userProfileData.data.isSuperAdmin,
             isOrganizationManager: userProfileData.data.isOrganizationManager,
-            clientId: userProfileData.data.clientId,
+            clientId: userProfileData.data.clientId || userProfileData.data.clientProfile?.id,
+            organizationId: userProfileData.data.organizationId || userProfileData.data.clientProfile?.organizationId || (authData.user as any).organizationId,
           },
         };
         setData(enhancedData as unknown as Data);

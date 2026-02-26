@@ -51,6 +51,11 @@ interface UserProfile {
     isDemo: boolean;
     passwordChanged: boolean;
   } | null;
+  clientProfile?: {
+    id: string;
+    organizationId: string;
+    [key: string]: any;
+  } | null;
   /** For role "client": the client record id for API calls (projects, tasks, invoices) */
   clientId?: string | null;
 }
