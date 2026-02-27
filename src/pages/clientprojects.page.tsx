@@ -8,7 +8,7 @@ import { useFetchClientProjects } from "@/hooks/useFetchClientProjects";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Center } from "@/components/ui/center";
-import { ArrowUp, Eye, Download, MessageCircleReply, Trash2, EyeIcon } from "lucide-react";
+import { ArrowUp, Download, MessageCircleReply, Trash2, Eye } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button"; 
 import { useNavigate } from "react-router";
@@ -190,7 +190,7 @@ const ClientProjectsPage = () => {
                   className="bg-black border-none w-10 h-9 hover:bg-black/80 cursor-pointer rounded-md p-0"
                   onClick={() => navigate(`/clients/projects/view/${row.original.id}`)}
                 >
-                  <EyeIcon className="text-white size-5 fill-white" />
+                  <Eye className="text-white size-5 fill-white" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="mb-2">
