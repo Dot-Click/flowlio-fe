@@ -1,15 +1,23 @@
 import { Box } from "@/components/ui/box";
+import { Flex } from "@/components/ui/flex";
+import { Stack } from "@/components/ui/stack";
+import { Input } from "@/components/ui/input";
 import { ClientPortalHeader } from "@/components/client section/clientportalheader";
 import { ReusableTable } from "@/components/reusable/reusabletable";
 import { useFetchClientProjects } from "@/hooks/useFetchClientProjects";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { Eye, Download } from "lucide-react";
+import { Center } from "@/components/ui/center";
+import { ArrowUp, Eye, Download, MessageCircleReply, Trash2, EyeIcon } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button"; 
 import { useNavigate } from "react-router";
 import { useUser } from "@/providers/user.provider";
+import { GeneralModal, useGeneralModalDisclosure } from "@/components/common/generalmodal";
+import { useState } from "react";
+import { useFetchProjectComments } from "@/hooks/usefetchprojectcomments";
+import { useCreateProjectComment } from "@/hooks/usecreateprojectcomment";
+import { useDeleteProjectComment } from "@/hooks/usedeleteprojectcomment";
 
 const ClientProjectsPage = () => {
   const { data: userData } = useUser();
@@ -21,6 +29,53 @@ const ClientProjectsPage = () => {
     organizationId || undefined
   );
   
+  const props = useGeneralModalDisclosure();
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const [input, setInput] = useState("");
+  const [replyTo, setReplyTo] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState("");
+
+  const { data: commentsData, isLoading: commentsLoading } = useFetchProjectComments(activeProjectId || "");
+  const { mutate: createComment, isPending: isCreatingComment } = useCreateProjectComment();
+  const { mutate: deleteComment, isPending: isDeletingComment } = useDeleteProjectComment();
+
+  const commentsWithReplies = commentsData?.data || [];
+
+  const handleAddComment = (parentId?: string) => {
+    if (!activeProjectId || !input.trim()) return;
+    createComment({
+      projectId: activeProjectId,
+      content: input.trim(),
+      parentId: parentId || undefined,
+    });
+    setInput("");
+    setReplyTo(null);
+    setReplyContent("");
+  };
+
+  const handleAddReply = () => {
+    if (!activeProjectId || !replyTo || !replyContent.trim()) return;
+    createComment({
+      projectId: activeProjectId,
+      content: replyContent.trim(),
+      parentId: replyTo,
+    });
+    setReplyTo(null);
+    setReplyContent("");
+  };
+
+  const handleDeleteComment = (commentId: string) => {
+    deleteComment(commentId);
+  };
+
+  const openCommentModal = (projectId: string) => {
+    setActiveProjectId(projectId);
+    props.onOpenChange(true);
+    setInput("");
+    setReplyTo(null);
+    setReplyContent("");
+  };
+
   const navigate = useNavigate();
 
   const getStatusColor = (status: string) => {
@@ -37,66 +92,149 @@ const ClientProjectsPage = () => {
   const columns: ColumnDef<any>[] = [
     {
       accessorKey: "projectNumber",
-      header: "Project #",
-      cell: ({ row }) => <span className="font-medium">{row.original.projectNumber}</span>,
+      header: () => <Box className="text-center text-black">#</Box>,
+      cell: ({ row }) => <Box className="text-center">{row.original.projectNumber}</Box>,
     },
     {
       accessorKey: "projectName",
-      header: "Project Name",
-      cell: ({ row }) => <span className="font-semibold">{row.original.projectName}</span>,
+      header: () => <Box className="text-center text-black">Project Name</Box>,
+      cell: ({ row }) => <Box className="text-center">{row.original.projectName}</Box>,
     },
     {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => (
-        <Badge variant="outline" className={getStatusColor(row.original.status)}>
-          {row.original.status.charAt(0).toUpperCase() + row.original.status.slice(1)}
-        </Badge>
-      ),
+      accessorKey: "clientName",
+      header: () => <Box className="text-center text-black">Client</Box>,
+      cell: ({ row }) => <Box className="text-center">{row.original.clientName}</Box>,
     },
     {
-      accessorKey: "progress",
-      header: "Progress",
+      accessorKey: "assignedTo",
+      header: () => <Box className="text-center text-black">Assigned To</Box>,
+      cell: ({ row }) => <Box className="text-center">{row.original.assignedProject || "Unassigned"}</Box>,
+    },
+    {
+      accessorKey: "startDate",
+      header: () => <Box className="text-center text-black">Start Date</Box>,
       cell: ({ row }) => (
-        <Box className="w-full min-w-[100px]">
-          <div className="flex justify-between text-xs mb-1">
-            <span>{row.original.progress}%</span>
-          </div>
-          <Progress value={row.original.progress} className="h-2" />
+        <Box className="text-center">
+          {row.original.startDate ? format(new Date(row.original.startDate), "MMM d, yyyy") : "Not set"}
         </Box>
       ),
     },
     {
       accessorKey: "endDate",
-      header: "Due Date",
-      cell: ({ row }) => row.original.endDate ? format(new Date(row.original.endDate), "MMM dd, yyyy") : "N/A",
+      header: () => <Box className="text-center text-black">End Date</Box>,
+      cell: ({ row }) => (
+        <Box className="text-center">
+          {row.original.endDate ? format(new Date(row.original.endDate), "MMM d, yyyy") : "Not set"}
+        </Box>
+      ),
+    },
+    {
+      accessorKey: "progress",
+      header: () => <Box className="text-center text-black">Progress</Box>,
+      cell: ({ row }) => (
+        <Center className="text-center">
+          {row.original.progress + "%"}{" "}
+          <ArrowUp className="size-4 text-green-600 font-semibold" />
+        </Center>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: () => <Box className="text-center text-black">Status</Box>,
+      cell: ({ row }) => {
+        const status = row.original.status as "pending" | "completed" | "ongoing" | "delayed";
+        const statusStyles: Record<string, { text: string; dot: string }> = {
+          completed: {
+            text: "text-white bg-[#00A400] border-none rounded-full",
+            dot: "bg-white",
+          },
+          pending: {
+            text: "text-white bg-[#F98618] border-none rounded-full",
+            dot: "bg-white",
+          },
+          ongoing: {
+            text: "text-white bg-[#005FA4] border-none rounded-full",
+            dot: "bg-white",
+          },
+          delayed: {
+            text: "text-white bg-[#EF5350] border-none rounded-full",
+            dot: "bg-white",
+          },
+        };
+
+        const currentStyle = statusStyles[status] || {
+          text: "text-white bg-gray-500 border-none rounded-full",
+          dot: "bg-white",
+        };
+
+        return (
+          <Center>
+            <Box className={`flex rounded-md capitalize w-32 h-10 gap-2 border justify-center items-center ${currentStyle.text}`}>
+              <Flex className={`w-2 h-2 items-start rounded-full ${currentStyle.dot}`} />
+              <span>{status || "Unknown"}</span>
+            </Box>
+          </Center>
+        );
+      },
     },
     {
       id: "actions",
-      header: "Actions",
+      header: () => <Box className="text-center text-black">Actions</Box>,
       cell: ({ row }) => (
-        <div className="flex gap-2">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => navigate(`/clients/projects/view/${row.original.id}`)}
-            className="hover:bg-blue-50 text-blue-600"
-          >
-            <Eye className="h-4 w-4 mr-1" />
-            View
-          </Button>
+        <Center className="space-x-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="bg-black border-none w-10 h-9 hover:bg-black/80 cursor-pointer rounded-md p-0"
+                  onClick={() => navigate(`/clients/projects/view/${row.original.id}`)}
+                >
+                  <EyeIcon className="text-white size-5 fill-white" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="mb-2">
+                <p>View Project</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="bg-[#40aeed] hover:bg-[#40aeed]/80 rounded-md border-none cursor-pointer w-10 h-9 p-0"
+                  onClick={() => openCommentModal(row.original.id)}
+                >
+                  <MessageCircleReply className="text-white size-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="mb-2">
+                <p>Add Comment</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
           {row.original.contractfile && (
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => window.open(row.original.contractfile, "_blank")}
-              className="hover:bg-green-50 text-green-600"
-            >
-              <Download className="h-4 w-4 mr-1" />
-              File
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="bg-[#23B95D] hover:bg-[#23B95D]/80 rounded-md border-none cursor-pointer w-10 h-9 p-0"
+                    onClick={() => window.open(row.original.contractfile, "_blank")}
+                  >
+                    <Download className="text-white size-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="mb-2">
+                  <p>Download File</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
-        </div>
+        </Center>
       ),
     },
   ];
@@ -116,6 +254,138 @@ const ClientProjectsPage = () => {
           columns={columns} 
         />
       )}
+
+      <GeneralModal {...props} contentProps={{ className: "overflow-hidden max-sm:p-3" }}>
+        <Box>
+          <Box className="mb-4 text-lg font-semibold">Project Comments</Box>
+
+          <Box className="flex flex-col gap-3 max-h-64 overflow-y-auto mb-4 bg-gray-50 p-3 rounded">
+            {commentsLoading ? (
+              <Box className="text-gray-400 text-center py-4">Loading comments...</Box>
+            ) : activeProjectId && commentsWithReplies.length === 0 ? (
+              <Box className="text-gray-400 text-center py-4">No comments yet.</Box>
+            ) : (
+              commentsWithReplies.map((comment: any) => (
+                <Box key={comment.id} className="space-y-2">
+                  <Box className="flex items-start gap-2 group">
+                    <Flex className="flex-1 items-start justify-between bg-white p-3 rounded shadow-sm text-sm">
+                      <Stack className="flex-1">
+                        <Flex className="justify-between">
+                          <Box className="flex items-center gap-2 mb-1">
+                            <span className="font-medium text-xs text-gray-900">{comment.userName}</span>
+                            <span className="text-xs text-gray-400">
+                              {format(new Date(comment.createdAt), "MMM d, yyyy hh:mm a")}
+                            </span>
+                          </Box>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-red-500 cursor-pointer p-1 h-auto text-xs"
+                            onClick={() => handleDeleteComment(comment.id)}
+                            disabled={isDeletingComment}
+                            title="Delete"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </Flex>
+                        <Box className="w-full max-sm:w-48 overflow-hidden break-words whitespace-pre-line">
+                          {comment.content}
+                        </Box>
+                      </Stack>
+                    </Flex>
+                  </Box>
+
+                  {replyTo === comment.id && (
+                    <Box className="ml-6 bg-white p-2 rounded border">
+                      <Input
+                        value={replyContent}
+                        onChange={(e) => setReplyContent(e.target.value)}
+                        placeholder="Write a reply..."
+                        className="mb-2"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleAddReply();
+                        }}
+                      />
+                      <Box className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          onClick={handleAddReply}
+                          disabled={!replyContent.trim() || isCreatingComment}
+                          className="bg-blue-600 hover:bg-blue-700 text-xs"
+                        >
+                          {isCreatingComment ? "Adding..." : "Reply"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setReplyTo(null);
+                            setReplyContent("");
+                          }}
+                          className="text-xs"
+                        >
+                          Cancel
+                        </Button>
+                      </Box>
+                    </Box>
+                  )}
+
+                  {comment.replies && comment.replies.length > 0 && (
+                    <Box className="ml-6 space-y-2">
+                      {comment.replies.map((reply: any) => (
+                        <Box key={reply.id} className="flex items-start gap-2">
+                          <Flex className="flex-1 items-start justify-between bg-white p-2 rounded shadow-sm text-sm border-l-2 border-blue-200">
+                            <Stack className="flex-1">
+                              <Box className="flex items-center gap-2 mb-1">
+                                <span className="font-medium text-xs text-gray-900">{reply.userName}</span>
+                                <span className="text-xs text-gray-400">
+                                  {format(new Date(reply.createdAt), "MMM d, yyyy hh:mm a")}
+                                </span>
+                              </Box>
+                              <Box className="w-full max-sm:w-40 overflow-hidden break-words whitespace-pre-line">
+                                {reply.content}
+                              </Box>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-red-500 cursor-pointer p-1 h-auto text-xs mt-1"
+                                onClick={() => handleDeleteComment(reply.id)}
+                                disabled={isDeletingComment}
+                                title="Delete"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </Stack>
+                          </Flex>
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
+                </Box>
+              ))
+            )}
+          </Box>
+
+          <Flex className="items-center justify-between gap-2">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type a comment..."
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleAddComment();
+              }}
+              className="bg-white rounded-full placeholder:text-gray-400 h-11 border border-gray-400"
+            />
+            <Button
+              onClick={() => handleAddComment()}
+              disabled={!input.trim() || isCreatingComment}
+              className="rounded-full h-11 cursor-pointer min-w-20"
+            >
+              {isCreatingComment ? "Sending..." : "Send"}
+            </Button>
+          </Flex>
+        </Box>
+      </GeneralModal>
     </Box>
   );
 };
