@@ -1,19 +1,33 @@
 import { Box } from "@/components/ui/box";
 import { Flex } from "@/components/ui/flex";
 import { Stack } from "@/components/ui/stack";
+import { PageWrapper } from "@/components/common/pagewrapper";
 import { Input } from "@/components/ui/input";
-import { ClientPortalHeader } from "@/components/client section/clientportalheader";
 import { ReusableTable } from "@/components/reusable/reusabletable";
 import { useFetchClientProjects } from "@/hooks/useFetchClientProjects";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Center } from "@/components/ui/center";
-import { ArrowUp, Download, MessageCircleReply, Trash2, Eye } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button"; 
+import {
+  ArrowUp,
+  Download,
+  MessageCircleReply,
+  Trash2,
+  Eye,
+} from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router";
 import { useUser } from "@/providers/user.provider";
-import { GeneralModal, useGeneralModalDisclosure } from "@/components/common/generalmodal";
+import {
+  GeneralModal,
+  useGeneralModalDisclosure,
+} from "@/components/common/generalmodal";
 import { useState } from "react";
 import { useFetchProjectComments } from "@/hooks/usefetchprojectcomments";
 import { useCreateProjectComment } from "@/hooks/usecreateprojectcomment";
@@ -26,18 +40,21 @@ const ClientProjectsPage = () => {
 
   const { data: projectsResponse, isLoading } = useFetchClientProjects(
     clientId || undefined,
-    organizationId || undefined
+    organizationId || undefined,
   );
-  
+
   const props = useGeneralModalDisclosure();
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
 
-  const { data: commentsData, isLoading: commentsLoading } = useFetchProjectComments(activeProjectId || "");
-  const { mutate: createComment, isPending: isCreatingComment } = useCreateProjectComment();
-  const { mutate: deleteComment, isPending: isDeletingComment } = useDeleteProjectComment();
+  const { data: commentsData, isLoading: commentsLoading } =
+    useFetchProjectComments(activeProjectId || "");
+  const { mutate: createComment, isPending: isCreatingComment } =
+    useCreateProjectComment();
+  const { mutate: deleteComment, isPending: isDeletingComment } =
+    useDeleteProjectComment();
 
   const commentsWithReplies = commentsData?.data || [];
 
@@ -80,10 +97,14 @@ const ClientProjectsPage = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "completed": return "bg-green-100 text-green-800 border-green-200";
-      case "ongoing": return "bg-blue-100 text-blue-800 border-blue-200";
-      case "pending": return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      default: return "bg-gray-100 text-gray-800 border-gray-200";
+      case "completed":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "ongoing":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
@@ -93,29 +114,41 @@ const ClientProjectsPage = () => {
     {
       accessorKey: "projectNumber",
       header: () => <Box className="text-center text-black">#</Box>,
-      cell: ({ row }) => <Box className="text-center">{row.original.projectNumber}</Box>,
+      cell: ({ row }) => (
+        <Box className="text-center">{row.original.projectNumber}</Box>
+      ),
     },
     {
       accessorKey: "projectName",
       header: () => <Box className="text-center text-black">Project Name</Box>,
-      cell: ({ row }) => <Box className="text-center">{row.original.projectName}</Box>,
+      cell: ({ row }) => (
+        <Box className="text-center">{row.original.projectName}</Box>
+      ),
     },
     {
       accessorKey: "clientName",
       header: () => <Box className="text-center text-black">Client</Box>,
-      cell: ({ row }) => <Box className="text-center">{row.original.clientName}</Box>,
+      cell: ({ row }) => (
+        <Box className="text-center">{row.original.clientName}</Box>
+      ),
     },
     {
       accessorKey: "assignedTo",
       header: () => <Box className="text-center text-black">Assigned To</Box>,
-      cell: ({ row }) => <Box className="text-center">{row.original.assignedProject || "Unassigned"}</Box>,
+      cell: ({ row }) => (
+        <Box className="text-center">
+          {row.original.assignedProject || "Unassigned"}
+        </Box>
+      ),
     },
     {
       accessorKey: "startDate",
       header: () => <Box className="text-center text-black">Start Date</Box>,
       cell: ({ row }) => (
         <Box className="text-center">
-          {row.original.startDate ? format(new Date(row.original.startDate), "MMM d, yyyy") : "Not set"}
+          {row.original.startDate
+            ? format(new Date(row.original.startDate), "MMM d, yyyy")
+            : "Not set"}
         </Box>
       ),
     },
@@ -124,7 +157,9 @@ const ClientProjectsPage = () => {
       header: () => <Box className="text-center text-black">End Date</Box>,
       cell: ({ row }) => (
         <Box className="text-center">
-          {row.original.endDate ? format(new Date(row.original.endDate), "MMM d, yyyy") : "Not set"}
+          {row.original.endDate
+            ? format(new Date(row.original.endDate), "MMM d, yyyy")
+            : "Not set"}
         </Box>
       ),
     },
@@ -142,7 +177,11 @@ const ClientProjectsPage = () => {
       accessorKey: "status",
       header: () => <Box className="text-center text-black">Status</Box>,
       cell: ({ row }) => {
-        const status = row.original.status as "pending" | "completed" | "ongoing" | "delayed";
+        const status = row.original.status as
+          | "pending"
+          | "completed"
+          | "ongoing"
+          | "delayed";
         const statusStyles: Record<string, { text: string; dot: string }> = {
           completed: {
             text: "text-white bg-[#00A400] border-none rounded-full",
@@ -169,8 +208,12 @@ const ClientProjectsPage = () => {
 
         return (
           <Center>
-            <Box className={`flex rounded-md capitalize w-32 h-10 gap-2 border justify-center items-center ${currentStyle.text}`}>
-              <Flex className={`w-2 h-2 items-start rounded-full ${currentStyle.dot}`} />
+            <Box
+              className={`flex rounded-md capitalize w-32 h-10 gap-2 border justify-center items-center ${currentStyle.text}`}
+            >
+              <Flex
+                className={`w-2 h-2 items-start rounded-full ${currentStyle.dot}`}
+              />
               <span>{status || "Unknown"}</span>
             </Box>
           </Center>
@@ -188,7 +231,9 @@ const ClientProjectsPage = () => {
                 <Button
                   variant="outline"
                   className="bg-black border-none w-10 h-9 hover:bg-black/80 cursor-pointer rounded-md p-0"
-                  onClick={() => navigate(`/clients/projects/view/${row.original.id}`)}
+                  onClick={() =>
+                    navigate(`/clients/projects/view/${row.original.id}`)
+                  }
                 >
                   <Eye className="text-white size-5 fill-white" />
                 </Button>
@@ -223,7 +268,9 @@ const ClientProjectsPage = () => {
                   <Button
                     variant="outline"
                     className="bg-[#23B95D] hover:bg-[#23B95D]/80 rounded-md border-none cursor-pointer w-10 h-9 p-0"
-                    onClick={() => window.open(row.original.contractfile, "_blank")}
+                    onClick={() =>
+                      window.open(row.original.contractfile, "_blank")
+                    }
                   >
                     <Download className="text-white size-5" />
                   </Button>
@@ -240,30 +287,43 @@ const ClientProjectsPage = () => {
   ];
 
   return (
-    <Box className="px-4 py-2">
-      <ClientPortalHeader 
-        title="My Projects" 
-        description="View and track the progress of your projects" 
-      />
-      
+    <PageWrapper className="mt-6">
+      <Stack className="gap-1 p-6 mb-6">
+        <h1 className="text-2xl font-medium text-black">My Projects</h1>
+        <p className="text-gray-500">
+          View and track the progress of your projects
+        </p>
+      </Stack>
+
       {isLoading ? (
         <Box className="flex justify-center p-10">Loading projects...</Box>
       ) : (
-        <ReusableTable 
-          data={projects} 
-          columns={columns} 
-        />
+        <Box className=" rounded-xl   border border-gray-100 overflow-hidden">
+          <ReusableTable
+            data={projects}
+            columns={columns}
+            searchClassName="rounded-full"
+            filterClassName="rounded-full"
+          />
+        </Box>
       )}
 
-      <GeneralModal {...props} contentProps={{ className: "overflow-hidden max-sm:p-3" }}>
+      <GeneralModal
+        {...props}
+        contentProps={{ className: "overflow-hidden max-sm:p-3" }}
+      >
         <Box>
           <Box className="mb-4 text-lg font-semibold">Project Comments</Box>
 
           <Box className="flex flex-col gap-3 max-h-64 overflow-y-auto mb-4 bg-gray-50 p-3 rounded">
             {commentsLoading ? (
-              <Box className="text-gray-400 text-center py-4">Loading comments...</Box>
+              <Box className="text-gray-400 text-center py-4">
+                Loading comments...
+              </Box>
             ) : activeProjectId && commentsWithReplies.length === 0 ? (
-              <Box className="text-gray-400 text-center py-4">No comments yet.</Box>
+              <Box className="text-gray-400 text-center py-4">
+                No comments yet.
+              </Box>
             ) : (
               commentsWithReplies.map((comment: any) => (
                 <Box key={comment.id} className="space-y-2">
@@ -272,9 +332,14 @@ const ClientProjectsPage = () => {
                       <Stack className="flex-1">
                         <Flex className="justify-between">
                           <Box className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-xs text-gray-900">{comment.userName}</span>
+                            <span className="font-medium text-xs text-gray-900">
+                              {comment.userName}
+                            </span>
                             <span className="text-xs text-gray-400">
-                              {format(new Date(comment.createdAt), "MMM d, yyyy hh:mm a")}
+                              {format(
+                                new Date(comment.createdAt),
+                                "MMM d, yyyy hh:mm a",
+                              )}
                             </span>
                           </Box>
                           <Button
@@ -337,9 +402,14 @@ const ClientProjectsPage = () => {
                           <Flex className="flex-1 items-start justify-between bg-white p-2 rounded shadow-sm text-sm border-l-2 border-blue-200">
                             <Stack className="flex-1">
                               <Box className="flex items-center gap-2 mb-1">
-                                <span className="font-medium text-xs text-gray-900">{reply.userName}</span>
+                                <span className="font-medium text-xs text-gray-900">
+                                  {reply.userName}
+                                </span>
                                 <span className="text-xs text-gray-400">
-                                  {format(new Date(reply.createdAt), "MMM d, yyyy hh:mm a")}
+                                  {format(
+                                    new Date(reply.createdAt),
+                                    "MMM d, yyyy hh:mm a",
+                                  )}
                                 </span>
                               </Box>
                               <Box className="w-full max-sm:w-40 overflow-hidden break-words whitespace-pre-line">
@@ -386,7 +456,7 @@ const ClientProjectsPage = () => {
           </Flex>
         </Box>
       </GeneralModal>
-    </Box>
+    </PageWrapper>
   );
 };
 

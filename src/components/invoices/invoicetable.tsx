@@ -23,13 +23,8 @@ const InvoiceActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
   };
 
   const handleDownloadPDF = () => {
-    if (invoice.pdfUrl) {
-      // Open existing PDF
-      window.open(invoice.pdfUrl, "_blank");
-    } else {
-      // Generate new PDF
-      generatePDF({ invoices: [invoice], exportType: "selected" });
-    }
+    // Generate new PDF from frontend to ensure data accuracy
+    generatePDF({ invoices: [invoice], exportType: "selected" });
   };
 
   return (
