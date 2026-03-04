@@ -10,7 +10,13 @@ import { DemoPasswordGuard } from "./demopasswordguard";
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  requiredRole?: "superadmin" | "subadmin" | "operator" | "viewer" | "user" | "client";
+  requiredRole?:
+    | "superadmin"
+    | "subadmin"
+    | "operator"
+    | "viewer"
+    | "user"
+    | "client";
   requiredOrganization?: boolean;
 }
 
@@ -75,7 +81,7 @@ export const ProtectedRoute = ({
             fallbackPath = "/viewer";
             break;
           case "client":
-            fallbackPath = "/clients";
+            fallbackPath = "/clients/projects";
             break;
           case "subadmin":
           case "operator":
@@ -171,7 +177,7 @@ export const ClientRoute = ({ children }: { children: ReactNode }) => (
 const hasAdminManagerOrOrgOwnerAccess = (
   role: string,
   isOrganizationOwner?: boolean,
-  isOrganizationManager?: boolean
+  isOrganizationManager?: boolean,
 ): boolean =>
   role === "superadmin" ||
   role === "subadmin" ||
@@ -203,11 +209,11 @@ export const AdminManagerOrOrgOwnerRoute = ({
       !hasAdminManagerOrOrgOwnerAccess(
         user.role || "",
         user.isOrganizationOwner,
-        user.isOrganizationManager
+        user.isOrganizationManager,
       )
     ) {
       toast.error(
-        "Access denied. This area is for organization owners or managers."
+        "Access denied. This area is for organization owners or managers.",
       );
       navigate("/dashboard", { replace: true });
     }
@@ -228,7 +234,7 @@ export const AdminManagerOrOrgOwnerRoute = ({
     !hasAdminManagerOrOrgOwnerAccess(
       userData.user.role || "",
       userData.user.isOrganizationOwner,
-      userData.user.isOrganizationManager
+      userData.user.isOrganizationManager,
     )
   ) {
     return null;

@@ -34,9 +34,8 @@ export const useFetchViewerTasks = () => {
   return useQuery<ApiResponse<ViewerTask[]>>({
     queryKey: ["viewer-tasks"],
     queryFn: async () => {
-      const response = await axios.get<ApiResponse<ViewerTask[]>>(
-        "/viewer/tasks"
-      );
+      const response =
+        await axios.get<ApiResponse<ViewerTask[]>>("/viewer/tasks");
       return response.data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

@@ -42,7 +42,7 @@ export const DashboardLayout = () => {
       if (user.role === "client") {
         setNavItems(getNavigationItemsByRole("client"));
         if (location.pathname.startsWith("/dashboard")) {
-          navigate("/clients", { replace: true });
+          navigate("/clients/projects", { replace: true });
         }
         return;
       }
@@ -52,7 +52,7 @@ export const DashboardLayout = () => {
       const roleBasedNavItems = getNavigationItemsByRole(
         userRole,
         user.isOrganizationOwner,
-        user.isOrganizationManager
+        user.isOrganizationManager,
       );
       setNavItems(roleBasedNavItems);
     }
