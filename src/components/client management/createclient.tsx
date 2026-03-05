@@ -25,7 +25,7 @@ import { useCreateClient } from "@/hooks/usecreateclient";
 import { useUpdateClient } from "@/hooks/useupdateclient";
 import { toast } from "sonner";
 import { GuidedFlowModal } from "../common/GuidedFlowModal";
-import { Loader2, Plus, X } from "lucide-react";
+import { Loader2, Plus, X, Eye, EyeOff } from "lucide-react";
 import {
   FaInstagram,
   FaTwitter,
@@ -96,7 +96,7 @@ const formSchema = z.object({
       {
         message:
           "Must be a valid international phone number (e.g., +1234567890)",
-      }
+      },
     ),
   cpfcnpj: z.string().optional(),
   address: z.string().optional(),
@@ -109,7 +109,7 @@ const formSchema = z.object({
           .string()
           .url({ message: "Must be a valid URL" })
           .or(z.literal("")),
-      })
+      }),
     )
     .optional(),
   customFields: z.record(z.any()).optional(),
@@ -147,7 +147,7 @@ export const ClientForm = ({
 
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [pdfPreview, setPdfPreview] = useState<string | null>(
-    client?.image || null
+    client?.image || null,
   );
 
   // Fetch custom field definitions
@@ -157,6 +157,7 @@ export const ClientForm = ({
   const [isImageRemoved, setIsImageRemoved] = useState(false);
   const [showGuidedFlow, setShowGuidedFlow] = useState(false);
   const [createdClientId, setCreatedClientId] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [socialMediaLinks, setSocialMediaLinks] = useState<SocialMediaLink[]>(
     () => {
       if (client?.socialMediaLinks) {
@@ -170,7 +171,7 @@ export const ClientForm = ({
         }
       }
       return [];
-    }
+    },
   );
 
   const isPending = isCreating || isUpdating;
@@ -331,7 +332,7 @@ export const ClientForm = ({
       address: values.address,
       status: mode === "create" ? "New Lead" : client?.status || "New Lead",
       socialMediaLinks: JSON.stringify(
-        socialMediaLinks.filter((link) => link.url.trim() !== "")
+        socialMediaLinks.filter((link) => link.url.trim() !== ""),
       ),
       customFields: values.customFields,
       ...(mode === "create" && { password: values.portalPassword }),
@@ -370,7 +371,7 @@ export const ClientForm = ({
                   console.error("Error updating client:", Error);
                   toast.error("Failed to update client. Please try again.");
                 },
-              }
+              },
             );
           })
           .catch(() => {
@@ -394,7 +395,7 @@ export const ClientForm = ({
               console.error("Error updating client:", Error);
               toast.error("Failed to update client. Please try again.");
             },
-          }
+          },
         );
       } else {
         // No image changes
@@ -412,7 +413,7 @@ export const ClientForm = ({
             onError: () => {
               toast.error("Failed to update client. Please try again.");
             },
-          }
+          },
         );
       }
     } else {
@@ -441,7 +442,7 @@ export const ClientForm = ({
                 onError: () => {
                   toast.error("Failed to create client. Please try again.");
                 },
-              }
+              },
             );
           })
           .catch((error) => {
@@ -709,7 +710,8 @@ export const ClientForm = ({
                     Client Portal Access
                   </h1>
                   <p className="text-gray-600 text-sm">
-                    Every client will have portal access to view projects, tasks & invoices
+                    Every client will have portal access to view projects, tasks
+                    & invoices
                   </p>
                   <FormField
                     control={form.control}
@@ -718,13 +720,26 @@ export const ClientForm = ({
                       <FormItem>
                         <FormLabel>Portal password (required)</FormLabel>
                         <FormControl>
-                          <Input
-                            className="bg-white rounded-full placeholder:text-gray-400 max-w-md"
-                            size="xl"
-                            type="password"
-                            placeholder="Min. 8 characters"
-                            {...field}
-                          />
+                          <div className="relative max-w-md">
+                            <Input
+                              className="bg-white rounded-full placeholder:text-gray-400 w-full pr-12"
+                              size="xl"
+                              type={showPassword ? "text" : "password"}
+                              placeholder="Min. 8 characters"
+                              {...field}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-5 w-5" />
+                              ) : (
+                                <Eye className="h-5 w-5" />
+                              )}
+                            </button>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -743,14 +758,14 @@ export const ClientForm = ({
                 <Box className="space-y-4">
                   {socialMediaLinks.map((link, index) => {
                     const socialType = socialMediaTypes.find(
-                      (type) => type.value === link.type
+                      (type) => type.value === link.type,
                     );
                     const Icon = socialType?.icon || FaInstagram;
                     const availableTypes = socialMediaTypes.filter(
                       (type) =>
                         !socialMediaLinks.some(
-                          (l, i) => l.type === type.value && i !== index
-                        )
+                          (l, i) => l.type === type.value && i !== index,
+                        ),
                     );
 
                     return (
@@ -818,7 +833,7 @@ export const ClientForm = ({
                           size="sm"
                           onClick={() => {
                             setSocialMediaLinks(
-                              socialMediaLinks.filter((_, i) => i !== index)
+                              socialMediaLinks.filter((_, i) => i !== index),
                             );
                           }}
                           className="text-red-500 hover:text-red-700"
@@ -836,8 +851,8 @@ export const ClientForm = ({
                       const availableTypes = socialMediaTypes.filter(
                         (type) =>
                           !socialMediaLinks.some(
-                            (link) => link.type === type.value
-                          )
+                            (link) => link.type === type.value,
+                          ),
                       );
                       if (availableTypes.length > 0) {
                         setSocialMediaLinks([
@@ -861,7 +876,9 @@ export const ClientForm = ({
             {/* Custom Fields Section */}
             {customFieldsData?.data && customFieldsData.data.length > 0 && (
               <Box className="space-y-6 mt-6 pt-6 border-t border-gray-200">
-                <h1 className="text-black text-xl font-medium">Custom Fields</h1>
+                <h1 className="text-black text-xl font-medium">
+                  Custom Fields
+                </h1>
                 <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
                   {customFieldsData.data.map((field) => (
                     <FormField
@@ -878,7 +895,9 @@ export const ClientForm = ({
                                 value={formField.value}
                               >
                                 <SelectTrigger className="bg-white rounded-full h-14">
-                                  <SelectValue placeholder={`Select ${field.name}`} />
+                                  <SelectValue
+                                    placeholder={`Select ${field.name}`}
+                                  />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {field.options?.map((opt) => (
@@ -889,15 +908,20 @@ export const ClientForm = ({
                                 </SelectContent>
                               </Select>
                             ) : field.type === "boolean" ? (
-                                <div className="flex items-center space-x-2 h-14">
-                                  <Checkbox 
-                                    checked={formField.value === "true" || formField.value === true}
-                                    onCheckedChange={(checked) => formField.onChange(checked)}
-                                  />
-                                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                    {field.name}
-                                  </label>
-                                </div>
+                              <div className="flex items-center space-x-2 h-14">
+                                <Checkbox
+                                  checked={
+                                    formField.value === "true" ||
+                                    formField.value === true
+                                  }
+                                  onCheckedChange={(checked) =>
+                                    formField.onChange(checked)
+                                  }
+                                />
+                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                  {field.name}
+                                </label>
+                              </div>
                             ) : field.type === "date" ? (
                               <Popover>
                                 <PopoverTrigger asChild>
@@ -905,7 +929,8 @@ export const ClientForm = ({
                                     variant={"outline"}
                                     className={cn(
                                       "w-full justify-start text-left font-normal rounded-full h-14 bg-white",
-                                      !formField.value && "text-muted-foreground"
+                                      !formField.value &&
+                                        "text-muted-foreground",
                                     )}
                                   >
                                     <CalendarIcon className="mr-2 h-4 w-4" />
@@ -920,24 +945,30 @@ export const ClientForm = ({
                                   <Calendar
                                     mode="single"
                                     selected={
-                                      formField.value ? new Date(formField.value) : undefined
+                                      formField.value
+                                        ? new Date(formField.value)
+                                        : undefined
                                     }
                                     onSelect={(date) =>
-                                       formField.onChange(date ? date.toISOString() : "")
+                                      formField.onChange(
+                                        date ? date.toISOString() : "",
+                                      )
                                     }
                                     initialFocus
                                   />
                                 </PopoverContent>
                               </Popover>
                             ) : (
-                               <Input
-                                  className="bg-white rounded-full placeholder:text-gray-400"
-                                  size="xl"
-                                  type={field.type === "number" ? "number" : "text"}
-                                  placeholder={`Enter ${field.name}`}
-                                  {...formField}
-                                  value={formField.value || ""}
-                               />
+                              <Input
+                                className="bg-white rounded-full placeholder:text-gray-400"
+                                size="xl"
+                                type={
+                                  field.type === "number" ? "number" : "text"
+                                }
+                                placeholder={`Enter ${field.name}`}
+                                {...formField}
+                                value={formField.value || ""}
+                              />
                             )}
                           </FormControl>
                           <FormMessage />
