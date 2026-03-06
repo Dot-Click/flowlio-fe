@@ -44,6 +44,8 @@ import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { useFetchCustomFields } from "../../hooks/usecustomfields";
 import { Checkbox } from "../ui/checkbox";
+import { Switch } from "../ui/switch";
+import { Lock, Globe } from "lucide-react";
 
 const formSchema = z
   .object({
@@ -64,10 +66,11 @@ const formSchema = z
           file: z.string(),
           type: z.string(),
           name: z.string(),
-        })
+        }),
       )
       .optional(),
     customFields: z.record(z.any()).optional(),
+    visibility: z.enum(["public", "private"]).default("private"),
   })
   .refine(
     (data) => {
@@ -79,7 +82,7 @@ const formSchema = z
     {
       message: "End Date must be after or equal to Start Date.",
       path: ["endDate"],
-    }
+    },
   );
 
 export const CreateProject = () => {
@@ -177,6 +180,7 @@ export const CreateProject = () => {
       contractfile: "",
       projectFiles: [],
       customFields: {},
+      visibility: "private",
     },
   });
 
@@ -214,6 +218,7 @@ export const CreateProject = () => {
         address: project.address || "",
         contractfile: project.contractfile || "",
         customFields: project.customFields || {},
+        visibility: (project as any).visibility || "private",
       });
 
       // Explicitly set Select values after reset to ensure they're recognized
@@ -273,7 +278,7 @@ export const CreateProject = () => {
           file: await convertFileToBase64(fileData.file),
           type: fileData.type,
           name: fileData.name,
-        }))
+        })),
       );
 
       // Include file data if uploaded
@@ -294,6 +299,7 @@ export const CreateProject = () => {
         }),
         organizationId: finalOrganizationId,
         customFields: values.customFields,
+        visibility: values.visibility,
       };
 
       if (isEditMode && id) {
@@ -397,14 +403,14 @@ export const CreateProject = () => {
         errors.forEach((error) => {
           if (error.code === "file-too-large") {
             toast.error(
-              t("projects.fileTooLargeDropzone", { name: file.name })
+              t("projects.fileTooLargeDropzone", { name: file.name }),
             );
           } else {
             toast.error(
               t("projects.fileErrorDropzone", {
                 name: file.name,
                 message: error.message,
-              })
+              }),
             );
           }
         });
@@ -509,9 +515,45 @@ export const CreateProject = () => {
                 ? t("projects.updating...")
                 : t("projects.creating...")
               : isEditMode
-              ? t("projects.updateProject")
-              : t("projects.saveProject")}
+                ? t("projects.updateProject")
+                : t("projects.saveProject")}
           </Button>
+
+          <Box className="bg-gray-50 border border-gray-200 rounded-2xl p-4 flex items-center gap-4 mb-4">
+            <FormField
+              control={form.control}
+              name="visibility"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between gap-4 space-y-0 w-full">
+                  <Box className="flex flex-col gap-0.5">
+                    <FormLabel className="text-base font-semibold flex items-center gap-2">
+                      {field.value === "private" ? (
+                        <Lock className="w-4 h-4 text-orange-500" />
+                      ) : (
+                        <Globe className="w-4 h-4 text-blue-500" />
+                      )}
+                      {field.value === "private"
+                        ? "Private Project"
+                        : "Public Project"}
+                    </FormLabel>
+                    <p className="text-xs text-gray-500">
+                      {field.value === "private"
+                        ? "Only members assigned to this project can see it."
+                        : "Anyone in your organization can view this project."}
+                    </p>
+                  </Box>
+                  <FormControl>
+                    <Switch
+                      checked={field.value === "public"}
+                      onCheckedChange={(checked) =>
+                        field.onChange(checked ? "public" : "private")
+                      }
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </Box>
           <Box className="bg-white/80 rounded-xl border border-gray-200 p-6 gap-4 grid grid-cols-1">
             <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
               <Stack className="flex-1 w-full gap-6">
@@ -613,14 +655,14 @@ export const CreateProject = () => {
                             <span className="font-medium text-blue-900">
                               {
                                 projectFiles.find(
-                                  (f) => f.type === "projectPdf"
+                                  (f) => f.type === "projectPdf",
                                 )?.name
                               }
                             </span>
                             <span className="text-blue-700">
                               {(
                                 (projectFiles.find(
-                                  (f) => f.type === "projectPdf"
+                                  (f) => f.type === "projectPdf",
                                 )?.file.size || 0) /
                                 102 /
                                 1024
@@ -704,7 +746,7 @@ export const CreateProject = () => {
                             variant={"outline"}
                             className={cn(
                               "justify-start text-left font-normal rounded-full",
-                              !field.value && "text-muted-foreground"
+                              !field.value && "text-muted-foreground",
                             )}
                           >
                             <CalendarIcon className="size-5" fill="#62A1C0" />
@@ -751,7 +793,7 @@ export const CreateProject = () => {
                             variant={"outline"}
                             className={cn(
                               "justify-start text-left font-normal rounded-full",
-                              !field.value && "text-muted-foreground"
+                              !field.value && "text-muted-foreground",
                             )}
                           >
                             {/* <CalendarRange className="size-5" /> */}
@@ -900,7 +942,9 @@ export const CreateProject = () => {
             {/* Custom Fields Section */}
             {customFieldsData?.data && customFieldsData.data.length > 0 && (
               <Box className="space-y-6 mt-6 pt-6 border-t border-gray-200">
-                <h3 className="text-lg font-medium text-black">Custom Fields</h3>
+                <h3 className="text-lg font-medium text-black">
+                  Custom Fields
+                </h3>
                 <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
                   {customFieldsData.data.map((field) => (
                     <FormField
@@ -917,7 +961,9 @@ export const CreateProject = () => {
                                 value={formField.value}
                               >
                                 <SelectTrigger className="bg-white rounded-full h-12">
-                                  <SelectValue placeholder={`Select ${field.name}`} />
+                                  <SelectValue
+                                    placeholder={`Select ${field.name}`}
+                                  />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {field.options?.map((opt) => (
@@ -928,15 +974,20 @@ export const CreateProject = () => {
                                 </SelectContent>
                               </Select>
                             ) : field.type === "boolean" ? (
-                                <div className="flex items-center space-x-2 h-12">
-                                  <Checkbox 
-                                    checked={formField.value === "true" || formField.value === true}
-                                    onCheckedChange={(checked) => formField.onChange(checked)}
-                                  />
-                                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                    {field.name}
-                                  </label>
-                                </div>
+                              <div className="flex items-center space-x-2 h-12">
+                                <Checkbox
+                                  checked={
+                                    formField.value === "true" ||
+                                    formField.value === true
+                                  }
+                                  onCheckedChange={(checked) =>
+                                    formField.onChange(checked)
+                                  }
+                                />
+                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                  {field.name}
+                                </label>
+                              </div>
                             ) : field.type === "date" ? (
                               <Popover>
                                 <PopoverTrigger asChild>
@@ -944,7 +995,8 @@ export const CreateProject = () => {
                                     variant={"outline"}
                                     className={cn(
                                       "w-full justify-start text-left font-normal rounded-full h-12 bg-white",
-                                      !formField.value && "text-muted-foreground"
+                                      !formField.value &&
+                                        "text-muted-foreground",
                                     )}
                                   >
                                     <CalendarIcon className="mr-2 h-4 w-4" />
@@ -959,24 +1011,30 @@ export const CreateProject = () => {
                                   <Calendar
                                     mode="single"
                                     selected={
-                                      formField.value ? new Date(formField.value) : undefined
+                                      formField.value
+                                        ? new Date(formField.value)
+                                        : undefined
                                     }
                                     onSelect={(date) =>
-                                       formField.onChange(date ? date.toISOString() : "")
+                                      formField.onChange(
+                                        date ? date.toISOString() : "",
+                                      )
                                     }
                                     initialFocus
                                   />
                                 </PopoverContent>
                               </Popover>
                             ) : (
-                               <Input
-                                  className="bg-white rounded-full placeholder:text-gray-400"
-                                  size="lg"
-                                  type={field.type === "number" ? "number" : "text"}
-                                  placeholder={`Enter ${field.name}`}
-                                  {...formField}
-                                  value={formField.value || ""}
-                               />
+                              <Input
+                                className="bg-white rounded-full placeholder:text-gray-400"
+                                size="lg"
+                                type={
+                                  field.type === "number" ? "number" : "text"
+                                }
+                                placeholder={`Enter ${field.name}`}
+                                {...formField}
+                                value={formField.value || ""}
+                              />
                             )}
                           </FormControl>
                           <FormMessage />

@@ -8,6 +8,8 @@ import {
   MessageCircleReply,
   PencilLine,
   Trash2,
+  Lock,
+  Globe,
 } from "lucide-react";
 import { ReusableTable } from "../reusable/reusabletable";
 import { format, isWithinInterval } from "date-fns";
@@ -212,10 +214,10 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
         },
         onError: (error: any) => {
           toast.error(
-            error?.response?.data?.error || "Failed to update project status"
+            error?.response?.data?.error || "Failed to update project status",
           );
         },
-      }
+      },
     );
   };
 
@@ -236,11 +238,12 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
         if (value === undefined || value === null || value === "") continue;
 
         // Exact match for select/boolean
-        if (projectValue !== value && typeof value !== 'string') return false;
+        if (projectValue !== value && typeof value !== "string") return false;
 
         // Partial match for text string
-        if (typeof value === 'string' && typeof projectValue === 'string') {
-          if (!projectValue.toLowerCase().includes(value.toLowerCase())) return false;
+        if (typeof value === "string" && typeof projectValue === "string") {
+          if (!projectValue.toLowerCase().includes(value.toLowerCase()))
+            return false;
         } else if (projectValue != value) {
           return false;
         }
@@ -361,6 +364,36 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
       },
     },
     {
+      accessorKey: "visibility",
+      header: () => <Box className="text-center text-black">Visibility</Box>,
+      cell: ({ row }) => {
+        const visibility = row.original.visibility || "private";
+        return (
+          <Center>
+            {visibility === "private" ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Lock className="w-4 h-4 text-orange-500" />
+                  </TooltipTrigger>
+                  <TooltipContent>Private Project</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Globe className="w-4 h-4 text-blue-500" />
+                  </TooltipTrigger>
+                  <TooltipContent>Public Project</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </Center>
+        );
+      },
+    },
+    {
       accessorKey: "status",
       header: () => (
         <Box className="text-center text-black">{t("projects.status")}</Box>
@@ -406,11 +439,11 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
           value: typeof status;
           label: string;
         }> = [
-            { value: "pending", label: "Pending" },
-            { value: "ongoing", label: "Ongoing" },
-            { value: "delayed", label: "Delayed" },
-            { value: "completed", label: "Completed" },
-          ];
+          { value: "pending", label: "Pending" },
+          { value: "ongoing", label: "Ongoing" },
+          { value: "delayed", label: "Delayed" },
+          { value: "completed", label: "Completed" },
+        ];
 
         return (
           <Center>
@@ -461,7 +494,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
       },
     },
     // Dynamic Custom Columns
-    ...(customFieldsData?.data.map(field => ({
+    ...(customFieldsData?.data.map((field) => ({
       accessorKey: `customFields.${field.id}`,
       id: field.id,
       header: () => (
@@ -474,7 +507,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
             {val !== undefined && val !== null ? String(val) : "-"}
           </Box>
         );
-      }
+      },
     })) || []),
     {
       accessorKey: "actions",
@@ -564,7 +597,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
           </Center>
         );
       },
-    }
+    },
   ];
 
   return (
@@ -624,7 +657,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
                             <span className="text-xs text-gray-400">
                               {format(
                                 new Date(comment.createdAt),
-                                "MMM d, yyyy hh:mm a"
+                                "MMM d, yyyy hh:mm a",
                               )}
                             </span>
                           </Box>
@@ -698,7 +731,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
                                 <span className="text-xs text-gray-400">
                                   {format(
                                     new Date(reply.createdAt),
-                                    "MMM d, yyyy hh:mm a"
+                                    "MMM d, yyyy hh:mm a",
                                   )}
                                 </span>
                               </Box>

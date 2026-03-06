@@ -14,7 +14,7 @@ interface UpdateProjectData {
   address?: string;
   contractfile?: string;
   organizationId?: string;
-  // Newly allowed partial updates
+  visibility?: "public" | "private";
   status?: "pending" | "completed" | "ongoing" | "active" | "delayed";
   progress?: number; // 0-100
 }

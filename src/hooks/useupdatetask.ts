@@ -28,6 +28,7 @@ export interface UpdateTaskRequest {
   parentId?: string;
   startAfter?: string | null;
   finishBefore?: string | null;
+  visibility?: "public" | "private";
 }
 
 export interface UpdateTaskResponse {

@@ -18,6 +18,7 @@ interface CreateProjectData {
     name: string;
   }>;
   organizationId: string;
+  visibility?: "public" | "private";
 }
 
 // Response data interface
@@ -54,7 +55,7 @@ export const useCreateProject = () => {
     mutationFn: async (data: CreateProjectData) => {
       const response = await axios.post<CreateProjectResponse>(
         "/projects/create",
-        data
+        data,
       );
       return response.data;
     },

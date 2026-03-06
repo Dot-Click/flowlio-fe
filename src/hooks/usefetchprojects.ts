@@ -30,6 +30,7 @@ export interface Project {
     };
   };
   customFields?: Record<string, any>;
+  visibility: "public" | "private";
 }
 
 export interface ProjectsResponse {
@@ -58,7 +59,7 @@ const fetchProjects = async ({
   }
 
   const response = await axios.get<ProjectsResponse>(
-    `/projects/all${params.toString() ? `?${params.toString()}` : ""}`
+    `/projects/all${params.toString() ? `?${params.toString()}` : ""}`,
   );
   return response.data;
 };

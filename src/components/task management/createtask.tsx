@@ -38,8 +38,13 @@ import { useFetchProjects } from "@/hooks/usefetchprojects";
 import { useFetchOrganizationUsers } from "@/hooks/usefetchorganizationusers";
 import { CreateTaskRequest } from "@/hooks/usecreatetask";
 import { toast } from "sonner";
-import { useFetchTaskById, useFetchTasksByAssignee } from "@/hooks/usefetchtasks";
+import {
+  useFetchTaskById,
+  useFetchTasksByAssignee,
+} from "@/hooks/usefetchtasks";
 // import { AITaskCreator } from "./AITaskCreator";
+import { Switch } from "../ui/switch";
+import { Lock, Globe } from "lucide-react";
 
 interface CreateTaskProps {
   taskId?: string; // If provided, component works in edit mode
@@ -63,6 +68,7 @@ const formSchema = z
     parentId: z.string().optional(),
     startAfter: z.string().optional(),
     finishBefore: z.string().optional(),
+    visibility: z.enum(["public", "private"]).default("private"),
   })
   .refine(
     (data) =>
@@ -72,7 +78,7 @@ const formSchema = z
     {
       message: "End date must be on or after start date.",
       path: ["endDate"],
-    }
+    },
   )
   .refine(
     (data) =>
@@ -82,7 +88,7 @@ const formSchema = z
     {
       message: "Start After and Finish Before cannot be the same task.",
       path: ["finishBefore"],
-    }
+    },
   )
   .refine(
     (data) =>
@@ -92,7 +98,7 @@ const formSchema = z
     {
       message: "Start After and Finish Before cannot be the same task.",
       path: ["startAfter"],
-    }
+    },
   );
 
 export const CreateTask = ({
@@ -140,6 +146,7 @@ export const CreateTask = ({
       parentId: parentId || "",
       startAfter: "",
       finishBefore: "",
+      visibility: "private",
     },
   });
 
@@ -208,6 +215,7 @@ export const CreateTask = ({
         form.setValue("endDate", new Date(task.endDate));
       }
       form.setValue("parentId", task.parentId || "");
+      form.setValue("visibility", (task as any).visibility || "private");
     }
   }, [isEditMode, taskData, form]);
 
@@ -245,6 +253,7 @@ export const CreateTask = ({
       parentId: task.parentId || "",
       startAfter: safeStartAfter,
       finishBefore: safeFinishBefore,
+      visibility: (task as any).visibility || "private",
     });
   }, [
     isEditMode,
@@ -302,7 +311,7 @@ export const CreateTask = ({
             result.length /
             1024 /
             1024
-          ).toFixed(2)}MB`
+          ).toFixed(2)}MB`,
         );
         resolve(result);
       };
@@ -318,7 +327,7 @@ export const CreateTask = ({
       // Check file size before processing
       if (uploadedFile && uploadedFile.size > 10 * 1024 * 1024) {
         toast.error(
-          "File size must be less than 10MB. Please choose a smaller file."
+          "File size must be less than 10MB. Please choose a smaller file.",
         );
         return;
       }
@@ -348,6 +357,7 @@ export const CreateTask = ({
           attachments: attachmentData ? [attachmentData] : undefined,
           startAfter: values.startAfter || null,
           finishBefore: values.finishBefore || null,
+          visibility: values.visibility,
         };
 
         updateTask.mutate(
@@ -367,7 +377,7 @@ export const CreateTask = ({
               toast.error("Task update failed");
               console.log("Task update failed", error);
             },
-          }
+          },
         );
       } else {
         // Create new task
@@ -382,6 +392,7 @@ export const CreateTask = ({
           parentId: values.parentId || undefined,
           startAfter: values.startAfter || null,
           finishBefore: values.finishBefore || null,
+          visibility: values.visibility,
         };
         console.log("Task data", taskData);
 
@@ -452,8 +463,8 @@ export const CreateTask = ({
             {isEditMode
               ? "Update task details and keep your team aligned."
               : parentId
-              ? "Create a subtask to break down your main objective."
-              : "Create and assign tasks to keep your team aligned and productive."}
+                ? "Create a subtask to break down your main objective."
+                : "Create and assign tasks to keep your team aligned and productive."}
           </h1>
         </Stack>
       </Center>
@@ -471,11 +482,47 @@ export const CreateTask = ({
                 ? "Updating..."
                 : "Update Task"
               : createTask.isPending
-              ? "Creating..."
-              : parentId
-              ? "Save Subtask"
-              : "Save Task"}
+                ? "Creating..."
+                : parentId
+                  ? "Save Subtask"
+                  : "Save Task"}
           </Button>
+
+          <Box className="bg-gray-50 border border-gray-200 rounded-2xl p-4 flex items-center gap-4 mb-4 mt-12">
+            <FormField
+              control={form.control}
+              name="visibility"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between gap-4 space-y-0 w-full">
+                  <Box className="flex flex-col gap-0.5">
+                    <FormLabel className="text-base font-semibold flex items-center gap-2">
+                      {field.value === "private" ? (
+                        <Lock className="w-4 h-4 text-orange-500" />
+                      ) : (
+                        <Globe className="w-4 h-4 text-blue-500" />
+                      )}
+                      {field.value === "private"
+                        ? "Private Task"
+                        : "Public Task"}
+                    </FormLabel>
+                    <p className="text-xs text-gray-500">
+                      {field.value === "private"
+                        ? "Only the assignee and creator can see this task."
+                        : "Anyone in your organization can view this task."}
+                    </p>
+                  </Box>
+                  <FormControl>
+                    <Switch
+                      checked={field.value === "public"}
+                      onCheckedChange={(checked) =>
+                        field.onChange(checked ? "public" : "private")
+                      }
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </Box>
 
           {(isModal || isEditMode) && onClose && (
             <Button
@@ -691,7 +738,7 @@ export const CreateTask = ({
                             variant={"outline"}
                             className={cn(
                               "justify-start text-left font-normal rounded-full",
-                              !field.value && "text-muted-foreground"
+                              !field.value && "text-muted-foreground",
                             )}
                           >
                             <CalendarIcon className="size-5" fill="#62A1C0" />
@@ -765,7 +812,12 @@ export const CreateTask = ({
                   <FormItem>
                     <FormLabel>Start After</FormLabel>
                     <Select
-                      value={field.value && dependencyOptions.some((t) => t.id === field.value) ? field.value : undefined}
+                      value={
+                        field.value &&
+                        dependencyOptions.some((t) => t.id === field.value)
+                          ? field.value
+                          : undefined
+                      }
                       onValueChange={(value) => {
                         field.onChange(value);
                         form.trigger(["startAfter", "finishBefore"]);
@@ -802,7 +854,12 @@ export const CreateTask = ({
                   <FormItem>
                     <FormLabel>Finish Before</FormLabel>
                     <Select
-                      value={field.value && dependencyOptions.some((t) => t.id === field.value) ? field.value : undefined}
+                      value={
+                        field.value &&
+                        dependencyOptions.some((t) => t.id === field.value)
+                          ? field.value
+                          : undefined
+                      }
                       onValueChange={(value) => {
                         field.onChange(value);
                         form.trigger(["startAfter", "finishBefore"]);
@@ -849,7 +906,7 @@ export const CreateTask = ({
                             variant={"outline"}
                             className={cn(
                               "justify-start text-left font-normal rounded-full",
-                              !field.value && "text-muted-foreground"
+                              !field.value && "text-muted-foreground",
                             )}
                           >
                             <CalendarIcon className="size-5" fill="#62A1C0" />

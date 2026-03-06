@@ -164,6 +164,7 @@ export interface Task {
   clientName?: string;
   clientEmail?: string;
   clientImage?: string;
+  visibility: "public" | "private";
 }
 
 export interface CreateTaskRequest {
@@ -183,6 +184,7 @@ export interface CreateTaskRequest {
     size: number;
     type: string;
   }>;
+  visibility?: "public" | "private";
 }
 
 export type IPlan<T = {}> = {
@@ -263,7 +265,7 @@ export type INotification<T = {}> = {
   createdAt: Date;
   message: string;
   type: // tasks
-  | "task_assigned"
+    | "task_assigned"
     | "task_updated"
     | "task_completed"
     // issues

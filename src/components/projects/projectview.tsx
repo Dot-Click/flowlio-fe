@@ -358,7 +358,7 @@ export const ProjectView = () => {
                 <Badge
                   variant="outline"
                   className={`${getStatusColor(
-                    project.status
+                    project.status,
                   )} flex items-center gap-2 px-4 py-2 text-sm font-medium`}
                 >
                   {getStatusIcon(project.status)}
@@ -375,6 +375,18 @@ export const ProjectView = () => {
                   <Building2 className="h-4 w-4 text-green-600" />
                   <span className="font-medium">
                     {project.clientName || "No Client"}
+                  </span>
+                </Box>
+                <Box className="flex items-center gap-2 text-sm text-gray-600 bg-white/70 px-3 py-2 rounded-full">
+                  {(project as any).visibility === "private" ? (
+                    <Lock className="h-4 w-4 text-orange-500" />
+                  ) : (
+                    <Globe className="h-4 w-4 text-blue-500" />
+                  )}
+                  <span className="font-medium">
+                    {(project as any).visibility === "private"
+                      ? "Private"
+                      : "Public"}
                   </span>
                 </Box>
               </Box>
@@ -567,7 +579,7 @@ export const ProjectView = () => {
                             iframe.style.display = "none";
                             const fallback =
                               iframe.parentElement?.querySelector(
-                                ".pdf-fallback"
+                                ".pdf-fallback",
                               ) as HTMLElement;
                             if (fallback) fallback.style.display = "block";
                           }}
@@ -737,7 +749,7 @@ export const ProjectView = () => {
                     <Badge
                       variant="outline"
                       className={`${getStatusColor(
-                        editStatus
+                        editStatus,
                       )} flex items-center gap-1 px-3 py-1`}
                     >
                       {getStatusIcon(editStatus)}
@@ -864,7 +876,7 @@ export const ProjectView = () => {
                           size="sm"
                           onClick={() =>
                             handleOpenInNewTab(
-                              project.projectFiles?.projectPdf?.url || ""
+                              project.projectFiles?.projectPdf?.url || "",
                             )
                           }
                           className="flex items-center gap-1 bg-white hover:bg-blue-50 cursor-pointer"
@@ -946,7 +958,7 @@ export const ProjectView = () => {
                 onError={(e) => {
                   console.error("PDF failed to load in modal:", e);
                   toast.error(
-                    "Failed to load PDF. Please try opening in a new tab."
+                    "Failed to load PDF. Please try opening in a new tab.",
                   );
                 }}
               />
@@ -1000,7 +1012,7 @@ export const ProjectView = () => {
                             <span className="text-xs text-gray-400">
                               {format(
                                 new Date(comment.createdAt),
-                                "MMM d, yyyy hh:mm a"
+                                "MMM d, yyyy hh:mm a",
                               )}
                             </span>
                           </Box>
@@ -1028,7 +1040,7 @@ export const ProjectView = () => {
                           className="text-blue-600 cursor-pointer p-1 h-auto text-xs mt-2 hidden"
                           onClick={() => {
                             setReplyTo(
-                              replyTo === comment.id ? null : comment.id
+                              replyTo === comment.id ? null : comment.id,
                             );
                             setReplyContent("");
                           }}
@@ -1089,7 +1101,7 @@ export const ProjectView = () => {
                                 <span className="text-xs text-gray-400">
                                   {format(
                                     new Date(reply.createdAt),
-                                    "MMM d, yyyy hh:mm a"
+                                    "MMM d, yyyy hh:mm a",
                                   )}
                                 </span>
                               </Box>
