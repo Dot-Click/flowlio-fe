@@ -3,6 +3,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Center } from "@/components/ui/center";
 import { Box } from "../ui/box";
 import { Flex } from "../ui/flex";
+import { Stack } from "../ui/stack";
 import { ReusableTable } from "../reusable/reusabletable";
 import { format } from "date-fns";
 import {
@@ -234,7 +235,7 @@ export const UserManagementTable = ({
   const handleDeleteUserMember = async (id: string, email: string) => {
     if (
       window.confirm(
-        `Are you sure you want to delete ${email}? This action cannot be undone.`
+        `Are you sure you want to delete ${email}? This action cannot be undone.`,
       )
     ) {
       try {
@@ -253,7 +254,7 @@ export const UserManagementTable = ({
   const handleToggleUserStatus = async (
     id: string,
     isActive: boolean,
-    email: string
+    email: string,
   ) => {
     const action = isActive ? "deactivate" : "reactivate";
     if (window.confirm(`Are you sure you want to ${action} ${email}?`)) {
@@ -285,7 +286,7 @@ export const UserManagementTable = ({
       toast.success(
         orgManagerModal.type === "promote"
           ? "User is now Organization Manager."
-          : "User has been removed from Organization Manager."
+          : "User has been removed from Organization Manager.",
       );
       setOrgManagerModal({ open: false, type: "promote", member: null });
       refetch();
@@ -405,7 +406,10 @@ export const UserManagementTable = ({
   if (isLoading) {
     return (
       <Center className="h-64">
-        <Box className="text-lg">Loading user members...</Box>
+        <Box className="flex items-center justify-center p-8">
+          <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
+          <Box className="ml-2 text-gray-600">Loading user members...</Box>
+        </Box>
       </Center>
     );
   }
@@ -473,7 +477,11 @@ export const UserManagementTable = ({
             <Button
               variant="outline"
               onClick={() =>
-                setOrgManagerModal({ open: false, type: "promote", member: null })
+                setOrgManagerModal({
+                  open: false,
+                  type: "promote",
+                  member: null,
+                })
               }
             >
               No

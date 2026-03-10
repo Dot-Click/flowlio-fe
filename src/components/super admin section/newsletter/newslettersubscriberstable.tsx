@@ -34,7 +34,7 @@ export const NewsletterSubscribersTable = () => {
   const handleDelete = (subscriber: NewsletterSubscriber) => {
     if (
       window.confirm(
-        `Are you sure you want to delete ${subscriber.email} from the newsletter list?`
+        `Are you sure you want to delete ${subscriber.email} from the newsletter list?`,
       )
     ) {
       deleteMutation.mutate(subscriber.id);
@@ -104,7 +104,10 @@ export const NewsletterSubscribersTable = () => {
   if (isLoading) {
     return (
       <Center className="px-4 py-6">
-        <div className="text-gray-500">Loading subscribers...</div>
+        <Box className="flex items-center justify-center p-8">
+          <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
+          <Box className="ml-2 text-gray-600">Loading subscribers...</Box>
+        </Box>
       </Center>
     );
   }

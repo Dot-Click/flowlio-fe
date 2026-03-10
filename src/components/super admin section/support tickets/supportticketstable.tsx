@@ -74,10 +74,10 @@ export const SupportTicketTable = ({
           },
           onError: (error: any) => {
             toast.error(
-              error.response?.data?.message || "Failed to close support ticket"
+              error.response?.data?.message || "Failed to close support ticket",
             );
           },
-        }
+        },
       );
     }
   };
@@ -267,7 +267,10 @@ export const SupportTicketTable = ({
   if (isLoading) {
     return (
       <Center className="flex items-center justify-center h-64">
-        <Box className="text-lg">Loading support tickets...</Box>
+        <Box className="flex items-center justify-center p-8">
+          <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
+          <Box className="ml-2 text-gray-600">Loading support tickets...</Box>
+        </Box>
       </Center>
     );
   }

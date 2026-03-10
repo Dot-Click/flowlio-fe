@@ -159,7 +159,10 @@ export const UsersTable = () => {
   if (isLoading) {
     return (
       <Center className="py-10">
-        <Box>Loading users...</Box>
+        <Box className="flex items-center justify-center p-8">
+          <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
+          <Box className="ml-2 text-gray-600">Loading users...</Box>
+        </Box>
       </Center>
     );
   }

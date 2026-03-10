@@ -11,7 +11,10 @@ import { Box } from "../ui/box";
 import { Flex } from "../ui/flex";
 import { useState } from "react";
 import { Settings2 } from "lucide-react";
-import { GeneralModal, useGeneralModalDisclosure } from "../common/generalmodal";
+import {
+  GeneralModal,
+  useGeneralModalDisclosure,
+} from "../common/generalmodal";
 import { CustomFieldsManager } from "./customfields/CustomFieldsManager";
 import { useUser } from "@/providers/user.provider";
 
@@ -48,7 +51,11 @@ export const ProjectHeader = () => {
             <Button
               variant="outline"
               className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
-              onClick={() =>  !showGranttChart ? setShowGranttChart(true) : setShowGranttChart(false)}
+              onClick={() =>
+                !showGranttChart
+                  ? setShowGranttChart(true)
+                  : setShowGranttChart(false)
+              }
             >
               <Eye className="fill-white text-black size-5" />
               {showGranttChart ? "Hide Project Grantt" : "View Project Grantt"}
@@ -65,22 +72,19 @@ export const ProjectHeader = () => {
         )}
       </Center>
 
-
       {(!showGranttChart || isClient) && <ProjectTable isClient={isClient} />}
 
       {!isClient && (
-        <Box className="p-4">
-          {showGranttChart && <GranttChart />}
-        </Box>
+        <Box className="p-4">{showGranttChart && <GranttChart />}</Box>
       )}
 
       {!isClient && (
-      <GeneralModal {...customFieldsModal}>
-        <Box className="p-1">
-          <h2 className="text-xl font-semibold mb-4">Manage Custom Fields</h2>
-          <CustomFieldsManager entityType="project" />
-        </Box>
-      </GeneralModal>
+        <GeneralModal {...customFieldsModal}>
+          <Box className="p-1">
+            <h2 className="text-xl font-semibold mb-4">Manage Custom Fields</h2>
+            <CustomFieldsManager entityType="project" />
+          </Box>
+        </GeneralModal>
       )}
     </PageWrapper>
   );

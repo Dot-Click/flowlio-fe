@@ -142,7 +142,10 @@ export const PaymentLinksTable = () => {
   if (isLoading) {
     return (
       <Box className="flex justify-center items-center p-8">
-        <Box className="text-gray-500">Loading payment links...</Box>
+        <Box className="flex items-center justify-center p-8">
+          <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
+          <Box className="ml-2 text-gray-600">Loading payment links...</Box>
+        </Box>
       </Box>
     );
   }

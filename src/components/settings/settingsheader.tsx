@@ -53,7 +53,7 @@ const settingsSchema = z
     {
       message: "If changing password, all password fields must be filled.",
       path: ["currentpassword"],
-    }
+    },
   )
   .refine(
     (data) => {
@@ -68,7 +68,7 @@ const settingsSchema = z
     {
       message: "Current password must be 8-12 characters long.",
       path: ["currentpassword"],
-    }
+    },
   )
   .refine(
     (data) => {
@@ -81,7 +81,7 @@ const settingsSchema = z
     {
       message: "New password must be 8-12 characters long.",
       path: ["newpassword"],
-    }
+    },
   )
   .refine(
     (data) => {
@@ -96,7 +96,7 @@ const settingsSchema = z
     {
       message: "Confirm password must be 8-12 characters long.",
       path: ["confirmpassword"],
-    }
+    },
   )
   .refine(
     (data) => {
@@ -109,7 +109,7 @@ const settingsSchema = z
     {
       message: "New password and confirm password must match.",
       path: ["confirmpassword"],
-    }
+    },
   );
 
 export const SettingsHeader = () => {
@@ -124,7 +124,7 @@ export const SettingsHeader = () => {
   const enable2FAMutation = useEnable2FA();
 
   const [avatarPreview, setAvatarPreview] = useState<string | undefined>(
-    undefined
+    undefined,
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -190,7 +190,7 @@ export const SettingsHeader = () => {
       setValue("invoiceRemindersNotifications", prefs.invoiceReminders ?? true);
       setValue(
         "projectActivityUpdatesNotifications",
-        prefs.projectActivityUpdates ?? true
+        prefs.projectActivityUpdates ?? true,
       );
     }
   }, [userData, setValue]);
@@ -357,11 +357,11 @@ export const SettingsHeader = () => {
 
       if (enabled) {
         toast.success(
-          "🔔 Payment alerts enabled! You'll receive notifications for transactions and overdue payments."
+          "🔔 Payment alerts enabled! You'll receive notifications for transactions and overdue payments.",
         );
       } else {
         toast.info(
-          "🔕 Payment alerts disabled. You won't receive payment notifications."
+          "🔕 Payment alerts disabled. You won't receive payment notifications.",
         );
       }
     } catch (error) {
@@ -369,7 +369,7 @@ export const SettingsHeader = () => {
       // Revert the toggle on error
       setValue("paymentAlertNotifications", !enabled);
       toast.error(
-        "Failed to update payment alert preferences. Please try again."
+        "Failed to update payment alert preferences. Please try again.",
       );
     }
   };
@@ -396,11 +396,11 @@ export const SettingsHeader = () => {
 
       if (enabled) {
         toast.success(
-          "📧 Invoice reminders enabled! You'll be notified about upcoming due dates and pending payments."
+          "📧 Invoice reminders enabled! You'll be notified about upcoming due dates and pending payments.",
         );
       } else {
         toast.info(
-          "🔕 Invoice reminders disabled. You won't receive invoice notifications."
+          "🔕 Invoice reminders disabled. You won't receive invoice notifications.",
         );
       }
     } catch (error) {
@@ -408,7 +408,7 @@ export const SettingsHeader = () => {
       // Revert the toggle on error
       setValue("invoiceRemindersNotifications", !enabled);
       toast.error(
-        "Failed to update invoice reminder preferences. Please try again."
+        "Failed to update invoice reminder preferences. Please try again.",
       );
     }
   };
@@ -435,11 +435,11 @@ export const SettingsHeader = () => {
 
       if (enabled) {
         toast.success(
-          "🚀 Project activity updates enabled! You'll receive alerts on project changes and task assignments."
+          "🚀 Project activity updates enabled! You'll receive alerts on project changes and task assignments.",
         );
       } else {
         toast.info(
-          "🔕 Project activity updates disabled. You won't receive project notifications."
+          "🔕 Project activity updates disabled. You won't receive project notifications.",
         );
       }
     } catch (error) {
@@ -447,7 +447,7 @@ export const SettingsHeader = () => {
       // Revert the toggle on error
       setValue("projectActivityUpdatesNotifications", !enabled);
       toast.error(
-        "Failed to update project activity preferences. Please try again."
+        "Failed to update project activity preferences. Please try again.",
       );
     }
   };
@@ -514,13 +514,13 @@ export const SettingsHeader = () => {
       if (error) {
         toast.error(
           (error as any)?.message ||
-            "Failed to change password. Please check your current password."
+            "Failed to change password. Please check your current password.",
         );
         return;
       }
 
       toast.success(
-        "Password changed successfully! You will be logged out from other devices for security."
+        "Password changed successfully! You will be logged out from other devices for security.",
       );
 
       // Clear password fields

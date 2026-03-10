@@ -91,7 +91,7 @@ export const CompaniesTable = () => {
   };
 
   const getColumns = (
-    navigate: ReturnType<typeof useNavigate>
+    navigate: ReturnType<typeof useNavigate>,
   ): ColumnDef<any>[] => [
     {
       id: "select",
@@ -179,7 +179,7 @@ export const CompaniesTable = () => {
 
         // Find the owner user
         const ownerUser = userOrganizations?.find(
-          (uo) => uo.role === "owner"
+          (uo) => uo.role === "owner",
         )?.user;
         const userStatus = ownerUser?.status;
 
@@ -245,8 +245,8 @@ export const CompaniesTable = () => {
         const status = isActive
           ? "active"
           : hasPendingPayment
-          ? "non active"
-          : orgSubscriptionStatus?.toLowerCase() || "non active";
+            ? "non active"
+            : orgSubscriptionStatus?.toLowerCase() || "non active";
 
         const statusStyles: Record<string, { text: string; dot: string }> = {
           active: {
@@ -305,7 +305,7 @@ export const CompaniesTable = () => {
                         // For pending users, show a message or handle differently
                         // They don't have a real organization to view details for
                         toast.info(
-                          "This user hasn't completed payment yet. No organization details available."
+                          "This user hasn't completed payment yet. No organization details available.",
                         );
                         return;
                       }

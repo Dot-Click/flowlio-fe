@@ -30,7 +30,7 @@ export const ViewDetails = () => {
 
     // Use the actual slug field from the database instead of generating from name
     const organization = organizationsResponse.data.find(
-      (org: any) => org.slug === slug
+      (org: any) => org.slug === slug,
     );
 
     return organization?.id || null;
@@ -106,11 +106,11 @@ export const ViewDetails = () => {
                   companyDetails.owner?.image
                     ? companyDetails.owner.image
                     : companyDetails.organization.settings?.demo === true &&
-                      companyDetails.users.length > 0 &&
-                      companyDetails.users[0].user.image
-                    ? companyDetails.users[0].user.image
-                    : companyDetails.organization.logo ||
-                      "/super admin/viewdetailsimg.png"
+                        companyDetails.users.length > 0 &&
+                        companyDetails.users[0].user.image
+                      ? companyDetails.users[0].user.image
+                      : companyDetails.organization.logo ||
+                        "/super admin/viewdetailsimg.png"
                 }
                 alt="company"
                 className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover"
@@ -243,7 +243,7 @@ export const ViewDetails = () => {
                     <Box className="text-xs text-gray-600">
                       Cancelled on:{" "}
                       {new Date(
-                        companyDetails.subscription.cancelledAt
+                        companyDetails.subscription.cancelledAt,
                       ).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "long",
@@ -255,7 +255,7 @@ export const ViewDetails = () => {
                     <Box className="text-xs text-gray-600">
                       Access until:{" "}
                       {new Date(
-                        companyDetails.subscription.currentPeriodEnd
+                        companyDetails.subscription.currentPeriodEnd,
                       ).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "long",
@@ -325,8 +325,8 @@ export const ViewDetails = () => {
                     companyDetails.subscription?.cancelAtPeriodEnd
                       ? "red-600"
                       : companyDetails.subscription?.status === "active"
-                      ? "[#00A400]"
-                      : "[#FF0000]"
+                        ? "[#00A400]"
+                        : "[#FF0000]"
                   } rounded-full`}
                 >
                   <Center className="gap-2">
@@ -335,8 +335,8 @@ export const ViewDetails = () => {
                         companyDetails.subscription?.cancelAtPeriodEnd
                           ? "red-600"
                           : companyDetails.subscription?.status === "active"
-                          ? "[#00A400]"
-                          : "[#FF0000]"
+                            ? "[#00A400]"
+                            : "[#FF0000]"
                       }`}
                     />
                     <h1
@@ -344,8 +344,8 @@ export const ViewDetails = () => {
                         companyDetails.subscription?.cancelAtPeriodEnd
                           ? "red-600"
                           : companyDetails.subscription?.status === "active"
-                          ? "[#00A400]"
-                          : "[#FF0000]"
+                            ? "[#00A400]"
+                            : "[#FF0000]"
                       } text-xs`}
                     >
                       {companyDetails.subscription?.cancelAtPeriodEnd

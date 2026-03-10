@@ -22,7 +22,7 @@ import {
   FaSnapchat,
   FaPinterest,
 } from "react-icons/fa";
-import { Ellipsis, Eye, Pencil, Loader2, KeyRound } from "lucide-react";
+import { Ellipsis, Eye, Pencil, KeyRound } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
   GeneralModal,
@@ -127,10 +127,10 @@ export const ClientManagementTable = () => {
         },
         onError: (error: any) => {
           toast.error(
-            error?.response?.data?.error || "Failed to update client status"
+            error?.response?.data?.error || "Failed to update client status",
           );
         },
-      }
+      },
     );
   };
 
@@ -153,7 +153,7 @@ export const ClientManagementTable = () => {
   const handleDeleteClient = async (id: string, email: string) => {
     if (
       window.confirm(
-        `Are you sure you want to delete ${email}? This action cannot be undone.`
+        `Are you sure you want to delete ${email}? This action cannot be undone.`,
       )
     ) {
       try {
@@ -438,7 +438,11 @@ export const ClientManagementTable = () => {
 
         return (
           <Box className="text-center p-1 capitalize">
-            {displayValue !== undefined && displayValue !== null && displayValue !== "" ? String(displayValue) : "-"}
+            {displayValue !== undefined &&
+            displayValue !== null &&
+            displayValue !== ""
+              ? String(displayValue)
+              : "-"}
           </Box>
         );
       },
@@ -513,7 +517,7 @@ export const ClientManagementTable = () => {
                     disabled={isDeleting}
                   >
                     {isDeleting ? (
-                      <Loader2 className="text-white fill-white size-4 animate-spin" />
+                      <Box className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <FaRegTrashAlt className="text-white fill-white size-4 " />
                     )}
@@ -557,10 +561,10 @@ export const ClientManagementTable = () => {
   if (isLoading) {
     return (
       <Center className="py-12">
-        <Stack className="gap-4 items-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-          <p className="text-gray-600">Loading clients...</p>
-        </Stack>
+        <Box className="flex items-center justify-center p-8">
+          <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
+          <Box className="ml-2 text-gray-600">Loading clients...</Box>
+        </Box>
       </Center>
     );
   }
@@ -711,7 +715,8 @@ export const ClientManagementTable = () => {
 
                       let displayValue = value;
                       if (field.type === "boolean") {
-                        displayValue = value === "true" || value === true ? "Yes" : "No";
+                        displayValue =
+                          value === "true" || value === true ? "Yes" : "No";
                       } else if (field.type === "date" && value) {
                         try {
                           displayValue = new Date(value).toLocaleDateString();
@@ -802,7 +807,7 @@ export const ClientManagementTable = () => {
                             [
                               `Contract for ${selectedClient.name} - ${project.name}`,
                             ],
-                            { type: "text/plain" }
+                            { type: "text/plain" },
                           );
                           const url = window.URL.createObjectURL(blob);
                           const a = document.createElement("a");

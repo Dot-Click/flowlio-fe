@@ -81,7 +81,7 @@ export const AiAssistChat: React.FC<{ withoutWelcomeGrids?: boolean }> = ({
   const handleSend = async (
     input: string,
     setInput: (v: string) => void,
-    attachments?: File[]
+    attachments?: File[],
   ) => {
     if (
       (!input.trim() && (!attachments || attachments.length === 0)) ||
@@ -195,7 +195,7 @@ const ChatBox: React.FC<{
   onSend: (
     input: string,
     setInput: (v: string) => void,
-    attachments?: File[]
+    attachments?: File[],
   ) => void;
   showWelcome: boolean;
   activeChatId: string | null;

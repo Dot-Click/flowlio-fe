@@ -176,13 +176,16 @@ export const InvoiceTable = ({ onTableStateChange }: InvoiceTableProps) => {
         onTableStateChange(newTableState);
       }
     },
-    [invoicesData?.data, onTableStateChange]
+    [invoicesData?.data, onTableStateChange],
   );
 
   if (isLoading) {
     return (
       <Center className="py-8">
-        <Box className="text-gray-500">Loading invoices...</Box>
+        <Box className="flex items-center justify-center p-8">
+          <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
+          <Box className="ml-2 text-gray-600">Loading invoices...</Box>
+        </Box>
       </Center>
     );
   }
