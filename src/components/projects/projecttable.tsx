@@ -10,6 +10,7 @@ import {
   Trash2,
   Lock,
   Globe,
+  DollarSign,
 } from "lucide-react";
 import { ReusableTable } from "../reusable/reusabletable";
 import { format, isWithinInterval } from "date-fns";
@@ -57,6 +58,7 @@ import {
 import { ProjectFilter } from "./ProjectFilter";
 import { useFetchCustomFields } from "@/hooks/usecustomfields";
 import { useUpdateProject } from "@/hooks/useupdateproject";
+import { ProjectExpenses } from "./ProjectExpenses";
 
 // Use the Project interface from the hook
 export type Data = Project & { customFields?: Record<string, any> };
@@ -96,6 +98,8 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
     id: string;
     name: string;
   } | null>(null);
+  const [expenseModalOpen, setExpenseModalOpen] = useState(false);
+  const [activeProjectForExpenses, setActiveProjectForExpenses] = useState<Project | null>(null);
 
   // API hooks for comments
   const { data: commentsData, isLoading: commentsLoading } =
@@ -364,6 +368,20 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
       },
     },
     {
+      accessorKey: "budget",
+      header: () => <Box className="text-center text-black">Budget</Box>,
+      cell: ({ row }) => {
+        const budget = (row.original as any).budget;
+        return (
+          <Center className="text-center">
+            {budget && Number(budget) > 0
+              ? `$${Number(budget).toLocaleString("en-US", { minimumFractionDigits: 2 })}`
+              : "-"}
+          </Center>
+        );
+      },
+    },
+    {
       accessorKey: "visibility",
       header: () => <Box className="text-center text-black">Visibility</Box>,
       cell: ({ row }) => {
@@ -569,6 +587,26 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
                 </TooltipTrigger>
                 <TooltipContent className="mb-2">
                   <p>Add Comment</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="bg-emerald-600 hover:bg-emerald-600/80 rounded-md border-none cursor-pointer"
+                    onClick={() => {
+                      setActiveProjectForExpenses(row.original);
+                      setExpenseModalOpen(true);
+                    }}
+                  >
+                    <DollarSign className="text-white size-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="mb-2">
+                  <p>Project Expenses</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -811,6 +849,24 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Expenses Modal */}
+      <GeneralModal
+        open={expenseModalOpen}
+        onOpenChange={setExpenseModalOpen}
+        contentProps={{ className: "max-w-3xl overflow-hidden p-0" }}
+      >
+        {activeProjectForExpenses && (
+          <Box className="p-0">
+            <ProjectExpenses
+              projectId={activeProjectForExpenses.id}
+              budget={(activeProjectForExpenses as any).budget || 0}
+              isClient={isClient}
+              isModal={true}
+            />
+          </Box>
+        )}
+      </GeneralModal>
     </>
   );
 };

@@ -23,6 +23,8 @@ import {
   BarChart3,
   Eye,
   EyeIcon,
+  Globe,
+  Lock,
 } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Progress } from "../ui/progress";
@@ -51,6 +53,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { useUpdateProject } from "@/hooks/useupdateproject";
+import { ProjectExpenses } from "./ProjectExpenses";
 
 import { useUser } from "@/providers/user.provider";
 
@@ -652,6 +655,13 @@ export const ProjectView = () => {
               </Box>
             </CardContent>
           </Card>
+
+          {/* Financial Tracking - Project Expenses */}
+          <ProjectExpenses
+            projectId={project.id}
+            budget={(project as any).budget || 0}
+            isClient={isClient}
+          />
         </Box>
 
         {/* Right Column - Sidebar */}

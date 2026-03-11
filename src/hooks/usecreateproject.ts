@@ -19,6 +19,7 @@ interface CreateProjectData {
   }>;
   organizationId: string;
   visibility?: "public" | "private";
+  budget?: number;
 }
 
 // Response data interface
@@ -39,6 +40,7 @@ interface CreateProjectResponse {
     address?: string;
     organizationId: string;
     createdBy: string;
+    budget?: number;
     createdAt: string;
     updatedAt: string;
   };

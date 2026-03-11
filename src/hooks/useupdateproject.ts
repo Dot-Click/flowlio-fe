@@ -17,6 +17,7 @@ interface UpdateProjectData {
   visibility?: "public" | "private";
   status?: "pending" | "completed" | "ongoing" | "active" | "delayed";
   progress?: number; // 0-100
+  budget?: number;
 }
 
 interface UpdateProjectResponse {
@@ -38,6 +39,7 @@ interface UpdateProjectResponse {
     contractfilePublicId?: string;
     organizationId: string;
     createdBy: string;
+    budget?: number;
     createdAt: Date;
     updatedAt: Date;
   };

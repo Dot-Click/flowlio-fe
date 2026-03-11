@@ -45,7 +45,7 @@ import { useTranslation } from "react-i18next";
 import { useFetchCustomFields } from "../../hooks/usecustomfields";
 import { Checkbox } from "../ui/checkbox";
 import { Switch } from "../ui/switch";
-import { Lock, Globe } from "lucide-react";
+import { Lock, Globe, DollarSign } from "lucide-react";
 
 const formSchema = z
   .object({
@@ -71,6 +71,7 @@ const formSchema = z
       .optional(),
     customFields: z.record(z.any()).optional(),
     visibility: z.enum(["public", "private"]).default("private"),
+    budget: z.coerce.number().min(0).optional(),
   })
   .refine(
     (data) => {
@@ -181,6 +182,7 @@ export const CreateProject = () => {
       projectFiles: [],
       customFields: {},
       visibility: "private",
+      budget: 0,
     },
   });
 
@@ -219,6 +221,7 @@ export const CreateProject = () => {
         contractfile: project.contractfile || "",
         customFields: project.customFields || {},
         visibility: (project as any).visibility || "private",
+        budget: (project as any).budget || 0,
       });
 
       // Explicitly set Select values after reset to ensure they're recognized
@@ -300,6 +303,7 @@ export const CreateProject = () => {
         organizationId: finalOrganizationId,
         customFields: values.customFields,
         visibility: values.visibility,
+        ...(values.budget !== undefined && values.budget > 0 && { budget: values.budget }),
       };
 
       if (isEditMode && id) {
@@ -729,6 +733,35 @@ export const CreateProject = () => {
                   </FormItem>
                 )}
               />
+            </Box>
+
+            <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
+              <FormField
+                control={form.control}
+                name="budget"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-1.5">
+                      <DollarSign className="h-4 w-4 text-emerald-600" />
+                      Project Budget
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        className="bg-white rounded-full placeholder:text-gray-400"
+                        size="lg"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="Enter project budget (e.g. 10000)"
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Box />
             </Box>
 
             <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
