@@ -19,13 +19,11 @@ import {
   Download,
   Eye,
   Calendar,
-  Clock,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useFetchProjects } from "@/hooks/usefetchprojects";
 import { Skeleton } from "../ui/skeleton";
 import { useFetchClientMedia } from "@/hooks/usefetchclientmedia";
-
 import { toast } from "sonner";
 
 export const ClientMediaCenter: React.FC = () => {
@@ -33,8 +31,7 @@ export const ClientMediaCenter: React.FC = () => {
   const [projectFilter, setProjectFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
 
-  const { data: projectsResponse, isLoading: projectsLoading } =
-    useFetchProjects();
+  const { data: projectsResponse } = useFetchProjects();
   const projects = projectsResponse?.data ?? [];
 
   const { data: mediaResponse, isLoading: mediaLoading } = useFetchClientMedia({
@@ -68,10 +65,16 @@ export const ClientMediaCenter: React.FC = () => {
     const toastId = toast.loading("Preparing download...");
     try {
       let downloadUrl = file.fileUrl;
-      
+
       // For Cloudinary, we use their native attachment flag which is the most reliable
-      if (downloadUrl.includes("cloudinary.com") && downloadUrl.includes("/upload/")) {
-        const forcedUrl = downloadUrl.replace("/upload/", "/upload/fl_attachment/");
+      if (
+        downloadUrl.includes("cloudinary.com") &&
+        downloadUrl.includes("/upload/")
+      ) {
+        const forcedUrl = downloadUrl.replace(
+          "/upload/",
+          "/upload/fl_attachment/",
+        );
         const link = document.createElement("a");
         link.href = forcedUrl;
         link.target = "_blank";
@@ -187,8 +190,8 @@ export const ClientMediaCenter: React.FC = () => {
                     alt={file.fileName}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                ) : (file.fileType?.toLowerCase().includes("pdf") || 
-                     file.fileName?.toLowerCase().endsWith(".pdf")) ? (
+                ) : file.fileType?.toLowerCase().includes("pdf") ||
+                  file.fileName?.toLowerCase().endsWith(".pdf") ? (
                   <Box className="w-full h-full p-2 overflow-hidden relative pointer-events-none">
                     <iframe
                       src={`${file.fileUrl}#toolbar=0&navpanes=0&scrollbar=0&view=Fit`}

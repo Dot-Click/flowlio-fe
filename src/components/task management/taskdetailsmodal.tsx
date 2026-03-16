@@ -31,10 +31,9 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { FileVersionHistoryModal } from "../common/fileversionhistorymodal";
-import { useFetchFileVersions } from "@/hooks/usefetchfileversions";
 import { useUploadFileVersion } from "@/hooks/useuploadfileversion";
 import { toast } from "sonner";
-import { Attachment, FileVersion } from "@/types";
+import { Attachment } from "@/types";
 
 type TaskForMap = {
   id: string;
