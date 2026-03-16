@@ -163,7 +163,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
             <SidebarMenu>
               {navItems.map((item, index) => {
                 const normalizePath = (path: string) =>
-                  path.replace(/\/+$/, "").split("?")[0];
+                  decodeURIComponent(path).replace(/\/+$/, "").split("?")[0];
 
                 const currentPath = normalizePath(location.pathname);
                 const itemPath = normalizePath(item.url);
@@ -174,13 +174,17 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                   (subPath) => normalizePath(subPath) === currentPath
                 );
 
-                // Check if current path includes the parent item's URL (for nested routes like dashboard/project/create-project)
+                const isAnotherTopLevelActive = navItems.some(
+                  (ni) => ni.url !== item.url && normalizePath(ni.url) === currentPath
+                );
+
                 const isParentActive =
                   itemPath !== "/" &&
                   itemPath !== "/dashboard" &&
                   itemPath !== "/superadmin" &&
                   itemPath !== "/viewer" &&
-                  currentPath.startsWith(itemPath);
+                  currentPath.startsWith(itemPath + "/") &&
+                  !isAnotherTopLevelActive;
 
                 return (
                   <SidebarMenuItem key={item.title}>

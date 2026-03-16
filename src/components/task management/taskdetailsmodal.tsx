@@ -11,6 +11,8 @@ import {
   Trash2,
   Edit,
   Link2,
+  Clock,
+  Upload,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
@@ -28,6 +30,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import { FileVersionHistoryModal } from "../common/fileversionhistorymodal";
+import { useFetchFileVersions } from "@/hooks/usefetchfileversions";
+import { useUploadFileVersion } from "@/hooks/useuploadfileversion";
+import { toast } from "sonner";
+import { Attachment, FileVersion } from "@/types";
 
 type TaskForMap = {
   id: string;
@@ -49,13 +56,7 @@ interface TaskDetailsModalProps {
     assigneeName?: string;
     assigneeImage?: string;
     creatorName?: string;
-    attachments?: Array<{
-      id: string;
-      name: string;
-      url: string;
-      size: number;
-      type: string;
-    }>;
+    attachments?: Array<Attachment>;
     parentId?: string;
     parentTitle?: string;
     startAfter?: string | null;
@@ -80,6 +81,11 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showCreateSubtaskModal, setShowCreateSubtaskModal] = useState(false);
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  const [activeAttachment, setActiveAttachment] = useState<Attachment | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const uploadVersion = useUploadFileVersion();
   const { data: commentsResponse } = useFetchProjectComments(
     task.projectId || ""
   );
@@ -154,6 +160,33 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
         setShowDeleteConfirm(false);
       },
     });
+  };
+
+  const handleOpenHistory = (attachment: Attachment) => {
+    setActiveAttachment(attachment);
+    setHistoryModalOpen(true);
+  };
+
+  const handleUploadClick = (attachment: Attachment) => {
+    setActiveAttachment(attachment);
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && activeAttachment) {
+      try {
+        await uploadVersion.mutateAsync({
+          attachmentId: activeAttachment.id,
+          file,
+        });
+        toast.success("New version uploaded successfully");
+      } catch (error) {
+        toast.error("Failed to upload new version");
+      }
+    }
+    // Reset input
+    if (event.target) event.target.value = "";
   };
 
   return (
@@ -248,9 +281,8 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                       <Box
                         key={attachment.id}
                         className="bg-white rounded-lg p-3 border border-gray-200 hover:border-blue-300 transition-colors cursor-pointer group"
-                        onClick={() => setSelectedAttachment(attachment.url)}
                       >
-                        <Flex className="gap-3">
+                        <Flex className="gap-3" onClick={() => setSelectedAttachment(attachment.url)}>
                           <Center className="w-10 h-10 bg-blue-100 rounded-lg text-blue-600">
                             {getFileIcon(attachment.type)}
                           </Center>
@@ -260,9 +292,39 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                             </p>
                             <p className="text-sm text-gray-500">
                               {formatFileSize(attachment.size)}
+                              {attachment.versions && attachment.versions.length > 1 && (
+                                <span className="ml-2 px-1.5 py-0.5 bg-gray-100 text-[10px] font-bold rounded uppercase">
+                                  V{attachment.versions[0].versionNumber}
+                                </span>
+                              )}
                             </p>
                           </div>
-                          <Box className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Box className="flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="w-8 h-8 p-0"
+                              title="View History"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenHistory(attachment);
+                              }}
+                            >
+                              <Clock className="w-4 h-4 text-gray-500" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="w-8 h-8 p-0"
+                              title="Upload New Version"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleUploadClick(attachment);
+                              }}
+                              disabled={uploadVersion.isPending}
+                            >
+                              <Upload className="w-4 h-4 text-gray-500" />
+                            </Button>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -647,6 +709,26 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
           </div>
         </div>
       )}
+      {/* File Version History Modal */}
+      {activeAttachment && (
+        <FileVersionHistoryModal
+          isOpen={historyModalOpen}
+          onClose={() => {
+            setHistoryModalOpen(false);
+            setActiveAttachment(null);
+          }}
+          fileName={activeAttachment.name}
+          attachmentId={activeAttachment.id}
+        />
+      )}
+
+      {/* Hidden File Input for Version Upload */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        className="hidden"
+      />
     </Box>
   );
 };

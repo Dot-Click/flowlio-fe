@@ -137,13 +137,7 @@ export interface Task {
   startDate?: string;
   estimatedHours?: number;
   actualHours?: number;
-  attachments?: Array<{
-    id: string;
-    name: string;
-    url: string;
-    size: number;
-    type: string;
-  }>;
+  attachments?: Array<Attachment>;
   createdAt: string;
   updatedAt: string;
   // Project data
@@ -167,6 +161,27 @@ export interface Task {
   visibility: "public" | "private";
 }
 
+export interface Attachment {
+  id: string;
+  name: string;
+  url: string;
+  size: number;
+  type: string;
+  versions?: FileVersion[];
+}
+
+export interface FileVersion {
+  id: string;
+  url: string;
+  name: string;
+  size: number;
+  type: string;
+  uploadedBy: string;
+  uploadedByName: string;
+  versionNumber: number;
+  createdAt: string;
+}
+
 export interface CreateTaskRequest {
   title: string;
   description?: string;
@@ -178,7 +193,7 @@ export interface CreateTaskRequest {
   actualHours?: number;
   attachments?: Array<{
     id: string;
-    file: string;
+    file: string; // Base64 or Blob URL for first-time upload
     name: string;
     url: string;
     size: number;

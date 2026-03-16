@@ -25,6 +25,7 @@ import {
   EyeIcon,
   Globe,
   Lock,
+  Upload,
 } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Progress } from "../ui/progress";
@@ -35,7 +36,7 @@ import {
   GeneralModal,
   useGeneralModalDisclosure,
 } from "../common/generalmodal";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { Flex } from "../ui/flex";
 import { Input } from "../ui/input";
@@ -54,6 +55,9 @@ import {
 } from "../ui/select";
 import { useUpdateProject } from "@/hooks/useupdateproject";
 import { ProjectExpenses } from "./ProjectExpenses";
+import { FileVersionHistoryModal } from "../common/fileversionhistorymodal";
+import { useUploadFileVersion } from "@/hooks/useuploadfileversion";
+import { Attachment } from "@/types";
 
 import { useUser } from "@/providers/user.provider";
 
@@ -88,6 +92,11 @@ export const ProjectView = () => {
   const [editProgress, setEditProgress] = useState<number>(0);
 
   const { mutate: updateProject, isPending: isUpdating } = useUpdateProject();
+
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  const [activeAttachment, setActiveAttachment] = useState<Attachment | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadVersion = useUploadFileVersion();
 
   // Sync local edit fields when project data loads/changes
   useEffect(() => {
@@ -265,6 +274,46 @@ export const ProjectView = () => {
     } else {
       toast.error("No contract file available");
     }
+  };
+
+  const handleOpenHistory = () => {
+    if (!project.contractfile) return;
+    
+    // Create a virtual attachment for the contract if it doesn't have one
+    const contractAttachment: Attachment = {
+      id: (project as any).contractFileId || "contract-" + project.id,
+      name: (project.projectName || "Project") + "-Contract.pdf",
+      url: project.contractfile,
+      size: 0,
+      type: "application/pdf",
+      versions: (project as any).contractVersions || []
+    };
+    
+    setActiveAttachment(contractAttachment);
+    setHistoryModalOpen(true);
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    const attachmentId = (project as any).contractFileId || "contract-" + project.id;
+    
+    if (file) {
+      try {
+        await uploadVersion.mutateAsync({
+          attachmentId: attachmentId,
+          file,
+        });
+        toast.success("New version uploaded successfully");
+      } catch (error) {
+        toast.error("Failed to upload new version");
+      }
+    }
+    // Reset input
+    if (event.target) event.target.value = "";
   };
 
   const handleViewImage = (imageUrl: string) => {
@@ -555,6 +604,25 @@ export const ProjectView = () => {
                               View Full Screen
                             </Button>
 
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={handleOpenHistory}
+                              className="flex items-center gap-1"
+                            >
+                              <Clock className="h-4 w-4" />
+                              History
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={handleUploadClick}
+                              className="flex items-center gap-1"
+                              disabled={uploadVersion.isPending}
+                            >
+                              <Upload className="h-4 w-4" />
+                              Update
+                            </Button>
                             <Button
                               variant="outline"
                               size="sm"
@@ -1161,6 +1229,26 @@ export const ProjectView = () => {
           </Flex>
         </Box>
       </GeneralModal>
+      {/* File Version History Modal */}
+      {activeAttachment && (
+        <FileVersionHistoryModal
+          isOpen={historyModalOpen}
+          onClose={() => {
+            setHistoryModalOpen(false);
+            setActiveAttachment(null);
+          }}
+          fileName={activeAttachment.name}
+          attachmentId={activeAttachment.id}
+        />
+      )}
+
+      {/* Hidden File Input for Version Upload */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        className="hidden"
+      />
     </PageWrapper>
   );
 };

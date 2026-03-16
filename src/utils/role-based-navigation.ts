@@ -28,6 +28,11 @@ const clientNavItems: NavItem[] = [
     url: "/clients/invoices",
     icon: React.createElement(FileText),
   },
+  {
+    title: "Media Center",
+    url: "/clients/media-center",
+    icon: React.createElement(TbReportSearch),
+  },
 ]; 
 
 
@@ -102,6 +107,11 @@ const operatorNavItems: NavItem[] = [
     url: "/dashboard/settings",
     title: "Settings",
     icon: React.createElement(IoSettingsOutline),
+  },
+  {
+    url: "/dashboard/client-management/media-center",
+    title: "Media Center",
+    icon: React.createElement(TbReportSearch),
   },
 ];
 
@@ -185,6 +195,11 @@ const userOrgOwnerNavItems: NavItem[] = [
     url: "/dashboard/client-management",
     title: "Client Management",
     icon: React.createElement(UserPen),
+  },
+  {
+    url: "/dashboard/client-management/media-center",
+    title: "Media Center",
+    icon: React.createElement(TbReportSearch),
   },
   {
     url: "/dashboard/calender",
