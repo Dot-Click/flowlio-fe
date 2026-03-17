@@ -26,47 +26,160 @@ import { Skeleton } from "../ui/skeleton";
 import { useFetchClientMedia } from "@/hooks/usefetchclientmedia";
 import { toast } from "sonner";
 
+interface MediaItem {
+  fileId: string;
+  fileName: string;
+  fileType: string;
+  fileUrl: string;
+  projectId: string;
+  projectName: string;
+  taskId: string | null;
+  clientId: string | null;
+  clientName: string | null;
+  uploadedBy: string;
+  createdAt: string;
+  latestVersion: number;
+}
+
+interface Project {
+  id: string;
+  projectName: string;
+}
+
 export const ClientMediaCenter: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [projectFilter, setProjectFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("newest");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [projectFilter, setProjectFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("newest");
 
-  const { data: projectsResponse } = useFetchProjects();
-  const projects = projectsResponse?.data ?? [];
+  // Fetch projects
+  const { data: projectsResponse, isLoading: projectsLoading } =
+    useFetchProjects();
+  const projects: Project[] = projectsResponse?.data ?? [];
 
+  // Fetch media with backend filters
   const { data: mediaResponse, isLoading: mediaLoading } = useFetchClientMedia({
     projectId: projectFilter === "all" ? undefined : projectFilter,
     searchTerm: searchTerm || undefined,
   });
 
-  const mediaItems = mediaResponse?.data ?? [];
+  const mediaItems: MediaItem[] = mediaResponse?.data ?? [];
 
+  // Filter and sort media items
   const filteredMedia = useMemo(() => {
-    return [...mediaItems].sort((a, b) => {
-      if (sortBy === "newest")
-        return (
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-      if (sortBy === "oldest")
-        return (
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        );
-      return a.fileName.localeCompare(b.fileName);
+    // Start with all media items (backend already filtered by projectId and searchTerm)
+    let result = [...mediaItems];
+
+    // Additional client-side filtering (as safety net)
+    if (projectFilter !== "all") {
+      result = result.filter((item) => item.projectId === projectFilter);
+    }
+
+    if (searchTerm) {
+      const lowerSearch = searchTerm.toLowerCase();
+      result = result.filter(
+        (item) =>
+          item.fileName?.toLowerCase().includes(lowerSearch) ||
+          item.projectName?.toLowerCase().includes(lowerSearch) ||
+          (item.taskName?.toLowerCase() || "").includes(lowerSearch) ||
+          (item.clientName?.toLowerCase() || "").includes(lowerSearch),
+      );
+    }
+
+    // Apply sorting
+    return result.sort((a, b) => {
+      switch (sortBy) {
+        case "newest":
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        case "oldest":
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        case "name":
+          return a.fileName.localeCompare(b.fileName);
+        default:
+          return 0;
+      }
     });
-  }, [mediaItems, sortBy]);
+  }, [mediaItems, sortBy, projectFilter, searchTerm]);
 
   const getFileIcon = (type: string) => {
-    if (type.startsWith("image/") || type === "projectImage")
+    if (type?.startsWith("image/") || type === "projectImage")
       return <ImageIcon className="w-12 h-12 text-blue-400 opacity-40" />;
     return <FileText className="w-12 h-12 text-blue-400 opacity-40" />;
   };
 
-  const handleDownload = async (file: any) => {
+  const getFileExtension = (fileName: string): string => {
+    if (!fileName) return "FILE";
+    const ext = fileName.split(".").pop();
+    return ext?.toUpperCase() || "FILE";
+  };
+
+  const getFormatBadgeStyle = (
+    fileName: string,
+    fileType: string = "",
+  ): string => {
+    const ext = fileName?.split(".").pop()?.toLowerCase();
+    const type = (fileType || "").toLowerCase();
+
+    if (type.includes("pdf") || ext === "pdf") {
+      return "bg-rose-600 text-white border-rose-400/50";
+    }
+    if (
+      type.startsWith("image/") ||
+      ["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(ext || "")
+    ) {
+      return "bg-blue-600 text-white border-blue-400/50";
+    }
+    if (
+      type.startsWith("video/") ||
+      ["mp4", "mov", "avi", "mkv"].includes(ext || "")
+    ) {
+      return "bg-purple-600 text-white border-purple-400/50";
+    }
+    if (
+      [
+        "doc",
+        "docx",
+        "txt",
+        "rtf",
+        "xls",
+        "xlsx",
+        "csv",
+        "zip",
+        "rar",
+        "7z",
+      ].includes(ext || "")
+    ) {
+      return "bg-emerald-600 text-white border-emerald-400/50";
+    }
+    return "bg-gray-600 text-white border-gray-400/50";
+  };
+
+  const handleDownload = async (file: MediaItem): Promise<void> => {
     const toastId = toast.loading("Preparing download...");
+
     try {
       let downloadUrl = file.fileUrl;
 
-      // For Cloudinary, we use their native attachment flag which is the most reliable
+      // Handle blob URLs
+      if (downloadUrl.startsWith("blob:")) {
+        const response = await fetch(downloadUrl);
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = file.fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+        toast.success("Download started", { id: toastId });
+        return;
+      }
+
+      // For Cloudinary files
       if (
         downloadUrl.includes("cloudinary.com") &&
         downloadUrl.includes("/upload/")
@@ -86,7 +199,7 @@ export const ClientMediaCenter: React.FC = () => {
         return;
       }
 
-      // For non-Cloudinary files, try the blob approach
+      // For other files
       const response = await fetch(downloadUrl);
       if (response.ok) {
         const blob = await response.blob();
@@ -110,11 +223,18 @@ export const ClientMediaCenter: React.FC = () => {
     }
   };
 
+  const handleView = (file: MediaItem): void => {
+    window.open(file.fileUrl, "_blank");
+  };
+
+  const isLoading = mediaLoading || projectsLoading;
+
   return (
     <Stack className="gap-8 w-full">
+      {/* Header */}
       <Box className="flex items-center justify-between">
         <Box>
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+          <h1 className="text-3xl font-medium text-gray-900 tracking-tight">
             Media Center
           </h1>
           <p className="text-gray-500 mt-1">
@@ -127,68 +247,66 @@ export const ClientMediaCenter: React.FC = () => {
       <Card className="border-none shadow-sm bg-white p-2 rounded-2xl">
         <CardContent className="p-2">
           <Flex className="gap-3 flex-wrap">
+            {/* Search Input */}
             <Box className="flex-1 min-w-[300px] relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
-                placeholder="Search resources..."
+                placeholder="Search by filename, project, task, or client..."
                 className="pl-11 h-12 rounded-xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-blue-100 placeholder:text-gray-400"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </Box>
-
-            <Box className="w-[200px]">
-              <Select value={projectFilter} onValueChange={setProjectFilter}>
-                <SelectTrigger className="h-12 rounded-xl bg-gray-50 border-none text-gray-700 font-medium">
-                  <SelectValue placeholder="All Projects" />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl">
-                  <SelectItem value="all">All Projects</SelectItem>
-                  {projects.map((proj) => (
-                    <SelectItem key={proj.id} value={proj.id}>
-                      {proj.projectName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Box>
-
-            <Box className="w-[160px]">
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="h-12 rounded-xl bg-gray-50 border-none text-gray-700 font-medium">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl">
-                  <SelectItem value="newest">Newest First</SelectItem>
-                  <SelectItem value="oldest">Oldest First</SelectItem>
-                  <SelectItem value="name">Name (A-Z)</SelectItem>
-                </SelectContent>
-              </Select>
-            </Box>
+            <Select value={projectFilter} onValueChange={setProjectFilter}>
+              <SelectTrigger className="h-12 rounded-xl bg-gray-50 border-none text-gray-700 font-medium">
+                <SelectValue placeholder="All Projects" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl">
+                <SelectItem value="all">All Projects</SelectItem>
+                {projects.map((proj) => (
+                  <SelectItem key={proj.id} value={proj.id}>
+                    {proj.projectName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="h-12 rounded-xl bg-gray-50 border-none text-gray-700 font-medium">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl">
+                <SelectItem value="newest">Newest First</SelectItem>
+                <SelectItem value="oldest">Oldest First</SelectItem>
+                <SelectItem value="name">Name (A-Z)</SelectItem>
+              </SelectContent>
+            </Select>
           </Flex>
         </CardContent>
       </Card>
 
       {/* Gallery Grid */}
       <Box className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {mediaLoading ? (
-          Array.from({ length: 12 }).map((_, i) => (
+        {isLoading ? (
+          // Loading skeletons
+          Array.from({ length: 8 }).map((_, i) => (
             <Skeleton key={i} className="aspect-square rounded-2xl" />
           ))
         ) : filteredMedia.length > 0 ? (
+          // Media items
           filteredMedia.map((file) => (
             <Box
-              key={file.fileId}
-              className="group relative aspect-square rounded-2xl overflow-hidden bg-gray-100 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 cursor-pointer"
+              key={`${file.fileId}-${file.createdAt}`}
+              className="group relative aspect-square rounded-2xl overflow-hidden bg-gray-100 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 cursor-pointer border border-gray-100"
             >
               {/* Media Preview */}
               <Box className="w-full h-full flex items-center justify-center pointer-events-none">
-                {file.fileType.startsWith("image/") ||
+                {file.fileType?.startsWith("image/") ||
                 file.fileType === "projectImage" ? (
                   <img
                     src={file.fileUrl}
                     alt={file.fileName}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    loading="lazy"
                   />
                 ) : file.fileType?.toLowerCase().includes("pdf") ||
                   file.fileName?.toLowerCase().endsWith(".pdf") ? (
@@ -204,21 +322,43 @@ export const ClientMediaCenter: React.FC = () => {
                   <Box className="flex flex-col items-center">
                     {getFileIcon(file.fileType)}
                     <span className="text-[10px] font-bold text-gray-400 mt-2 uppercase tracking-widest">
-                      {file.fileType}
+                      {file.fileType?.split("/")[1] || "FILE"}
                     </span>
                   </Box>
                 )}
               </Box>
 
-              {/* Version Badge (Top Left - Floating) */}
-              <Box className="absolute top-3 left-3 z-10 transition-transform duration-300 group-hover:translate-x-1 group-hover:translate-y-1">
-                <span className="bg-white/80 backdrop-blur-md text-[10px] font-black px-2 py-1 rounded-lg text-gray-800 shadow-sm border border-white/50">
-                  V{file.latestVersion}
-                </span>
+              {/* Badges */}
+              <Flex className="absolute top-3 left-3 right-3 justify-between items-start z-10 pointer-events-none">
+                {/* Project Name Badge */}
+                <Box className="transition-transform duration-300 group-hover:translate-x-1 group-hover:translate-y-1">
+                  <span className="bg-white/90 backdrop-blur-md text-[9px] font-black px-1.5 py-0.5 rounded-md text-gray-800 shadow-sm border border-white/50">
+                    V{file.latestVersion}
+                  </span>
+                </Box>
+
+                {/* Format Badge */}
+                <Box className="transition-transform duration-300 group-hover:-translate-x-1 group-hover:translate-y-1">
+                  <span
+                    className={`backdrop-blur-md text-[9px] font-black px-2 py-0.5 rounded-md shadow-sm border border-white/20 uppercase tracking-tighter ${getFormatBadgeStyle(
+                      file.fileName,
+                      file.fileType,
+                    )}`}
+                  >
+                    {getFileExtension(file.fileName)}
+                  </span>
+                </Box>
+              </Flex>
+
+              {/* Always Visible Filename */}
+              <Box className="absolute bottom-0 left-0 right-0 p-4 pt-12 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none z-20 group-hover:opacity-0 transition-opacity duration-300">
+                <p className="text-white font-bold text-[11px] leading-tight line-clamp-1 drop-shadow-lg">
+                  {file.fileName}
+                </p>
               </Box>
 
               {/* Hover Overlay */}
-              <Box className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-5">
+              <Box className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-5 z-30">
                 <Stack className="gap-3 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
                   <Box>
                     <p className="text-white font-bold text-sm leading-tight line-clamp-2 drop-shadow-md">
@@ -241,9 +381,17 @@ export const ClientMediaCenter: React.FC = () => {
                     )}
                     {file.taskName && (
                       <p className="text-[10px] text-white/50 italic truncate">
-                        {file.taskName}
+                        Task: {file.taskName}
                       </p>
                     )}
+                    {file.clientName && (
+                      <p className="text-[10px] text-white/50 truncate">
+                        Client: {file.clientName}
+                      </p>
+                    )}
+                    <p className="text-[10px] text-white/30">
+                      Version {file.latestVersion}
+                    </p>
                   </Box>
 
                   <Flex className="gap-2 mt-2">
@@ -252,7 +400,7 @@ export const ClientMediaCenter: React.FC = () => {
                       className="flex-1 bg-white hover:bg-white/90 text-black h-9 rounded-xl font-bold text-xs gap-2"
                       onClick={(e) => {
                         e.stopPropagation();
-                        window.open(file.fileUrl, "_blank");
+                        handleView(file);
                       }}
                     >
                       <Eye className="w-3.5 h-3.5" />
@@ -274,6 +422,7 @@ export const ClientMediaCenter: React.FC = () => {
             </Box>
           ))
         ) : (
+          // Empty state
           <Box className="col-span-full py-24 bg-white rounded-3xl border-2 border-dashed border-gray-100 flex flex-col items-center justify-center text-gray-300">
             <ImageIcon className="w-16 h-16 mb-4 opacity-10" />
             <p className="text-xl font-bold text-gray-400">No assets found</p>

@@ -131,6 +131,7 @@ const DashboardPage = () => {
 
         <Stack className="max-[950px]:w-full items-start gap-3">
           <ProjectStatusPieChart
+            className="w-full"
             data={pieChartData}
             title={t("dashboard.projectStatus")}
           />

@@ -24,7 +24,7 @@ export const ProjectStatusPieChart: FC<
           <h1 className="text-lg font-medium">{title}</h1>
         </Flex>
 
-        <Box className="max-sm:w-full flex flex-col max-md:justify-center max-md:items-center">
+        <Box className="w-full flex flex-col justify-center items-center">
           <PieChart className="w-full" width={220} height={300}>
             <Pie
               data={data}
