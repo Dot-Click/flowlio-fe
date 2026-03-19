@@ -14,22 +14,22 @@ import { FolderOpen, ListTodo, FileText } from "lucide-react";
 // Client portal: three sections – Project Management, Task Management, Invoices
 const clientNavItems: NavItem[] = [
   {
-    title: "Project Management",
+    title: "projectManagement",
     url: "/clients/projects",
     icon: React.createElement(FolderOpen),
   },
   {
-    title: "Task Management",
+    title: "taskManagement",
     url: "/clients/tasks",
     icon: React.createElement(ListTodo),
   },
   {
-    title: "Invoices",
+    title: "invoices",
     url: "/clients/invoices",
     icon: React.createElement(FileText),
   },
   {
-    title: "Media Center",
+    title: "mediaCenter",
     url: "/clients/media-center",
     icon: React.createElement(TbReportSearch),
   },
@@ -38,33 +38,33 @@ const clientNavItems: NavItem[] = [
 
 const viewerNavItems: NavItem[] = [
   {
-    title: "Viewer",
+    title: "viewer",
     url: "/viewer",
     icon: React.createElement(SquareKanban),
   },
   {
     url: "/viewer/my-projects",
-    title: "Projects",
+    title: "projects",
     icon: React.createElement(GroupIcon),
   },
   {
     url: "/viewer/task-management",
-    title: "My Tasks",
+    title: "tasks",
     icon: React.createElement(TaskManagementIcon),
   },
   {
     url: "/dashboard/support",
-    title: "Support Tickets",
+    title: "supporttickets",
     icon: React.createElement(MessageCircleQuestion),
   },
   {
     url: "/dashboard/notifications",
-    title: "Notifications",
+    title: "notifications",
     icon: React.createElement(Bell),
   },
   {
     url: "/dashboard/settings",
-    title: "Settings",
+    title: "settings",
     icon: React.createElement(IoSettingsOutline),
   },
 ];
@@ -74,43 +74,43 @@ const viewerNavItems: NavItem[] = [
 // Can update: Projects, Tasks, Support Tickets
 const operatorNavItems: NavItem[] = [
   {
-    title: "Dashboard",
+    title: "dashboard",
     url: "/dashboard",
     icon: React.createElement(SquareKanban),
   },
   {
     url: "/dashboard/project",
-    title: "Projects",
+    title: "projects",
     icon: React.createElement(GroupIcon),
   },
   {
     url: "/dashboard/task-management",
-    title: "Task Management",
+    title: "tasksmanagement",
     icon: React.createElement(TaskManagementIcon),
   },
   {
     url: "/dashboard/time-tracking",
-    title: "Time Tracking",
+    title: "timeTracking",
     icon: React.createElement(Clock),
   },
   {
     url: "/dashboard/support",
-    title: "Support Tickets",
+    title: "supporttickets",
     icon: React.createElement(MessageCircleQuestion),
   },
   {
     url: "/dashboard/notifications",
-    title: "Notifications",
+    title: "notifications",
     icon: React.createElement(Bell),
   },
   {
     url: "/dashboard/settings",
-    title: "Settings",
+    title: "settings",
     icon: React.createElement(IoSettingsOutline),
   },
   {
     url: "/dashboard/client-management/media-center",
-    title: "Media Center",
+    title: "mediaCenter",
     icon: React.createElement(TbReportSearch),
   },
 ];
@@ -118,53 +118,53 @@ const operatorNavItems: NavItem[] = [
 // User (Member) navigation items - no Invoices, Payment Links, Client Management, User Management (Admin/Manager only)
 const userNavItems: NavItem[] = [
   {
-    title: "Dashboard",
+    title: "dashboard",
     url: "/dashboard",
     icon: React.createElement(SquareKanban),
   },
   {
     url: "/dashboard/project",
-    title: "Projects",
+    title: "projects",
     icon: React.createElement(GroupIcon),
   },
   {
     url: "/dashboard/task-management",
-    title: "Tasks Management",
+    title: "tasksmanagement",
     icon: React.createElement(TaskManagementIcon),
   },
   {
     url: "/dashboard/calender",
-    title: "Calender",
+    title: "calendar",
     icon: React.createElement(IoCalendarOutline),
   },
   {
     url: "/dashboard/time-tracking",
-    title: "Time Tracking",
+    title: "timeTracking",
     icon: React.createElement(Clock),
   },
   {
     url: "/dashboard/ai-assist",
-    title: "AI Assistance",
+    title: "aiassistance",
     icon: React.createElement(LuWandSparkles),
   },
   {
     url: "/dashboard/subscription",
-    title: "My Subscriptions",
+    title: "mysubscriptions",
     icon: React.createElement(BadgeDollarSign),
   },
   {
     url: "/dashboard/support",
-    title: "Support Tickets",
+    title: "supporttickets",
     icon: React.createElement(MessageCircleQuestion),
   },
   {
     url: "/dashboard/notifications",
-    title: "Notifications",
+    title: "notifications",
     icon: React.createElement(Bell),
   },
   {
     url: "/dashboard/settings",
-    title: "Settings",
+    title: "settings",
     icon: React.createElement(IoSettingsOutline),
   },
 ];
@@ -172,78 +172,78 @@ const userNavItems: NavItem[] = [
 // User as organization owner (purchaser): same as user + Invoices, Payment Links, Client Management, User Management
 const userOrgOwnerNavItems: NavItem[] = [
   {
-    title: "Dashboard",
+    title: "dashboard",
     url: "/dashboard",
     icon: React.createElement(SquareKanban),
   },
   {
     url: "/dashboard/project",
-    title: "Projects",
+    title: "projects",
     icon: React.createElement(GroupIcon),
   },
   {
     url: "/dashboard/task-management",
-    title: "Tasks Management",
+    title: "tasksmanagement",
     icon: React.createElement(TaskManagementIcon),
   },
   {
     url: "/dashboard/user-management",
-    title: "User Management",
+    title: "usermanagement",
     icon: React.createElement(LuUsers),
   },
   {
     url: "/dashboard/client-management",
-    title: "Client Management",
+    title: "clinetmanagement",
     icon: React.createElement(UserPen),
   },
   {
     url: "/dashboard/client-management/media-center",
-    title: "Media Center",
+    title: "mediaCenter",
     icon: React.createElement(TbReportSearch),
   },
   {
     url: "/dashboard/calender",
-    title: "Calender",
+    title: "calendar",
     icon: React.createElement(IoCalendarOutline),
   },
   {
     url: "/dashboard/time-tracking",
-    title: "Time Tracking",
+    title: "timeTracking",
     icon: React.createElement(Clock),
   },
   {
     url: "/dashboard/ai-assist",
-    title: "AI Assistance",
+    title: "aiassistance",
     icon: React.createElement(LuWandSparkles),
   },
   {
     url: "/dashboard/payment-links",
-    title: "Payment Links",
+    title: "paymentlinks",
     icon: React.createElement(TbReportSearch),
   },
   {
     url: "/dashboard/invoice",
-    title: "Invoices",
+    title: "invoices",
     icon: React.createElement(TbInvoice),
   },
   {
     url: "/dashboard/subscription",
-    title: "My Subscriptions",
+    title: "mysubscriptions",
     icon: React.createElement(BadgeDollarSign),
   },
   {
     url: "/dashboard/support",
-    title: "Support Tickets",
+    title: "supporttickets",
     icon: React.createElement(MessageCircleQuestion),
   },
   {
     url: "/dashboard/notifications",
-    title: "Notifications",
+    title: "notifications",
     icon: React.createElement(Bell),
   },
   {
     url: "/dashboard/settings",
-    title: "Settings",
+    title: "settings",
     icon: React.createElement(IoSettingsOutline),
   },
 ];
@@ -252,49 +252,49 @@ const userOrgOwnerNavItems: NavItem[] = [
 // Can access: All features except creating sub admins
 const subAdminNavItems: NavItem[] = [
   {
-    title: "Dashboard",
+    title: "dashboard",
     url: "/dashboard",
     icon: React.createElement(SquareKanban),
   },
   {
     url: "/dashboard/project",
-    title: "Projects",
+    title: "projects",
     icon: React.createElement(GroupIcon),
   },
   {
     url: "/dashboard/task-management",
-    title: "Tasks Management",
+    title: "tasksmanagement",
     icon: React.createElement(TaskManagementIcon),
   },
   {
     url: "/dashboard/user-management",
-    title: "User Management",
+    title: "usermanagement",
     icon: React.createElement(LuUsers),
   },
   {
     url: "/dashboard/client-management",
-    title: "Client Management",
+    title: "clinetmanagement",
     icon: React.createElement(UserPen),
   },
   {
     url: "/dashboard/calender",
-    title: "Calender",
+    title: "calendar",
     icon: React.createElement(IoCalendarOutline),
   },
 
   {
     url: "/dashboard/ai-assist",
-    title: "AI Assistance",
+    title: "aiassistance",
     icon: React.createElement(LuWandSparkles),
   },
   {
     url: "/dashboard/payment-links",
-    title: "Payment Links",
+    title: "paymentlinks",
     icon: React.createElement(TbReportSearch),
   },
   {
     url: "/dashboard/invoice",
-    title: "Invoices",
+    title: "invoices",
     icon: React.createElement(TbInvoice),
   },
   // {
@@ -304,22 +304,22 @@ const subAdminNavItems: NavItem[] = [
   // },
   {
     url: "/dashboard/time-tracking",
-    title: "Time Tracking",
+    title: "timeTracking",
     icon: React.createElement(Clock),
   },
   {
     url: "/dashboard/support",
-    title: "Support Tickets",
+    title: "supporttickets",
     icon: React.createElement(MessageCircleQuestion),
   },
   {
     url: "/dashboard/notifications",
-    title: "Notifications",
+    title: "notifications",
     icon: React.createElement(Bell),
   },
   {
     url: "/dashboard/settings",
-    title: "Settings",
+    title: "settings",
     icon: React.createElement(IoSettingsOutline),
   },
 ];
@@ -328,80 +328,80 @@ const subAdminNavItems: NavItem[] = [
 // Can access: All features including super admin specific ones
 const superAdminNavItems: NavItem[] = [
   {
-    title: "Dashboard",
+    title: "dashboard",
     url: "/dashboard",
     icon: React.createElement(SquareKanban),
   },
   {
     url: "/dashboard/project",
-    title: "Projects",
+    title: "projects",
     icon: React.createElement(GroupIcon),
   },
   {
     url: "/dashboard/task-management",
-    title: "Tasks Management",
+    title: "tasksmanagement",
     icon: React.createElement(TaskManagementIcon),
   },
   {
     url: "/dashboard/user-management",
-    title: "User Management",
+    title: "usermanagement",
     icon: React.createElement(LuUsers),
   },
   {
     url: "/dashboard/client-management",
-    title: "Client Management",
+    title: "clinetmanagement",
     icon: React.createElement(UserPen),
   },
   {
     url: "/dashboard/calender",
-    title: "Calender",
+    title: "calendar",
     icon: React.createElement(IoCalendarOutline),
   },
   {
     url: "/dashboard/time-tracking",
-    title: "Time Tracking",
+    title: "timeTracking",
     icon: React.createElement(Clock),
   },
   {
     url: "/dashboard/ai-assist",
-    title: "AI Assistance",
+    title: "aiassistance",
     icon: React.createElement(LuWandSparkles),
   },
   {
     url: "/dashboard/payment-links",
-    title: "Payment Links",
+    title: "paymentlinks",
     icon: React.createElement(TbReportSearch),
   },
   {
     url: "/dashboard/invoice",
-    title: "Invoices",
+    title: "invoices",
     icon: React.createElement(TbInvoice),
   },
   {
     url: "/dashboard/subscription",
-    title: "My Subscriptions",
+    title: "mysubscriptions",
     icon: React.createElement(TbInvoice),
   },
   {
     url: "/dashboard/support",
-    title: "Support Tickets",
+    title: "supporttickets",
     icon: React.createElement(MessageCircleQuestion),
   },
   // {
   //   url: "/dashboard/notifications",
-  //   title: "Notifications",
+  //   title: "notifications",
   //   icon: React.createElement(Bell),
   // },
   {
     url: "/dashboard/settings",
-    title: "Settings",
+    title: "settings",
     icon: React.createElement(IoSettingsOutline),
   },
 ];
 
 // User as organization manager: same as owner but without User Management
 const userOrgManagerNavItems: NavItem[] = userOrgOwnerNavItems.filter(
-  (item) => item.title !== "User Management",
+  (item) => item.title !== "usermanagement",
 );
 
 /**

@@ -11,8 +11,10 @@ import {
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { useUser } from "@/providers/user.provider";
+import { useTranslation } from "react-i18next";
 
 const ClientTasksPage = () => {
+  const { t } = useTranslation();
   const { data: userData } = useUser();
   const clientId = userData?.user?.clientId;
   const organizationId = userData?.user?.organizationId;
@@ -27,52 +29,52 @@ const ClientTasksPage = () => {
   const columns: ColumnDef<ClientTask>[] = [
     {
       accessorKey: "title",
-      header: () => <Box className="text-center text-black">Task Title</Box>,
+      header: () => <Box className="text-center text-black">{t("tasks.taskTitle")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center font-medium">{row.original.title}</Box>
       ),
     },
     {
       accessorKey: "projectName",
-      header: () => <Box className="text-center text-black">Project Name</Box>,
+      header: () => <Box className="text-center text-black">{t("projects.projectName")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center">{row.original.projectName}</Box>
       ),
     },
     {
       accessorKey: "assigneeName",
-      header: () => <Box className="text-center text-black">Assigned To</Box>,
+      header: () => <Box className="text-center text-black">{t("projects.assignedTo")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center">
-          {row.original.assigneeName || "Unassigned"}
+          {row.original.assigneeName || t("common.unassigned")}
         </Box>
       ),
     },
     {
       accessorKey: "startDate",
-      header: () => <Box className="text-center text-black">Start Date</Box>,
+      header: () => <Box className="text-center text-black">{t("projects.startDate")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center">
           {row.original.startDate
             ? format(new Date(row.original.startDate), "MMM d, yyyy")
-            : "Not set"}
+            : t("common.notSet")}
         </Box>
       ),
     },
     {
       accessorKey: "endDate",
-      header: () => <Box className="text-center text-black">End Date</Box>,
+      header: () => <Box className="text-center text-black">{t("projects.endDate")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center">
           {row.original.endDate
             ? format(new Date(row.original.endDate), "MMM d, yyyy")
-            : "Not set"}
+            : t("common.notSet")}
         </Box>
       ),
     },
     {
       accessorKey: "status",
-      header: () => <Box className="text-center text-black">Status</Box>,
+      header: () => <Box className="text-center text-black">{t("projects.status")}</Box>,
       cell: ({ row }) => {
         const status = row.original.status as
           | "pending"
@@ -111,7 +113,7 @@ const ClientTasksPage = () => {
               <Flex
                 className={`w-2 h-2 items-start rounded-full ${currentStyle.dot}`}
               />
-              <span>{status || "Unknown"}</span>
+              <span>{t(`dashboard.${status}`) || t("common.unknown")}</span>
             </Box>
           </Center>
         );
@@ -122,9 +124,9 @@ const ClientTasksPage = () => {
   return (
     <PageWrapper className="mt-6">
       <Stack className="gap-1 p-6 mb-6">
-        <h1 className="text-2xl font-medium text-black">My Tasks</h1>
+        <h1 className="text-2xl font-medium text-black">{t("tasks.myTasks")}</h1>
         <p className="text-gray-500">
-          Stay updated with the tasks related to your projects
+          {t("tasks.myTasksDesc")}
         </p>
       </Stack>
       {isLoading ? (

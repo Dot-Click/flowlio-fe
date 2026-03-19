@@ -369,7 +369,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
     },
     {
       accessorKey: "budget",
-      header: () => <Box className="text-center text-black">Budget</Box>,
+      header: () => <Box className="text-center text-black">{t("projects.budget")}</Box>,
       cell: ({ row }) => {
         const budget = (row.original as any).budget;
         return (
@@ -383,7 +383,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
     },
     {
       accessorKey: "visibility",
-      header: () => <Box className="text-center text-black">Visibility</Box>,
+      header: () => <Box className="text-center text-black">{t("projects.visibility")}</Box>,
       cell: ({ row }) => {
         const visibility = row.original.visibility || "private";
         return (
@@ -394,7 +394,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
                   <TooltipTrigger>
                     <Lock className="w-4 h-4 text-orange-500" />
                   </TooltipTrigger>
-                  <TooltipContent>Private Project</TooltipContent>
+                  <TooltipContent>{t("projects.privateProject")}</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             ) : (
@@ -403,7 +403,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
                   <TooltipTrigger>
                     <Globe className="w-4 h-4 text-blue-500" />
                   </TooltipTrigger>
-                  <TooltipContent>Public Project</TooltipContent>
+                  <TooltipContent>{t("projects.publicProject")}</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             )}
@@ -520,9 +520,25 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
       ),
       cell: ({ row }: { row: any }) => {
         const val = row.original.customFields?.[field.id];
+        if (val === undefined || val === null) return <Box className="text-center p-1">-</Box>;
+
+        if (field.type === "select" && field.options) {
+          const option = field.options.find((opt: any) => opt.label === val);
+          if (option) {
+            return (
+              <Center>
+                <Flex className="items-center gap-2 px-2 py-1 bg-gray-50 rounded-full border border-gray-100 text-xs">
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: option.color }} />
+                  <span className="capitalize">{val}</span>
+                </Flex>
+              </Center>
+            );
+          }
+        }
+
         return (
           <Box className="text-center p-1 capitalize">
-            {val !== undefined && val !== null ? String(val) : "-"}
+            {String(val)}
           </Box>
         );
       },
@@ -551,7 +567,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="mb-2">
-                  <p>View Project</p>
+                  <p>{t("projects.viewProject")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -570,7 +586,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="mb-2">
-                  <p>Edit Project</p>
+                  <p>{t("projects.editProject")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -586,7 +602,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="mb-2">
-                  <p>Add Comment</p>
+                  <p>{t("projects.addComment")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -606,7 +622,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="mb-2">
-                  <p>Project Expenses</p>
+                  <p>{t("projects.projectExpenses")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -628,7 +644,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="mb-2">
-                  <p>Delete Project</p>
+                  <p>{t("projects.deleteProject")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

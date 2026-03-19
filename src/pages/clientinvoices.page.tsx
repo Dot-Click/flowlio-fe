@@ -14,8 +14,10 @@ import { useUser } from "@/providers/user.provider";
 
 import { PageWrapper } from "@/components/common/pagewrapper";
 import { Stack } from "@/components/ui/stack";
+import { useTranslation } from "react-i18next";
 
 const ClientInvoicesPage = () => {
+  const { t } = useTranslation();
   const { data: userData } = useUser();
   const clientId = userData?.user?.clientId;
   const organizationId = userData?.user?.organizationId;
@@ -46,26 +48,26 @@ const ClientInvoicesPage = () => {
   const columns: ColumnDef<ClientInvoice>[] = [
     {
       accessorKey: "invoiceNumber",
-      header: "Invoice #",
+      header: t("invoices.invoiceNum"),
       cell: ({ row }) => (
         <span className="font-medium">{row.original.invoiceNumber}</span>
       ),
     },
     {
       accessorKey: "clientname",
-      header: "Client Name",
+      header: t("invoices.clientName"),
       cell: ({ row }) => <span>{row.original.clientname}</span>,
     },
     {
       accessorKey: "amount",
-      header: "Amount",
+      header: t("invoices.amount"),
       cell: ({ row }) => (
         <span className="font-semibold">${row.original.amount}</span>
       ),
     },
     {
       accessorKey: "status",
-      header: "Status",
+      header: t("invoices.status"),
       cell: ({ row }) => (
         <Badge
           variant="outline"
@@ -77,7 +79,7 @@ const ClientInvoicesPage = () => {
     },
     {
       accessorKey: "createdAt",
-      header: "Date",
+      header: t("invoices.date"),
       cell: ({ row }) =>
         row.original.createdAt
           ? format(new Date(row.original.createdAt), "MMM dd, yyyy")
@@ -85,7 +87,7 @@ const ClientInvoicesPage = () => {
     },
     {
       accessorKey: "dueDate",
-      header: "Due Date",
+      header: t("invoices.dueDate"),
       cell: ({ row }) =>
         row.original.dueDate
           ? format(new Date(row.original.dueDate), "MMM dd, yyyy")
@@ -93,7 +95,7 @@ const ClientInvoicesPage = () => {
     },
     {
       id: "actions",
-      header: "Actions",
+      header: t("common.actions"),
       cell: ({ row }) => (
         <div className="flex gap-2">
           <Button
@@ -105,7 +107,7 @@ const ClientInvoicesPage = () => {
             className="hover:bg-blue-50 text-blue-600"
           >
             <Download className="h-4 w-4 mr-1" />
-            Download
+            {t("common.download")}
           </Button>
         </div>
       ),
@@ -115,9 +117,9 @@ const ClientInvoicesPage = () => {
   return (
     <PageWrapper className="mt-6">
       <Stack className="gap-1 p-6 mb-6">
-        <h1 className="text-2xl font-medium text-black">Invoices & Payments</h1>
+        <h1 className="text-2xl font-medium text-black">{t("invoices.title")}</h1>
         <p className="text-gray-500">
-          Manage your project invoices and billing history
+          {t("invoices.desc")}
         </p>
       </Stack>
       {isLoading ? (

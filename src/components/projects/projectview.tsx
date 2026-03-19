@@ -58,10 +58,13 @@ import { ProjectExpenses } from "./ProjectExpenses";
 import { FileVersionHistoryModal } from "../common/fileversionhistorymodal";
 import { useUploadFileVersion } from "@/hooks/useuploadfileversion";
 import { Attachment } from "@/types";
+import { useFetchCustomFields } from "@/hooks/usecustomfields";
 
 import { useUser } from "@/providers/user.provider";
+import { useTranslation } from "react-i18next";
 
 export const ProjectView = () => {
+  const { t } = useTranslation();
   const { data: userData } = useUser();
   const user = userData?.user;
   const isClient = user?.role === "client";
@@ -71,6 +74,7 @@ export const ProjectView = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const { data: projectData, isLoading, error } = useFetchProjectById(id || "");
+  const { data: customFieldsData } = useFetchCustomFields("project");
 
   const { open, onOpenChange } = useGeneralModalDisclosure();
 
@@ -208,11 +212,11 @@ export const ProjectView = () => {
       <PageWrapper className="mt-6 p-6">
         <Box className="bg-red-50 border border-red-200 rounded-lg p-6">
           <p className="text-red-600 text-center">
-            {error?.message || "Project not found"}
+            {error?.message || t("projects.projectNotFound")}
           </p>
           <Center className="mt-4">
             <Button onClick={() => navigate(-1)} variant="outline">
-              Go Back
+              {t("common.back")}
             </Button>
           </Center>
         </Box>
@@ -270,9 +274,9 @@ export const ProjectView = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast.success("Contract file downloaded!");
+      toast.success(t("projects.contractDownloaded"));
     } else {
-      toast.error("No contract file available");
+      toast.error(t("projects.noContractFile"));
     }
   };
 
@@ -307,9 +311,9 @@ export const ProjectView = () => {
           attachmentId: attachmentId,
           file,
         });
-        toast.success("New version uploaded successfully");
+        toast.success(t("projects.versionUploaded"));
       } catch (error) {
-        toast.error("Failed to upload new version");
+        toast.error(t("projects.uploadFailed"));
       }
     }
     // Reset input
@@ -378,7 +382,7 @@ export const ProjectView = () => {
             onClick={() => navigate(-1)}
           >
             <IoArrowBack />
-            <p className="text-black">Back</p>
+            <p className="text-black">{t("common.back")}</p>
           </Box>
 
           {/* Breadcrumb */}
@@ -388,7 +392,7 @@ export const ProjectView = () => {
               className="p-0 h-auto text-gray-600 hover:text-gray-900"
               onClick={() => navigate("/dashboard/project")}
             >
-              Projects
+              {t("appSidebar.projects")}
             </Button>
             <span>/</span>
             <span className="text-gray-900 font-medium">
@@ -404,7 +408,7 @@ export const ProjectView = () => {
           <Box className="flex items-start justify-between max-sm:flex-col-reverse max-sm:gap-4">
             <Box className="flex-1">
               <CardTitle className="text-3xl font-bold text-gray-900 mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
-                {project.projectName || "Untitled Project"}
+                {project.projectName || t("projects.untitled")}
               </CardTitle>
               <Box className="flex items-center gap-6 mb-6">
                 <Badge
@@ -420,13 +424,13 @@ export const ProjectView = () => {
                 <Box className="flex items-center gap-2 text-sm text-gray-600 bg-white/70 px-3 py-2 rounded-full">
                   <BarChart3 className="h-4 w-4 text-blue-600" />
                   <span className="font-medium">
-                    Progress: {project.progress}%
+                    {t("projects.progress")}: {project.progress}%
                   </span>
                 </Box>
                 <Box className="flex items-center gap-2 text-sm text-gray-600 bg-white/70 px-3 py-2 rounded-full">
                   <Building2 className="h-4 w-4 text-green-600" />
                   <span className="font-medium">
-                    {project.clientName || "No Client"}
+                    {project.clientName || t("common.noClient")}
                   </span>
                 </Box>
                 <Box className="flex items-center gap-2 text-sm text-gray-600 bg-white/70 px-3 py-2 rounded-full">
@@ -437,8 +441,8 @@ export const ProjectView = () => {
                   )}
                   <span className="font-medium">
                     {(project as any).visibility === "private"
-                      ? "Private"
-                      : "Public"}
+                      ? t("projects.private")
+                      : t("projects.public")}
                   </span>
                 </Box>
               </Box>
@@ -476,7 +480,7 @@ export const ProjectView = () => {
             <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg p-3">
               <CardTitle className="flex items-center gap-2 text-white">
                 <FileText className="h-5 w-5" />
-                Project Information
+                {t("projects.projectInfo")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 p-4">
@@ -487,7 +491,7 @@ export const ProjectView = () => {
                   </Box>
                   <Box>
                     <p className="text-sm text-gray-600 font-medium">
-                      Project Number
+                     {t("projects.projectNumber")}
                     </p>
                     <p className="font-semibold text-gray-900">
                       {project.projectNumber}
@@ -500,10 +504,10 @@ export const ProjectView = () => {
                   </Box>
                   <Box>
                     <p className="text-sm text-gray-600 font-medium">
-                      Assigned To
+                     {t("projects.assignedTo")}
                     </p>
                     <p className="font-semibold text-gray-900">
-                      {project.assignedProject || "Not assigned"}
+                      {project.assignedProject || t("common.unassigned")}
                     </p>
                   </Box>
                 </Box>
@@ -513,7 +517,7 @@ export const ProjectView = () => {
                   </Box>
                   <Box>
                     <p className="text-sm text-gray-600 font-medium">
-                      Start Date
+                     {t("projects.startDate")}
                     </p>
                     <p className="font-semibold text-gray-900">
                       {project.startDate
@@ -528,7 +532,7 @@ export const ProjectView = () => {
                   </Box>
                   <Box>
                     <p className="text-sm text-gray-600 font-medium">
-                      End Date
+                     {t("projects.endDate")}
                     </p>
                     <p className="font-semibold text-gray-900">
                       {project.endDate
@@ -546,7 +550,7 @@ export const ProjectView = () => {
                   </Box>
                   <Box>
                     <p className="text-sm text-gray-600 font-medium mb-1">
-                      Address
+                     {t("projects.addressLabel")}
                     </p>
                     <p className="font-semibold text-gray-900">
                       {project.address}
@@ -558,13 +562,75 @@ export const ProjectView = () => {
               {project.description && (
                 <Box className="p-4 bg-white/70 rounded-lg border border-gray-100">
                   <p className="text-sm text-gray-600 font-medium mb-3">
-                    Description
+                     {t("projects.projectDescriptionLabel")}
                   </p>
                   <p className="text-gray-900 leading-relaxed bg-white p-4 rounded-lg border border-gray-200">
                     {project.description}
                   </p>
                 </Box>
               )}
+
+              {/* Custom Fields Section */}
+              {customFieldsData?.data &&
+                customFieldsData.data.length > 0 &&
+                project.customFields &&
+                Object.keys(project.customFields).length > 0 && (
+                  <Box className="mt-6 pt-6 border-t border-gray-100">
+                    <span className="text-lg font-semibold text-gray-800 mb-4 block">
+                      {t("projects.customFields")}
+                    </span>
+                    <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {customFieldsData.data.map((field) => {
+                        const value = project.customFields?.[field.id];
+                        if (
+                          value === undefined ||
+                          value === null ||
+                          value === ""
+                        )
+                          return null;
+
+                        let displayValue = value;
+                        if (field.type === "boolean") {
+                          displayValue =
+                            value === "true" || value === true ? "Yes" : "No";
+                        } else if (field.type === "date" && value) {
+                          try {
+                            displayValue = new Date(value).toLocaleDateString();
+                          } catch (e) {
+                            displayValue = value;
+                          }
+                        }
+
+                        return (
+                          <Box
+                            key={field.id}
+                            className="p-3 border border-blue-50 rounded-lg bg-white shadow-sm"
+                          >
+                            <span className="text-xs font-medium text-gray-400 block mb-1">
+                              {field.name}
+                            </span>
+                            <Flex className="items-center gap-2">
+                              {field.type === "select" && field.options && (
+                                <div
+                                  className="w-2 h-2 rounded-full"
+                                  style={{
+                                    backgroundColor:
+                                      field.options.find(
+                                        (opt: any) => opt.label === value,
+                                      )?.color || "transparent",
+                                  }}
+                                />
+                              )}
+                              <span className="text-sm text-gray-800 font-semibold capitalize">
+                                {String(displayValue)}
+                              </span>
+                            </Flex>
+                          </Box>
+                        );
+                      })}
+                    </Box>
+                  </Box>
+                )}
             </CardContent>
           </Card>
 
@@ -1192,7 +1258,7 @@ export const ProjectView = () => {
                                 className="text-red-500 cursor-pointer p-1 h-auto text-xs mt-1"
                                 onClick={() => handleDeleteComment(reply.id)}
                                 disabled={isDeletingComment}
-                                title="Delete"
+                                title={t("common.delete")}
                               >
                                 <Trash2 className="w-3 h-3" />
                               </Button>

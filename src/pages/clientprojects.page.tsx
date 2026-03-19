@@ -32,8 +32,10 @@ import { useState } from "react";
 import { useFetchProjectComments } from "@/hooks/usefetchprojectcomments";
 import { useCreateProjectComment } from "@/hooks/usecreateprojectcomment";
 import { useDeleteProjectComment } from "@/hooks/usedeleteprojectcomment";
+import { useTranslation } from "react-i18next";
 
 const ClientProjectsPage = () => {
+  const { t } = useTranslation();
   const { data: userData } = useUser();
   const clientId = userData?.user?.clientId;
   const organizationId = userData?.user?.organizationId;
@@ -107,52 +109,52 @@ const ClientProjectsPage = () => {
     },
     {
       accessorKey: "projectName",
-      header: () => <Box className="text-center text-black">Project Name</Box>,
+      header: () => <Box className="text-center text-black">{t("projects.projectName")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center">{row.original.projectName}</Box>
       ),
     },
     {
       accessorKey: "clientName",
-      header: () => <Box className="text-center text-black">Client</Box>,
+      header: () => <Box className="text-center text-black">{t("projects.client")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center">{row.original.clientName}</Box>
       ),
     },
     {
       accessorKey: "assignedTo",
-      header: () => <Box className="text-center text-black">Assigned To</Box>,
+      header: () => <Box className="text-center text-black">{t("projects.assignedTo")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center">
-          {row.original.assignedProject || "Unassigned"}
+          {row.original.assignedProject || t("common.unassigned")}
         </Box>
       ),
     },
     {
       accessorKey: "startDate",
-      header: () => <Box className="text-center text-black">Start Date</Box>,
+      header: () => <Box className="text-center text-black">{t("projects.startDate")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center">
           {row.original.startDate
             ? format(new Date(row.original.startDate), "MMM d, yyyy")
-            : "Not set"}
+            : t("common.notSet")}
         </Box>
       ),
     },
     {
       accessorKey: "endDate",
-      header: () => <Box className="text-center text-black">End Date</Box>,
+      header: () => <Box className="text-center text-black">{t("projects.endDate")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center">
           {row.original.endDate
             ? format(new Date(row.original.endDate), "MMM d, yyyy")
-            : "Not set"}
+            : t("common.notSet")}
         </Box>
       ),
     },
     {
       accessorKey: "progress",
-      header: () => <Box className="text-center text-black">Progress</Box>,
+      header: () => <Box className="text-center text-black">{t("projects.progress")}</Box>,
       cell: ({ row }) => (
         <Center className="text-center">
           {row.original.progress + "%"}{" "}
@@ -162,7 +164,7 @@ const ClientProjectsPage = () => {
     },
     {
       accessorKey: "status",
-      header: () => <Box className="text-center text-black">Status</Box>,
+      header: () => <Box className="text-center text-black">{t("projects.status")}</Box>,
       cell: ({ row }) => {
         const status = row.original.status as
           | "pending"
@@ -209,7 +211,7 @@ const ClientProjectsPage = () => {
     },
     {
       id: "actions",
-      header: () => <Box className="text-center text-black">Actions</Box>,
+      header: () => <Box className="text-center text-black">{t("common.actions")}</Box>,
       cell: ({ row }) => (
         <Center className="space-x-2">
           <TooltipProvider>
@@ -226,7 +228,7 @@ const ClientProjectsPage = () => {
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="mb-2">
-                <p>View Project</p>
+                <p>{t("projects.viewProject")}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -243,7 +245,7 @@ const ClientProjectsPage = () => {
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="mb-2">
-                <p>Add Comment</p>
+                <p>{t("projects.addComment")}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -263,7 +265,7 @@ const ClientProjectsPage = () => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="mb-2">
-                  <p>Download File</p>
+                  <p>{t("projects.downloadFile")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -276,14 +278,14 @@ const ClientProjectsPage = () => {
   return (
     <PageWrapper className="mt-6">
       <Stack className="gap-1 p-6 mb-6">
-        <h1 className="text-2xl font-medium text-black">My Projects</h1>
+        <h1 className="text-2xl font-medium text-black">{t("projects.myProjects")}</h1>
         <p className="text-gray-500">
-          View and track the progress of your projects
+          {t("projects.myProjectsDesc")}
         </p>
       </Stack>
 
       {isLoading ? (
-        <Box className="flex justify-center p-10">Loading projects...</Box>
+        <Box className="flex justify-center p-10">{t("projects.loadingProjects")}</Box>
       ) : (
         <Box className=" rounded-xl   border border-gray-100 overflow-hidden">
           <ReusableTable
@@ -300,16 +302,16 @@ const ClientProjectsPage = () => {
         contentProps={{ className: "overflow-hidden max-sm:p-3" }}
       >
         <Box>
-          <Box className="mb-4 text-lg font-semibold">Project Comments</Box>
+          <Box className="mb-4 text-lg font-semibold">{t("projects.comments")}</Box>
 
           <Box className="flex flex-col gap-3 max-h-64 overflow-y-auto mb-4 bg-gray-50 p-3 rounded">
             {commentsLoading ? (
               <Box className="text-gray-400 text-center py-4">
-                Loading comments...
+                {t("common.loading")}
               </Box>
             ) : activeProjectId && commentsWithReplies.length === 0 ? (
               <Box className="text-gray-400 text-center py-4">
-                No comments yet.
+                {t("projects.noComments")}
               </Box>
             ) : (
               commentsWithReplies.map((comment: any) => (
@@ -352,7 +354,7 @@ const ClientProjectsPage = () => {
                       <Input
                         value={replyContent}
                         onChange={(e) => setReplyContent(e.target.value)}
-                        placeholder="Write a reply..."
+                        placeholder={t("projects.writeReply")}
                         className="mb-2"
                         onKeyDown={(e) => {
                           if (e.key === "Enter") handleAddReply();
@@ -365,7 +367,7 @@ const ClientProjectsPage = () => {
                           disabled={!replyContent.trim() || isCreatingComment}
                           className="bg-blue-600 hover:bg-blue-700 text-xs"
                         >
-                          {isCreatingComment ? "Adding..." : "Reply"}
+                          {isCreatingComment ? t("projects.replying") : t("projects.reply")}
                         </Button>
                         <Button
                           variant="outline"
@@ -376,7 +378,7 @@ const ClientProjectsPage = () => {
                           }}
                           className="text-xs"
                         >
-                          Cancel
+                          {t("common.cancel")}
                         </Button>
                       </Box>
                     </Box>
@@ -408,7 +410,7 @@ const ClientProjectsPage = () => {
                                 className="text-red-500 cursor-pointer p-1 h-auto text-xs mt-1"
                                 onClick={() => handleDeleteComment(reply.id)}
                                 disabled={isDeletingComment}
-                                title="Delete"
+                                title={t("common.delete")}
                               >
                                 <Trash2 className="w-3 h-3" />
                               </Button>
@@ -427,7 +429,7 @@ const ClientProjectsPage = () => {
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Type a comment..."
+              placeholder={t("projects.typeComment")}
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleAddComment();
               }}
@@ -438,7 +440,7 @@ const ClientProjectsPage = () => {
               disabled={!input.trim() || isCreatingComment}
               className="rounded-full h-11 cursor-pointer min-w-20"
             >
-              {isCreatingComment ? "Sending..." : "Send"}
+              {isCreatingComment ? t("projects.sending") : t("projects.send")}
             </Button>
           </Flex>
         </Box>

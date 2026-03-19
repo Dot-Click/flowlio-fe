@@ -36,6 +36,14 @@ export type Task = {
   parentTitle?: string;
   startAfter?: string | null;
   finishBefore?: string | null;
+  projectCustomFields?: Record<string, any>;
+};
+
+export type CustomFieldDefinition = {
+  id: string;
+  name: string;
+  type: string;
+  options?: Array<{ label: string; color: string }>;
 };
 
 export const initialTasks: Task[] = [];
@@ -70,9 +78,11 @@ const STATUS_COLUMNS: StatusType[] = [
 function DraggableTask({
   task,
   onTaskClick,
+  projectCustomFieldsDefinitions,
 }: {
   task: Task;
   onTaskClick?: (task: Task) => void;
+  projectCustomFieldsDefinitions?: CustomFieldDefinition[];
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
@@ -187,6 +197,38 @@ function DraggableTask({
                 {task.dueDate}
               </Box>
             </Flex>
+
+            {/* Custom Field Colors */}
+            {task.projectCustomFields && 
+             projectCustomFieldsDefinitions && 
+             projectCustomFieldsDefinitions.length > 0 && (
+              <Flex className="mt-2 gap-1.5 flex-wrap">
+                {projectCustomFieldsDefinitions.map((field) => {
+                  if (field.type !== "select") return null;
+                  const value = task.projectCustomFields?.[field.id];
+                  if (!value) return null;
+                  
+                  const option = field.options?.find(opt => opt.label === value);
+                  if (!option) return null;
+
+                  return (
+                    <TooltipProvider key={field.id}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div 
+                            className="w-3 h-3 rounded-full border border-white shadow-sm" 
+                            style={{ backgroundColor: option.color }}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="text-[10px] px-2 py-1">
+                          {field.name}: {value}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  );
+                })}
+              </Flex>
+            )}
           </Flex>
         </Flex>
       </Box>
@@ -261,6 +303,7 @@ interface KanbanBoardProps {
   filteredTasks: Task[];
   onStatusUpdate?: (taskId: string, status: string) => void;
   onTaskClick?: (task: Task) => void;
+  projectCustomFieldsData?: CustomFieldDefinition[];
 }
 
 export default function KanbanBoard({
@@ -269,6 +312,7 @@ export default function KanbanBoard({
   filteredTasks,
   onStatusUpdate,
   onTaskClick,
+  projectCustomFieldsData,
 }: KanbanBoardProps) {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
 
@@ -333,6 +377,7 @@ export default function KanbanBoard({
                     key={task.id}
                     task={task}
                     onTaskClick={onTaskClick}
+                    projectCustomFieldsDefinitions={projectCustomFieldsData}
                   />
                 ))}
             </DroppableColumn>

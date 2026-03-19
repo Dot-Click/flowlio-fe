@@ -27,6 +27,7 @@ import {
 import { ComponentProps, FC, type ReactElement, useState } from "react";
 import { ChevronRight, LogOut, Loader } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { useMediaQuery } from "usehooks-ts";
 import { Button } from "../ui/button";
 import { Center } from "../ui/center";
@@ -70,6 +71,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { t } = useTranslation();
 
   const handleLogout = async () => {
     try {
@@ -152,7 +154,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
               />
             </TooltipTrigger>
             <TooltipContent className="mb-2">
-              <p>{state === "collapsed" ? "Open" : "Close"}</p>
+              <p>{state === "collapsed" ? t("common.open") : t("common.close")}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -212,7 +214,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                                             )}
                                           >
                                             {renderIcon(subItem.icon, "invert")}
-                                            {subItem.title}
+                                            {t(`appSidebar.${subItem.title}`)}
                                           </li>
                                         </Link>
                                       );
@@ -250,7 +252,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                                       : undefined
                                   }
                                 >
-                                  {item.title}
+                                  {t(`appSidebar.${item.title}`)}
                                 </span>
                               </Center>
                               {(state === "expanded" || is768) && (
@@ -319,7 +321,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                                           : undefined
                                       )}
                                     >
-                                      {subItem.title}
+                                      {t(`appSidebar.${subItem.title}`)}
                                     </span>
                                   </Link>
                                 </SidebarMenuSubItem>
@@ -338,7 +340,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                         tooltip={{
                           children: (
                             <span className="capitalize text-[14px]">
-                              {item.title}
+                              {t(`appSidebar.${item.title}`)}
                             </span>
                           ),
                         }}
@@ -371,7 +373,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                                 : undefined
                             }
                           >
-                            {item.title}
+                            {t(`appSidebar.${item.title}`)}
                           </span>
                         </Link>
                       </SidebarMenuButton>
@@ -400,7 +402,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
               {isLoggingOut ? (
                 <Center>
                   <Loader className="mr-2 h-4 w-4 animate-spin" />
-                  Logging out...
+                  {t("common.loggingOut")}
                 </Center>
               ) : (
                 <Flex className="items-center gap-2">
@@ -410,7 +412,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                       state === "collapsed" ? "m-auto size-4" : "size-4"
                     }
                   />
-                  <span className="text-sm">Logout</span>
+                  <span className="text-sm">{t("common.logout")}</span>
                 </Flex>
               )}
             </span>

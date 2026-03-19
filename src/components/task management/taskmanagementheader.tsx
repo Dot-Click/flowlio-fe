@@ -14,6 +14,7 @@ import { CustomDropdown, CustomDropdownItem } from "../ui/custom-dropdown";
 import { useFetchTasks } from "@/hooks/usefetchtasks";
 import { useFetchOrganizationUsers } from "@/hooks/usefetchorganizationusers";
 import { useFetchProjects } from "@/hooks/usefetchprojects";
+import { useFetchCustomFields } from "@/hooks/usecustomfields";
 // removed client-specific hooks
 import { useUpdateTaskStatus } from "@/hooks/useupdatetask";
 import { format } from "date-fns";
@@ -33,6 +34,7 @@ export const TaskManagementHeader = () => {
   const orgTasks = useFetchTasks();
   const orgUsers = useFetchOrganizationUsers();
   const orgProjects = useFetchProjects();
+  const { data: customFieldsData } = useFetchCustomFields("project");
 
   const tasksResponse = orgTasks.data;
   const usersResponse = orgUsers.data;
@@ -69,29 +71,32 @@ export const TaskManagementHeader = () => {
   // Map real tasks to KanbanBoard format, or use initial tasks
   const tasks: KanbanTask[] =
     realTasks.length > 0
-      ? realTasks.map((task) => ({
-          id: task.id,
-          title: task.title,
-          project: task.projectName || "Unknown Project",
-          projectId: task.projectId, // Include projectId for fetching comments
-          dueDate: task.endDate
-            ? format(new Date(task.endDate), "dd MMM, yyyy")
-            : "No due date",
-          status: mapStatusToKanban(task.status) as any,
-          comments: [], // Will be populated with project comments
-          // Additional data for modal
-          description: task.description,
-          assigneeName: task.assigneeName,
-          assigneeImage: task.assigneeImage,
-          creatorName: task.creatorName,
-          attachments: task.attachments,
-          parentId: task.parentId,
-          parentTitle: task.parentId
-            ? realTasks.find((rt) => rt.id === task.parentId)?.title
-            : undefined,
-          startAfter: task.startAfter ?? undefined,
-          finishBefore: task.finishBefore ?? undefined,
-        }))
+      ? realTasks.map((task) => {
+          const project = projects.find((p) => p.id === task.projectId);
+          return {
+            id: task.id,
+            title: task.title,
+            project: task.projectName || "Unknown Project",
+            projectId: task.projectId,
+            dueDate: task.endDate
+              ? format(new Date(task.endDate), "dd MMM, yyyy")
+              : "No due date",
+            status: mapStatusToKanban(task.status) as any,
+            comments: [],
+            description: task.description,
+            assigneeName: task.assigneeName,
+            assigneeImage: task.assigneeImage,
+            creatorName: task.creatorName,
+            attachments: task.attachments,
+            parentId: task.parentId,
+            parentTitle: task.parentId
+              ? realTasks.find((rt) => rt.id === task.parentId)?.title
+              : undefined,
+            startAfter: task.startAfter ?? undefined,
+            finishBefore: task.finishBefore ?? undefined,
+            projectCustomFields: project?.customFields,
+          };
+        })
       : initialTasks;
   const setTasks = () => {}; // No-op since we're using real data
 
@@ -282,6 +287,7 @@ export const TaskManagementHeader = () => {
         filteredTasks={filteredTasks}
         onStatusUpdate={handleStatusUpdate}
         onTaskClick={handleTaskClick}
+        projectCustomFieldsData={customFieldsData?.data}
       />
 
       {/* Task Details Modal */}

@@ -424,6 +424,21 @@ export const ClientManagementTable = () => {
       ),
       cell: ({ row }: { row: any }) => {
         const val = row.original.customFields?.[field.id];
+        if (val === undefined || val === null || val === "") return <Box className="text-center p-1">-</Box>;
+
+        if (field.type === "select" && field.options) {
+          const option = field.options.find((opt: any) => opt.label === val);
+          if (option) {
+            return (
+              <Center>
+                <Flex className="items-center gap-2 px-2 py-1 bg-gray-50 rounded-full border border-gray-100 text-xs">
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: option.color }} />
+                  <span className="capitalize">{val}</span>
+                </Flex>
+              </Center>
+            );
+          }
+        }
 
         let displayValue = val;
         if (field.type === "boolean") {
@@ -438,11 +453,7 @@ export const ClientManagementTable = () => {
 
         return (
           <Box className="text-center p-1 capitalize">
-            {displayValue !== undefined &&
-            displayValue !== null &&
-            displayValue !== ""
-              ? String(displayValue)
-              : "-"}
+            {String(displayValue)}
           </Box>
         );
       },
@@ -733,9 +744,19 @@ export const ClientManagementTable = () => {
                           <span className="text-xs font-medium text-gray-500 block">
                             {field.name}
                           </span>
-                          <span className="text-sm text-gray-800 font-semibold">
-                            {displayValue}
-                          </span>
+                          <Flex className="items-center gap-2">
+                            {field.type === "select" && field.options && (
+                              <div 
+                                className="w-2 h-2 rounded-full" 
+                                style={{ 
+                                  backgroundColor: field.options.find((opt: any) => opt.label === value)?.color || "transparent" 
+                                }} 
+                              />
+                            )}
+                            <span className="text-sm text-gray-800 font-semibold">
+                              {displayValue}
+                            </span>
+                          </Flex>
                         </Box>
                       );
                     })}

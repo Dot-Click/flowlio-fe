@@ -25,6 +25,7 @@ import { useFetchProjects } from "@/hooks/usefetchprojects";
 import { Skeleton } from "../ui/skeleton";
 import { useFetchClientMedia } from "@/hooks/usefetchclientmedia";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface MediaItem {
   fileId: string;
@@ -34,6 +35,7 @@ interface MediaItem {
   projectId: string;
   projectName: string;
   taskId: string | null;
+  taskName?: string | null;
   clientId: string | null;
   clientName: string | null;
   uploadedBy: string;
@@ -47,6 +49,7 @@ interface Project {
 }
 
 export const ClientMediaCenter: React.FC = () => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [projectFilter, setProjectFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("newest");
@@ -158,7 +161,7 @@ export const ClientMediaCenter: React.FC = () => {
   };
 
   const handleDownload = async (file: MediaItem): Promise<void> => {
-    const toastId = toast.loading("Preparing download...");
+    const toastId = toast.loading(t("common.loading"));
 
     try {
       let downloadUrl = file.fileUrl;
@@ -235,10 +238,10 @@ export const ClientMediaCenter: React.FC = () => {
       <Box className="flex items-center justify-between">
         <Box>
           <h1 className="text-3xl font-medium text-gray-900 tracking-tight">
-            Media Center
+            {t("appSidebar.mediaCenter")}
           </h1>
           <p className="text-gray-500 mt-1">
-            Browse and manage your digital assets across all work.
+            {t("media.desc")}
           </p>
         </Box>
       </Box>
@@ -251,7 +254,7 @@ export const ClientMediaCenter: React.FC = () => {
             <Box className="flex-1 min-w-[300px] relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
-                placeholder="Search by filename, project, task, or client..."
+                placeholder={t("media.searchPlaceholder")}
                 className="pl-11 h-12 rounded-xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-blue-100 placeholder:text-gray-400"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -259,10 +262,10 @@ export const ClientMediaCenter: React.FC = () => {
             </Box>
             <Select value={projectFilter} onValueChange={setProjectFilter}>
               <SelectTrigger className="h-12 rounded-xl bg-gray-50 border-none text-gray-700 font-medium">
-                <SelectValue placeholder="All Projects" />
+                <SelectValue placeholder={t("projects.allProjects")} />
               </SelectTrigger>
               <SelectContent className="rounded-xl">
-                <SelectItem value="all">All Projects</SelectItem>
+                <SelectItem value="all">{t("projects.allProjects")}</SelectItem>
                 {projects.map((proj) => (
                   <SelectItem key={proj.id} value={proj.id}>
                     {proj.projectName}
@@ -272,12 +275,12 @@ export const ClientMediaCenter: React.FC = () => {
             </Select>
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="h-12 rounded-xl bg-gray-50 border-none text-gray-700 font-medium">
-                <SelectValue placeholder="Sort by" />
+                <SelectValue placeholder={t("media.sortBy")} />
               </SelectTrigger>
               <SelectContent className="rounded-xl">
-                <SelectItem value="newest">Newest First</SelectItem>
-                <SelectItem value="oldest">Oldest First</SelectItem>
-                <SelectItem value="name">Name (A-Z)</SelectItem>
+                <SelectItem value="newest">{t("media.newest")}</SelectItem>
+                <SelectItem value="oldest">{t("media.oldest")}</SelectItem>
+                <SelectItem value="name">{t("media.nameAZ")}</SelectItem>
               </SelectContent>
             </Select>
           </Flex>
@@ -381,16 +384,16 @@ export const ClientMediaCenter: React.FC = () => {
                     )}
                     {file.taskName && (
                       <p className="text-[10px] text-white/50 italic truncate">
-                        Task: {file.taskName}
+                        {t("projects.task")}: {file.taskName}
                       </p>
                     )}
                     {file.clientName && (
                       <p className="text-[10px] text-white/50 truncate">
-                        Client: {file.clientName}
+                        {t("projects.client")}: {file.clientName}
                       </p>
                     )}
                     <p className="text-[10px] text-white/30">
-                      Version {file.latestVersion}
+                      {t("media.version")} {file.latestVersion}
                     </p>
                   </Box>
 

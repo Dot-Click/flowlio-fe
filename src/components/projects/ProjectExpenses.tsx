@@ -40,6 +40,7 @@ import {
 } from "@/hooks/useProjectExpenses";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 const EXPENSE_CATEGORIES = [
   { value: "labour", label: "Labour", color: "bg-blue-100 text-blue-800" },
@@ -84,6 +85,7 @@ export const ProjectExpenses = ({
   isClient = false,
   isModal = false,
 }: ProjectExpensesProps) => {
+  const { t } = useTranslation();
   const [showAddForm, setShowAddForm] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
@@ -108,13 +110,13 @@ export const ProjectExpenses = ({
 
   const handleAddExpense = () => {
     if (!amount || !description || !category || !date) {
-      toast.error("Please fill in all fields");
+      toast.error(t("common.fillAllFields"));
       return;
     }
 
     const numAmount = parseFloat(amount);
     if (isNaN(numAmount) || numAmount <= 0) {
-      toast.error("Please enter a valid amount");
+      toast.error(t("expenses.invalidAmount"));
       return;
     }
 
@@ -176,7 +178,7 @@ export const ProjectExpenses = ({
       <Center className="h-48">
         <Box className="flex items-center justify-center p-8">
           <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
-          <Box className="ml-2 text-gray-600">Loading expenses...</Box>
+          <Box className="ml-2 text-gray-600">{t("expenses.loading")}</Box>
         </Box>
       </Center>
     );
@@ -188,7 +190,7 @@ export const ProjectExpenses = ({
         <CardTitle className="flex items-center justify-between text-white">
           <Flex className="items-center gap-2">
             <DollarSign className="h-5 w-5" />
-            Financial Tracking
+            {t("expenses.financialTracking")}
           </Flex>
           {!isClient && (
             <Button
@@ -198,7 +200,7 @@ export const ProjectExpenses = ({
               onClick={() => setShowAddForm(true)}
             >
               <Plus className="h-3 w-3 mr-1" />
-              Add Expense
+              {t("expenses.addExpense")}
             </Button>
           )}
         </CardTitle>
@@ -339,7 +341,7 @@ export const ProjectExpenses = ({
                           variant="outline"
                           className={`${catInfo.color} text-xs px-2 py-0.5 border-0`}
                         >
-                          {catInfo.label}
+                          {t(`expenses.categories.${catInfo.value}`) || catInfo.label}
                         </Badge>
                       </Box>
                       <Stack className="gap-0 flex-1 min-w-0">
@@ -431,7 +433,7 @@ export const ProjectExpenses = ({
                 <SelectContent>
                   {EXPENSE_CATEGORIES.map((cat) => (
                     <SelectItem key={cat.value} value={cat.value}>
-                      {cat.label}
+                      {t(`expenses.categories.${cat.value}`) || cat.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
