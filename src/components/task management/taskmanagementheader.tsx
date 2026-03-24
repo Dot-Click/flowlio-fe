@@ -19,8 +19,10 @@ import { useFetchCustomFields } from "@/hooks/usecustomfields";
 import { useUpdateTaskStatus } from "@/hooks/useupdatetask";
 import { format } from "date-fns";
 import { TaskDetailsModal } from "./taskdetailsmodal";
+import { useTranslation } from "react-i18next";
 
 export const TaskManagementHeader = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   // client-specific logic removed
 
@@ -76,11 +78,11 @@ export const TaskManagementHeader = () => {
           return {
             id: task.id,
             title: task.title,
-            project: task.projectName || "Unknown Project",
+            project: task.projectName || t("taskManagement.unknownProject"),
             projectId: task.projectId,
             dueDate: task.endDate
               ? format(new Date(task.endDate), "dd MMM, yyyy")
-              : "No due date",
+              : t("taskManagement.noDueDate"),
             status: mapStatusToKanban(task.status) as any,
             comments: [],
             description: task.description,
@@ -164,11 +166,10 @@ export const TaskManagementHeader = () => {
         <Center className="justify-between max-sm:flex-col max-sm:items-start gap-2">
           <Stack className="gap-1">
             <h1 className="text-black text-3xl max-sm:text-xl font-medium">
-              Task Management
+              {t("appSidebar.tasksmanagement")}
             </h1>
             <h1 className={`max-sm:text-sm text-[#616572]`}>
-              Efficiently track, assign, and monitor tasks to ensure smooth
-              workflow and productivity.
+              {t("taskManagement.subtitle")}
             </h1>
           </Stack>
 
@@ -178,7 +179,7 @@ export const TaskManagementHeader = () => {
               onClick={() => navigate("/dashboard/task-management/create-task")}
             >
               <CirclePlus className="fill-white text-black size-5" />
-              Create Task
+              {t("taskManagement.createTask")}
             </Button>
         </Center>
 
@@ -187,7 +188,7 @@ export const TaskManagementHeader = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5.5 w-5.5 text-gray-300 font-light" />
             <Input
               type="search"
-              placeholder="Search Project"
+              placeholder={t("taskManagement.searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full md:w-115 lg:w-80 xl:w-[400px] py-4 pl-10 bg-white h-10  placeholder:text-black  placeholder:text-[15px] border border-gray-100 rounded-md focus:outline-none active:border-gray-200 focus:ring-0 focus:ring-offset-0"
@@ -215,9 +216,11 @@ export const TaskManagementHeader = () => {
                   {selectedProjects.length > 0
                     ? selectedProjects.length === 1
                       ? projects.find((p) => p.id === selectedProjects[0])
-                          ?.projectName || "Projects"
-                      : `${selectedProjects.length} Projects`
-                    : "Projects"}
+                          ?.projectName || t("taskManagement.projects")
+                      : t("taskManagement.nProjects", {
+                          count: selectedProjects.length,
+                        })
+                    : t("taskManagement.projects")}
                 </Button>
               }
             >
@@ -225,7 +228,7 @@ export const TaskManagementHeader = () => {
                 checked={selectedProjects.length === 0}
                 onClick={() => setSelectedProjects([])}
               >
-                All Projects
+                {t("taskManagement.allProjects")}
               </CustomDropdownItem>
               {projects.map((project) => (
                 <CustomDropdownItem
@@ -255,9 +258,11 @@ export const TaskManagementHeader = () => {
                   {selectedUsers.length > 0
                     ? selectedUsers.length === 1
                       ? users.find((u) => u.user?.id === selectedUsers[0])
-                          ?.firstname || "Users"
-                      : `${selectedUsers.length} Users`
-                    : "Users"}
+                          ?.firstname || t("taskManagement.users")
+                      : t("taskManagement.nUsers", {
+                          count: selectedUsers.length,
+                        })
+                    : t("taskManagement.users")}
                 </Button>
               }
             >
@@ -265,7 +270,7 @@ export const TaskManagementHeader = () => {
                 checked={selectedUsers.length === 0}
                 onClick={() => setSelectedUsers([])}
               >
-                All Users
+                {t("taskManagement.allUsers")}
               </CustomDropdownItem>
               {users.map((user) => (
                 <CustomDropdownItem

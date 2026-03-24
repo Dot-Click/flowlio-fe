@@ -10,6 +10,7 @@ import { Tooltip, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { GripVertical, MessageCircleMore } from "lucide-react";
 import { format } from "date-fns";
 import { useFetchProjectComments } from "@/hooks/usefetchprojectcomments";
+import { useTranslation } from "react-i18next";
 
 // Task type
 export type Task = {
@@ -74,6 +75,15 @@ const STATUS_COLUMNS: StatusType[] = [
   "Completed",
 ];
 
+const KANBAN_STATUS_I18N_KEY: Record<StatusType, string> = {
+  "To Do": "taskManagement.statusColumns.toDo",
+  "In Progress": "taskManagement.statusColumns.inProgress",
+  Delay: "taskManagement.statusColumns.delay",
+  Changes: "taskManagement.statusColumns.changes",
+  Updated: "taskManagement.statusColumns.updated",
+  Completed: "taskManagement.statusColumns.completed",
+};
+
 // Draggable Task Card
 function DraggableTask({
   task,
@@ -84,6 +94,7 @@ function DraggableTask({
   onTaskClick?: (task: Task) => void;
   projectCustomFieldsDefinitions?: CustomFieldDefinition[];
 }) {
+  const { t } = useTranslation();
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: task.id,
@@ -157,7 +168,7 @@ function DraggableTask({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="mb-2">
-                  <p>View Comments</p>
+                  <p>{t("taskManagement.viewComments")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -176,7 +187,7 @@ function DraggableTask({
                   className="size-4"
                   alt="calendericon"
                 />
-                Project:
+                {t("taskManagement.projectLabel")}
               </Flex>
 
               <span className="font-nromal text-black text-sm ml-4">
@@ -191,7 +202,7 @@ function DraggableTask({
                   className="size-4"
                   alt="calendericon"
                 />
-                Deadline:
+                {t("taskManagement.deadlineLabel")}
               </Flex>
               <Box className="text-red-500 text-xs font-medium rounded ml-2">
                 {task.dueDate}
@@ -239,7 +250,7 @@ function DraggableTask({
             onClick={() => setShowComments(false)}
             className="bg-blue-500 text-white px-4 py-2 rounded-full cursor-pointer self-end m-2"
           >
-            Close Comments
+            {t("taskManagement.closeComments")}
           </Button>
           <Box className="flex-1 flex flex-col gap-2 max-h-70 overflow-y-auto bg-gray-50 p-2 rounded">
             {displayComments && displayComments.length > 0 ? (
@@ -255,7 +266,9 @@ function DraggableTask({
                 </Box>
               ))
             ) : (
-              <Box className="text-gray-400 text-center">No comments yet.</Box>
+              <Box className="text-gray-400 text-center">
+                {t("taskManagement.noCommentsYet")}
+              </Box>
             )}
           </Box>
         </Box>
@@ -272,6 +285,7 @@ function DroppableColumn({
   status: StatusType;
   children: React.ReactNode;
 }) {
+  const { t } = useTranslation();
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
   return (
@@ -287,7 +301,7 @@ function DroppableColumn({
         className="text-base font-semibold text-white w-full px-4 py-3 flex items-center justify-between"
         style={{ backgroundColor: STATUS_COLORS[status] }}
       >
-        <span>{status}</span>
+        <span>{t(KANBAN_STATUS_I18N_KEY[status])}</span>
         <span className="text-xs opacity-80">
           {React.Children.count(children)}
         </span>
@@ -314,6 +328,7 @@ export default function KanbanBoard({
   onTaskClick,
   projectCustomFieldsData,
 }: KanbanBoardProps) {
+  const { t } = useTranslation();
   const [activeTask, setActiveTask] = useState<Task | null>(null);
 
   const handleDragEnd = (event: any) => {
@@ -390,7 +405,7 @@ export default function KanbanBoard({
                     {activeTask.title}
                   </Box>
                   <Box className="text-gray-600 text-xs">
-                    Project:{" "}
+                    {t("taskManagement.dragOverlayProject")}{" "}
                     <span className="font-medium">{activeTask.project}</span>
                   </Box>
                 </Flex>

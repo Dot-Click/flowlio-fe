@@ -6,8 +6,10 @@ import { Button } from "../ui/button";
 import { CirclePlus } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useGetCurrentOrgUserMembers } from "@/hooks/usegetallusermembers";
+import { useTranslation } from "react-i18next";
 
 export const UserManagementHeader = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   // const { data: userData } = useUser();
   const {
@@ -48,10 +50,10 @@ export const UserManagementHeader = () => {
       <Center className="justify-between px-4 py-6 max-sm:flex-col max-sm:items-start gap-2">
         <Stack className="gap-1">
           <h1 className="text-black text-3xl max-sm:text-xl font-medium">
-            User Management
+            {t("appSidebar.usermanagement")}
           </h1>
           <h1 className={`max-sm:text-sm max-w-[600px] text-gray-500`}>
-            Control access, roles, and permissions across your organization.
+            {t("userManagement.subtitle")}
             {/* {userMembersData?.data?.organizationId && (
               <span className="block mt-1 text-blue-600 font-medium">
                 Organization ID: {userMembersData.data.organizationId}
@@ -68,7 +70,7 @@ export const UserManagementHeader = () => {
           }
         >
           <CirclePlus className="fill-white text-black size-5" />
-          Add Members
+          {t("userManagement.addMembers")}
         </Button>
       </Center>
 

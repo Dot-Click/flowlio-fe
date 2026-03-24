@@ -9,8 +9,10 @@ import { CustomFieldsManager } from "../projects/customfields/CustomFieldsManage
 import { Box } from "../ui/box";
 import { Flex } from "../ui/flex";
 import { ClientManagementTable } from "./clientmanagementtable";
+import { useTranslation } from "react-i18next";
 
 export const ClientManagementHeader = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const customFieldsModal = useGeneralModalDisclosure();
 
@@ -19,10 +21,10 @@ export const ClientManagementHeader = () => {
       <Center className="justify-between px-4 py-6 max-sm:flex-col max-sm:items-start gap-2">
         <Stack className="gap-1">
           <h1 className="text-black text-3xl max-sm:text-xl font-medium">
-            Client Management
+            {t("appSidebar.clinetmanagement")}
           </h1>
           <h1 className={`max-sm:text-sm max-w-[600px] text-gray-500`}>
-            Track and manage clients efficiently
+            {t("clientManagement.subtitle")}
           </h1>
         </Stack>
 
@@ -33,7 +35,7 @@ export const ClientManagementHeader = () => {
             onClick={() => customFieldsModal.onOpenChange(true)}
           >
             <Settings2 className="w-4 h-4" />
-            Custom Fields
+            {t("clientManagement.customFields")}
           </Button>
 
           <Button
@@ -42,7 +44,7 @@ export const ClientManagementHeader = () => {
             onClick={() => navigate("/dashboard/client-management/create-client")}
           >
             <CirclePlus className="fill-white text-black size-5" />
-            Create New Client
+            {t("clientManagement.createNewClient")}
           </Button>
         </Flex>
       </Center>
@@ -51,7 +53,9 @@ export const ClientManagementHeader = () => {
 
       <GeneralModal {...customFieldsModal}>
         <Box className="p-1">
-          <h2 className="text-xl font-semibold mb-4">Manage Custom Fields</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            {t("clientManagement.manageCustomFieldsTitle")}
+          </h2>
           <CustomFieldsManager entityType="client" />
         </Box>
       </GeneralModal>

@@ -36,6 +36,7 @@ import { useUpdateClient } from "@/hooks/useupdateclient";
 import { useFetchCustomFields } from "@/hooks/usecustomfields";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import {
   Select,
   SelectContent,
@@ -94,10 +95,14 @@ export type Data = {
 };
 
 export const ClientManagementTable = () => {
+  const { t } = useTranslation();
   const props = useGeneralModalDisclosure();
   const [selectedClient, setSelectedClient] = useState<Data | null>(null);
   // const [grantAccessClient, setGrantAccessClient] = useState<Data | null>(null);
   const navigate = useNavigate();
+
+  const translateClientStatus = (status: string) =>
+    t(`clientManagement.clientStatuses.${status}`, { defaultValue: status });
 
   // Fetch clients from API
   const {
@@ -122,12 +127,12 @@ export const ClientManagementTable = () => {
       },
       {
         onSuccess: () => {
-          toast.success("Client status updated successfully");
+          toast.success(t("clientManagement.toastStatusUpdated"));
           refetch();
         },
         onError: (error: any) => {
           toast.error(
-            error?.response?.data?.error || "Failed to update client status",
+            error?.response?.data?.error || t("clientManagement.toastStatusFailed"),
           );
         },
       },
@@ -151,18 +156,14 @@ export const ClientManagementTable = () => {
 
   // Handle delete client
   const handleDeleteClient = async (id: string, email: string) => {
-    if (
-      window.confirm(
-        `Are you sure you want to delete ${email}? This action cannot be undone.`,
-      )
-    ) {
+    if (window.confirm(t("clientManagement.confirmDelete", { email }))) {
       try {
         deleteClient(id);
-        toast.success("Client deleted successfully");
+        toast.success(t("clientManagement.toastDeleted"));
         refetch();
       } catch (error: any) {
         const errorMessage =
-          error?.response?.data?.message || "Failed to delete client";
+          error?.response?.data?.message || t("clientManagement.toastDeleteFailed");
         toast.error(errorMessage);
       }
     }
@@ -172,7 +173,7 @@ export const ClientManagementTable = () => {
   const columns: ColumnDef<Data>[] = [
     {
       accessorKey: "name",
-      header: () => <Box className="text-black pl-4">Name</Box>,
+      header: () => <Box className="text-black pl-4">{t("table.name")}</Box>,
       cell: ({ row }) => (
         <Flex className="capitalize pl-4 w-30 max-sm:w-full">
           <Avatar className="size-8">
@@ -193,27 +194,31 @@ export const ClientManagementTable = () => {
 
     {
       accessorKey: "cpfcnpj",
-      header: () => <Box className="text-black text-center">VAT</Box>,
+      header: () => <Box className="text-black text-center">{t("table.vat")}</Box>,
       cell: ({ row }) => (
         <Box className="captialize text-center">
-          {row.original.cpfcnpj || "N/A"}
+          {row.original.cpfcnpj || t("clientManagement.notAvailable")}
         </Box>
       ),
     },
 
     {
       accessorKey: "address",
-      header: () => <Box className="text-black text-center">Address</Box>,
+      header: () => (
+        <Box className="text-black text-center">{t("table.address")}</Box>
+      ),
       cell: ({ row }) => (
         <Box className="captialize text-center">
-          {row.original.address || "N/A"}
+          {row.original.address || t("clientManagement.notAvailable")}
         </Box>
       ),
     },
 
     {
       id: "social",
-      header: () => <Box className="text-center text-black">Social</Box>,
+      header: () => (
+        <Box className="text-center text-black">{t("table.social")}</Box>
+      ),
       cell: ({ row }) => {
         const socialLinks = row.original.socialMediaLinks
           ? typeof row.original.socialMediaLinks === "string"
@@ -254,19 +259,27 @@ export const ClientManagementTable = () => {
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-64">
-              <Box className="text-sm font-semibold mb-3">Contact & Social</Box>
+              <Box className="text-sm font-semibold mb-3">
+                {t("clientManagement.contactSocial")}
+              </Box>
               <Box className="mb-2">
-                <span className="font-medium text-xs">Email:</span>{" "}
+                <span className="font-medium text-xs">
+                  {t("clientManagement.emailLabel")}
+                </span>{" "}
                 <span className="text-xs">{row.original.email}</span>
               </Box>
               <Box className="mb-3">
-                <span className="font-medium text-xs">Phone:</span>{" "}
-                <span className="text-xs">{row.original.phone || "N/A"}</span>
+                <span className="font-medium text-xs">
+                  {t("clientManagement.phoneLabel")}
+                </span>{" "}
+                <span className="text-xs">
+                  {row.original.phone || t("clientManagement.notAvailable")}
+                </span>
               </Box>
               {Array.isArray(socialLinks) && socialLinks.length > 0 && (
                 <>
                   <Box className="text-sm font-semibold mb-2 mt-3 pt-3 border-t">
-                    Social Media
+                    {t("clientManagement.socialMedia")}
                   </Box>
                   <Box className="flex flex-wrap gap-2">
                     {socialLinks.map((link: any, index: number) => {
@@ -296,17 +309,21 @@ export const ClientManagementTable = () => {
 
     {
       accessorKey: "businessIndustry",
-      header: () => <Box className="text-black text-center">Industry</Box>,
+      header: () => (
+        <Box className="text-black text-center">{t("table.industry")}</Box>
+      ),
       cell: ({ row }) => (
         <Box className="captialize text-center">
-          {row.original.businessIndustry || "N/A"}
+          {row.original.businessIndustry || t("clientManagement.notAvailable")}
         </Box>
       ),
     },
 
     {
       accessorKey: "status",
-      header: () => <Box className="text-center text-black">Status</Box>,
+      header: () => (
+        <Box className="text-center text-black">{t("table.status")}</Box>
+      ),
       cell: ({ row }) => {
         const status = row.original.status as
           | "New Lead"
@@ -358,12 +375,24 @@ export const ClientManagementTable = () => {
           value: typeof status;
           label: string;
         }> = [
-          { value: "New Lead", label: "New Lead" },
-          { value: "In Negotiation", label: "In Negotiation" },
-          { value: "Contract Signed", label: "Contract Signed" },
-          { value: "Project In Progress", label: "Project In Progress" },
-          { value: "Completed", label: "Completed" },
-          { value: "Inactive Client", label: "Inactive Client" },
+          { value: "New Lead", label: translateClientStatus("New Lead") },
+          {
+            value: "In Negotiation",
+            label: translateClientStatus("In Negotiation"),
+          },
+          {
+            value: "Contract Signed",
+            label: translateClientStatus("Contract Signed"),
+          },
+          {
+            value: "Project In Progress",
+            label: translateClientStatus("Project In Progress"),
+          },
+          { value: "Completed", label: translateClientStatus("Completed") },
+          {
+            value: "Inactive Client",
+            label: translateClientStatus("Inactive Client"),
+          },
         ];
 
         return (
@@ -383,7 +412,11 @@ export const ClientManagementTable = () => {
                     <Flex
                       className={`w-2 h-2 items-start rounded-full ${currentStyle.dot}`}
                     />
-                    <h1>{status || "Unknown"}</h1>
+                    <h1>
+                      {status
+                        ? translateClientStatus(status)
+                        : t("clientManagement.unknown")}
+                    </h1>
                   </Center>
                 </SelectValue>
               </SelectTrigger>
@@ -442,7 +475,10 @@ export const ClientManagementTable = () => {
 
         let displayValue = val;
         if (field.type === "boolean") {
-          displayValue = val === "true" || val === true ? "Yes" : "No";
+          displayValue =
+            val === "true" || val === true
+              ? t("clientManagement.yes")
+              : t("clientManagement.no");
         } else if (field.type === "date" && val) {
           try {
             displayValue = new Date(val).toLocaleDateString();
@@ -461,7 +497,9 @@ export const ClientManagementTable = () => {
 
     {
       accessorKey: "actions",
-      header: () => <Box className="text-center text-black">Actions</Box>,
+      header: () => (
+        <Box className="text-center text-black">{t("common.actions")}</Box>
+      ),
       cell: ({ row }) => {
         return (
           <Center className="space-x-2">
@@ -477,7 +515,7 @@ export const ClientManagementTable = () => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="mb-2">
-                  <p>Edit Client</p>
+                  <p>{t("clientManagement.editClient")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -494,7 +532,7 @@ export const ClientManagementTable = () => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="mb-2">
-                  <p>View Client</p>
+                  <p>{t("clientManagement.viewClient")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -511,7 +549,7 @@ export const ClientManagementTable = () => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="mb-2">
-                  <p>Grant portal access</p>
+                  <p>{t("clientManagement.grantPortalAccess")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -523,7 +561,10 @@ export const ClientManagementTable = () => {
                     variant="outline"
                     className="bg-[#A50403] border-none w-9 h-9 hover:bg-[#A50403]/80 cursor-pointer rounded-md "
                     onClick={() =>
-                      handleDeleteClient(row.original.id, row.original.name)
+                      handleDeleteClient(
+                        row.original.id,
+                        row.original.email || row.original.name,
+                      )
                     }
                     disabled={isDeleting}
                   >
@@ -535,7 +576,7 @@ export const ClientManagementTable = () => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="mb-2">
-                  <p>Delete Client</p>
+                  <p>{t("clientManagement.deleteClient")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -574,7 +615,9 @@ export const ClientManagementTable = () => {
       <Center className="py-12">
         <Box className="flex items-center justify-center p-8">
           <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
-          <Box className="ml-2 text-gray-600">Loading clients...</Box>
+          <Box className="ml-2 text-gray-600">
+            {t("clientManagement.loadingClients")}
+          </Box>
         </Box>
       </Center>
     );
@@ -585,8 +628,12 @@ export const ClientManagementTable = () => {
     return (
       <Center className="py-12">
         <Stack className="gap-4 items-center">
-          <p className="text-red-500">Error loading clients: {error.message}</p>
-          <Button onClick={() => refetch()}>Retry</Button>
+          <p className="text-red-500">
+            {t("clientManagement.errorLoading")} {error.message}
+          </p>
+          <Button onClick={() => refetch()}>
+            {t("clientManagement.retry")}
+          </Button>
         </Stack>
       </Center>
     );
@@ -632,7 +679,7 @@ export const ClientManagementTable = () => {
                 className="inline-block px-3 py-1 rounded-full text-xs font-semibold mt-1 mb-2"
                 style={{ background: "#F3F4F6", color: "#1797B9" }}
               >
-                {selectedClient.status}
+                {translateClientStatus(selectedClient.status)}
               </span>
             </Stack>
 
@@ -640,7 +687,7 @@ export const ClientManagementTable = () => {
             {selectedClient.socialMediaLinks && (
               <Box className="mt-6">
                 <span className="text-lg font-semibold text-gray-800 mb-2 block">
-                  Social Media
+                  {t("clientManagement.viewModal.socialMedia")}
                 </span>
                 <Box className="flex flex-wrap gap-3">
                   {(() => {
@@ -693,14 +740,14 @@ export const ClientManagementTable = () => {
                         })
                       ) : (
                         <Box className="text-center text-gray-500 text-sm">
-                          No social media links
+                          {t("clientManagement.viewModal.noSocialLinks")}
                         </Box>
                       );
                     } catch (err) {
                       console.error("Error parsing social media links:", err);
                       return (
                         <Box className="text-center text-gray-500 text-sm">
-                          Unable to load social media links
+                          {t("clientManagement.viewModal.loadSocialError")}
                         </Box>
                       );
                     }
@@ -716,7 +763,7 @@ export const ClientManagementTable = () => {
               Object.keys(selectedClient.customFields).length > 0 && (
                 <Box className="mt-6">
                   <span className="text-lg font-semibold text-gray-800 mb-2 block">
-                    Custom Fields
+                    {t("clientManagement.viewModal.customFields")}
                   </span>
                   <Box className="grid grid-cols-2 gap-4">
                     {customFieldsData.data.map((field) => {
@@ -727,7 +774,9 @@ export const ClientManagementTable = () => {
                       let displayValue = value;
                       if (field.type === "boolean") {
                         displayValue =
-                          value === "true" || value === true ? "Yes" : "No";
+                          value === "true" || value === true
+                            ? t("clientManagement.yes")
+                            : t("clientManagement.no");
                       } else if (field.type === "date" && value) {
                         try {
                           displayValue = new Date(value).toLocaleDateString();
@@ -766,12 +815,12 @@ export const ClientManagementTable = () => {
 
             <Box className="mt-6">
               <span className="text-lg font-semibold text-gray-800 mb-2 block">
-                Projects
+                {t("clientManagement.viewModal.projects")}
               </span>
               {!selectedClient.projects ||
               selectedClient.projects.length === 0 ? (
                 <Box className="text-center text-gray-500">
-                  No projects found
+                  {t("clientManagement.viewModal.noProjects")}
                 </Box>
               ) : (
                 <Stack className="gap-4">
@@ -786,13 +835,13 @@ export const ClientManagementTable = () => {
                         </span>
                         {project.status === "Completed" && (
                           <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">
-                            Completed
+                            {t("clientManagement.viewModal.completed")}
                           </span>
                         )}
                       </Flex>
                       <Flex className="items-center gap-2 mb-2">
                         <span className="text-xs font-medium text-gray-600">
-                          Status:
+                          {t("clientManagement.viewModal.statusLabel")}
                         </span>
                         <span
                           className="text-xs font-semibold"
@@ -803,12 +852,12 @@ export const ClientManagementTable = () => {
                                 : "#1797B9",
                           }}
                         >
-                          {project.status}
+                          {translateClientStatus(project.status)}
                         </span>
                       </Flex>
                       <Flex className="items-center gap-2 mb-2">
                         <span className="text-xs font-medium text-gray-600">
-                          Completion:
+                          {t("clientManagement.viewModal.completionLabel")}
                         </span>
                         <Box className="w-32 h-2 bg-gray-200 rounded">
                           <Box
@@ -838,7 +887,7 @@ export const ClientManagementTable = () => {
                           window.URL.revokeObjectURL(url);
                         }}
                       >
-                        Download Contract
+                        {t("clientManagement.viewModal.downloadContract")}
                       </Button>
                     </Box>
                   ))}
