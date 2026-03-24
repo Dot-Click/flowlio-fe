@@ -19,7 +19,10 @@ import {
   useEnable2FA,
 } from "@/hooks/useBetterAuthTwoFA";
 import { useUser } from "@/providers/user.provider";
-import { useUserProfile } from "@/hooks/useuserprofile";
+import {
+  useUserProfile,
+  getMergedProfileFormValues,
+} from "@/hooks/useuserprofile";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUpdateUserProfile } from "@/hooks/useupdateuserprofile";
@@ -80,19 +83,22 @@ export const ViewerSettingsHeader = () => {
   // Loading guard to avoid empty fields flash during refetch
   const isProfileReady = Boolean(userProfile?.data);
 
-  // Keep profile form in sync with latest user data
+  // Keep profile form in sync with latest user data (includes client CRM row for portal users)
   useEffect(() => {
     const u = userProfile?.data;
     if (u) {
-      if (u.image) {
-        setAvatarPreview(u.image);
+      const merged = getMergedProfileFormValues(u);
+      if (merged.image) {
+        setAvatarPreview(merged.image);
+      } else {
+        setAvatarPreview(userData?.user?.image || "/dashboard/1.svg");
       }
       profileForm.reset({
         avatar: undefined,
-        fullName: u.name ?? "",
-        email: u.email ?? "",
-        phone: u.phone ?? "",
-        address: u.address ?? "",
+        fullName: merged.fullName,
+        email: merged.email,
+        phone: merged.phone,
+        address: merged.address,
         paymentAlertNotifications:
           u.notificationPreferences?.paymentAlerts ?? true,
         invoiceRemindersNotifications:
@@ -101,7 +107,7 @@ export const ViewerSettingsHeader = () => {
           u.notificationPreferences?.projectActivityUpdates ?? true,
       });
     }
-  }, [userProfile?.data]);
+  }, [userProfile?.data, userData?.user?.image]);
 
   // Password Form
   const passwordChangeSchema = z

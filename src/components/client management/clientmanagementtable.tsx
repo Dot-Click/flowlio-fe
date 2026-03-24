@@ -213,99 +213,110 @@ export const ClientManagementTable = () => {
         </Box>
       ),
     },
-
     {
-      id: "social",
+      accessorKey: "email",
       header: () => (
-        <Box className="text-center text-black">{t("table.social")}</Box>
+        <Box className="text-black text-center">{t("table.email")}</Box>
       ),
-      cell: ({ row }) => {
-        const socialLinks = row.original.socialMediaLinks
-          ? typeof row.original.socialMediaLinks === "string"
-            ? JSON.parse(row.original.socialMediaLinks)
-            : row.original.socialMediaLinks
-          : [];
-
-        const socialIcons: Record<string, any> = {
-          instagram: FaInstagram,
-          twitter: FaTwitter,
-          facebook: FaFacebook,
-          linkedin: FaLinkedin,
-          youtube: FaYoutube,
-          tiktok: FaTiktok,
-          snapchat: FaSnapchat,
-          pinterest: FaPinterest,
-        };
-
-        const socialColors: Record<string, string> = {
-          instagram: "#E4405F",
-          twitter: "#1DA1F2",
-          facebook: "#1877F2",
-          linkedin: "#0077B5",
-          youtube: "#FF0000",
-          tiktok: "#000000",
-          snapchat: "#FFFC00",
-          pinterest: "#BD081C",
-        };
-
-        return (
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                className="w-8 h-8 p-0 flex items-center justify-center cursor-pointer"
-              >
-                <Ellipsis className="text-gray-600" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-64">
-              <Box className="text-sm font-semibold mb-3">
-                {t("clientManagement.contactSocial")}
-              </Box>
-              <Box className="mb-2">
-                <span className="font-medium text-xs">
-                  {t("clientManagement.emailLabel")}
-                </span>{" "}
-                <span className="text-xs">{row.original.email}</span>
-              </Box>
-              <Box className="mb-3">
-                <span className="font-medium text-xs">
-                  {t("clientManagement.phoneLabel")}
-                </span>{" "}
-                <span className="text-xs">
-                  {row.original.phone || t("clientManagement.notAvailable")}
-                </span>
-              </Box>
-              {Array.isArray(socialLinks) && socialLinks.length > 0 && (
-                <>
-                  <Box className="text-sm font-semibold mb-2 mt-3 pt-3 border-t">
-                    {t("clientManagement.socialMedia")}
-                  </Box>
-                  <Box className="flex flex-wrap gap-2">
-                    {socialLinks.map((link: any, index: number) => {
-                      const Icon = socialIcons[link.type] || FaInstagram;
-                      const color = socialColors[link.type] || "#000000";
-                      return (
-                        <a
-                          key={index}
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 p-1.5 border border-gray-200 rounded hover:bg-gray-50 transition-colors"
-                          title={link.type}
-                        >
-                          <Icon className="w-4 h-4" style={{ color }} />
-                        </a>
-                      );
-                    })}
-                  </Box>
-                </>
-              )}
-            </PopoverContent>
-          </Popover>
-        );
-      },
+      cell: ({ row }) => (
+        <Box className="captialize text-center">
+          {row.original.email || t("clientManagement.notAvailable")}
+        </Box>
+      ),
     },
+
+    // {
+    //   id: "social",
+    //   header: () => (
+    //     <Box className="text-center text-black">{t("table.social")}</Box>
+    //   ),
+    //   cell: ({ row }) => {
+    //     const socialLinks = row.original.socialMediaLinks
+    //       ? typeof row.original.socialMediaLinks === "string"
+    //         ? JSON.parse(row.original.socialMediaLinks)
+    //         : row.original.socialMediaLinks
+    //       : [];
+
+    //     const socialIcons: Record<string, any> = {
+    //       instagram: FaInstagram,
+    //       twitter: FaTwitter,
+    //       facebook: FaFacebook,
+    //       linkedin: FaLinkedin,
+    //       youtube: FaYoutube,
+    //       tiktok: FaTiktok,
+    //       snapchat: FaSnapchat,
+    //       pinterest: FaPinterest,
+    //     };
+
+    //     const socialColors: Record<string, string> = {
+    //       instagram: "#E4405F",
+    //       twitter: "#1DA1F2",
+    //       facebook: "#1877F2",
+    //       linkedin: "#0077B5",
+    //       youtube: "#FF0000",
+    //       tiktok: "#000000",
+    //       snapchat: "#FFFC00",
+    //       pinterest: "#BD081C",
+    //     };
+
+    //     return (
+    //       <Popover>
+    //         <PopoverTrigger asChild>
+    //           <Button
+    //             variant="ghost"
+    //             className="w-8 h-8 p-0 flex items-center justify-center cursor-pointer"
+    //           >
+    //             <Ellipsis className="text-gray-600" />
+    //           </Button>
+    //         </PopoverTrigger>
+    //         <PopoverContent className="w-64">
+    //           <Box className="text-sm font-semibold mb-3">
+    //             {t("clientManagement.contactSocial")}
+    //           </Box>
+    //           <Box className="mb-2">
+    //             <span className="font-medium text-xs">
+    //               {t("clientManagement.emailLabel")}
+    //             </span>{" "}
+    //             <span className="text-xs">{row.original.email}</span>
+    //           </Box>
+    //           <Box className="mb-3">
+    //             <span className="font-medium text-xs">
+    //               {t("clientManagement.phoneLabel")}
+    //             </span>{" "}
+    //             <span className="text-xs">
+    //               {row.original.phone || t("clientManagement.notAvailable")}
+    //             </span>
+    //           </Box>
+    //           {Array.isArray(socialLinks) && socialLinks.length > 0 && (
+    //             <>
+    //               <Box className="text-sm font-semibold mb-2 mt-3 pt-3 border-t">
+    //                 {t("clientManagement.socialMedia")}
+    //               </Box>
+    //               <Box className="flex flex-wrap gap-2">
+    //                 {socialLinks.map((link: any, index: number) => {
+    //                   const Icon = socialIcons[link.type] || FaInstagram;
+    //                   const color = socialColors[link.type] || "#000000";
+    //                   return (
+    //                     <a
+    //                       key={index}
+    //                       href={link.url}
+    //                       target="_blank"
+    //                       rel="noopener noreferrer"
+    //                       className="flex items-center gap-1 p-1.5 border border-gray-200 rounded hover:bg-gray-50 transition-colors"
+    //                       title={link.type}
+    //                     >
+    //                       <Icon className="w-4 h-4" style={{ color }} />
+    //                     </a>
+    //                   );
+    //                 })}
+    //               </Box>
+    //             </>
+    //           )}
+    //         </PopoverContent>
+    //       </Popover>
+    //     );
+    //   },
+    // },
 
     {
       accessorKey: "businessIndustry",
@@ -397,7 +408,8 @@ export const ClientManagementTable = () => {
 
         return (
           <Center>
-            <Select
+            <Select 
+              
               value={status}
               onValueChange={(newStatus) =>
                 handleStatusChange(row.original.id, newStatus)
@@ -405,18 +417,18 @@ export const ClientManagementTable = () => {
               disabled={isUpdatingStatus}
             >
               <SelectTrigger
-                className={`rounded-md capitalize w-38 h-12 gap-2 border justify-center items-center ${currentStyle.text} cursor-pointer hover:opacity-90`}
+                className={`rounded-md capitalize w-32 h-12 gap-2 border justify-center items-center ${currentStyle.text} cursor-pointer hover:opacity-90`}
               >
                 <SelectValue>
                   <Center className="gap-2">
                     <Flex
                       className={`w-2 h-2 items-start rounded-full ${currentStyle.dot}`}
                     />
-                    <h1>
+                    <h2 className="text-sm">
                       {status
                         ? translateClientStatus(status)
                         : t("clientManagement.unknown")}
-                    </h1>
+                    </h2>
                   </Center>
                 </SelectValue>
               </SelectTrigger>

@@ -11,7 +11,7 @@ import type { NavItem } from "@/components/admin/appsidebar";
 import { BadgeDollarSign } from "lucide-react";
 import { FolderOpen, ListTodo, FileText } from "lucide-react";
 
-// Client portal: three sections – Project Management, Task Management, Invoices
+// Client portal – project / tasks / invoices / media + self-service profile (PUT /user/profile)
 const clientNavItems: NavItem[] = [
   {
     title: "projectManagement",
@@ -32,6 +32,11 @@ const clientNavItems: NavItem[] = [
     title: "mediaCenter",
     url: "/clients/media-center",
     icon: React.createElement(TbReportSearch),
+  },
+  {
+    title: "settings",
+    url: "/clients/settings",
+    icon: React.createElement(IoSettingsOutline),
   },
 ]; 
 

@@ -177,13 +177,12 @@ const ViewerAiAssistantPage = lazy(() =>
 const ClientManagementPage = lazy(
   () => import("./pages/clientmanagement.page"),
 );
-const CreateClient = lazy(() =>
-  import("./components/client management/createclient").then((module) => ({
-    default: module.CreateClient,
-  })),
-);
+const CreateClientPage = lazy(() => import("./pages/createclient.page"));
 const SubscriptionsPage = lazy(() => import("./pages/subscriptions.page"));
 const ClientMediaCenterPage = lazy(() => import("./pages/clientmediacenter.page"));
+const ClientPortalSettingsPage = lazy(
+  () => import("./pages/clientportalsettings.page"),
+);
 
 const ClientProjectsPage = lazy(() => import("./pages/clientprojects.page"));
 const ClientTasksPage = lazy(() => import("./pages/clienttasks.page"));
@@ -364,7 +363,7 @@ const AppRoutes = () => {
         <Route
           element={
             <AdminManagerOrOrgOwnerRoute>
-              <LazyWrapper component={CreateClient} />
+              <LazyWrapper component={CreateClientPage} />
             </AdminManagerOrOrgOwnerRoute>
           }
           path="client-management/create-client"
@@ -474,6 +473,10 @@ const AppRoutes = () => {
         <Route
           path="media-center"
           element={<LazyWrapper component={ClientMediaCenterPage} />}
+        />
+        <Route
+          path="settings"
+          element={<LazyWrapper component={ClientPortalSettingsPage} />}
         />
       </Route>
 
