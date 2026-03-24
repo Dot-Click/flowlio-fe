@@ -11,6 +11,8 @@ export interface MediaCenterItem {
   taskId: string | null;
   taskName?: string;
   clientId: string;
+  /** Present when API joins client name for display/filtering */
+  clientName?: string | null;
   uploadedBy: string;
   createdAt: string;
   latestVersion: number;

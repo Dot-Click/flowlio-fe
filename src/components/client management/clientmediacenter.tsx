@@ -23,25 +23,12 @@ import {
 import { format } from "date-fns";
 import { useFetchProjects } from "@/hooks/usefetchprojects";
 import { Skeleton } from "../ui/skeleton";
-import { useFetchClientMedia } from "@/hooks/usefetchclientmedia";
+import {
+  useFetchClientMedia,
+  type MediaCenterItem,
+} from "@/hooks/usefetchclientmedia";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-
-interface MediaItem {
-  fileId: string;
-  fileName: string;
-  fileType: string;
-  fileUrl: string;
-  projectId: string;
-  projectName: string;
-  taskId: string | null;
-  taskName?: string | null;
-  clientId: string | null;
-  clientName: string | null;
-  uploadedBy: string;
-  createdAt: string;
-  latestVersion: number;
-}
 
 interface Project {
   id: string;
@@ -65,7 +52,7 @@ export const ClientMediaCenter: React.FC = () => {
     searchTerm: searchTerm || undefined,
   });
 
-  const mediaItems: MediaItem[] = mediaResponse?.data ?? [];
+  const mediaItems: MediaCenterItem[] = mediaResponse?.data ?? [];
 
   // Filter and sort media items
   const filteredMedia = useMemo(() => {
@@ -160,7 +147,7 @@ export const ClientMediaCenter: React.FC = () => {
     return "bg-gray-600 text-white border-gray-400/50";
   };
 
-  const handleDownload = async (file: MediaItem): Promise<void> => {
+  const handleDownload = async (file: MediaCenterItem): Promise<void> => {
     const toastId = toast.loading(t("common.loading"));
 
     try {
@@ -226,7 +213,7 @@ export const ClientMediaCenter: React.FC = () => {
     }
   };
 
-  const handleView = (file: MediaItem): void => {
+  const handleView = (file: MediaCenterItem): void => {
     window.open(file.fileUrl, "_blank");
   };
 
