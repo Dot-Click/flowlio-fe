@@ -2,7 +2,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Center } from "@/components/ui/center";
 import { Box } from "../ui/box";
 import { Flex } from "../ui/flex";
-import { ReusableTable } from "../reusable/reusabletable";
+import { DraggableTable } from "../reusable/draggabletable";
 import {
   Tooltip,
   TooltipContent,
@@ -33,6 +33,7 @@ import { Stack } from "../ui/stack";
 import { useFetchOrganizationClients } from "@/hooks/usefetchclients";
 import { useDeleteClient } from "@/hooks/usedeleteclient";
 import { useUpdateClient } from "@/hooks/useupdateclient";
+import { useBulkUpdateClientPositions } from "@/hooks/useBulkUpdateClientPositions";
 import { useFetchCustomFields } from "@/hooks/usecustomfields";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
@@ -60,6 +61,7 @@ const mockData: Data[] = [
     businessIndustry: "Technology",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    position: 0,
   },
 ];
 
@@ -92,12 +94,14 @@ export type Data = {
   projects?: Project[];
   socialMediaLinks?: string; // JSON string
   customFields?: Record<string, any>;
+  position?: number; // Order field for drag-and-drop
 };
 
 export const ClientManagementTable = () => {
   const { t } = useTranslation();
   const props = useGeneralModalDisclosure();
   const [selectedClient, setSelectedClient] = useState<Data | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   // const [grantAccessClient, setGrantAccessClient] = useState<Data | null>(null);
   const navigate = useNavigate();
 
@@ -118,6 +122,8 @@ export const ClientManagementTable = () => {
   const { mutate: deleteClient, isPending: isDeleting } = useDeleteClient();
   const { mutate: updateClient, isPending: isUpdatingStatus } =
     useUpdateClient();
+  const { mutate: bulkUpdatePositions, isPending: isUpdatingPositions } =
+    useBulkUpdateClientPositions();
 
   const handleStatusChange = (clientId: string, newStatus: string) => {
     updateClient(
@@ -619,7 +625,36 @@ export const ClientManagementTable = () => {
           : JSON.stringify(client.socialMediaLinks)
         : undefined,
       customFields: client.customFields || {},
+      position: client.position || 0,
     })) || mockData;
+
+  // Handle reorder completion
+  const handleReorderComplete = (
+    reorderedClients: Data[],
+    updates: Array<{ id: string; position: number }>
+  ) => {
+    // Update positions via API
+    bulkUpdatePositions(
+      updates.map((update) => ({
+        clientId: update.id,
+        position: update.position,
+      })),
+      {
+        onSuccess: () => {
+          toast.success(t("clientManagement.toastReordered", { defaultValue: "Clients reordered successfully" }));
+          setIsDragging(false);
+        },
+        onError: (error: any) => {
+          toast.error(
+            error?.response?.data?.error ||
+              t("clientManagement.toastReorderFailed", { defaultValue: "Failed to reorder clients" }),
+          );
+          setIsDragging(false);
+          refetch(); // Refetch to restore original order on error
+        },
+      }
+    );
+  };
 
   // Show loading state
   if (isLoading) {
@@ -665,11 +700,15 @@ export const ClientManagementTable = () => {
           }}
         />
       )} */}
-      <ReusableTable
+      <DraggableTable
         data={tableData}
         columns={columns}
-        // searchInput={false}
         enablePaymentLinksCalender={true}
+        onReorderComplete={handleReorderComplete}
+        onDragStart={() => setIsDragging(true)}
+        onDragEnd={() => setIsDragging(false)}
+        isReorderingDisabled={isUpdatingPositions}
+        dragHandleCell={true}
       />
 
       {/* Edit Client Modal */}

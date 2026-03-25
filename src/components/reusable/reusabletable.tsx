@@ -277,21 +277,42 @@ export const ReusableTable = <TData,>({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              table.getRowModel().rows.map((row) => {
+                const SortableRowWrapper = meta?.SortableRowWrapper;
+                const isSortingActive = meta?.isSortingActive;
+                const shouldDisableDrag = meta?.shouldDisableDrag;
+                
+                const rowContent = row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(
+                      cell.column.columnDef.cell,
+                      cell.getContext()
+                    )}
+                  </TableCell>
+                ));
+
+                if (SortableRowWrapper && meta?.sortableContext) {
+                  return (
+                    <SortableRowWrapper
+                      key={row.id}
+                      id={row.original.id}
+                      isSortingActive={isSortingActive}
+                      showDragHandle={false}
+                    >
+                      {rowContent}
+                    </SortableRowWrapper>
+                  );
+                }
+
+                return (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {rowContent}
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell
