@@ -62,12 +62,14 @@ import { useFetchCustomFields } from "@/hooks/usecustomfields";
 
 import { useUser } from "@/providers/user.provider";
 import { useTranslation } from "react-i18next";
+import { canViewInternalProjectFinancials } from "@/utils/projectFinancialAccess";
 
 export const ProjectView = () => {
   const { t } = useTranslation();
   const { data: userData } = useUser();
   const user = userData?.user;
   const isClient = user?.role === "client";
+  const showProjectFinancials = canViewInternalProjectFinancials(user);
 
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -790,12 +792,14 @@ export const ProjectView = () => {
             </CardContent>
           </Card>
 
-          {/* Financial Tracking - Project Expenses */}
-          <ProjectExpenses
-            projectId={project.id}
-            budget={(project as any).budget || 0}
-            isClient={isClient}
-          />
+          {/* Financial tracking: org owner / platform admins only — never clients */}
+          {showProjectFinancials && (
+            <ProjectExpenses
+              projectId={project.id}
+              budget={(project as any).budget || 0}
+              isClient={isClient}
+            />
+          )}
         </Box>
 
         {/* Right Column - Sidebar */}

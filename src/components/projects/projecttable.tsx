@@ -59,17 +59,21 @@ import { ProjectFilter } from "./ProjectFilter";
 import { useFetchCustomFields } from "@/hooks/usecustomfields";
 import { useUpdateProject } from "@/hooks/useupdateproject";
 import { ProjectExpenses } from "./ProjectExpenses";
+import { useUser } from "@/providers/user.provider";
+import { canViewInternalProjectFinancials } from "@/utils/projectFinancialAccess";
 
 // Use the Project interface from the hook
 export type Data = Project & { customFields?: Record<string, any> };
 
 export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
   const { t } = useTranslation();
+  const { data: userData } = useUser();
+  const showFinancials =
+    canViewInternalProjectFinancials(userData?.user) && !isClient;
   const orgProjects = useFetchProjects();
   const projectsData = orgProjects.data;
   const isLoading = orgProjects.isLoading;
   const error = orgProjects.error;
-  console.log("Fetched projects data:", isClient);
 
   const queryClient = useQueryClient();
 
@@ -607,25 +611,27 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
               </Tooltip>
             </TooltipProvider>
 
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="bg-emerald-600 hover:bg-emerald-600/80 rounded-md border-none cursor-pointer"
-                    onClick={() => {
-                      setActiveProjectForExpenses(row.original);
-                      setExpenseModalOpen(true);
-                    }}
-                  >
-                    <DollarSign className="text-white size-5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="mb-2">
-                  <p>{t("projects.projectExpenses")}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            {showFinancials && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="bg-emerald-600 hover:bg-emerald-600/80 rounded-md border-none cursor-pointer"
+                      onClick={() => {
+                        setActiveProjectForExpenses(row.original);
+                        setExpenseModalOpen(true);
+                      }}
+                    >
+                      <DollarSign className="text-white size-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="mb-2">
+                    <p>{t("projects.projectExpenses")}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -866,23 +872,25 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
         </DialogContent>
       </Dialog>
 
-      {/* Expenses Modal */}
-      <GeneralModal
-        open={expenseModalOpen}
-        onOpenChange={setExpenseModalOpen}
-        contentProps={{ className: "max-w-3xl overflow-hidden p-0" }}
-      >
-        {activeProjectForExpenses && (
-          <Box className="p-0">
-            <ProjectExpenses
-              projectId={activeProjectForExpenses.id}
-              budget={(activeProjectForExpenses as any).budget || 0}
-              isClient={isClient}
-              isModal={true}
-            />
-          </Box>
-        )}
-      </GeneralModal>
+      {/* Expenses Modal — org owner / admins only */}
+      {showFinancials && (
+        <GeneralModal
+          open={expenseModalOpen}
+          onOpenChange={setExpenseModalOpen}
+          contentProps={{ className: "max-w-3xl overflow-hidden p-0" }}
+        >
+          {activeProjectForExpenses && (
+            <Box className="p-0">
+              <ProjectExpenses
+                projectId={activeProjectForExpenses.id}
+                budget={(activeProjectForExpenses as any).budget || 0}
+                isClient={isClient}
+                isModal={true}
+              />
+            </Box>
+          )}
+        </GeneralModal>
+      )}
     </>
   );
 };
