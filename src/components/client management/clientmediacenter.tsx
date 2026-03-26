@@ -29,6 +29,7 @@ import {
 } from "@/hooks/usefetchclientmedia";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { useUser } from "@/providers/user.provider";
 
 interface Project {
   id: string;
@@ -41,6 +42,9 @@ export const ClientMediaCenter: React.FC = () => {
   const [projectFilter, setProjectFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("newest");
 
+  const { data: userData } = useUser();
+  const clientId = userData?.user?.clientId;
+
   // Fetch projects
   const { data: projectsResponse, isLoading: projectsLoading } =
     useFetchProjects();
@@ -50,6 +54,7 @@ export const ClientMediaCenter: React.FC = () => {
   const { data: mediaResponse, isLoading: mediaLoading } = useFetchClientMedia({
     projectId: projectFilter === "all" ? undefined : projectFilter,
     searchTerm: searchTerm || undefined,
+    clientId: clientId || undefined,
   });
 
   const mediaItems: MediaCenterItem[] = mediaResponse?.data ?? [];
