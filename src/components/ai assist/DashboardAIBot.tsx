@@ -81,12 +81,12 @@ export const DashboardAIBot = () => {
     {
       id: "create-client",
       title: "Create Client",
-      description: "Create clients from natural language input",
+      description: "Create clients (requires Name, Email, Password)",
       icon: <UserPlus className="w-5 h-5" />,
       action: () => {
         setActiveOption("create-client");
         addBotMessage(
-          "Great! Let me help you create a client. Please describe the client details:"
+          "Great! Let me help you create a client. Please describe the client details (Name, Email, and Password are required):"
         );
       },
       available: true,
@@ -581,6 +581,7 @@ export const DashboardAIBot = () => {
 {
   "name": "client name",
   "email": "email@example.com",
+  "password": "secure password or null",
   "phone": "phone number or null",
   "businessIndustry": "industry or null",
   "address": "address or null"
@@ -627,6 +628,7 @@ Description: ${userInput}`,
   const handleClientGenerated = async (clientData: {
     name: string;
     email: string;
+    password?: string;
     phone?: string;
     businessIndustry?: string;
     address?: string;
@@ -638,12 +640,18 @@ Description: ${userInput}`,
       return;
     }
 
+    // Generate a secure random password if none provided
+    const generatedPassword = clientData.password || 
+      Math.random().toString(36).slice(-10) + 
+      Math.random().toString(36).toUpperCase().slice(-2) + "!";
+
     addBotMessage("⏳ Creating client... Please wait.");
 
     try {
       const result = await createClient.mutateAsync({
         name: clientData.name,
         email: clientData.email,
+        password: generatedPassword,
         phone: clientData.phone,
         businessIndustry: clientData.businessIndustry,
         address: clientData.address,
@@ -652,11 +660,11 @@ Description: ${userInput}`,
       addBotMessage(
         `✅ Client Created Successfully!\n\n👤 Name: ${
           result.data.name
-        }\n📧 Email: ${result.data.email}\n${
+        }\n📧 Email: ${result.data.email}\n🔑 Temporary Password: ${generatedPassword}\n${
           result.data.phone ? `📞 Phone: ${result.data.phone}\n` : ""
         }Status: ${
           result.data.status
-        }\n\nYour client has been added to the system.`
+        }\n\nYour client has been added to the system and can now access their portal.`
       );
 
       // Reset after success
