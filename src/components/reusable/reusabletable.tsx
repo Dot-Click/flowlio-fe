@@ -280,7 +280,7 @@ export const ReusableTable = <TData,>({
               table.getRowModel().rows.map((row) => {
                 const SortableRowWrapper = meta?.SortableRowWrapper;
                 const isSortingActive = meta?.isSortingActive;
-                const shouldDisableDrag = meta?.shouldDisableDrag;
+
                 
                 const rowContent = row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
@@ -295,7 +295,7 @@ export const ReusableTable = <TData,>({
                   return (
                     <SortableRowWrapper
                       key={row.id}
-                      id={row.original.id}
+                      id={(row.original as any).id}
                       isSortingActive={isSortingActive}
                       showDragHandle={false}
                     >

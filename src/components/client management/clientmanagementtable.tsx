@@ -22,8 +22,7 @@ import {
   FaSnapchat,
   FaPinterest,
 } from "react-icons/fa";
-import { Ellipsis, Eye, Pencil, KeyRound } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Eye, Pencil, KeyRound } from "lucide-react";
 import {
   GeneralModal,
   useGeneralModalDisclosure,
@@ -101,7 +100,7 @@ export const ClientManagementTable = () => {
   const { t } = useTranslation();
   const props = useGeneralModalDisclosure();
   const [selectedClient, setSelectedClient] = useState<Data | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
+
   // const [grantAccessClient, setGrantAccessClient] = useState<Data | null>(null);
   const navigate = useNavigate();
 
@@ -630,7 +629,7 @@ export const ClientManagementTable = () => {
 
   // Handle reorder completion
   const handleReorderComplete = (
-    reorderedClients: Data[],
+    _reorderedClients: Data[],
     updates: Array<{ id: string; position: number }>
   ) => {
     // Update positions via API
@@ -642,14 +641,12 @@ export const ClientManagementTable = () => {
       {
         onSuccess: () => {
           toast.success(t("clientManagement.toastReordered", { defaultValue: "Clients reordered successfully" }));
-          setIsDragging(false);
         },
         onError: (error: any) => {
           toast.error(
             error?.response?.data?.error ||
               t("clientManagement.toastReorderFailed", { defaultValue: "Failed to reorder clients" }),
           );
-          setIsDragging(false);
           refetch(); // Refetch to restore original order on error
         },
       }
@@ -705,8 +702,8 @@ export const ClientManagementTable = () => {
         columns={columns}
         enablePaymentLinksCalender={true}
         onReorderComplete={handleReorderComplete}
-        onDragStart={() => setIsDragging(true)}
-        onDragEnd={() => setIsDragging(false)}
+        onDragStart={() => {}}
+        onDragEnd={() => {}}
         isReorderingDisabled={isUpdatingPositions}
         dragHandleCell={true}
       />
