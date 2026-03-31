@@ -59,7 +59,7 @@ const viewerNavItems: NavItem[] = [
   },
   {
     url: "/dashboard/support",
-    title: "supporttickets",
+    title: "supportTickets",
     icon: React.createElement(MessageCircleQuestion),
   },
   {
@@ -90,7 +90,7 @@ const operatorNavItems: NavItem[] = [
   },
   {
     url: "/dashboard/task-management",
-    title: "tasksmanagement",
+    title: "tasksManagement",
     icon: React.createElement(TaskManagementIcon),
   },
   {
@@ -100,7 +100,7 @@ const operatorNavItems: NavItem[] = [
   },
   {
     url: "/dashboard/support",
-    title: "supporttickets",
+    title: "supportTickets",
     icon: React.createElement(MessageCircleQuestion),
   },
   {
@@ -134,7 +134,7 @@ const userNavItems: NavItem[] = [
   },
   {
     url: "/dashboard/task-management",
-    title: "tasksmanagement",
+    title: "tasksManagement",
     icon: React.createElement(TaskManagementIcon),
   },
   {
@@ -149,17 +149,17 @@ const userNavItems: NavItem[] = [
   },
   {
     url: "/dashboard/ai-assist",
-    title: "aiassistance",
+    title: "aiAssistance",
     icon: React.createElement(LuWandSparkles),
   },
   {
     url: "/dashboard/subscription",
-    title: "mysubscriptions",
+    title: "mySubscriptions",
     icon: React.createElement(BadgeDollarSign),
   },
   {
     url: "/dashboard/support",
-    title: "supporttickets",
+    title: "supportTickets",
     icon: React.createElement(MessageCircleQuestion),
   },
   {
@@ -188,17 +188,17 @@ const userOrgOwnerNavItems: NavItem[] = [
   },
   {
     url: "/dashboard/task-management",
-    title: "tasksmanagement",
+    title: "tasksManagement",
     icon: React.createElement(TaskManagementIcon),
   },
   {
     url: "/dashboard/user-management",
-    title: "usermanagement",
+    title: "userManagement",
     icon: React.createElement(LuUsers),
   },
   {
     url: "/dashboard/client-management",
-    title: "clinetmanagement",
+    title: "clientManagement",
     icon: React.createElement(UserPen),
   },
   {
@@ -218,12 +218,12 @@ const userOrgOwnerNavItems: NavItem[] = [
   },
   {
     url: "/dashboard/ai-assist",
-    title: "aiassistance",
+    title: "aiAssistance",
     icon: React.createElement(LuWandSparkles),
   },
   {
     url: "/dashboard/payment-links",
-    title: "paymentlinks",
+    title: "paymentLinks",
     icon: React.createElement(TbReportSearch),
   },
   {
@@ -233,12 +233,12 @@ const userOrgOwnerNavItems: NavItem[] = [
   },
   {
     url: "/dashboard/subscription",
-    title: "mysubscriptions",
+    title: "mySubscriptions",
     icon: React.createElement(BadgeDollarSign),
   },
   {
     url: "/dashboard/support",
-    title: "supporttickets",
+    title: "supportTickets",
     icon: React.createElement(MessageCircleQuestion),
   },
   {
@@ -268,17 +268,17 @@ const subAdminNavItems: NavItem[] = [
   },
   {
     url: "/dashboard/task-management",
-    title: "tasksmanagement",
+    title: "tasksManagement",
     icon: React.createElement(TaskManagementIcon),
   },
   {
     url: "/dashboard/user-management",
-    title: "usermanagement",
+    title: "userManagement",
     icon: React.createElement(LuUsers),
   },
   {
     url: "/dashboard/client-management",
-    title: "clinetmanagement",
+    title: "clientManagement",
     icon: React.createElement(UserPen),
   },
   {
@@ -289,12 +289,12 @@ const subAdminNavItems: NavItem[] = [
 
   {
     url: "/dashboard/ai-assist",
-    title: "aiassistance",
+    title: "aiAssistance",
     icon: React.createElement(LuWandSparkles),
   },
   {
     url: "/dashboard/payment-links",
-    title: "paymentlinks",
+    title: "paymentLinks",
     icon: React.createElement(TbReportSearch),
   },
   {
@@ -314,7 +314,7 @@ const subAdminNavItems: NavItem[] = [
   },
   {
     url: "/dashboard/support",
-    title: "supporttickets",
+    title: "supportTickets",
     icon: React.createElement(MessageCircleQuestion),
   },
   {
@@ -344,17 +344,17 @@ const superAdminNavItems: NavItem[] = [
   },
   {
     url: "/dashboard/task-management",
-    title: "tasksmanagement",
+    title: "tasksManagement",
     icon: React.createElement(TaskManagementIcon),
   },
   {
     url: "/dashboard/user-management",
-    title: "usermanagement",
+    title: "userManagement",
     icon: React.createElement(LuUsers),
   },
   {
     url: "/dashboard/client-management",
-    title: "clinetmanagement",
+    title: "clientManagement",
     icon: React.createElement(UserPen),
   },
   {
@@ -369,12 +369,12 @@ const superAdminNavItems: NavItem[] = [
   },
   {
     url: "/dashboard/ai-assist",
-    title: "aiassistance",
+    title: "aiAssistance",
     icon: React.createElement(LuWandSparkles),
   },
   {
     url: "/dashboard/payment-links",
-    title: "paymentlinks",
+    title: "paymentLinks",
     icon: React.createElement(TbReportSearch),
   },
   {
@@ -384,12 +384,12 @@ const superAdminNavItems: NavItem[] = [
   },
   {
     url: "/dashboard/subscription",
-    title: "mysubscriptions",
+    title: "mySubscriptions",
     icon: React.createElement(TbInvoice),
   },
   {
     url: "/dashboard/support",
-    title: "supporttickets",
+    title: "supportTickets",
     icon: React.createElement(MessageCircleQuestion),
   },
   // {
@@ -406,7 +406,7 @@ const superAdminNavItems: NavItem[] = [
 
 // User as organization manager: same as owner but without User Management
 const userOrgManagerNavItems: NavItem[] = userOrgOwnerNavItems.filter(
-  (item) => item.title !== "usermanagement",
+  (item) => item.title !== "userManagement",
 );
 
 /**

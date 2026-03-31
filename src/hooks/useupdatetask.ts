@@ -88,6 +88,9 @@ export const useUpdateTask = () => {
         queryKey: ["organization-weekly-hours-tracked"],
       });
       queryClient.invalidateQueries({
+        queryKey: ["team-productivity"],
+      });
+      queryClient.invalidateQueries({
         queryKey: ["organization-active-projects"],
       });
 
@@ -143,6 +146,9 @@ export const useUpdateTaskStatus = () => {
       });
       queryClient.invalidateQueries({
         queryKey: ["organization-weekly-hours-tracked"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["team-productivity"],
       });
       queryClient.invalidateQueries({
         queryKey: ["organization-active-projects"],

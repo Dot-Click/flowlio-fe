@@ -23,6 +23,7 @@ import Img1 from "/dashboard/prostat1.svg";
 import Img2 from "/dashboard/prostat2.svg";
 import Img3 from "/dashboard/projstat3.svg";
 import { DemoPasswordChangeModal } from "@/components/dempasswordchangemodal";
+import { TeamProductivityChart } from "@/components/admin/dashboard/barchart/teamproductivitychart";
 import { useState, useEffect } from "react";
 import { useUserProfile } from "@/hooks/useuserprofile";
 import { useQueryClient } from "@tanstack/react-query";
@@ -127,6 +128,12 @@ const DashboardPage = () => {
         <Stack className="w-full gap-3">
           <BarChartComponent />
           <OngoingTasks />
+          {(userProfile?.data?.role === "superadmin" ||
+            userProfile?.data?.role === "subadmin" ||
+            userProfile?.data?.isOrganizationOwner ||
+            userProfile?.data?.isOrganizationManager) && (
+            <TeamProductivityChart />
+          )}
         </Stack>
 
         <Stack className="max-[950px]:w-full items-start gap-3">

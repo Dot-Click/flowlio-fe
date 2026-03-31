@@ -20,52 +20,52 @@ import { useUser } from "@/providers/user.provider";
 
 export const navItems: NavItem[] = [
   {
-    title: "Dashboard",
+    title: "dashboard",
     url: "/superadmin",
     icon: <SquareKanban />,
   },
   {
-    title: "Companies",
+    title: "companies",
     url: "/superadmin/companies",
     icon: <Building />,
   },
   {
-    title: "Sub Admin",
+    title: "subAdmin",
     url: "/superadmin/sub-admin",
     icon: <User />,
   },
   {
-    title: "Users",
+    title: "users",
     url: "/superadmin/users",
     icon: <Users />,
   },
   {
-    title: "Subscriptions",
+    title: "subscriptions",
     url: "/superadmin/subscriptions",
     icon: <BadgeCent />,
   },
   {
-    title: "Newsletter",
+    title: "newsletter",
     url: "/superadmin/newsletter",
     icon: <Mail />,
   },
   {
-    title: "Demo Accounts",
+    title: "demoAccounts",
     url: "/superadmin/demo-accounts",
     icon: <FlaskConical />,
   },
   {
-    title: "Support Tickets",
+    title: "supportTickets",
     url: "/superadmin/support-tickets",
     icon: <MessageCircleQuestion />,
   },
   {
-    title: "Notifications",
+    title: "notifications",
     url: "/superadmin/notifications",
     icon: <Bell />,
   },
   {
-    title: "Settings",
+    title: "settings",
     url: "/superadmin/settings",
     icon: <Settings />,
   },

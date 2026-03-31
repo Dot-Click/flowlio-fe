@@ -75,6 +75,9 @@ export const useCreateTask = () => {
         queryKey: ["organization-weekly-hours-tracked"],
       });
       queryClient.invalidateQueries({
+        queryKey: ["team-productivity"],
+      });
+      queryClient.invalidateQueries({
         queryKey: ["organization-active-projects"],
       });
 
