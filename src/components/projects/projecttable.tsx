@@ -103,7 +103,8 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
     name: string;
   } | null>(null);
   const [expenseModalOpen, setExpenseModalOpen] = useState(false);
-  const [activeProjectForExpenses, setActiveProjectForExpenses] = useState<Project | null>(null);
+  const [activeProjectForExpenses, setActiveProjectForExpenses] =
+    useState<Project | null>(null);
 
   // API hooks for comments
   const { data: commentsData, isLoading: commentsLoading } =
@@ -373,7 +374,9 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
     },
     {
       accessorKey: "budget",
-      header: () => <Box className="text-center text-black">{t("projects.budget")}</Box>,
+      header: () => (
+        <Box className="text-center text-black">{t("projects.budget")}</Box>
+      ),
       cell: ({ row }) => {
         const budget = (row.original as any).budget;
         return (
@@ -387,7 +390,9 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
     },
     {
       accessorKey: "visibility",
-      header: () => <Box className="text-center text-black">{t("projects.visibility")}</Box>,
+      header: () => (
+        <Box className="text-center text-black">{t("projects.visibility")}</Box>
+      ),
       cell: ({ row }) => {
         const visibility = row.original.visibility || "private";
         return (
@@ -398,7 +403,9 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
                   <TooltipTrigger>
                     <Lock className="w-4 h-4 text-orange-500" />
                   </TooltipTrigger>
-                  <TooltipContent>{t("projects.privateProject")}</TooltipContent>
+                  <TooltipContent>
+                    {t("projects.privateProject")}
+                  </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             ) : (
@@ -524,7 +531,8 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
       ),
       cell: ({ row }: { row: any }) => {
         const val = row.original.customFields?.[field.id];
-        if (val === undefined || val === null) return <Box className="text-center p-1">-</Box>;
+        if (val === undefined || val === null)
+          return <Box className="text-center p-1">-</Box>;
 
         if (field.type === "select" && field.options) {
           const option = field.options.find((opt: any) => opt.label === val);
@@ -532,7 +540,10 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
             return (
               <Center>
                 <Flex className="items-center gap-2 px-2 py-1 bg-gray-50 rounded-full border border-gray-100 text-xs">
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: option.color }} />
+                  <div
+                    className="w-2 h-2 rounded-full"
+                    style={{ backgroundColor: option.color }}
+                  />
                   <span className="capitalize">{val}</span>
                 </Flex>
               </Center>
@@ -540,11 +551,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
           }
         }
 
-        return (
-          <Box className="text-center p-1 capitalize">
-            {String(val)}
-          </Box>
-        );
+        return <Box className="text-center p-1 capitalize">{String(val)}</Box>;
       },
     })) || []),
     {

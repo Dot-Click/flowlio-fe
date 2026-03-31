@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,6 +16,10 @@ import { Button } from "@/components/ui/button";
 import { Flex } from "@/components/ui/flex";
 import { useSendNewsletter } from "@/hooks/usesendnewsletter";
 import { toast } from "sonner";
+import RichTextEditor from "@/components/common/RichTextEditor";
+import { sanitizeHTML } from "@/utils/sanitize";
+import { Eye, Send, X, ClipboardList } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const newsletterSchema = z.object({
   subject: z
@@ -36,6 +40,8 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const [isPreview, setIsPreview] = useState(false);
+
   const form = useForm<NewsletterFormData>({
     resolver: zodResolver(newsletterSchema),
     defaultValues: {
@@ -47,14 +53,20 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
   const sendNewsletterMutation = useSendNewsletter();
 
   const onSubmit = async (data: NewsletterFormData) => {
+    // Sanitize HTML before sending
+    const sanitizedContent = sanitizeHTML(data.content);
+
     console.log("[Newsletter Modal] Form submitted:", {
       subject: data.subject,
-      contentLength: data.content.length,
+      contentLength: sanitizedContent.length,
       timestamp: new Date().toISOString(),
     });
 
     try {
-      const result = await sendNewsletterMutation.mutateAsync(data);
+      const result = await sendNewsletterMutation.mutateAsync({
+        ...data,
+        content: sanitizedContent,
+      });
 
       console.log("[Newsletter Modal] Response received:", result);
 
@@ -62,27 +74,13 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
         const successMessage = `Newsletter sent successfully to ${
           result.data?.successful || 0
         } subscribers!`;
-        console.log("[Newsletter Modal] Success:", successMessage);
-
-        if (result.data?.failed && result.data.failed > 0) {
-          console.warn(
-            `[Newsletter Modal] Some emails failed: ${result.data.failed} out of ${result.data.total}`
-          );
-          console.warn(
-            "[Newsletter Modal] Failed emails:",
-            result.data.results?.filter((r) => !r.success)
-          );
-
-          toast.error(`${successMessage} (${result.data.failed} failed)`);
-        } else {
-          toast.success(successMessage);
-        }
-
+        
+        toast.success(successMessage);
         form.reset();
+        setIsPreview(false);
         onClose();
       } else {
         const errorMessage = result.message || "Failed to send newsletter";
-        console.error("[Newsletter Modal] Failed:", errorMessage, result);
         toast.error(errorMessage);
       }
     } catch (error: any) {
@@ -90,34 +88,10 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
         error.response?.data?.message ||
         error.message ||
         "Failed to send newsletter. Please try again.";
-
-      console.error("[Newsletter Modal] Error caught:", {
-        error,
-        message: errorMessage,
-        response: error?.response?.data,
-        status: error?.response?.status,
-        statusText: error?.response?.statusText,
-        data: error?.response?.data?.data,
-        fullError: error,
-      });
-
-      // Show detailed error if available
-      if (error?.response?.data?.data) {
-        const errorData = error.response.data.data;
-        if (errorData.results && errorData.results.length > 0) {
-          const failedEmails = errorData.results
-            .filter((r: any) => !r.success)
-            .map((r: any) => `${r.email}: ${r.error || "Unknown error"}`);
-          console.error(
-            "[Newsletter Modal] Failed email details:",
-            failedEmails
-          );
-        }
-      }
-
       toast.error(errorMessage);
     }
   };
+
 
   return (
     <GeneralModal
@@ -125,87 +99,180 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
       onOpenChange={(open) => {
         if (!open) {
           form.reset();
+          setIsPreview(false);
           onClose();
         }
       }}
       contentProps={{
         className:
-          "max-w-3xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] xl:w-[60vw]",
+          "max-w-4xl max-h-[95vh] overflow-y-auto w-[95vw] sm:w-[90vw] md:w-[85vw] lg:w-[80vw] xl:w-[75vw] p-0 border-none bg-transparent shadow-none",
       }}
     >
-      <h2 className="text-lg font-normal mb-4">Send Newsletter</h2>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <Box className="bg-white/80 gap-4 grid grid-cols-1">
-            <FormField
-              control={form.control}
-              name="subject"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Subject</FormLabel>
-                  <FormControl className="w-full h-12">
-                    <input
-                      {...field}
-                      className="bg-gray-100 border border-gray-200 rounded-full w-full h-12 px-4 placeholder:text-gray-500"
-                      placeholder="Enter newsletter subject"
-                      disabled={sendNewsletterMutation.isPending}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+      <Box className="bg-white rounded-2xl overflow-hidden flex flex-col h-full max-h-[90vh]">
+        {/* Header */}
+        <Flex className="items-center justify-between p-6 border-b border-gray-100 bg-gray-50/50">
+          <Flex className="items-center gap-3">
+            <Box className="p-2 bg-[#1797b9]/10 rounded-lg text-[#1797b9]">
+              <Send size={20} />
+            </Box>
+            <h2 className="text-xl font-semibold text-gray-800">Send Newsletter</h2>
+          </Flex>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              form.reset();
+              setIsPreview(false);
+              onClose();
+            }}
+            className="rounded-full hover:bg-gray-200"
+          >
+            <X size={20} />
+          </Button>
+        </Flex>
 
-            <FormField
-              control={form.control}
-              name="content"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Content</FormLabel>
-                  <FormControl className="w-full">
-                    <textarea
-                      {...field}
-                      className="bg-gray-100 border border-gray-200 rounded-lg w-full p-4 min-h-[200px] resize-none placeholder:text-gray-500"
-                      placeholder="Enter newsletter content..."
-                      disabled={sendNewsletterMutation.isPending}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                  <p className="text-sm text-gray-500 mt-1">
-                    This will be sent to all subscribed users. You can use line
-                    breaks for formatting.
-                  </p>
-                </FormItem>
-              )}
-            />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex-grow flex flex-col overflow-hidden">
+            <Box className="p-6 space-y-6 overflow-y-auto">
+              {/* Subject Field */}
+              <FormField
+                control={form.control}
+                name="subject"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium text-gray-700">Newsletter Subject</FormLabel>
+                    <FormControl>
+                      <input
+                        {...field}
+                        className="bg-gray-50 border border-gray-200 rounded-xl w-full h-12 px-4 focus:ring-2 focus:ring-[#1797b9]/20 focus:border-[#1797b9] transition-all outline-none"
+                        placeholder="e.g. Weekly Updates - March 2024"
+                        disabled={sendNewsletterMutation.isPending}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Flex className="justify-end gap-3 mt-4">
+              {/* Toggle Preview / Edit */}
+              <Flex className="justify-between items-center bg-gray-50 p-2 rounded-xl">
+                <p className="text-xs text-gray-500 font-medium px-2">
+                  {isPreview ? "Previewing Email Layout" : "Composing Newsletter Content"}
+                </p>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsPreview(!isPreview)}
+                  className={cn(
+                    "rounded-lg flex items-center gap-2 text-xs font-semibold px-3 py-1.5 transition-all",
+                    isPreview 
+                      ? "bg-white text-[#1797b9] shadow-sm" 
+                      : "text-gray-600 hover:bg-gray-200"
+                  )}
+                >
+                  {isPreview ? (
+                    <>
+                      <ClipboardList size={14} />
+                      Back to Editor
+                    </>
+                  ) : (
+                    <>
+                      <Eye size={14} />
+                      Preview Mode
+                    </>
+                  )}
+                </Button>
+              </Flex>
+
+              {/* Content / Preview Area */}
+              <FormField
+                control={form.control}
+                name="content"
+                render={({ field }) => (
+                  <FormItem className="flex-grow flex flex-col space-y-2">
+                    <FormLabel className="sr-only">Content</FormLabel>
+                    <FormControl>
+                      {isPreview ? (
+                        <Box className="bg-gray-100 p-8 rounded-xl min-h-[400px] border border-gray-200 overflow-y-auto">
+                          {/* Simulated Email Browser Container */}
+                          <Box className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden border border-gray-100">
+                            {/* Email Header Simulation */}
+                            <Box className="bg-[#1797b9] p-6 text-center">
+                              <h1 className="text-white text-xl font-bold tracking-tight">NEWSLETTER</h1>
+                            </Box>
+                            
+                            {/* Rendered Sanitized content */}
+                            <Box 
+                              className="p-8 prose prose-gray max-w-none newsletter-preview"
+                              dangerouslySetInnerHTML={{ __html: sanitizeHTML(field.value) }} 
+                            />
+                            
+                            {/* Email Footer Simulation */}
+                            <Box className="bg-gray-50 p-6 border-t border-gray-100 text-center">
+                              <p className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">
+                                Sent via Flowlio Newsletter Service
+                              </p>
+                              <p className="text-[10px] text-gray-400 mt-2">
+                                © 2024 Flowlio. All rights reserved.
+                              </p>
+                            </Box>
+                          </Box>
+                        </Box>
+                      ) : (
+                        <RichTextEditor
+                          content={field.value}
+                          onChange={field.onChange}
+                          className="min-h-[400px]"
+                        />
+                      )}
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </Box>
+
+            {/* Footer Actions */}
+            <Flex className="p-6 border-t border-gray-100 justify-end gap-3 bg-gray-50/50">
               <Button
                 variant="outline"
-                className="bg-white hover:bg-gray-50 text-black border border-gray-200 font-normal rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
+                className="bg-white hover:bg-gray-50 text-gray-700 border-gray-200 rounded-full px-6 h-11 transition-all"
                 type="button"
                 onClick={() => {
                   form.reset();
+                  setIsPreview(false);
                   onClose();
                 }}
                 disabled={sendNewsletterMutation.isPending}
               >
-                Cancel
+                Discard
               </Button>
               <Button
-                variant="outline"
-                className="bg-[#1797b9] hover:bg-[#1797b9]/80 hover:text-white text-white border border-gray-200 rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
+                className="bg-[#1797b9] hover:bg-[#117a96] text-white shadow-md shadow-[#1797b9]/20 rounded-full px-8 h-11 flex items-center gap-2 font-semibold transition-all"
                 type="submit"
-                disabled={sendNewsletterMutation.isPending}
+                disabled={sendNewsletterMutation.isPending || !form.formState.isValid}
               >
-                {sendNewsletterMutation.isPending
-                  ? "Sending..."
-                  : "Send Newsletter"}
+                {sendNewsletterMutation.isPending ? (
+                  <>
+                    <Box className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send size={18} />
+                    Send Newsletter
+                  </>
+                )}
               </Button>
             </Flex>
-          </Box>
-        </form>
-      </Form>
+          </form>
+        </Form>
+      </Box>
     </GeneralModal>
   );
 };
+
+// Add display name for debugging
+SendNewsletterModal.displayName = "SendNewsletterModal";
+

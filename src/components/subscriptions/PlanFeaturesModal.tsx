@@ -57,7 +57,7 @@ export const PlanFeaturesModal = ({
               // If features is an array
               if (Array.isArray(features)) {
                 displayFeatures = features.map((f: any) =>
-                  typeof f === "string" ? f : f.name || f.title || String(f)
+                  typeof f === "string" ? f : f.name || f.title || String(f),
                 );
               }
               // If features is an object
@@ -69,14 +69,14 @@ export const PlanFeaturesModal = ({
                   displayFeatures.push(
                     `Up to ${featureObj.maxUsers} user${
                       featureObj.maxUsers > 1 ? "s" : ""
-                    }`
+                    }`,
                   );
                 }
                 if (featureObj.maxProjects) {
                   displayFeatures.push(
                     `Up to ${featureObj.maxProjects} project${
                       featureObj.maxProjects > 1 ? "s" : ""
-                    }`
+                    }`,
                   );
                 }
                 if (featureObj.maxStorage) {
@@ -86,7 +86,7 @@ export const PlanFeaturesModal = ({
                   displayFeatures.push(
                     `Up to ${featureObj.maxTasks} task${
                       featureObj.maxTasks > 1 ? "s" : ""
-                    } per user`
+                    } per user`,
                   );
                 }
 
