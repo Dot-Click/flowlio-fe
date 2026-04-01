@@ -20,6 +20,7 @@ import RichTextEditor from "@/components/common/RichTextEditor";
 import { sanitizeHTML } from "@/utils/sanitize";
 import { Eye, Send, X, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 const newsletterSchema = z.object({
   subject: z
@@ -40,6 +41,7 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { t } = useTranslation();
   const [isPreview, setIsPreview] = useState(false);
 
   const form = useForm<NewsletterFormData>({
@@ -115,7 +117,7 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
             <Box className="p-2 bg-[#1797b9]/10 rounded-lg text-[#1797b9]">
               <Send size={20} />
             </Box>
-            <h2 className="text-xl font-semibold text-gray-800">Send Newsletter</h2>
+            <h2 className="text-xl font-semibold text-gray-800">{t("superadmin.newsletter.sendNewsletter", "Send Newsletter")}</h2>
           </Flex>
           <Button
             variant="ghost"
@@ -140,7 +142,7 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
                 name="subject"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">Newsletter Subject</FormLabel>
+                    <FormLabel className="text-sm font-medium text-gray-700">{t("superadmin.newsletter.modal.subject", "Newsletter Subject")}</FormLabel>
                     <FormControl>
                       <input
                         {...field}
@@ -157,7 +159,7 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
               {/* Toggle Preview / Edit */}
               <Flex className="justify-between items-center bg-gray-50 p-2 rounded-xl">
                 <p className="text-xs text-gray-500 font-medium px-2">
-                  {isPreview ? "Previewing Email Layout" : "Composing Newsletter Content"}
+                  {isPreview ? t("superadmin.newsletter.modal.previewing", "Previewing Email Layout") : t("superadmin.newsletter.modal.composing", "Composing Newsletter Content")}
                 </p>
                 <Button
                   type="button"
@@ -174,12 +176,12 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
                   {isPreview ? (
                     <>
                       <ClipboardList size={14} />
-                      Back to Editor
+                      {t("superadmin.newsletter.modal.backToEditor", "Back to Editor")}
                     </>
                   ) : (
                     <>
                       <Eye size={14} />
-                      Preview Mode
+                      {t("superadmin.newsletter.modal.previewMode", "Preview Mode")}
                     </>
                   )}
                 </Button>
@@ -246,7 +248,7 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
                 }}
                 disabled={sendNewsletterMutation.isPending}
               >
-                Discard
+                {t("common.cancel", "Discard")}
               </Button>
               <Button
                 className="bg-[#1797b9] hover:bg-[#117a96] text-white shadow-md shadow-[#1797b9]/20 rounded-full px-8 h-11 flex items-center gap-2 font-semibold transition-all"
@@ -256,12 +258,12 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
                 {sendNewsletterMutation.isPending ? (
                   <>
                     <Box className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Sending...
+                    {t("superadmin.newsletter.modal.sending", "Sending...")}
                   </>
                 ) : (
                   <>
                     <Send size={18} />
-                    Send Newsletter
+                    {t("superadmin.newsletter.sendNewsletter", "Send Newsletter")}
                   </>
                 )}
               </Button>

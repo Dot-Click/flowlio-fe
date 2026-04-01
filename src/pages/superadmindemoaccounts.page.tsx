@@ -32,6 +32,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useTranslation } from "react-i18next";
 
 type DemoOrg = {
   id: string;
@@ -51,6 +52,7 @@ type DemoOrg = {
 };
 
 const SuperAdminDemoAccountsPage = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -274,7 +276,7 @@ const SuperAdminDemoAccountsPage = () => {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-1">
-              Create Demo Account
+              {t("superadmin.demoAccounts.createDemoAccount", "Create Demo Account")}
             </h2>
             <p className="text-sm text-gray-600">
               Create a new demo account with temporary access credentials
@@ -285,7 +287,7 @@ const SuperAdminDemoAccountsPage = () => {
               onClick={handleShowForm}
               className="bg-blue-600 hover:bg-blue-700 text-white h-10 px-6 cursor-pointer"
             >
-              Create Demo Account
+              {t("superadmin.demoAccounts.createDemoAccount", "Create Demo Account")}
             </Button>
           )}
         </div>
@@ -444,13 +446,13 @@ const SuperAdminDemoAccountsPage = () => {
 
       <Box className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">
-          Demo Accounts
+          {t("superadmin.demoAccounts.title", "Demo Accounts")}
         </h2>
         {fetchingDemos ? (
           <Center className="py-12">
             <div className="flex flex-col items-center gap-4">
               <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-              <p className="text-sm text-gray-600">Loading demo accounts...</p>
+              <p className="text-sm text-gray-600">{t("common.loading", "Loading demo accounts...")}</p>
             </div>
           </Center>
         ) : (
@@ -458,14 +460,14 @@ const SuperAdminDemoAccountsPage = () => {
             <Table className="w-full ">
               <TableHeader className="bg-gray-100">
                 <TableRow>
-                  <TableHead>Organization</TableHead>
-                  <TableHead>User</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Trial Ends</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-center">Actions</TableHead>
+                  <TableHead>{t("superadmin.demoAccounts.table.organization", "Organization")}</TableHead>
+                  <TableHead>{t("superadmin.demoAccounts.table.user", "User")}</TableHead>
+                  <TableHead>{t("superadmin.demoAccounts.table.email", "Email")}</TableHead>
+                  <TableHead>{t("superadmin.demoAccounts.table.role", "Role")}</TableHead>
+                  <TableHead>{t("superadmin.demoAccounts.table.status", "Status")}</TableHead>
+                  <TableHead>{t("superadmin.demoAccounts.table.trialEnds", "Trial Ends")}</TableHead>
+                  <TableHead>{t("superadmin.demoAccounts.table.created", "Created")}</TableHead>
+                  <TableHead className="text-center">{t("superadmin.demoAccounts.table.actions", "Actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

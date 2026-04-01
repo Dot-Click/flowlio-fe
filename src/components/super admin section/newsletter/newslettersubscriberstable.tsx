@@ -13,8 +13,10 @@ import { useDeleteNewsletterSubscriber } from "@/hooks/usedeletenewslettersubscr
 import { useFetchNewsletterStats } from "@/hooks/usefetchnewslettersubscribers";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { CheckCircle2, XCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export const NewsletterSubscribersTable = () => {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const limit = 20;
 
@@ -44,25 +46,25 @@ export const NewsletterSubscribersTable = () => {
   const columns: ColumnDef<NewsletterSubscriber>[] = [
     {
       accessorKey: "email",
-      header: "Email",
+      header: t("superadmin.newsletter.table.email", "Email"),
       cell: ({ row }) => (
         <div className="font-medium">{row.original.email}</div>
       ),
     },
     {
       accessorKey: "subscribed",
-      header: "Status",
+      header: t("superadmin.newsletter.table.status", "Status"),
       cell: ({ row }) => (
         <Flex className="items-center gap-2">
           {row.original.subscribed ? (
             <>
               <CheckCircle2 className="h-4 w-4 text-green-500" />
-              <span className="text-green-600">Subscribed</span>
+              <span className="text-green-600">{t("superadmin.newsletter.active", "Subscribed")}</span>
             </>
           ) : (
             <>
               <XCircle className="h-4 w-4 text-red-500" />
-              <span className="text-red-600">Unsubscribed</span>
+              <span className="text-red-600">{t("superadmin.newsletter.unsubscribed", "Unsubscribed")}</span>
             </>
           )}
         </Flex>
@@ -70,7 +72,7 @@ export const NewsletterSubscribersTable = () => {
     },
     {
       accessorKey: "subscribedAt",
-      header: "Subscribed At",
+      header: t("superadmin.newsletter.table.subscribedAt", "Subscribed At"),
       cell: ({ row }) => {
         const date = new Date(row.original.subscribedAt);
         return <div>{date.toLocaleDateString()}</div>;
@@ -78,7 +80,7 @@ export const NewsletterSubscribersTable = () => {
     },
     {
       accessorKey: "createdAt",
-      header: "Created At",
+      header: t("superadmin.newsletter.table.createdAt", "Created At"),
       cell: ({ row }) => {
         const date = new Date(row.original.createdAt);
         return <div>{date.toLocaleDateString()}</div>;
@@ -86,7 +88,7 @@ export const NewsletterSubscribersTable = () => {
     },
     {
       id: "actions",
-      header: "Actions",
+      header: t("superadmin.newsletter.table.actions", "Actions"),
       cell: ({ row }) => (
         <Button
           variant="ghost"
@@ -106,7 +108,7 @@ export const NewsletterSubscribersTable = () => {
       <Center className="px-4 py-6">
         <Box className="flex items-center justify-center p-8">
           <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
-          <Box className="ml-2 text-gray-600">Loading subscribers...</Box>
+          <Box className="ml-2 text-gray-600">{t("common.loading", "Loading subscribers...")}</Box>
         </Box>
       </Center>
     );
@@ -116,7 +118,7 @@ export const NewsletterSubscribersTable = () => {
     return (
       <Center className="px-4 py-6">
         <div className="text-red-500">
-          Error loading subscribers. Please try again.
+          {t("common.error", "Error loading subscribers. Please try again.")}
         </div>
       </Center>
     );
@@ -128,19 +130,19 @@ export const NewsletterSubscribersTable = () => {
       {stats && (
         <Flex className="gap-4 mb-6 max-sm:flex-col">
           <Box className="flex-1 bg-white border border-gray-200 rounded-lg p-4">
-            <div className="text-sm text-gray-500 mb-1">Total Subscribers</div>
+            <div className="text-sm text-gray-500 mb-1">{t("superadmin.newsletter.totalSubscribers", "Total Subscribers")}</div>
             <div className="text-2xl font-semibold text-gray-900">
               {stats.total}
             </div>
           </Box>
           <Box className="flex-1 bg-white border border-gray-200 rounded-lg p-4">
-            <div className="text-sm text-gray-500 mb-1">Active</div>
+            <div className="text-sm text-gray-500 mb-1">{t("superadmin.newsletter.active", "Active")}</div>
             <div className="text-2xl font-semibold text-green-600">
               {stats.subscribed}
             </div>
           </Box>
           <Box className="flex-1 bg-white border border-gray-200 rounded-lg p-4">
-            <div className="text-sm text-gray-500 mb-1">Unsubscribed</div>
+            <div className="text-sm text-gray-500 mb-1">{t("superadmin.newsletter.unsubscribed", "Unsubscribed")}</div>
             <div className="text-2xl font-semibold text-red-600">
               {stats.unsubscribed}
             </div>

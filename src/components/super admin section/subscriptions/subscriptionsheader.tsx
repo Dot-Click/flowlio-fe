@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { PlanFeature } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { useFetchPlans } from "@/hooks/usefetchplans";
+import { useTranslation } from "react-i18next";
 
 const PLAN_LIST = [
   { key: "basic", label: "Basic" },
@@ -82,6 +83,7 @@ const initialPlanState: PlanState = {
 };
 
 export const SubscriptionsHeader = () => {
+  const { t } = useTranslation();
   const { data: plansResponse, isLoading, error } = useFetchPlans();
   const fetchedPlans = plansResponse?.data || [];
 
@@ -805,10 +807,10 @@ export const SubscriptionsHeader = () => {
       <PageWrapper className="mt-6 px-4 py-6">
         <Stack className="gap-1">
           <h1 className="text-black text-2xl font-medium max-md:text-lg">
-            Subscription Management
+            {t("superadmin.subscriptions.title", "Subscription Management")}
           </h1>
           <h1 className="text-gray-500 max-md:text-sm">
-            Loading subscription plans...
+            {t("common.loading", "Loading subscription plans...")}
           </h1>
         </Stack>
       </PageWrapper>
@@ -821,10 +823,10 @@ export const SubscriptionsHeader = () => {
       <PageWrapper className="mt-6 px-4 py-6">
         <Stack className="gap-1">
           <h1 className="text-black text-2xl font-medium max-md:text-lg">
-            Subscription Management
+            {t("superadmin.subscriptions.title", "Subscription Management")}
           </h1>
           <h1 className="text-red-500 max-md:text-sm">
-            Error loading subscription plans: {error.message}
+            {t("common.error", "Error loading subscription plans:")} {error.message}
           </h1>
         </Stack>
       </PageWrapper>
@@ -835,11 +837,10 @@ export const SubscriptionsHeader = () => {
     <PageWrapper className="mt-6 px-4 py-6">
       <Stack className="gap-1 ">
         <h1 className="text-black text-2xl font-medium max-md:text-lg">
-          Subscription Management
+          {t("superadmin.subscriptions.title", "Subscription Management")}
         </h1>
         <h1 className="text-gray-500 max-md:text-sm">
-          View and manage all subscription plans and active company
-          subscriptions.
+          {t("superadmin.subscriptions.subtitle", "View and manage all subscription plans and active company subscriptions.")}
         </h1>
       </Stack>
       <Flex className="flex-wrap items-start gap-6 mt-6 max-lg:flex-col flex-1">

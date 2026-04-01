@@ -183,6 +183,7 @@ const ClientMediaCenterPage = lazy(() => import("./pages/clientmediacenter.page"
 const ClientPortalSettingsPage = lazy(
   () => import("./pages/clientportalsettings.page"),
 );
+const ReportsPage = lazy(() => import("./pages/reports.page"));
 
 const ClientProjectsPage = lazy(() => import("./pages/clientprojects.page"));
 const ClientTasksPage = lazy(() => import("./pages/clienttasks.page"));
@@ -375,6 +376,14 @@ const AppRoutes = () => {
         <Route
           element={<LazyWrapper component={ClientMediaCenterPage} />}
           path="client-management/media-center"
+        />
+        <Route
+          element={
+            <AdminManagerOrOrgOwnerRoute>
+              <LazyWrapper component={ReportsPage} />
+            </AdminManagerOrOrgOwnerRoute>
+          }
+          path="reports"
         />
         <Route index element={<LazyWrapper component={DashboardPage} />} />
         <Route path="*" element={<LazyWrapper component={NotFound} />} />

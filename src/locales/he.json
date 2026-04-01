@@ -32,6 +32,7 @@
     "loadingComments": "טוען תגובות...",
     "fillAllFields": "אנא מלא את כל השדות",
     "loggingOut": "מתנתק...",
+    "noClient": "אין לקוח",
     "unknown": "לא ידוע"
   },
   "appSidebar": {
@@ -62,7 +63,8 @@
     "newsletter": "ניוזלטר",
     "demoAccounts": "חשבונות דמו",
     "support": "תמיכה",
-    "aiAssistant": "עוזר בינה מלאכותית"
+    "aiAssistant": "עוזר בינה מלאכותית",
+    "reports": "דוחות ואנליטיקה"
   },
   "settings": {
     "title": "הגדרות",
@@ -536,5 +538,103 @@
     "closeComments": "סגירת הערות",
     "noCommentsYet": "אין עדיין הערות.",
     "dragOverlayProject": "פרויקט:"
+  },
+  "superadmin": {
+    "companies": {
+      "title": "חברות",
+      "subtitle": "צפה ונהל את כל החברות הרשומות.",
+      "export": "ייצוא",
+      "table": {
+        "companyName": "שם חברה",
+        "email": "אימייל",
+        "employees": "עובדים",
+        "status": "סטטוס",
+        "plan": "תוכנית",
+        "actions": "פעולות"
+      }
+    },
+    "subAdmins": {
+      "title": "מנהלי משנה",
+      "subtitle": "נהל מנהלי משנה בעלי גישה למערכת.",
+      "create": "צור מנהל משנה",
+      "table": {
+        "name": "שם",
+        "email": "אימייל",
+        "type": "סוג",
+        "status": "סטטוס",
+        "addedOn": "נוסף בתאריך",
+        "actions": "פעולות"
+      }
+    },
+    "users": {
+      "title": "משתמשים",
+      "subtitle": "סקירה כללית של כל המשתמשים בפלטפורמה.",
+      "table": {
+        "name": "שם",
+        "email": "אימייל",
+        "company": "חברה",
+        "role": "תפקיד",
+        "status": "סטטוס",
+        "addedOn": "נוסף בתאריך",
+        "actions": "פעולות"
+      }
+    },
+    "subscriptions": {
+      "title": "מנויים",
+      "subtitle": "עקוב אחר כל תוכניות המנוי.",
+      "table": {
+        "company": "שם חברה",
+        "plan": "תוכנית",
+        "status": "סטטוס",
+        "amount": "סכום",
+        "nextBilling": "חיוב הבא",
+        "actions": "פעולות"
+      }
+    },
+    "newsletter": {
+      "title": "מנויי ניוזלטר",
+      "subtitle": "צפה ונהל את כל מנויי הניוזלטר.",
+      "sendNewsletter": "שלח ניוזלטר",
+      "totalSubscribers": "סך המנויים",
+      "active": "פעיל",
+      "unsubscribed": "ביטלו מנוי",
+      "table": {
+        "email": "אימייל",
+        "status": "סטטוס",
+        "subscribedAt": "נרשם בתאריך",
+        "createdAt": "נוצר בתאריך",
+        "actions": "פעולות"
+      }
+    },
+    "demoAccounts": {
+      "title": "חשבונות הדגמה",
+      "subtitle": "ניהול חשבונות הדגמה",
+      "generateAccount": "צור חשבון הדגמה",
+      "active": "פעיל",
+      "expired": "פג תוקף",
+      "total": "סך הכל",
+      "table": {
+        "name": "שם",
+        "email": "אימייל",
+        "password": "סיסמה",
+        "status": "סטטוס",
+        "expiresAt": "פג תוקף ב",
+        "actions": "פעולות"
+      }
+    },
+    "support": {
+      "title": "קריאות שירות",
+      "subtitle": "ניהול ותגובה לקריאות שירות מכל המשתמשים.",
+      "table": {
+        "ticketId": "מספר קריאה",
+        "subject": "נושא",
+        "user": "משתמש",
+        "company": "חברה",
+        "status": "סטטוס",
+        "priority": "עדיפות",
+        "createdAt": "נוצר בתאריך",
+        "actions": "פעולות"
+      }
+    }
   }
 }

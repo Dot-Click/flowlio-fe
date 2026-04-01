@@ -20,6 +20,7 @@ import { useState } from "react";
 import { SupportTicketModal } from "./supportticketmodal";
 import type { UniversalSupportTicket } from "@/hooks/useUniversalSupportTickets";
 import { useUpdateUniversalSupportTicket } from "@/hooks/useUniversalSupportTickets";
+import { useTranslation } from "react-i18next";
 
 export type Data = UniversalSupportTicket;
 
@@ -45,6 +46,7 @@ export const SupportTicketTable = ({
   onPageChange?: (page: number) => void;
   deleteSupportTicket: (id: string) => void;
 }) => {
+  const { t } = useTranslation();
   const [selectedTicket, setSelectedTicket] = useState<Data | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { mutate: updateSupportTicket } = useUpdateUniversalSupportTicket();
@@ -91,7 +93,7 @@ export const SupportTicketTable = ({
   const columns: ColumnDef<Data>[] = [
     {
       id: "select",
-      header: () => <Box className="text-center text-black p-3">Ticket ID</Box>,
+      header: () => <Box className="text-center text-black p-3">{t("superadmin.support.table.ticketId", "Ticket ID")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center p-3">#{row.original.ticketNumber}</Box>
       ),
@@ -101,7 +103,7 @@ export const SupportTicketTable = ({
 
     {
       accessorKey: "subject",
-      header: () => <Box className="text-black ">Subject</Box>,
+      header: () => <Box className="text-black ">{t("superadmin.support.table.subject", "Subject")}</Box>,
       cell: ({ row }) => (
         <Box className="capitalize w-30 max-sm:w-full">
           {row.original.subject.length > 28
@@ -113,7 +115,7 @@ export const SupportTicketTable = ({
 
     {
       accessorKey: "client",
-      header: () => <Box className="text-black text-center">Client</Box>,
+      header: () => <Box className="text-black text-center">{t("superadmin.support.table.client", "Client")}</Box>,
       cell: ({ row }) => (
         <Box className="capitalize text-center">
           {row.original.clientOrganization?.name ||
@@ -125,7 +127,7 @@ export const SupportTicketTable = ({
 
     {
       accessorKey: "assignedto",
-      header: () => <Box className="text-black text-center">Assigned To</Box>,
+      header: () => <Box className="text-black text-center">{t("superadmin.support.table.assignedTo", "Assigned To")}</Box>,
       cell: ({ row }) => (
         <Box className="capitalize text-center">
           {row.original.assignedUser?.name ||
@@ -138,7 +140,7 @@ export const SupportTicketTable = ({
 
     {
       accessorKey: "priority",
-      header: () => <Box className="text-center text-black">priority</Box>,
+      header: () => <Box className="text-center text-black">{t("superadmin.support.table.priority", "Priority")}</Box>,
       cell: ({ row }) => {
         return (
           <Center className="text-center font-semibold capitalize">
@@ -150,7 +152,7 @@ export const SupportTicketTable = ({
 
     {
       accessorKey: "createdon",
-      header: () => <Box className="text-center text-black">Created On</Box>,
+      header: () => <Box className="text-center text-black">{t("superadmin.support.table.createdOn", "Created On")}</Box>,
       cell: ({ row }) => {
         const createdon = row.original.createdon;
         try {
@@ -167,7 +169,7 @@ export const SupportTicketTable = ({
 
     {
       accessorKey: "status",
-      header: () => <Box className="text-center text-black">Status</Box>,
+      header: () => <Box className="text-center text-black">{t("superadmin.support.table.status", "Status")}</Box>,
       cell: ({ row }) => {
         const status = row.original.status as "open" | "closed";
 
@@ -204,7 +206,7 @@ export const SupportTicketTable = ({
 
     {
       accessorKey: "actions",
-      header: () => <Box className="text-center text-black">Actions</Box>,
+      header: () => <Box className="text-center text-black">{t("superadmin.support.table.actions", "Actions")}</Box>,
       cell: ({ row }) => {
         return (
           <Center className="space-x-2">

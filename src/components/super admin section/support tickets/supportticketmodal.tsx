@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import type { UniversalSupportTicket } from "@/hooks/useUniversalSupportTickets";
 import { GeneralModal } from "@/components/common/generalmodal";
+import { useTranslation } from "react-i18next";
 
 interface SupportTicketModalProps {
   ticket: UniversalSupportTicket | null;
@@ -34,6 +35,7 @@ export const SupportTicketModal = ({
   onClose,
   onCloseTicket,
 }: SupportTicketModalProps) => {
+  const { t } = useTranslation();
   if (!ticket) return null;
 
   const getPriorityColor = (priority: string) => {
@@ -90,7 +92,7 @@ export const SupportTicketModal = ({
       <Box className="space-y-4">
         <Flex className="items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">
-            Support Ticket #{ticket.ticketNumber}
+            {t("superadmin.support.modal.title", "Support Ticket #{{number}}", { number: ticket.ticketNumber })}
           </h2>
         </Flex>
 
@@ -98,7 +100,7 @@ export const SupportTicketModal = ({
         <Flex className="items-center gap-4 flex-wrap">
           <Badge className={`${getPriorityColor(ticket.priority)} border`}>
             <AlertTriangle className="w-3 h-3 mr-1" />
-            {ticket.priority} Priority
+            {ticket.priority} {t("superadmin.support.modal.priority", "Priority")}
           </Badge>
           <Badge className={`${getStatusColor(ticket.status)} border`}>
             {getStatusIcon(ticket.status)}
@@ -106,7 +108,7 @@ export const SupportTicketModal = ({
           </Badge>
           <Flex className="items-center gap-1 text-sm text-gray-600">
             <Calendar className="w-4 h-4" />
-            Created {format(ticket.createdon, "MMM dd, yyyy 'at' h:mm a")}
+            {t("superadmin.support.modal.created", "Created")} {format(ticket.createdon, "MMM dd, yyyy 'at' h:mm a")}
           </Flex>
         </Flex>
 
@@ -122,7 +124,7 @@ export const SupportTicketModal = ({
             </h3>
             <Box className="bg-white p-4 rounded-lg border border-gray-200">
               <p className="text-gray-700 leading-relaxed text-sm">
-                Description:
+                {t("superadmin.support.modal.description", "Description:")}
               </p>
               <p className="text-gray-700 leading-relaxed text-sm">
                 {ticket.description}
@@ -140,7 +142,7 @@ export const SupportTicketModal = ({
                 </Box>
                 <Box className="flex-1">
                   <p className="text-sm font-semibold text-gray-900">
-                    Submitted By
+                    {t("superadmin.support.modal.submittedBy", "Submitted By")}
                   </p>
                   <p className="text-sm text-gray-700 font-medium">
                     {ticket.submittedbyName}
@@ -153,7 +155,7 @@ export const SupportTicketModal = ({
                   <Building className="w-5 h-5 text-white" />
                 </Box>
                 <Box>
-                  <p className="text-sm font-semibold text-gray-900">Client</p>
+                  <p className="text-sm font-semibold text-gray-900">{t("superadmin.support.modal.client", "Client")}</p>
                   <p className="text-sm text-gray-700">{ticket.client}</p>
                 </Box>
               </Flex>
@@ -164,7 +166,7 @@ export const SupportTicketModal = ({
                 </Box>
                 <Box>
                   <p className="text-sm font-semibold text-gray-900">
-                    Assigned To
+                    {t("superadmin.support.modal.assignedTo", "Assigned To")}
                   </p>
                   <p className="text-sm text-gray-700">
                     {ticket.assignedUser?.name ||
@@ -189,7 +191,7 @@ export const SupportTicketModal = ({
                 </Box>
                 <Box>
                   <p className="text-sm font-semibold text-gray-900">
-                    Last Updated
+                    {t("superadmin.support.modal.lastUpdated", "Last Updated")}
                   </p>
                   <p className="text-[11.5px] text-gray-700">
                     {format(ticket.updatedAt, "MMM dd, yyyy 'at' h:mm a")}
@@ -203,7 +205,7 @@ export const SupportTicketModal = ({
                 </Box>
                 <Box>
                   <p className="text-sm font-semibold text-gray-900">
-                    Ticket ID
+                    {t("superadmin.support.modal.ticketId", "Ticket ID")}
                   </p>
                   <p className="text-sm text-gray-700 font-mono">
                     #{ticket.ticketNumber}
@@ -217,9 +219,9 @@ export const SupportTicketModal = ({
                 </Box>
                 <Box>
                   <p className="text-sm font-semibold text-gray-900">
-                    Category
+                    {t("superadmin.support.modal.category", "Category")}
                   </p>
-                  <p className="text-sm text-gray-700">Technical Support</p>
+                  <p className="text-sm text-gray-700">{t("superadmin.support.modal.technicalSupport", "Technical Support")}</p>
                 </Box>
               </Flex>
             </Box>
@@ -269,7 +271,7 @@ export const SupportTicketModal = ({
                 className="flex items-center gap-2"
               >
                 <ArrowLeft className="w-4 h-4" />
-                Back to List
+                {t("superadmin.support.modal.backToList", "Back to List")}
               </Button>
             </Flex>
 
@@ -281,7 +283,7 @@ export const SupportTicketModal = ({
                   className="flex items-center gap-2 text-orange-600 border-orange-200 hover:bg-orange-50"
                 >
                   <Archive className="w-4 h-4" />
-                  Close Ticket
+                  {t("superadmin.support.modal.closeTicketBtn", "Close Ticket")}
                 </Button>
               )}
             </Flex>

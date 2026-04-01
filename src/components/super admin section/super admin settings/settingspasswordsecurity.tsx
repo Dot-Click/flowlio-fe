@@ -17,6 +17,7 @@ import { IoEye, IoEyeOff } from "react-icons/io5";
 import { useState } from "react";
 import { useUpdateSuperAdminPassword } from "@/hooks/useupdatesuperadminpassword";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 export const formSchema = z
   .object({
@@ -49,6 +50,7 @@ export const formSchema = z
   });
 
 export const SettingsPasswordSecurity = () => {
+  const { t } = useTranslation();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -86,8 +88,8 @@ export const SettingsPasswordSecurity = () => {
   return (
     <Stack className="w-full bg-white border border-gray-400/50  p-8 rounded-md max-md:px-3">
       <Stack>
-        <h1 className="text-2xl font-semibold">Password & Security</h1>
-        <h1>Manage your passwords, login preferences and recovery methods.</h1>
+        <h1 className="text-2xl font-semibold">{t("settings.passwordTitle", "Password & Security")}</h1>
+        <h1>{t("settings.passwordDesc", "Manage your passwords, login preferences and recovery methods.")}</h1>
       </Stack>
 
       <Box className=" bg-gray-100/80 border border-gray-400/50 mt-4 min-h-6 w-2xl p-4 rounded-md max-md:w-full max-md:text-xs">
@@ -108,7 +110,7 @@ export const SettingsPasswordSecurity = () => {
               name="currentpassword"
               render={({ field }) => (
                 <FormItem className="w-md max-sm:w-full">
-                  <FormLabel>Current Password</FormLabel>
+                  <FormLabel>{t("settings.currentPassword", "Current Password")}</FormLabel>
                   <FormControl>
                     <Box className="relative">
                       <Input
@@ -143,7 +145,7 @@ export const SettingsPasswordSecurity = () => {
               name="newpassword"
               render={({ field }) => (
                 <FormItem className="w-md max-sm:w-full">
-                  <FormLabel>New Password</FormLabel>
+                  <FormLabel>{t("settings.newPassword", "New Password")}</FormLabel>
                   <FormControl>
                     <Box className="relative">
                       <Input
@@ -175,7 +177,7 @@ export const SettingsPasswordSecurity = () => {
               name="confirmpassword"
               render={({ field }) => (
                 <FormItem className="w-md max-sm:w-full">
-                  <FormLabel>Confirm New Password</FormLabel>
+                  <FormLabel>{t("settings.confirmPassword", "Confirm New Password")}</FormLabel>
                   <FormControl>
                     <Box className="relative">
                       <Input
@@ -210,7 +212,7 @@ export const SettingsPasswordSecurity = () => {
             type="submit"
             disabled={updatePasswordMutation.isPending}
           >
-            {updatePasswordMutation.isPending ? "Updating..." : "Save Changes"}
+            {updatePasswordMutation.isPending ? t("common.saving", "Updating...") : t("settings.saveChanges", "Save Changes")}
           </Button>
         </form>
       </Form>

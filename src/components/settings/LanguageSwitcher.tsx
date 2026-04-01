@@ -85,7 +85,7 @@ export const LanguageSwitcher = () => {
 
         <Box className="bg-blue-50 border border-blue-200 p-4 rounded-md mt-4">
           <p className="text-sm text-blue-800">
-            <strong>💡 {t("common.tip")}:</strong>{" "}
+            <strong>💡 {t("settings.tip")}:</strong>{" "}
             {t("settings.languageChanged")}
           </p>
         </Box>

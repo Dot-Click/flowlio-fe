@@ -251,6 +251,11 @@ const userOrgOwnerNavItems: NavItem[] = [
     title: "settings",
     icon: React.createElement(IoSettingsOutline),
   },
+  {
+    url: "/dashboard/reports",
+    title: "reports",
+    icon: React.createElement(TbReportSearch),
+  },
 ];
 
 // Sub Admin navigation items (same as super admin but without sub admin creation)

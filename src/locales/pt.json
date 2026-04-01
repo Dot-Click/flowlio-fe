@@ -32,6 +32,7 @@
     "loadingComments": "Carregando comentários...",
     "fillAllFields": "Por favor preencha todos os campos",
     "loggingOut": "Saindo...",
+    "noClient": "Nenhum cliente",
     "unknown": "Desconhecido"
   },
   "appSidebar": {
@@ -62,7 +63,127 @@
     "newsletter": "Newsletter",
     "demoAccounts": "Contas de demonstração",
     "support": "Suporte",
-    "aiAssistant": "Assistente de IA"
+    "aiAssistant": "Assistente de IA",
+    "reports": "Relatórios e Análises",
+    "subscriptions": "Assinaturas"
+  },
+  "superadmin": {
+    "companies": {
+      "title": "Empresas",
+      "subtitle": "Visualize e gerencie todas as empresas registradas. Acompanhe seus planos, projetos e usuários.",
+      "export": "Exportar",
+      "table": {
+        "companyName": "Nome da Empresa",
+        "email": "E-mail",
+        "employees": "Funcionários",
+        "status": "Status",
+        "plan": "Plano",
+        "actions": "Ações"
+      }
+    },
+    "subAdmins": {
+      "title": "Subadministradores",
+      "subtitle": "Gerenciar administradores com acesso para gerenciar empresas e sistema.",
+      "create": "Criar Subadministrador",
+      "table": {
+        "name": "Nome",
+        "email": "E-mail",
+        "type": "Tipo",
+        "status": "Status",
+        "addedOn": "Adicionado em",
+        "actions": "Ações"
+      }
+    },
+    "users": {
+      "title": "Usuários",
+      "subtitle": "Visão geral de todos os usuários na plataforma.",
+      "table": {
+        "name": "Nome",
+        "email": "E-mail",
+        "company": "Empresa",
+        "role": "Função",
+        "status": "Status",
+        "addedOn": "Adicionado em",
+        "actions": "Ações"
+      }
+    },
+    "subscriptions": {
+      "title": "Assinaturas",
+      "subtitle": "Acompanhe todos os planos de assinatura ativos e passados.",
+      "table": {
+        "company": "Nome da Empresa",
+        "plan": "Plano",
+        "status": "Status",
+        "amount": "Valor",
+        "nextBilling": "Próximo Faturamento",
+        "actions": "Ações"
+      }
+    },
+    "newsletter": {
+      "title": "Inscritos na Newsletter",
+      "subtitle": "Visualize e gerencie todos os inscritos na newsletter. Acompanhe as estatísticas.",
+      "sendNewsletter": "Enviar Newsletter",
+      "totalSubscribers": "Total de Inscritos",
+      "active": "Ativo",
+      "unsubscribed": "Cancelado",
+      "table": {
+        "email": "E-mail",
+        "status": "Status",
+        "subscribedAt": "Inscrito em",
+        "createdAt": "Criado em",
+        "actions": "Ações"
+      }
+    },
+    "demoAccounts": {
+      "title": "Contas de Demonstração",
+      "subtitle": "Gerencie e acompanhe as contas de demonstração.",
+      "generateAccount": "Gerar Conta",
+      "active": "Ativa",
+      "expired": "Expirada",
+      "total": "Total",
+      "table": {
+        "name": "Nome",
+        "email": "E-mail",
+        "password": "Senha",
+        "status": "Status",
+        "expiresAt": "Expira em",
+        "actions": "Ações"
+      }
+    },
+    "support": {
+      "title": "Tickets de Suporte",
+      "subtitle": "Gerenciar chamados de suporte relatados pelos clientes.",
+      "table": {
+        "ticketId": "ID do Ticket",
+        "subject": "Assunto",
+        "user": "Usuário",
+        "company": "Empresa",
+        "status": "Status",
+        "priority": "Prioridade",
+        "createdAt": "Criado em",
+        "actions": "Ações"
+      }
+    }
+  },
+  "superadminDashboard": {
+    "totalCompanies": "Total de Empresas",
+    "companiesDesc": "Empresas atualmente na plataforma",
+    "totalProjects": "Total de Projetos",
+    "projectsDesc": "Projetos criados por empresas",
+    "activeSubscriptions": "Assinaturas Ativas",
+    "subscriptionsDesc": "Empresas com planos pagos ativos",
+    "totalInvoices": "Total de Faturas",
+    "invoicesDesc": "Faturas criadas via plataforma",
+    "featureOverview": "Visão Geral dos Recursos"
+  },
+  "superadminSettings": {
+    "profileInformation": "Informações do Perfil",
+    "profilePicture": "Foto de Perfil",
+    "changeLogo": "Mudar Logo",
+    "superAdmin": "Superadministrador",
+    "subAdmin": "Subadministrador",
+    "user": "Usuário",
+    "unknown": "Desconhecido"
   },
   "settings": {
     "title": "Configurações",

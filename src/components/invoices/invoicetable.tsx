@@ -9,17 +9,30 @@ import { CircleCheck, FileText, Download, Trash2 } from "lucide-react";
 import { useFetchInvoices, Invoice } from "@/hooks/usefetchinvoices";
 import { useDeleteInvoice } from "@/hooks/usedeleteinvoice";
 import { useGenerateInvoicePDF } from "@/hooks/usegenerateinvoicepdf";
+import { useUpdateInvoiceStatus } from "@/hooks/useupdateinvoicestatus";
 import { useCallback } from "react";
+import { toast } from "sonner";
 
 // Actions component to properly use hooks
 const InvoiceActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
   const deleteInvoiceMutation = useDeleteInvoice();
+  const updateStatusMutation = useUpdateInvoiceStatus();
   const { generatePDF } = useGenerateInvoicePDF();
 
   const handleDelete = () => {
     if (confirm("Are you sure you want to delete this invoice?")) {
       deleteInvoiceMutation.mutate(invoice.id);
     }
+  };
+
+  const handleUpdateStatus = (status: string) => {
+    updateStatusMutation.mutate(
+      { id: invoice.id, status },
+      {
+        onSuccess: () => toast.success(`Invoice marked as ${status}`),
+        onError: () => toast.error(`Failed to update invoice status`),
+      }
+    );
   };
 
   const handleDownloadPDF = () => {
@@ -41,6 +54,27 @@ const InvoiceActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
         )}
         {invoice.pdfUrl ? "Download" : "Generate PDF"}
       </Button>
+
+      {invoice.status.toLowerCase() !== "paid" && (
+        <Button
+          onClick={() => handleUpdateStatus("paid")}
+          className="bg-green-500 border-none hover:bg-green-600 cursor-pointer rounded-full space-x-2 text-white"
+          disabled={updateStatusMutation.isPending}
+        >
+          <CircleCheck className="size-4" />
+          Mark as Paid
+        </Button>
+      )}
+
+      {invoice.status.toLowerCase() === "paid" && (
+        <Button
+          onClick={() => handleUpdateStatus("draft")}
+          className="bg-yellow-500 border-none hover:bg-yellow-600 cursor-pointer rounded-full space-x-2 text-white"
+          disabled={updateStatusMutation.isPending}
+        >
+          Mark as Draft
+        </Button>
+      )}
 
       <Button
         onClick={handleDelete}

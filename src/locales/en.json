@@ -30,7 +30,10 @@
     "close": "Close",
     "view": "View",
     "loadingComments": "Loading comments...",
-    "fillAllFields": "Please fill in all fields"
+    "fillAllFields": "Please fill in all fields",
+    "loggingOut": "Logging out...",
+    "noClient": "No client",
+    "unknown": "Unknown"
   },
   "appSidebar": {
     "dashboard": "Dashboard",
@@ -60,7 +63,126 @@
     "newsletter": "Newsletter",
     "demoAccounts": "Demo Accounts",
     "support": "Support",
-    "aiAssistant": "AI Assistant"
+    "aiAssistant": "AI Assistant",
+    "reports": "Reports & Analytics",
+    "subscriptions": "Subscriptions"
+  },
+  "superadmin": {
+    "companies": {
+      "title": "Companies",
+      "subtitle": "View and manage all registered companies. Track their subscription plans, projects, and users.",
+      "export": "Export",
+      "table": {
+        "companyName": "Company Name",
+        "email": "Email",
+        "employees": "Employees",
+        "status": "Status",
+        "plan": "Plan",
+        "actions": "Actions"
+      }
+    },
+    "subAdmins": {
+      "title": "Sub Admins",
+      "subtitle": "Manage administrators who have access to manage companies and system settings.",
+      "create": "Create Sub Admin",
+      "table": {
+        "name": "Name",
+        "email": "Email",
+        "type": "Type",
+        "status": "Status",
+        "addedOn": "Added On",
+        "actions": "Actions"
+      }
+    },
+    "users": {
+      "title": "Users",
+      "subtitle": "Overview of all users across the platform.",
+      "table": {
+        "name": "Name",
+        "email": "Email",
+        "company": "Company",
+        "role": "Role",
+        "status": "Status",
+        "addedOn": "Added On",
+        "actions": "Actions"
+      }
+    },
+    "subscriptions": {
+      "title": "Subscriptions",
+      "subtitle": "Track all active and past company subscriptions.",
+      "table": {
+        "company": "Company Name",
+        "plan": "Plan",
+        "status": "Status",
+        "amount": "Amount",
+        "nextBilling": "Next Billing",
+        "actions": "Actions"
+      }
+    },
+    "newsletter": {
+      "title": "Newsletter Subscribers",
+      "subtitle": "View and manage all newsletter subscribers. Track subscription statistics and manage email lists.",
+      "sendNewsletter": "Send Newsletter",
+      "totalSubscribers": "Total Subscribers",
+      "active": "Active",
+      "unsubscribed": "Unsubscribed",
+      "table": {
+        "email": "Email",
+        "status": "Status",
+        "subscribedAt": "Subscribed At",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      }
+    },
+    "demoAccounts": {
+      "title": "Demo Accounts",
+      "subtitle": "Manage and track all generated demo accounts for prospective clients.",
+      "generateAccount": "Generate Account",
+      "active": "Active",
+      "expired": "Expired",
+      "total": "Total",
+      "table": {
+        "username": "Username",
+        "password": "Password",
+        "expiresAt": "Expires At",
+        "status": "Status",
+        "actions": "Actions"
+      }
+    },
+    "support": {
+      "title": "Support Tickets",
+      "subtitle": "Manage and respond to support tickets from all users.",
+      "table": {
+        "ticketId": "Ticket ID",
+        "subject": "Subject",
+        "user": "User",
+        "company": "Company",
+        "status": "Status",
+        "priority": "Priority",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      }
+    }
+  },
+  "superadminDashboard": {
+    "totalCompanies": "Total Companies",
+    "companiesDesc": "Companies currently on platform",
+    "totalProjects": "Total Projects",
+    "projectsDesc": "All projects created by companies",
+    "activeSubscriptions": "Active Subscriptions",
+    "subscriptionsDesc": "Companies on active paid plans",
+    "totalInvoices": "Total Invoices",
+    "invoicesDesc": "Invoices created via platform",
+    "featureOverview": "Feature Overview"
+  },
+  "superadminSettings": {
+    "profileInformation": "Profile Information",
+    "profilePicture": "Profile Picture",
+    "changeLogo": "Change Logo",
+    "superAdmin": "Super Admin",
+    "subAdmin": "Sub Admin",
+    "user": "User",
+    "unknown": "Unknown"
   },
   "settings": {
     "title": "Settings",

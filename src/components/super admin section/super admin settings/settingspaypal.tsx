@@ -7,8 +7,10 @@ import {
   useGeneralModalDisclosure,
 } from "@/components/common/generalmodal";
 import { PayPalConfigModal } from "./paypalconfigmodal";
+import { useTranslation } from "react-i18next";
 
 export const SettingsPayPal = () => {
+  const { t } = useTranslation();
   const modalProps = useGeneralModalDisclosure();
 
   const handleOpenModal = () => {
@@ -17,10 +19,9 @@ export const SettingsPayPal = () => {
 
   return (
     <Box>
-      <h1 className="text-xl font-semibold">PayPal Configuration</h1>
+      <h1 className="text-xl font-semibold">{t("settings.paypalTitle", "PayPal Configuration")}</h1>
       <h4 className="max-md:text-sm">
-        View and manage your PayPal payment account settings. Check which
-        account is receiving payments.
+        {t("settings.paypalDesc", "View and manage your PayPal payment account settings. Check which account is receiving payments.")}
       </h4>
 
       <Box className="mt-8">
@@ -29,18 +30,18 @@ export const SettingsPayPal = () => {
             <Flex className="items-center gap-2">
               <CreditCard className="h-5 w-5 text-blue-600" />
               <h1 className="text-lg max-md:text-sm font-medium text-start">
-                PayPal Account Settings
+                {t("settings.paypalAccountSettings", "PayPal Account Settings")}
               </h1>
             </Flex>
             <p className="text-sm text-gray-600 max-md:text-xs">
-              Check which PayPal account is configured and receiving payments
+              {t("settings.paypalCheckWhich", "Check which PayPal account is configured and receiving payments")}
             </p>
           </Flex>
           <Button
             onClick={handleOpenModal}
             className="bg-[#1797b9] hover:bg-[#1797b9]/80 rounded-full px-6 cursor-pointer"
           >
-            View Configuration
+            {t("settings.viewConfiguration", "View Configuration")}
           </Button>
         </Flex>
       </Box>

@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { NewsletterSubscribersTable } from "./newslettersubscriberstable";
 import { SendNewsletterModal } from "./sendnewslettermodal";
 import { Mail } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export const NewsletterHeader = () => {
+  const { t } = useTranslation();
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
 
   return (
@@ -15,11 +17,10 @@ export const NewsletterHeader = () => {
       <Center className="justify-between px-4 py-6 max-sm:flex-col max-sm:items-start gap-2">
         <Stack className="gap-1">
           <h1 className="text-black text-3xl max-sm:text-xl font-medium">
-            Newsletter Subscribers
+            {t("superadmin.newsletter.title", "Newsletter Subscribers")}
           </h1>
           <h1 className={`max-sm:text-sm max-w-[700px] text-gray-500`}>
-            View and manage all newsletter subscribers. Track subscription
-            statistics and manage email lists.
+            {t("superadmin.newsletter.subtitle", "View and manage all newsletter subscribers. Track subscription statistics and manage email lists.")}
           </h1>
         </Stack>
 
@@ -29,7 +30,7 @@ export const NewsletterHeader = () => {
           className="bg-black text-white border border-gray-200 rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
         >
           <Mail className="size-5" />
-          Send Newsletter
+          {t("superadmin.newsletter.sendNewsletter", "Send Newsletter")}
         </Button>
       </Center>
 

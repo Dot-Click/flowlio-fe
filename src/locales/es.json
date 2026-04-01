@@ -32,6 +32,7 @@
     "loadingComments": "Cargando comentarios...",
     "fillAllFields": "Por favor complete todos los campos",
     "loggingOut": "Cerrando sesión...",
+    "noClient": "Sin cliente",
     "unknown": "Desconocido"
   },
   "appSidebar": {
@@ -62,7 +63,127 @@
     "newsletter": "Boletín",
     "demoAccounts": "Cuentas de demostración",
     "support": "Soporte",
-    "aiAssistant": "Asistente de IA"
+    "aiAssistant": "Asistente de IA",
+    "reports": "Informes y Análisis",
+    "subscriptions": "Suscripciones"
+  },
+  "superadmin": {
+    "companies": {
+      "title": "Empresas",
+      "subtitle": "Ver y administrar todas las empresas registradas. Realizar un seguimiento de sus planes de suscripción, proyectos y usuarios.",
+      "export": "Exportar",
+      "table": {
+        "companyName": "Nombre de la empresa",
+        "email": "Correo electrónico",
+        "employees": "Empleados",
+        "status": "Estado",
+        "plan": "Plan",
+        "actions": "Acciones"
+      }
+    },
+    "subAdmins": {
+      "title": "Subadministradores",
+      "subtitle": "Administre los administradores que tienen acceso a la configuración empresas y del sistema.",
+      "create": "Crear Subadministrador",
+      "table": {
+        "name": "Nombre",
+        "email": "Correo electrónico",
+        "type": "Tipo",
+        "status": "Estado",
+        "addedOn": "Agregado el",
+        "actions": "Acciones"
+      }
+    },
+    "users": {
+      "title": "Usuarios",
+      "subtitle": "Vista general de todos los usuarios en la plataforma.",
+      "table": {
+        "name": "Nombre",
+        "email": "Correo electrónico",
+        "company": "Empresa",
+        "role": "Rol",
+        "status": "Estado",
+        "addedOn": "Agregado el",
+        "actions": "Acciones"
+      }
+    },
+    "subscriptions": {
+      "title": "Suscripciones",
+      "subtitle": "Rastrear todas las suscripciones activas y pasadas.",
+      "table": {
+        "company": "Nombre de la empresa",
+        "plan": "Plan",
+        "status": "Estado",
+        "amount": "Monto",
+        "nextBilling": "Próxima facturación",
+        "actions": "Acciones"
+      }
+    },
+    "newsletter": {
+      "title": "Suscriptores del boletín",
+      "subtitle": "Ver y gestionar todos los suscriptores. Rastrea estadísticas de suscripción.",
+      "sendNewsletter": "Enviar boletín",
+      "totalSubscribers": "Suscriptores totales",
+      "active": "Activos",
+      "unsubscribed": "Desuscritos",
+      "table": {
+        "email": "Correo electrónico",
+        "status": "Estado",
+        "subscribedAt": "Suscrito en",
+        "createdAt": "Creado en",
+        "actions": "Acciones"
+      }
+    },
+    "demoAccounts": {
+      "title": "Cuentas de demostración",
+      "subtitle": "Ver y administrar cuentas de demostración del producto",
+      "generateAccount": "Generar Cuenta",
+      "active": "Activo",
+      "expired": "Caducado",
+      "total": "Total",
+      "table": {
+        "name": "Nombre",
+        "email": "Correo",
+        "password": "Contraseña",
+        "status": "Estado",
+        "expiresAt": "Caduca el",
+        "actions": "Acciones"
+      }
+    },
+    "support": {
+      "title": "Tickets de Soporte",
+      "subtitle": "Ver y gestionar tickets de problemas reportados por los clientes.",
+      "table": {
+        "ticketId": "Ticket ID",
+        "subject": "Asunto",
+        "user": "Usuario",
+        "company": "Empresa",
+        "status": "Estado",
+        "priority": "Prioridad",
+        "createdAt": "Creado en",
+        "actions": "Acciones"
+      }
+    }
+  },
+  "superadminDashboard": {
+    "totalCompanies": "Total de Empresas",
+    "companiesDesc": "Empresas actualmente en la plataforma",
+    "totalProjects": "Total de Proyectos",
+    "projectsDesc": "Todos los proyectos creados por empresas",
+    "activeSubscriptions": "Suscripciones Activas",
+    "subscriptionsDesc": "Empresas en planes de pago activos",
+    "totalInvoices": "Total de Facturas",
+    "invoicesDesc": "Facturas creadas en la plataforma",
+    "featureOverview": "Vista general de funciones"
+  },
+  "superadminSettings": {
+    "profileInformation": "Información del Perfil",
+    "profilePicture": "Foto de Perfil",
+    "changeLogo": "Cambiar Logo",
+    "superAdmin": "Superadministrador",
+    "subAdmin": "Subadministrador",
+    "user": "Usuario",
+    "unknown": "Desconocido"
   },
   "settings": {
     "title": "Ajustes",

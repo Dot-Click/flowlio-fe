@@ -166,7 +166,7 @@ export const TaskManagementHeader = () => {
         <Center className="justify-between max-sm:flex-col max-sm:items-start gap-2">
           <Stack className="gap-1">
             <h1 className="text-black text-3xl max-sm:text-xl font-medium">
-              {t("appSidebar.tasksmanagement")}
+              {t("appSidebar.tasksManagement")}
             </h1>
             <h1 className={`max-sm:text-sm text-[#616572]`}>
               {t("taskManagement.subtitle")}

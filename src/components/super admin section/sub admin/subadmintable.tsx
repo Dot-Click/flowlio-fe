@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { useDeleteSubAdmin } from "@/hooks/usedeletesubadmin";
 import { useUpdateSubAdminPermission } from "@/hooks/useupdatesubadminpermission";
 import { Flex } from "@/components/ui/flex";
+import { useTranslation } from "react-i18next";
 
 export type SubAdminData = {
   id: string;
@@ -36,6 +37,7 @@ export type SubAdminData = {
 };
 
 export const SubAdminTable = () => {
+  const { t } = useTranslation();
   const { fetchNextPage, hasNextPage, isLoading, error, data, refetch } =
     useFetchSubAdmins();
 
@@ -133,7 +135,7 @@ export const SubAdminTable = () => {
     },
     {
       accessorKey: "name",
-      header: () => <Box className="text-black font-semibold p-3">Name</Box>,
+      header: () => <Box className="text-black font-semibold p-3">{t("superadmin.subAdmins.table.name")}</Box>,
       cell: ({ row }) => (
         <Box className="p-3">
           <div className="font-medium capitalize">
@@ -145,25 +147,25 @@ export const SubAdminTable = () => {
     {
       accessorKey: "email",
       header: () => (
-        <Box className="text-black font-semibold text-center">Email</Box>
+        <Box className="text-black font-semibold text-center">{t("superadmin.subAdmins.table.email")}</Box>
       ),
       cell: ({ row }) => (
-        <Box className="text-center">{row.original.email || "N/A"}</Box>
+        <Box className="text-center">{row.original.email || t("common.unknown")}</Box>
       ),
     },
     {
       accessorKey: "contactNumber",
       header: () => (
-        <Box className="text-black font-semibold text-center">Contact</Box>
+        <Box className="text-black font-semibold text-center">{t("settings.phone")}</Box>
       ),
       cell: ({ row }) => (
-        <Box className="text-center">{row.original.contactNumber || "N/A"}</Box>
+        <Box className="text-center">{row.original.contactNumber || t("common.notSet")}</Box>
       ),
     },
     {
       accessorKey: "permission",
       header: () => (
-        <Box className="text-black font-semibold text-center">Permission</Box>
+        <Box className="text-black font-semibold text-center">{t("superadmin.subAdmins.table.type")}</Box>
       ),
       cell: ({ row }) => {
         return (
@@ -182,8 +184,8 @@ export const SubAdminTable = () => {
                 />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Active">Active</SelectItem>
-                <SelectItem value="Deactivated">Deactivated</SelectItem>
+                <SelectItem value="Active">{t("userManagement.memberStatus.active")}</SelectItem>
+                <SelectItem value="Deactivated">{t("userManagement.memberStatus.inactive")}</SelectItem>
               </SelectContent>
             </Select>
           </Center>
@@ -193,7 +195,7 @@ export const SubAdminTable = () => {
     {
       accessorKey: "createdAt",
       header: () => (
-        <Box className="text-black font-semibold text-center">Created</Box>
+        <Box className="text-black font-semibold text-center">{t("superadmin.subAdmins.table.addedOn")}</Box>
       ),
       cell: ({ row }) => (
         <Box className="text-center text-sm text-gray-600">
@@ -208,7 +210,7 @@ export const SubAdminTable = () => {
     {
       accessorKey: "actions",
       header: () => (
-        <Box className="text-center text-black font-semibold">Actions</Box>
+        <Box className="text-center text-black font-semibold">{t("superadmin.subAdmins.table.actions")}</Box>
       ),
       cell: ({ row }) => {
         return (
@@ -222,11 +224,11 @@ export const SubAdminTable = () => {
                     className="bg-[#A50403] border-none w-30 h-10 hover:bg-[#A50403]/80 cursor-pointer rounded-md text-white hover:text-white"
                   >
                     <FaRegTrashAlt className="text-white fill-white size-4 " />
-                    Delete
+                    {t("common.delete")}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Delete Sub Admin</p>
+                  <p>{t("common.delete")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -252,7 +254,7 @@ export const SubAdminTable = () => {
             variant="outline"
             disabled={isLoading}
           >
-            {isLoading ? "Loading..." : "Load More"}
+            {isLoading ? t("common.loading") : t("common.next")}
           </Button>
         </Flex>
       )}

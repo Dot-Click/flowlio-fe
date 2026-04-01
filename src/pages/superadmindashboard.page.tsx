@@ -16,6 +16,7 @@ import { useFetchAllData } from "@/hooks/useFetchAllData";
 import { useFetchTotalInvoices } from "@/hooks/useFetchTotalInvoices";
 import { getTotalCounts } from "@/utils/chartDataProcessor";
 import { useFetchSuperadminOverview } from "@/hooks/useFetchSuperadminOverview";
+import { useTranslation } from "react-i18next";
 // import { useUser } from "@/providers/user.provider";
 // import { Badge } from "@/components/ui/badge";
 
@@ -27,6 +28,7 @@ const FEATURE_COLORS = {
 } as const;
 
 const SuperAdminDashboardPage = () => {
+  const { t } = useTranslation();
   const { data: allDataResponse } = useFetchAllData();
   const { data: totalInvoicesResponse } = useFetchTotalInvoices();
   const { data: overviewResponse } = useFetchSuperadminOverview();
@@ -74,29 +76,29 @@ const SuperAdminDashboardPage = () => {
   const stats: Stat[] = [
     {
       link: "/superadmin/companies",
-      title: "Total Companies",
-      description: "Companies currently on platform",
+      title: t("superadminDashboard.totalCompanies"),
+      description: t("superadminDashboard.companiesDesc"),
       icon: img1,
       count: String(totalCompanies),
     },
     {
       link: "/superadmin", // No specific projects route, stays on dashboard
-      title: "Total Projects",
-      description: "All projects created by companies",
+      title: t("superadminDashboard.totalProjects"),
+      description: t("superadminDashboard.projectsDesc"),
       icon: img2,
       count: String(liveProjects),
     },
     {
       link: "/superadmin/subscriptions",
-      title: "Active Subscriptions",
-      description: "Companies on active paid plans",
+      title: t("superadminDashboard.activeSubscriptions"),
+      description: t("superadminDashboard.subscriptionsDesc"),
       icon: img3,
       count: String(activeSubscriptions),
     },
     {
       link: "/superadmin", // No specific invoices route, stays on dashboard
-      title: "Total Invoices",
-      description: "Invoices created via platform",
+      title: t("superadminDashboard.totalInvoices"),
+      description: t("superadminDashboard.invoicesDesc"),
       icon: img4,
       count: String(totalInvoices),
     },
@@ -138,7 +140,7 @@ const SuperAdminDashboardPage = () => {
         <Stack className="max-[950px]:w-full items-start">
           <ProjectStatusPieChart
             data={featureOverviewData}
-            title="Feature Overview"
+            title={t("superadminDashboard.featureOverview")}
           />
         </Stack>
       </Flex>

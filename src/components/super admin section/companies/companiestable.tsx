@@ -17,6 +17,7 @@ import { useFetchAllOrganizations } from "@/hooks/usefetchallorganizations";
 import { useState } from "react";
 import { DeleteOrganizationModal } from "./DeleteOrganizationModal";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 // Define the actual data structure from the API (userOrganizations with nested organization)
 export type OrganizationData = {
@@ -61,6 +62,7 @@ export type OrganizationData = {
 };
 
 export const CompaniesTable = () => {
+  const { t } = useTranslation();
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedOrganization, setSelectedOrganization] = useState<{
     id: string;
@@ -104,17 +106,17 @@ export const CompaniesTable = () => {
 
     {
       accessorKey: "name",
-      header: () => <Box className="text-black py-3 px-3">Company Name</Box>,
+      header: () => <Box className="text-black py-3 px-3">{t("superadmin.companies.table.companyName")}</Box>,
       cell: ({ row }) => (
         <Box className="capitalize py-3 px-3 max-sm:w-full">
-          {row.original.name || "N/A"}
+          {row.original.name || t("common.unknown")}
         </Box>
       ),
     },
 
     {
       accessorKey: "registeredEmail",
-      header: () => <Box className="text-black text-start">Email</Box>,
+      header: () => <Box className="text-black text-start">{t("superadmin.companies.table.email")}</Box>,
       cell: ({ row }) => {
         const userOrganizations = row.original.userOrganizations as
           | Array<{
@@ -136,7 +138,7 @@ export const CompaniesTable = () => {
     {
       accessorKey: "createdAt",
       header: () => (
-        <Box className="text-black text-center">Registration On</Box>
+        <Box className="text-black text-center">{t("table.addedOn")}</Box>
       ),
       cell: ({ row }) => (
         <Box className="captialize text-center">
@@ -151,7 +153,7 @@ export const CompaniesTable = () => {
 
     {
       accessorKey: "subscriptionPlan.name",
-      header: () => <Box className="text-center text-black">Subscription</Box>,
+      header: () => <Box className="text-center text-black">{t("superadmin.companies.table.plan")}</Box>,
       cell: ({ row }) => {
         return (
           <Box className="text-center">
@@ -163,7 +165,7 @@ export const CompaniesTable = () => {
 
     {
       accessorKey: "subscriptionStatus",
-      header: () => <Box className="text-center text-black">Status</Box>,
+      header: () => <Box className="text-center text-black">{t("superadmin.companies.table.status")}</Box>,
       cell: ({ row }) => {
         // Check if user has pending payment (status is pending or undefined)
         const userOrganizations = row.original.userOrganizations as
@@ -289,7 +291,7 @@ export const CompaniesTable = () => {
 
     {
       accessorKey: "actions",
-      header: () => <Box className="text-center text-black">Actions</Box>,
+      header: () => <Box className="text-center text-black">{t("superadmin.companies.table.actions")}</Box>,
       cell: ({ row }) => {
         // Check if this is a pending user without organization (virtual organization)
         const isPendingUser = row.original.id?.startsWith("pending_");
@@ -360,7 +362,7 @@ export const CompaniesTable = () => {
       <Box className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading organizations...</p>
+          <p className="text-gray-600">{t("common.loading")}</p>
         </div>
       </Box>
     );
@@ -370,7 +372,7 @@ export const CompaniesTable = () => {
     return (
       <Box className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600">Error loading organizations</p>
+          <p className="text-red-600">{t("common.error")}</p>
         </div>
       </Box>
     );
