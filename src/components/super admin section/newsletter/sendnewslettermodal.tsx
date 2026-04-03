@@ -15,6 +15,7 @@ import { Box } from "@/components/ui/box";
 import { Button } from "@/components/ui/button";
 import { Flex } from "@/components/ui/flex";
 import { useSendNewsletter } from "@/hooks/usesendnewsletter";
+import { useFetchNewsletterStats } from "@/hooks/usefetchnewslettersubscribers";
 import { toast } from "sonner";
 import RichTextEditor from "@/components/common/RichTextEditor";
 import { sanitizeHTML } from "@/utils/sanitize";
@@ -53,6 +54,8 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
   });
 
   const sendNewsletterMutation = useSendNewsletter();
+  const { data: statsResponse } = useFetchNewsletterStats();
+  const stats = statsResponse?.data;
 
   const onSubmit = async (data: NewsletterFormData) => {
     // Sanitize HTML before sending
@@ -97,6 +100,7 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
 
   return (
     <GeneralModal
+      withoutCloseButton
       open={isOpen}
       onOpenChange={(open) => {
         if (!open) {
@@ -155,6 +159,25 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
                   </FormItem>
                 )}
               />
+
+              {/* Recipient Info */}
+              <Flex className="items-center gap-3 p-4 bg-[#1797b9]/5 border border-[#1797b9]/10 rounded-xl">
+                <Box className="p-2 bg-[#1797b9]/10 rounded-lg text-[#1797b9]">
+                  <ClipboardList size={18} />
+                </Box>
+                <Box>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {t("superadmin.newsletter.modal.recipientInfo", "Target Audience")}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {stats ? (
+                      t("superadmin.newsletter.modal.sendingToCount", "This newsletter will be sent to {{count}} active subscribers.", { count: stats.subscribed })
+                    ) : (
+                      t("superadmin.newsletter.modal.calculatingRecipients", "Calculating recipients...")
+                    )}
+                  </p>
+                </Box>
+              </Flex>
 
               {/* Toggle Preview / Edit */}
               <Flex className="justify-between items-center bg-gray-50 p-2 rounded-xl">

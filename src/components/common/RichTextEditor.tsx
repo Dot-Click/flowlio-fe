@@ -7,7 +7,7 @@ import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
-import { Color } from "@tiptap/extension-color";
+import Color from "@tiptap/extension-color";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Highlight from "@tiptap/extension-highlight";
 import {
@@ -100,7 +100,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       attributes: {
         class: cn(
           "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none min-h-[300px] p-6 text-gray-800 leading-relaxed max-w-none",
-          className
+          className,
         ),
       },
     },
@@ -118,7 +118,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     fileInputRef.current?.click();
   }, []);
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -193,8 +195,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       title={title}
       className={cn(
         "h-9 w-9 p-0 rounded-md transition-all duration-200",
-        isActive ? "bg-[#1797b9]/20 text-[#1797b9] font-bold" : "text-gray-600 hover:bg-gray-100",
-        disabled && "opacity-50 cursor-not-allowed"
+        isActive
+          ? "bg-[#1797b9]/20 text-[#1797b9] font-bold cursor-pointer"
+          : "text-gray-600 hover:bg-gray-100 cursor-pointer",
+        disabled && "opacity-50 cursor-not-allowed",
       )}
     >
       {children}
@@ -202,9 +206,27 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   );
 
   const colors = [
-    "#000000", "#444444", "#666666", "#999999", "#CCCCCC", "#EEEEEE", "#FFFFFF",
-    "#FF0000", "#FF9900", "#FFFF00", "#00FF00", "#00FFFF", "#0000FF", "#9900FF",
-    "#FF00FF", "#E67E22", "#E74C3C", "#3498DB", "#2ECC71", "#F1C40F", "#1797B9"
+    "#000000",
+    "#444444",
+    "#666666",
+    "#999999",
+    "#CCCCCC",
+    "#EEEEEE",
+    "#FFFFFF",
+    "#FF0000",
+    "#FF9900",
+    "#FFFF00",
+    "#00FF00",
+    "#00FFFF",
+    "#0000FF",
+    "#9900FF",
+    "#FF00FF",
+    "#E67E22",
+    "#E74C3C",
+    "#3498DB",
+    "#2ECC71",
+    "#F1C40F",
+    "#1797B9",
   ];
 
   return (
@@ -252,21 +274,27 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         <Box className="w-px h-6 bg-gray-200 mx-1 self-center" />
 
         <ToolbarButton
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 1 }).run()
+          }
           isActive={editor.isActive("heading", { level: 1 })}
           title="H1"
         >
           <Heading1 size={18} />
         </ToolbarButton>
         <ToolbarButton
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 2 }).run()
+          }
           isActive={editor.isActive("heading", { level: 2 })}
           title="H2"
         >
           <Heading2 size={18} />
         </ToolbarButton>
         <ToolbarButton
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 3 }).run()
+          }
           isActive={editor.isActive("heading", { level: 3 })}
           title="H3"
         >
@@ -330,10 +358,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         >
           <LinkIcon size={18} />
         </ToolbarButton>
-        <ToolbarButton
-          onClick={addImage}
-          title="Insert Image"
-        >
+        <ToolbarButton onClick={addImage} title="Insert Image">
           <ImageIcon size={18} />
         </ToolbarButton>
         <ToolbarButton
@@ -353,27 +378,35 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
               variant="ghost"
               size="icon"
               title="Text Color"
-              className="h-9 w-9 p-0 rounded-md text-gray-600 hover:bg-gray-100"
+              className="h-9 w-9 p-0 rounded-md text-gray-600 hover:bg-gray-100 cursor-pointer"
             >
               <Palette size={18} />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-48 p-2">
-            <p className="text-xs font-medium mb-2 uppercase text-gray-400">Colors</p>
-            <Flex className="flex-wrap gap-1">
+          <PopoverContent className="w-48 p-2 z-[9999] pointer-events-auto">
+            <p className="text-xs font-medium mb-2 uppercase text-gray-400">
+              Colors
+            </p>
+            <Flex className="flex-wrap gap-1 cursor-default">
               {colors.map((c) => (
                 <button
                   key={c}
                   type="button"
-                  onClick={() => editor.chain().focus().setColor(c).run()}
-                  className="w-6 h-6 rounded-full border border-gray-200 hover:scale-110 transition-transform"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    editor.chain().focus().setColor(c).run();
+                  }}
+                  className="w-6 h-6 rounded-full border border-gray-200 hover:scale-110 transition-transform cursor-pointer"
                   style={{ backgroundColor: c }}
                 />
               ))}
               <button
                 type="button"
-                onClick={() => editor.chain().focus().unsetColor().run()}
-                className="w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center hover:scale-110 transition-transform"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  editor.chain().focus().unsetColor().run();
+                }}
+                className="w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
                 title="Clear Color"
               >
                 <Eraser size={12} />
@@ -383,7 +416,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         </Popover>
 
         <ToolbarButton
-          onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
+          onClick={() =>
+            editor.chain().focus().unsetAllMarks().clearNodes().run()
+          }
           title="Clear Formatting"
         >
           <Eraser size={18} />
@@ -417,7 +452,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
       {/* Bubble Menu for quick formatting */}
       {editor && !isSourceMode && (
-        <BubbleMenu editor={editor} className="flex bg-white shadow-xl border border-gray-100 rounded-lg overflow-hidden p-1 gap-0.5">
+        <BubbleMenu
+          editor={editor}
+          className="flex bg-white shadow-xl border border-gray-100 rounded-lg overflow-hidden p-1 gap-0.5"
+        >
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleBold().run()}
             isActive={editor.isActive("bold")}
@@ -472,9 +510,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           <p className="text-[10px] uppercase tracking-widest font-bold text-orange-400">
             HTML Source Mode
           </p>
-          <p className="text-[10px]">
-            Be careful with manual HTML tags
-          </p>
+          <p className="text-[10px]">Be careful with manual HTML tags</p>
         </Flex>
       )}
       {/* Editor Styles */}
