@@ -27,6 +27,7 @@ import { axios } from "@/configs/axios.config";
 import { authClient } from "@/lib/auth-client";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useTranslation } from "react-i18next";
+import { DetailsPageSkeleton } from "../skeletons";
 
 const settingsSchema = z
   .object({
@@ -540,12 +541,7 @@ export const SettingsHeader = () => {
   if (isLoading || !userData?.user) {
     return (
       <ComponentWrapper className="mt-8 px-6 py-5 max-md:px-6">
-        <div className="flex items-center justify-center py-8">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading settings...</p>
-          </div>
-        </div>
+        <DetailsPageSkeleton withSidebar={false} withTabs={false} />
       </ComponentWrapper>
     );
   }

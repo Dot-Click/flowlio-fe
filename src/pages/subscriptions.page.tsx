@@ -29,6 +29,7 @@ import {
   CreditCard,
   RefreshCw,
 } from "lucide-react";
+import { DetailsPageSkeleton, CardSkeleton, ErrorState } from "@/components/skeletons";
 
 const SubscriptionsPage = () => {
   const navigate = useNavigate();
@@ -43,19 +44,23 @@ const SubscriptionsPage = () => {
   const {
     data: subscriptionData,
     isLoading: subscriptionLoading,
+    isFetching: subscriptionFetching,
     error: subscriptionError,
     refetch: refetchSubscription,
   } = useSubscriptionStatus();
-
+ 
   const cancelSubscriptionMutation = useCancelSubscription();
   const createUpgradeOrderMutation = useCreateUpgradeOrder();
   const captureUpgradeOrderMutation = useCaptureUpgradeOrder();
-
+ 
   const {
     data: plansData,
     isLoading: plansLoading,
+    isFetching: plansFetching,
     error: plansError,
   } = useAvailablePlans();
+ 
+  const loading = subscriptionLoading || plansLoading || subscriptionFetching || plansFetching;
 
   // const updatePlanMutation = useUpdateSubscriptionPlan();
 
@@ -85,14 +90,30 @@ const SubscriptionsPage = () => {
     }
   }, [subscriptionStatus]);
 
-  if (subscriptionLoading || plansLoading) {
+  if (loading && (!subscriptionData || !plansData)) {
     return (
-      <Box className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading subscription information...</p>
-        </div>
-      </Box>
+      <ComponentWrapper className="bg-gray-50 p-8 mt-5">
+        <DetailsPageSkeleton withSidebar={false} withTabs={false} />
+        <Stack className="mt-10 gap-4">
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+        </Stack>
+      </ComponentWrapper>
+    );
+  }
+
+  if (subscriptionError || plansError) {
+    return (
+      <ComponentWrapper className="bg-gray-50 p-8 mt-5">
+        <ErrorState
+          title="Subscription Load Failed"
+          message="We couldn't retrieve your subscription details. This might be a temporary connection issue."
+          onRetry={() => {
+            refetchSubscription();
+          }}
+        />
+      </ComponentWrapper>
     );
   }
 

@@ -61,6 +61,7 @@ import { useUpdateProject } from "@/hooks/useupdateproject";
 import { ProjectExpenses } from "./ProjectExpenses";
 import { useUser } from "@/providers/user.provider";
 import { canViewInternalProjectFinancials } from "@/utils/projectFinancialAccess";
+import { TableSkeleton, ErrorState } from "@/components/skeletons";
 
 // Use the Project interface from the hook
 export type Data = Project & { customFields?: Record<string, any> };
@@ -73,7 +74,9 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
   const orgProjects = useFetchProjects();
   const projectsData = orgProjects.data;
   const isLoading = orgProjects.isLoading;
+  const isFetching = orgProjects.isFetching;
   const error = orgProjects.error;
+  const loading = isLoading || isFetching;
 
   const queryClient = useQueryClient();
 
@@ -673,11 +676,10 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
         <ProjectFilter onFilterChange={setFilters} />
       </Box>
 
-      {isLoading ? (
-        <Box className="flex items-center justify-center p-8">
-          <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
-          <Box className="ml-2">Loading projects...</Box>
-        </Box>
+      {loading ? (
+        <TableSkeleton rows={7} columns={6} withAvatar withActions />
+      ) : error ? (
+        <ErrorState title="Failed to load projects" message={error.message} />
       ) : (
         <>
           <ReusableTable

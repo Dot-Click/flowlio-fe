@@ -18,6 +18,7 @@ import { useState } from "react";
 import { DeleteOrganizationModal } from "./DeleteOrganizationModal";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { TableSkeleton, ErrorState } from "@/components/skeletons";
 
 // Define the actual data structure from the API (userOrganizations with nested organization)
 export type OrganizationData = {
@@ -72,8 +73,11 @@ export const CompaniesTable = () => {
   const {
     data: allOrganizationsResponse,
     isLoading,
+    isFetching,
     error,
   } = useFetchAllOrganizations();
+
+  const loading = isLoading || isFetching;
 
   // The API returns userOrganizations array directly
   const transformedData: OrganizationData[] =
@@ -357,23 +361,21 @@ export const CompaniesTable = () => {
 
   const navigate = useNavigate();
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <Box className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">{t("common.loading")}</p>
-        </div>
+      <Box className="px-4 py-4 min-h-[400px]">
+        <TableSkeleton rows={10} columns={6} withActions />
       </Box>
     );
   }
 
   if (error) {
     return (
-      <Box className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600">{t("common.error")}</p>
-        </div>
+      <Box className="flex items-center justify-center p-12">
+        <ErrorState
+          title={t("common.error")}
+          message={error.message || t("common.errorDescription", "Error loading organizations.")}
+        />
       </Box>
     );
   }

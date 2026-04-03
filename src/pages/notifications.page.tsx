@@ -13,7 +13,7 @@ import {
   type Notification,
 } from "@/hooks/useNotifications";
 import { formatDistanceToNow } from "date-fns";
-import { Trash2, Check, CheckCheck, X, Loader2 } from "lucide-react";
+import { Trash2, Check, CheckCheck, X } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Center } from "@/components/ui/center";
@@ -24,17 +24,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ListSkeleton, ErrorState } from "@/components/skeletons";
 
 const NotificationsPage = () => {
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const limit = 20;
 
-  const { data, isLoading, error, refetch } = useNotifications({
+  const { data, isLoading, isFetching, error, refetch } = useNotifications({
     page,
     limit,
     unreadOnly: filter === "unread",
   });
+
+  const loading = isLoading || isFetching;
 
   const deleteNotificationMutation = useDeleteNotification();
   const markAsReadMutation = useMarkNotificationAsRead();
@@ -86,30 +89,29 @@ const NotificationsPage = () => {
     }
   };
 
-  if (isLoading) {
+  if (loading && (!data || notifications.length === 0)) {
     return (
       <PageWrapper className="mt-6 px-4">
-        <Box className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading notifications...</p>
-          </div>
-        </Box>
+        <Stack className="p-3 gap-6">
+          <Flex className="justify-between items-center">
+            <h1 className="text-lg font-medium">Notifications</h1>
+          </Flex>
+          <ListSkeleton rows={8} withAvatar />
+        </Stack>
       </PageWrapper>
     );
   }
 
-  if (error) {
+  if (error && (!data || notifications.length === 0)) {
     return (
       <PageWrapper className="mt-6 px-4">
-        <Box className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-red-600">Error loading notifications</p>
-            <Button onClick={() => refetch()} className="mt-4">
-              Retry
-            </Button>
-          </div>
-        </Box>
+        <Center className="py-20">
+          <ErrorState
+            title="Error loading notifications"
+            message={error.message || "Please try again later."}
+            onRetry={() => refetch()}
+          />
+        </Center>
       </PageWrapper>
     );
   }
@@ -171,10 +173,8 @@ const NotificationsPage = () => {
         <Box className="w-full h-0.5 bg-gray-200 rounded-full absolute top-14 left-0 max-sm:top-24"></Box>
 
         <Box className="max-h-[calc(100vh-200px)] overflow-auto scroll space-y-3 mt-5">
-          {isLoading ? (
-            <Center className="py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-            </Center>
+          {loading && notifications.length === 0 ? (
+            <ListSkeleton rows={5} withAvatar />
           ) : notifications.length === 0 ? (
             <Center className="py-8">
               <p className="text-sm text-gray-500">

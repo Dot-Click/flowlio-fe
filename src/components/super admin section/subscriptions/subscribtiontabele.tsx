@@ -21,6 +21,7 @@ import { SubscriptionHistoryModal } from "./SubscriptionHistoryModal";
 import { SubscriptionAuditModal } from "./SubscriptionAuditModal";
 import { AlertTriangle } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { TableSkeleton, ErrorState } from "@/components/skeletons";
 
 export interface SubscriptionsHeaderProps {
   fetchedPlans?: IPlan[];
@@ -213,7 +214,13 @@ export const SubscribtionTabele = ({
     string | null
   >(null);
   const [selectedCompanyName, setSelectedCompanyName] = useState<string>("");
-  const { data: allOrganizationsResponse } = useFetchAllOrganizations();
+  const {
+    data: allOrganizationsResponse,
+    isLoading: isOrganizationsLoading,
+    isFetching: isOrganizationsFetching,
+  } = useFetchAllOrganizations();
+
+  const loading = isLoading || isOrganizationsLoading || isOrganizationsFetching;
 
   const handleViewHistory = (organizationId: string, companyName: string) => {
     setSelectedOrganizationId(organizationId);
@@ -329,33 +336,21 @@ export const SubscribtionTabele = ({
       : [];
 
   // Show loading state
-  if (isLoading) {
+  if (loading && tableData.length === 0) {
     return (
-      <Box>
-        <Stack className="gap-1 mb-6">
-          <h1 className="text-black text-2xl font-medium max-md:text-lg">
-            {t("superadmin.subscriptions.title", "Subscription Plans")}
-          </h1>
-          <h1 className="text-gray-500 max-md:text-sm">
-            {t("common.loading", "Loading subscription plans...")}
-          </h1>
-        </Stack>
+      <Box className="px-4 py-4">
+        <TableSkeleton rows={8} columns={7} />
       </Box>
     );
   }
 
-  // Show error state
-  if (error) {
+  if (error && tableData.length === 0) {
     return (
-      <Box>
-        <Stack className="gap-1 mb-6">
-          <h1 className="text-black text-2xl font-medium max-md:text-lg">
-            {t("superadmin.subscriptions.title", "Subscription Plans")}
-          </h1>
-          <h1 className="text-red-500 max-md:text-sm">
-            {t("common.error", "Error loading subscription plans:")} {error.message}
-          </h1>
-        </Stack>
+      <Box className="py-10">
+        <ErrorState
+          title={t("common.error")}
+          message={error.message || t("common.errorDescription", "Error loading subscriptions.")}
+        />
       </Box>
     );
   }

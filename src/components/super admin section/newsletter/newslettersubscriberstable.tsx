@@ -14,6 +14,7 @@ import { useFetchNewsletterStats } from "@/hooks/usefetchnewslettersubscribers";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { TableSkeleton, CardSkeleton, ErrorState, SkeletonWrapper } from "@/components/skeletons";
 
 export const NewsletterSubscribersTable = () => {
   const { t } = useTranslation();
@@ -22,11 +23,14 @@ export const NewsletterSubscribersTable = () => {
 
   const {
     data: subscribersResponse,
-    isLoading,
+    isLoading: isSubscribersLoading,
+    isFetching: isSubscribersFetching,
     error,
   } = useFetchNewsletterSubscribers(page, limit);
 
-  const { data: statsResponse } = useFetchNewsletterStats();
+  const { data: statsResponse, isLoading: isStatsLoading, isFetching: isStatsFetching } = useFetchNewsletterStats();
+
+  const loading = isSubscribersLoading || isSubscribersFetching || isStatsLoading || isStatsFetching;
   const deleteMutation = useDeleteNewsletterSubscriber();
 
   const subscribers = subscribersResponse?.data?.subscribers || [];
@@ -103,23 +107,22 @@ export const NewsletterSubscribersTable = () => {
     },
   ];
 
-  if (isLoading) {
+  if (loading && subscribers.length === 0) {
     return (
-      <Center className="px-4 py-6">
-        <Box className="flex items-center justify-center p-8">
-          <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
-          <Box className="ml-2 text-gray-600">{t("common.loading", "Loading subscribers...")}</Box>
-        </Box>
-      </Center>
+      <Box className="px-4 py-4">
+        <CardSkeleton count={3} className="mb-6 h-24" />
+        <TableSkeleton rows={10} columns={5} withActions />
+      </Box>
     );
   }
 
-  if (error) {
+  if (error && subscribers.length === 0) {
     return (
-      <Center className="px-4 py-6">
-        <div className="text-red-500">
-          {t("common.error", "Error loading subscribers. Please try again.")}
-        </div>
+      <Center className="px-4 py-10">
+        <ErrorState
+          title={t("common.error")}
+          message={error.message || t("common.errorDescription", "Error loading subscribers. Please try again.")}
+        />
       </Center>
     );
   }

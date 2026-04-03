@@ -12,13 +12,16 @@ import {
 } from "@/hooks/usefetchpaymentlinks";
 import { useDeletePaymentLink } from "@/hooks/usedeletepaymentlink";
 import { toast } from "sonner";
+import { TableSkeleton, ErrorState } from "../skeletons";
 
 // Use PaymentLink type from the hook
 export type Data = PaymentLink;
 
 export const PaymentLinksTable = () => {
-  const { data: paymentLinksData, isLoading, error } = useFetchPaymentLinks();
+  const { data: paymentLinksData, isLoading, isFetching, error, refetch } = useFetchPaymentLinks();
   const deletePaymentLinkMutation = useDeletePaymentLink();
+ 
+  const loading = isLoading || isFetching;
 
   const columns: ColumnDef<Data>[] = [
     {
@@ -139,22 +142,21 @@ export const PaymentLinksTable = () => {
     },
   ];
 
-  if (isLoading) {
+  if (loading && !paymentLinksData) {
     return (
-      <Box className="flex justify-center items-center p-8">
-        <Box className="flex items-center justify-center p-8">
-          <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
-          <Box className="ml-2 text-gray-600">Loading payment links...</Box>
-        </Box>
+      <Box className="mt-4">
+        <TableSkeleton rows={5} />
       </Box>
     );
   }
-
+ 
   if (error) {
     return (
-      <Box className="flex justify-center items-center p-8">
-        <Box className="text-red-500">Error loading payment links</Box>
-      </Box>
+      <ErrorState
+        title="Failed to load payment links"
+        message="Could not fetch the payment link data. Please try again later."
+        onRetry={refetch}
+      />
     );
   }
 

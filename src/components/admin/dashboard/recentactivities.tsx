@@ -8,17 +8,18 @@ import type { FC } from "react";
 import { useFetchOrganizationActivities } from "@/hooks/useFetchOrganizationActivities";
 // import { useDeleteActivity } from "@/hooks/useDeleteActivity";
 import { formatDistanceToNow } from "date-fns";
-import { Loader2 } from "lucide-react";
 import { Center } from "@/components/ui/center";
 import { useTranslation } from "react-i18next";
+import { ListSkeleton } from "@/components/skeletons";
 
 export const RecentActivities: FC<BoxProps> = ({ className, ...props }) => {
   const { t } = useTranslation();
-  const { data: activitiesResponse, isLoading } =
+  const { data: activitiesResponse, isLoading, isFetching } =
     useFetchOrganizationActivities();
   // const { mutate: deleteActivity } = useDeleteActivity();
 
   const activitiesContent = activitiesResponse?.data?.activities || [];
+  const loading = isLoading || isFetching;
 
   return (
     <ComponentWrapper className={cn("rounded-lg", className)} {...props}>
@@ -52,10 +53,8 @@ export const RecentActivities: FC<BoxProps> = ({ className, ...props }) => {
 
         <Box className="w-full h-0.5 bg-gray-200 rounded-full absolute top-14 left-0"></Box>
         <Box className="max-h-[21rem] overflow-auto scroll space-y-5 mt-5">
-          {isLoading ? (
-            <Center className="py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-            </Center>
+          {loading ? (
+            <ListSkeleton rows={5} />
           ) : activitiesContent.length > 0 ? (
             activitiesContent.map(({ id, activity, date, user }) => {
               const dateObj = typeof date === "string" ? new Date(date) : date;

@@ -37,6 +37,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TableSkeleton, CardSkeleton, ErrorState } from "@/components/skeletons";
 
 // Active Timer Component for table cells
 const ActiveTableTimer = ({ startTime }: { startTime: string }) => {
@@ -97,13 +98,38 @@ const TimeTrackingPage = () => {
   // Fetch data for regular users
   const { pathname } = useLocation();
   const isViewer = pathname.startsWith("/viewer");
-  const { data: orgProjects } = useFetchProjects();
-  const { data: orgTasks } = useFetchTasks();
-  const { data: viewerProjects } = useFetchViewerProjects();
-  const { data: viewerTasks } = useFetchViewerTasks();
-  const { data: activeTimeEntries } = useActiveTimeEntries();
-  const { data: allTimeEntries } = useAllTimeEntries();
-  const { data: weeklyHours } = useFetchOrganizationWeeklyHoursTracked();
+  
+  const { data: orgProjects, isLoading: projectsLoading, isFetching: projectsFetching } = useFetchProjects();
+  const { data: orgTasks, isLoading: tasksLoading, isFetching: tasksFetching } = useFetchTasks();
+  const { data: viewerProjects, isLoading: viewerProjectsLoading, isFetching: viewerProjectsFetching } = useFetchViewerProjects();
+  const { data: viewerTasks, isLoading: viewerTasksLoading, isFetching: viewerTasksFetching } = useFetchViewerTasks();
+  
+  const { 
+    data: activeTimeEntries, 
+    isLoading: activeLoading, 
+    isFetching: activeFetching,
+    error: activeError,
+    refetch: refetchActive 
+  } = useActiveTimeEntries();
+  
+  const { 
+    data: allTimeEntries, 
+    isLoading: allLoading, 
+    isFetching: allFetching,
+    error: allError,
+    refetch: refetchAll 
+  } = useAllTimeEntries();
+  
+  const { 
+    data: weeklyHours, 
+    isLoading: weeklyLoading, 
+    isFetching: weeklyFetching 
+  } = useFetchOrganizationWeeklyHoursTracked();
+
+  const loading = activeLoading || allLoading || projectsLoading || tasksLoading || weeklyLoading || 
+                  activeFetching || allFetching || projectsFetching || tasksFetching || weeklyFetching;
+  
+  const hasError = activeError || allError;
 
   // Mutations
   const startTaskMutation = useStartTask();
@@ -454,40 +480,49 @@ const TimeTrackingPage = () => {
           </Center>
         </Flex>
       </Box>
-
+ 
       {/* Stats Cards */}
       <Flex className="gap-4">
-        <Box className="flex-1 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <Flex className="items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                Weekly Hours
-              </h3>
-              <p className="text-3xl font-bold text-blue-600 mt-2">
-                {formatHours(weeklyHours?.data?.weeklyHours || 0)}
-              </p>
-              <p className="text-sm text-gray-500 mt-1">This week</p>
-            </div>
-            <BarChart3 className="w-8 h-8 text-blue-600" />
-          </Flex>
-        </Box>
-
-        <Box className="flex-1 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <Flex className="items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                Active Tracking
-              </h3>
-              <p className="text-3xl font-bold text-green-600 mt-2">
-                {isTracking ? "Yes" : "No"}
-              </p>
-              <p className="text-sm text-gray-500 mt-1">
-                {isTracking ? "Currently tracking" : "Not tracking"}
-              </p>
-            </div>
-            <Play className="w-8 h-8 text-green-600" />
-          </Flex>
-        </Box>
+        {loading && !weeklyHours ? (
+          <>
+            <CardSkeleton className="flex-1" />
+            <CardSkeleton className="flex-1" />
+          </>
+        ) : (
+          <>
+            <Box className="flex-1 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <Flex className="items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Weekly Hours
+                  </h3>
+                  <p className="text-3xl font-bold text-blue-600 mt-2">
+                    {formatHours(weeklyHours?.data?.weeklyHours || 0)}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">This week</p>
+                </div>
+                <BarChart3 className="w-8 h-8 text-blue-600" />
+              </Flex>
+            </Box>
+ 
+            <Box className="flex-1 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <Flex className="items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Active Tracking
+                  </h3>
+                  <p className="text-3xl font-bold text-green-600 mt-2">
+                    {isTracking ? "Yes" : "No"}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {isTracking ? "Currently tracking" : "Not tracking"}
+                  </p>
+                </div>
+                <Play className="w-8 h-8 text-green-600" />
+              </Flex>
+            </Box>
+          </>
+        )}
       </Flex>
 
       {/* Time Tracking Controls */}
@@ -710,7 +745,18 @@ const TimeTrackingPage = () => {
         </Flex>
 
         <Box className="">
-          {(() => {
+          {loading && !allTimeEntries ? (
+            <TableSkeleton rows={5} />
+          ) : hasError ? (
+            <ErrorState
+              title="Failed to load time entries"
+              message="We encountered an issue fetching your history. Please try again."
+              onRetry={() => {
+                refetchAll();
+                refetchActive();
+              }}
+            />
+          ) : (() => {
             const filteredEntries = (
               (allTimeEntries?.data as any[]) || []
             ).filter((row: any) => {

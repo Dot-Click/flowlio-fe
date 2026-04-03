@@ -15,9 +15,12 @@ export const UserManagementHeader = () => {
   const {
     data: userMembersData,
     isLoading,
+    isFetching,
     error,
     refetch,
   } = useGetCurrentOrgUserMembers();
+
+  const loading = isLoading || isFetching;
 
   const userMembers = userMembersData?.data?.userMembers || [];
 
@@ -77,7 +80,7 @@ export const UserManagementHeader = () => {
       <UserManagementTable
         userMembers={userMembers}
         error={error}
-        isLoading={isLoading}
+        isLoading={loading}
         refetch={refetch}
       />
     </PageWrapper>

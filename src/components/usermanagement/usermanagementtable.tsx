@@ -35,6 +35,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { TableSkeleton, ErrorState } from "../skeletons";
 
 export type Data = {
   id: string;
@@ -412,25 +413,19 @@ export const UserManagementTable = ({
 
   if (isLoading) {
     return (
-      <Center className="h-64">
-        <Box className="flex items-center justify-center p-8">
-          <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
-          <Box className="ml-2 text-gray-600">
-            {t("userManagement.loadingMembers")}
-          </Box>
-        </Box>
-      </Center>
+      <Box className="mt-4">
+        <TableSkeleton rows={8} />
+      </Box>
     );
   }
-
+ 
   if (error) {
     return (
-      <Center className="h-64">
-        <Box className="text-lg text-red-600">
-          {t("userManagement.errorLoading")}{" "}
-          {error?.response?.data?.message || t("userManagement.unknownError")}
-        </Box>
-      </Center>
+      <ErrorState
+        title={t("userManagement.errorLoading")}
+        message={error?.response?.data?.message || t("userManagement.unknownError")}
+        onRetry={refetch}
+      />
     );
   }
 

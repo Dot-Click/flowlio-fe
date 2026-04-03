@@ -29,6 +29,7 @@ import { useUserProfile } from "@/hooks/useuserprofile";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { DashboardAIBot } from "@/components/ai assist/DashboardAIBot";
+import { DashboardSkeleton, SkeletonWrapper } from "@/components/skeletons";
 
 const DashboardPage = () => {
   const { t } = useTranslation();
@@ -52,12 +53,17 @@ const DashboardPage = () => {
   }, [userProfile]);
 
   // Fetch real data for stats
-  const { data: totalClientsResponse } = useFetchOrganizationTotalClients();
-  const { data: activeProjectsResponse } = useFetchOrganizationActiveProjects();
-  const { data: weeklyHoursResponse } =
+  const { data: totalClientsResponse, isLoading: isLoadingClients, isFetching: isFetchingClients } = useFetchOrganizationTotalClients();
+  const { data: activeProjectsResponse, isLoading: isLoadingProjects, isFetching: isFetchingProjects } = useFetchOrganizationActiveProjects();
+  const { data: weeklyHoursResponse, isLoading: isLoadingHours, isFetching: isFetchingHours } =
     useFetchOrganizationWeeklyHoursTracked();
-  const { data: pendingTasksResponse } = useFetchOrganizationPendingTasks();
-  const { data: projectStatusResponse } = useFetchProjectStatusData();
+  const { data: pendingTasksResponse, isLoading: isLoadingTasks, isFetching: isFetchingTasks } = useFetchOrganizationPendingTasks();
+  const { data: projectStatusResponse, isLoading: isLoadingStatus, isFetching: isFetchingStatus } = useFetchProjectStatusData();
+
+  // Aggregated loading flag — show skeleton while any stats hook is in flight
+  const isAnyLoading =
+    isLoadingClients || isLoadingProjects || isLoadingHours || isLoadingTasks || isLoadingStatus ||
+    isFetchingClients || isFetchingProjects || isFetchingHours || isFetchingTasks || isFetchingStatus;
 
   // Extract values from responses
   const totalClients = totalClientsResponse?.data?.totalClients ?? 0;
@@ -122,7 +128,11 @@ const DashboardPage = () => {
 
   // issue fixed
   return (
-    <Stack className="pt-5 gap-3 px-2">
+    <SkeletonWrapper
+      isLoading={isAnyLoading}
+      skeleton={<DashboardSkeleton />}
+    >
+      <Stack className="pt-5 gap-3 px-2">
       <Stats stats={stats} />
       <Flex className="max-[950px]:flex-col items-start gap-3">
         <Stack className="w-full gap-3">
@@ -164,6 +174,7 @@ const DashboardPage = () => {
       {/* AI Bot Floating Button */}
       <DashboardAIBot />
     </Stack>
+    </SkeletonWrapper>
   );
 };
 

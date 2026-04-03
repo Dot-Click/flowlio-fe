@@ -23,6 +23,7 @@ import {
 import { useState } from "react";
 import { addDays } from "date-fns";
 import { useTranslation } from "react-i18next";
+import { ChartSkeleton, ErrorState } from "@/components/skeletons";
 
 const CustomTooltip = ({
   active,
@@ -101,24 +102,15 @@ export const BarChartComponent: FC<BoxProps> = ({ className, ...props }) => {
   if (isLoading) {
     return (
       <ComponentWrapper className={cn("p-4 relative", className)} {...props}>
-        <Stack className="gap-5">
-          <Flex className="max-lg:flex-col items-center justify-between">
-            <Flex className="justify-between max-md:justify-start max-lg:w-full">
-              <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
-              <h1 className="text-lg font-medium">
-                {t("charts.projectScheduleOverview")}
-              </h1>
-            </Flex>
-            <ChartGuides className="gap-4 pt-1 max-md:mr-auto" />
-            <CalendarPopOver
-              onDateRangeChange={handleDateRangeChange}
-              initialDateRange={dateRange || undefined}
-            />
+        <Flex className="max-lg:flex-col items-center justify-between mb-4">
+          <Flex className="justify-between max-md:justify-start max-lg:w-full gap-2">
+            <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
+            <h1 className="text-lg font-medium">
+              {t("charts.projectScheduleOverview")}
+            </h1>
           </Flex>
-        </Stack>
-        <Box className="flex items-center justify-center h-[21.8rem]">
-          <p className="text-gray-500">{t("dashboard.loadingProjectData")}</p>
-        </Box>
+        </Flex>
+        <ChartSkeleton height={350} className="shadow-none border-0 p-0" />
       </ComponentWrapper>
     );
   }
@@ -127,26 +119,10 @@ export const BarChartComponent: FC<BoxProps> = ({ className, ...props }) => {
   if (error) {
     return (
       <ComponentWrapper className={cn("p-4 relative", className)} {...props}>
-        <Stack className="gap-5">
-          <Flex className="max-lg:flex-col items-center justify-between">
-            <Flex className="justify-between max-md:justify-start max-lg:w-full">
-              <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
-              <h1 className="text-lg font-medium">
-                {t("charts.projectScheduleOverview")}
-              </h1>
-            </Flex>
-            <ChartGuides className="gap-4 pt-1 max-md:mr-auto" />
-            <CalendarPopOver
-              onDateRangeChange={handleDateRangeChange}
-              initialDateRange={dateRange || undefined}
-            />
-          </Flex>
-        </Stack>
-        <Box className="flex items-center justify-center h-[21.8rem]">
-          <p className="text-red-500">
-            {t("dashboard.failedToLoadProjectData")}
-          </p>
-        </Box>
+        <ErrorState
+          title={t("dashboard.failedToLoadProjectData")}
+          message={error.message}
+        />
       </ComponentWrapper>
     );
   }

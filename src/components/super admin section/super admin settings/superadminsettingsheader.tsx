@@ -32,6 +32,7 @@ import { SettingsTwoFactor } from "./settingstwofactor";
 import { SettingsPayPal } from "./settingspaypal";
 import { UpdateProfileImageContent } from "./updateprofileimagecontent";
 import { useTranslation } from "react-i18next";
+import { DetailsPageSkeleton } from "@/components/skeletons";
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -96,9 +97,9 @@ export const SuperAdminSettingsHeader = ({ user }: { user: any }) => {
   // Add null check for user
   if (!user) {
     return (
-      <ComponentWrapper className="mt-8 px-10 py-4 max-md:px-6">
-        <h1 className="text-2xl font-semibold">{t("settings.title")}</h1>
-        <div className="mt-4 text-gray-500">{t("common.loading")}</div>
+      <ComponentWrapper className="mt-8 px-10 py-6 max-md:px-6">
+        <h1 className="text-2xl font-semibold mb-6">{t("settings.title")}</h1>
+        <DetailsPageSkeleton withSidebar={false} withTabs={false} />
       </ComponentWrapper>
     );
   }

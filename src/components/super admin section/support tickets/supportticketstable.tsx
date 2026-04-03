@@ -21,12 +21,14 @@ import { SupportTicketModal } from "./supportticketmodal";
 import type { UniversalSupportTicket } from "@/hooks/useUniversalSupportTickets";
 import { useUpdateUniversalSupportTicket } from "@/hooks/useUniversalSupportTickets";
 import { useTranslation } from "react-i18next";
+import { TableSkeleton, ErrorState } from "@/components/skeletons";
 
 export type Data = UniversalSupportTicket;
 
 export const SupportTicketTable = ({
   data,
   isLoading,
+  isFetching,
   error,
   refetch,
   pagination,
@@ -35,6 +37,7 @@ export const SupportTicketTable = ({
 }: {
   data: UniversalSupportTicket[];
   isLoading: boolean;
+  isFetching?: boolean;
   error: any;
   refetch: () => void;
   pagination?: {
@@ -50,6 +53,8 @@ export const SupportTicketTable = ({
   const [selectedTicket, setSelectedTicket] = useState<Data | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { mutate: updateSupportTicket } = useUpdateUniversalSupportTicket();
+
+  const loading = isLoading || isFetching;
 
   const handleDelete = (id: string) => {
     if (
@@ -266,23 +271,21 @@ export const SupportTicketTable = ({
     },
   ];
 
-  if (isLoading) {
+  if (loading && (!data || data.length === 0)) {
     return (
-      <Center className="flex items-center justify-center h-64">
-        <Box className="flex items-center justify-center p-8">
-          <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
-          <Box className="ml-2 text-gray-600">Loading support tickets...</Box>
-        </Box>
-      </Center>
+      <Box className="px-4 py-4">
+        <TableSkeleton rows={8} columns={8} withActions />
+      </Box>
     );
   }
 
-  if (error) {
+  if (error && (!data || data.length === 0)) {
     return (
-      <Center className="h-64">
-        <Box className="text-lg text-red-600">
-          Error loading support tickets. Please try again.
-        </Box>
+      <Center className="py-10">
+        <ErrorState
+          title={t("common.error")}
+          message={error.message || t("common.errorDescription", "Error loading support tickets. Please try again.")}
+        />
       </Center>
     );
   }

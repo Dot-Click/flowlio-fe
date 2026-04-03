@@ -24,6 +24,7 @@ import { useDeleteSubAdmin } from "@/hooks/usedeletesubadmin";
 import { useUpdateSubAdminPermission } from "@/hooks/useupdatesubadminpermission";
 import { Flex } from "@/components/ui/flex";
 import { useTranslation } from "react-i18next";
+import { TableSkeleton, ErrorState } from "@/components/skeletons";
 
 export type SubAdminData = {
   id: string;
@@ -38,8 +39,17 @@ export type SubAdminData = {
 
 export const SubAdminTable = () => {
   const { t } = useTranslation();
-  const { fetchNextPage, hasNextPage, isLoading, error, data, refetch } =
-    useFetchSubAdmins();
+  const {
+    fetchNextPage,
+    hasNextPage,
+    isLoading,
+    isFetching,
+    error,
+    data,
+    refetch,
+  } = useFetchSubAdmins();
+
+  const loading = isLoading || isFetching;
 
   const { mutate: deleteSubAdmin } = useDeleteSubAdmin();
   const { mutate: updateSubAdminPermission, isPending: isUpdatingPermission } =
@@ -237,6 +247,25 @@ export const SubAdminTable = () => {
       },
     },
   ];
+
+  if (loading && transformedData.length === 0) {
+    return (
+      <Box className="px-4 py-4">
+        <TableSkeleton rows={5} columns={7} withAvatar withActions />
+      </Box>
+    );
+  }
+
+  if (error && transformedData.length === 0) {
+    return (
+      <Center className="py-10">
+        <ErrorState
+          title={t("common.error")}
+          message={error.message || t("common.errorDescription", "Failed to fetch sub admins")}
+        />
+      </Center>
+    );
+  }
 
   return (
     <>

@@ -194,6 +194,32 @@
   display: none;
 }
 
+/* ============================================================
+   SKELETON SHIMMER ANIMATION
+   Global shimmer effect for all skeleton loading states.
+   ============================================================ */
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+  border-radius: 0.375rem;
+}
+
 /* RTL (Right-to-Left) Support for Hebrew - Minimal and Selective */
 /* Only apply RTL to body and root, let components handle their own layout */
 [dir="rtl"] {

@@ -18,6 +18,7 @@ import { ComponentWrapper } from "@/components/common/componentwrapper";
 import { useFetchTeamProductivity } from "@/hooks/useFetchTeamProductivity";
 import { useTranslation } from "react-i18next";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { ChartSkeleton, ErrorState } from "@/components/skeletons";
 
 export const TeamProductivityChart: FC<BoxProps> = ({ className, ...props }) => {
   const { t } = useTranslation();
@@ -51,10 +52,11 @@ export const TeamProductivityChart: FC<BoxProps> = ({ className, ...props }) => 
   if (isLoading) {
     return (
       <ComponentWrapper className={cn("p-4", className)} {...props}>
-        <h1 className="text-lg font-medium mb-4">Team Productivity</h1>
-        <Box className="flex items-center justify-center h-[300px]">
-          <p className="text-gray-500">Loading productivity data...</p>
-        </Box>
+        <Flex className="gap-2 mb-4">
+          <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
+          <h1 className="text-lg font-medium">Team Productivity</h1>
+        </Flex>
+        <ChartSkeleton height={300} className="shadow-none border-0 p-0" />
       </ComponentWrapper>
     );
   }
@@ -62,10 +64,10 @@ export const TeamProductivityChart: FC<BoxProps> = ({ className, ...props }) => 
   if (error) {
     return (
       <ComponentWrapper className={cn("p-4", className)} {...props}>
-        <h1 className="text-lg font-medium mb-4">Team Productivity</h1>
-        <Box className="flex items-center justify-center h-[300px]">
-          <p className="text-red-500">Failed to load productivity data</p>
-        </Box>
+        <ErrorState
+          title="Failed to load productivity data"
+          message={error.message}
+        />
       </ComponentWrapper>
     );
   }

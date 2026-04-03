@@ -19,6 +19,7 @@ import { useFetchSuperadminOverview } from "@/hooks/useFetchSuperadminOverview";
 import { useTranslation } from "react-i18next";
 // import { useUser } from "@/providers/user.provider";
 // import { Badge } from "@/components/ui/badge";
+import { CardSkeleton, ChartSkeleton, SkeletonWrapper } from "@/components/skeletons";
 
 // Feature overview colors
 const FEATURE_COLORS = {
@@ -29,9 +30,11 @@ const FEATURE_COLORS = {
 
 const SuperAdminDashboardPage = () => {
   const { t } = useTranslation();
-  const { data: allDataResponse } = useFetchAllData();
-  const { data: totalInvoicesResponse } = useFetchTotalInvoices();
-  const { data: overviewResponse } = useFetchSuperadminOverview();
+  const { data: allDataResponse, isLoading: isLoadingAll, isFetching: isFetchingAll } = useFetchAllData();
+  const { data: totalInvoicesResponse, isLoading: isLoadingInvoices } = useFetchTotalInvoices();
+  const { data: overviewResponse, isLoading: isLoadingOverview } = useFetchSuperadminOverview();
+
+  const isAnyLoading = isLoadingAll || isLoadingInvoices || isLoadingOverview || isFetchingAll;
 
   // Use the new all-data approach for consistent counts
   const { totalCompanies, totalProjects } = allDataResponse?.data
@@ -126,27 +129,40 @@ const SuperAdminDashboardPage = () => {
   ];
 
   return (
-    <Stack className="pt-5 gap-3 px-2">
-      <Stats
-        stats={stats}
-        classNameDescription="text-[13px] leading-4"
-        isSuperAdmin={true}
-      />
-      <Flex className="max-[950px]:flex-col items-start gap-3">
-        <Stack className="w-full">
-          <SuperAdminBarChartComponent />
+    <SkeletonWrapper
+      isLoading={isAnyLoading}
+      skeleton={
+        <Stack className="pt-5 gap-3 px-2">
+          <CardSkeleton count={4} />
+          <Flex className="max-[950px]:flex-col items-start gap-3">
+            <ChartSkeleton height={280} className="flex-1" />
+            <ChartSkeleton height={280} className="w-64 flex-shrink-0" withLegend />
+          </Flex>
         </Stack>
+      }
+    >
+      <Stack className="pt-5 gap-3 px-2">
+        <Stats
+          stats={stats}
+          classNameDescription="text-[13px] leading-4"
+          isSuperAdmin={true}
+        />
+        <Flex className="max-[950px]:flex-col items-start gap-3">
+          <Stack className="w-full">
+            <SuperAdminBarChartComponent />
+          </Stack>
 
-        <Stack className="max-[950px]:w-full items-start">
-          <ProjectStatusPieChart
-            data={featureOverviewData}
-            title={t("superadminDashboard.featureOverview")}
-          />
-        </Stack>
-      </Flex>
+          <Stack className="max-[950px]:w-full items-start">
+            <ProjectStatusPieChart
+              data={featureOverviewData}
+              title={t("superadminDashboard.featureOverview")}
+            />
+          </Stack>
+        </Flex>
 
-      <SuperAdminTable />
-    </Stack>
+        <SuperAdminTable />
+      </Stack>
+    </SkeletonWrapper>
   );
 };
 

@@ -13,6 +13,7 @@ import { useState } from "react";
 import { DeleteUserModal } from "./DeleteUserModal";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
+import { TableSkeleton, ErrorState } from "@/components/skeletons";
 
 export const UsersTable = () => {
   const { t } = useTranslation();
@@ -26,8 +27,11 @@ export const UsersTable = () => {
   const {
     data: usersResponse,
     isLoading,
+    isFetching,
     error,
   } = useFetchAllUsers({ page, limit: 20 });
+
+  const loading = isLoading || isFetching;
 
   const users = usersResponse?.data?.users || [];
   const pagination = usersResponse?.data?.pagination;
@@ -157,23 +161,21 @@ export const UsersTable = () => {
     },
   ];
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <Center className="py-10">
-        <Box className="flex items-center justify-center p-8">
-          <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
-          <Box className="ml-2 text-gray-600">{t("common.loading", "Loading users...")}</Box>
-        </Box>
-      </Center>
+      <Box className="px-4 py-4">
+        <TableSkeleton rows={10} columns={7} withAvatar withActions />
+      </Box>
     );
   }
 
   if (error) {
     return (
       <Center className="py-10">
-        <Box className="text-red-500">
-          {t("common.error", "Error loading users. Please try again.")}
-        </Box>
+        <ErrorState
+          title={t("common.error")}
+          message={t("common.errorDescription", "Error loading users. Please try again.")}
+        />
       </Center>
     );
   }

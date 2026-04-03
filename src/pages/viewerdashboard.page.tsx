@@ -14,14 +14,17 @@ import { useAllTimeEntries } from "@/hooks/useAllTimeEntries";
 import { format, startOfDay, endOfDay } from "date-fns";
 import { useEffect, useState, useMemo } from "react";
 import type { DateRange } from "react-day-picker";
+import { DashboardSkeleton, SkeletonWrapper } from "@/components/skeletons";
 
 const ViewerDashboardPage = () => {
   // Fetch real data
-  const { data: tasksResponse } = useFetchViewerTasks();
-  const { data: projectsResponse } = useFetchViewerProjects();
+  const { data: tasksResponse, isLoading: isLoadingTasks, isFetching: isFetchingTasks } = useFetchViewerTasks();
+  const { data: projectsResponse, isLoading: isLoadingProjects, isFetching: isFetchingProjects } = useFetchViewerProjects();
   const { data: activeTimeEntries } = useActiveTimeEntries();
   const { data: allTimeEntries } = useAllTimeEntries();
   const [dateRange, setDateRange] = useState<DateRange | null>(null);
+
+  const isAnyLoading = isLoadingTasks || isLoadingProjects || isFetchingTasks || isFetchingProjects;
 
   // Calculate stats from data
   const totalTasks = tasksResponse?.data?.length ?? 0;
@@ -228,40 +231,42 @@ const ViewerDashboardPage = () => {
   ];
 
   return (
-    <Stack className="pt-5 gap-3 px-2">
-      <Stats
-        isViewer={true}
-        stats={stats}
-        classNameDescription="text-[13px] leading-4"
-        activeTimeData={
-          isTracking
-            ? {
-                elapsedTime: formatElapsedTime(elapsedTime),
-                elapsedSeconds: elapsedTime,
-                progressPercentage: progressPercentage,
-              }
-            : undefined
-        }
-        totalProductionHours={totalProductionHours}
-      />
-      <Stack className="w-full">
-        <ViewerBarChartComponent
-          data={chartData}
-          dateRange={dateRange || undefined}
-          onApplyDateRange={(r) => {
-            if (!r?.from || !r?.to) return;
-            // Normalize order and snap to full days
-            const start = r.from <= r.to ? r.from : r.to;
-            const end = r.to >= r.from ? r.to : r.from;
-            setDateRange({ from: startOfDay(start), to: endOfDay(end) });
-          }}
-          onResetDateRange={() => setDateRange(null)}
+    <SkeletonWrapper isLoading={isAnyLoading} skeleton={<DashboardSkeleton />}>
+      <Stack className="pt-5 gap-3 px-2">
+        <Stats
+          isViewer={true}
+          stats={stats}
+          classNameDescription="text-[13px] leading-4"
+          activeTimeData={
+            isTracking
+              ? {
+                  elapsedTime: formatElapsedTime(elapsedTime),
+                  elapsedSeconds: elapsedTime,
+                  progressPercentage: progressPercentage,
+                }
+              : undefined
+          }
+          totalProductionHours={totalProductionHours}
         />
-      </Stack>
+        <Stack className="w-full">
+          <ViewerBarChartComponent
+            data={chartData}
+            dateRange={dateRange || undefined}
+            onApplyDateRange={(r) => {
+              if (!r?.from || !r?.to) return;
+              // Normalize order and snap to full days
+              const start = r.from <= r.to ? r.from : r.to;
+              const end = r.to >= r.from ? r.to : r.from;
+              setDateRange({ from: startOfDay(start), to: endOfDay(end) });
+            }}
+            onResetDateRange={() => setDateRange(null)}
+          />
+        </Stack>
 
-      <ViewerTable />
-      <TimeModal />
-    </Stack>
+        <ViewerTable />
+        <TimeModal />
+      </Stack>
+    </SkeletonWrapper>
   );
 };
 

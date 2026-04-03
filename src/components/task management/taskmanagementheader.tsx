@@ -20,6 +20,7 @@ import { useUpdateTaskStatus } from "@/hooks/useupdatetask";
 import { format } from "date-fns";
 import { TaskDetailsModal } from "./taskdetailsmodal";
 import { useTranslation } from "react-i18next";
+import { KanbanSkeleton } from "@/components/skeletons";
 
 export const TaskManagementHeader = () => {
   const { t } = useTranslation();
@@ -41,6 +42,11 @@ export const TaskManagementHeader = () => {
   const tasksResponse = orgTasks.data;
   const usersResponse = orgUsers.data;
   const projectsResponse = orgProjects.data;
+
+  // Show skeleton while tasks or projects are loading
+  const isLoadingData =
+    orgTasks.isLoading || orgTasks.isFetching ||
+    orgProjects.isLoading || orgProjects.isFetching;
 
   const updateTaskStatus = useUpdateTaskStatus();
 
@@ -289,11 +295,16 @@ export const TaskManagementHeader = () => {
       <KanbanBoard
         tasks={tasks}
         setTasks={setTasks}
-        filteredTasks={filteredTasks}
+        filteredTasks={isLoadingData ? [] : filteredTasks}
         onStatusUpdate={handleStatusUpdate}
         onTaskClick={handleTaskClick}
         projectCustomFieldsData={customFieldsData?.data}
       />
+
+      {/* Kanban skeleton overlay while loading */}
+      {isLoadingData && (
+        <KanbanSkeleton columns={5} cardsPerColumn={3} />
+      )}
 
       {/* Task Details Modal */}
       {selectedTask && (

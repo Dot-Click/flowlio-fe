@@ -12,6 +12,7 @@ import { useGenerateInvoicePDF } from "@/hooks/usegenerateinvoicepdf";
 import { useUpdateInvoiceStatus } from "@/hooks/useupdateinvoicestatus";
 import { useCallback } from "react";
 import { toast } from "sonner";
+import { TableSkeleton, ErrorState } from "@/components/skeletons";
 
 // Actions component to properly use hooks
 const InvoiceActions: React.FC<{ invoice: Invoice }> = ({ invoice }) => {
@@ -190,7 +191,9 @@ export const InvoiceTable = ({ onTableStateChange }: InvoiceTableProps) => {
   const orgInvoices = useFetchInvoices();
   const invoicesData = orgInvoices.data;
   const isLoading = orgInvoices.isLoading;
+  const isFetching = orgInvoices.isFetching;
   const error = orgInvoices.error;
+  const loading = isLoading || isFetching;
 
   // Memoize the callback to prevent infinite loops
   const handleTableStateChange = useCallback(
@@ -213,24 +216,16 @@ export const InvoiceTable = ({ onTableStateChange }: InvoiceTableProps) => {
     [invoicesData?.data, onTableStateChange],
   );
 
-  if (isLoading) {
-    return (
-      <Center className="py-8">
-        <Box className="flex items-center justify-center p-8">
-          <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
-          <Box className="ml-2 text-gray-600">Loading invoices...</Box>
-        </Box>
-      </Center>
-    );
+  if (loading) {
+    return <TableSkeleton rows={6} columns={5} withActions />;
   }
 
   if (error) {
     return (
-      <Center className="py-8">
-        <Box className="text-red-500">
-          Error loading invoices: {error.message}
-        </Box>
-      </Center>
+      <ErrorState
+        title="Error loading invoices"
+        message={error.message}
+      />
     );
   }
 

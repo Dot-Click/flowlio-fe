@@ -33,6 +33,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useTranslation } from "react-i18next";
+import { TableSkeleton } from "@/components/skeletons";
 
 type DemoOrg = {
   id: string;
@@ -449,12 +450,7 @@ const SuperAdminDemoAccountsPage = () => {
           {t("superadmin.demoAccounts.title", "Demo Accounts")}
         </h2>
         {fetchingDemos ? (
-          <Center className="py-12">
-            <div className="flex flex-col items-center gap-4">
-              <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-              <p className="text-sm text-gray-600">{t("common.loading", "Loading demo accounts...")}</p>
-            </div>
-          </Center>
+          <TableSkeleton rows={5} columns={7} withActions />
         ) : (
           <div className="overflow-x-auto border border-gray-200 rounded-lg shadow-sm ">
             <Table className="w-full ">

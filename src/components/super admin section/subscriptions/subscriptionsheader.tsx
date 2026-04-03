@@ -25,6 +25,7 @@ import { PlanFeature } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { useFetchPlans } from "@/hooks/usefetchplans";
 import { useTranslation } from "react-i18next";
+import { CardSkeleton } from "@/components/skeletons";
 
 const PLAN_LIST = [
   { key: "basic", label: "Basic" },
@@ -84,7 +85,8 @@ const initialPlanState: PlanState = {
 
 export const SubscriptionsHeader = () => {
   const { t } = useTranslation();
-  const { data: plansResponse, isLoading, error } = useFetchPlans();
+  const { data: plansResponse, isLoading, isFetching, error } = useFetchPlans();
+  const loading = isLoading || isFetching;
   const fetchedPlans = plansResponse?.data || [];
 
   const [plans, setPlans] = useState<PlansState>({
@@ -802,17 +804,15 @@ export const SubscriptionsHeader = () => {
   };
 
   // Show loading state
-  if (isLoading) {
+  if (loading && fetchedPlans.length === 0) {
     return (
-      <PageWrapper className="mt-6 px-4 py-6">
-        <Stack className="gap-1">
+      <PageWrapper className="mt-6 px-4 py-8">
+        <Stack className="gap-1 mb-8">
           <h1 className="text-black text-2xl font-medium max-md:text-lg">
             {t("superadmin.subscriptions.title", "Subscription Management")}
           </h1>
-          <h1 className="text-gray-500 max-md:text-sm">
-            {t("common.loading", "Loading subscription plans...")}
-          </h1>
         </Stack>
+        <CardSkeleton count={3} className="h-96" />
       </PageWrapper>
     );
   }

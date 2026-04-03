@@ -44,6 +44,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { TableSkeleton, ErrorState } from "@/components/skeletons";
 // import { GrantAccessModal } from "./GrantAccessModal";
 
 // Mock data for fallback (will be replaced by API data)
@@ -111,9 +112,12 @@ export const ClientManagementTable = () => {
   const {
     data: clientsData,
     isLoading,
+    isFetching,
     error,
     refetch,
   } = useFetchOrganizationClients();
+
+  const loading = isLoading || isFetching;
 
   // Fetch custom field definitions for clients
   const { data: customFieldsData } = useFetchCustomFields("client");
@@ -654,32 +658,18 @@ export const ClientManagementTable = () => {
   };
 
   // Show loading state
-  if (isLoading) {
-    return (
-      <Center className="py-12">
-        <Box className="flex items-center justify-center p-8">
-          <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
-          <Box className="ml-2 text-gray-600">
-            {t("clientManagement.loadingClients")}
-          </Box>
-        </Box>
-      </Center>
-    );
+  if (loading) {
+    return <TableSkeleton rows={8} columns={6} withAvatar withActions />;
   }
 
   // Show error state
   if (error) {
     return (
-      <Center className="py-12">
-        <Stack className="gap-4 items-center">
-          <p className="text-red-500">
-            {t("clientManagement.errorLoading")} {error.message}
-          </p>
-          <Button onClick={() => refetch()}>
-            {t("clientManagement.retry")}
-          </Button>
-        </Stack>
-      </Center>
+      <ErrorState
+        title={t("clientManagement.errorLoading")}
+        message={error.message}
+        onRetry={() => refetch()}
+      />
     );
   }
 
