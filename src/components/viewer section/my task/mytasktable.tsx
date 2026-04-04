@@ -187,7 +187,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
   const columns: ColumnDef<Data>[] = [
     {
       id: "select",
-      header: () => <Box className="text-center text-black p-3">#</Box>,
+      header: () => <Box className="text-center text-foreground p-3">#</Box>,
       cell: ({ row }) => (
         <Box className="text-center px-2 py-3">0{row.index + 1}</Box>
       ),
@@ -195,7 +195,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
     },
     {
       accessorKey: "project",
-      header: () => <Box className="text-black">Project Name</Box>,
+      header: () => <Box className="text-foreground">Project Name</Box>,
       cell: ({ row }) => (
         <Box className="capitalize max-sm:w-full">
           {row.original.project.length > 28
@@ -206,14 +206,14 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
     },
     {
       accessorKey: "task",
-      header: () => <Box className="text-black text-center">Task Name</Box>,
+      header: () => <Box className="text-foreground text-center">Task Name</Box>,
       cell: ({ row }) => (
         <Box className="captialize text-center">{row.original.task}</Box>
       ),
     },
     {
       accessorKey: "duedate",
-      header: () => <Box className="text-black text-center">Due Date</Box>,
+      header: () => <Box className="text-foreground text-center">Due Date</Box>,
       cell: ({ row }) => (
         <Box className="captialize text-center">
           {new Date(row.original.duedate)
@@ -225,14 +225,14 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
     },
     {
       accessorKey: "submittedby",
-      header: () => <Box className="text-black text-center">Assigned By</Box>,
+      header: () => <Box className="text-foreground text-center">Assigned By</Box>,
       cell: ({ row }) => (
         <Box className="captialize text-center">{row.original.submittedby}</Box>
       ),
     },
     {
       accessorKey: "timeSpent",
-      header: () => <Box className="text-black text-center">Time Spent</Box>,
+      header: () => <Box className="text-foreground text-center">Time Spent</Box>,
       cell: ({ row }) => (
         <Box className="text-center">
           <div className="flex flex-col items-center gap-1">
@@ -240,7 +240,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
               className={`${
                 row.original.isActive
                   ? "text-green-600 font-semibold"
-                  : "text-gray-600"
+                  : "text-muted-foreground"
               }`}
             >
               {row.original.timeSpent}
@@ -268,7 +268,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
     },
     {
       accessorKey: "status",
-      header: () => <Box className="text-center text-black">Status</Box>,
+      header: () => <Box className="text-center text-foreground">Status</Box>,
       cell: ({ row }) => {
         const currentStatus = row.original.status;
         return (
@@ -297,7 +297,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
                   ] as Data["status"][]
                 ).map((status) => (
                   <Flex
-                    className="cursor-pointer p-2 hover:bg-gray-100 rounded-md"
+                    className="cursor-pointer p-2 hover:bg-muted rounded-md"
                     key={status}
                     onClick={() => handleStatusChange(row.original.id, status)}
                   >
@@ -306,7 +306,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
                     >
                       <Checkbox checked={currentStatus === status} />
                     </DropdownMenuCheckboxItem>
-                    <h1 className="text-black capitalize">
+                    <h1 className="text-foreground capitalize">
                       {status.charAt(0).toUpperCase() + status.slice(1)}
                     </h1>
                   </Flex>
@@ -319,7 +319,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
     },
     {
       accessorKey: "actions",
-      header: () => <Box className="text-center text-black">Actions</Box>,
+      header: () => <Box className="text-center text-foreground">Actions</Box>,
       cell: ({ row }) => {
         return (
           <Center
@@ -358,15 +358,15 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
           <Stack className="gap-4">
             {/* Task Header */}
             <Stack className="gap-2">
-              <h1 className="text-sm font-normal text-gray-500">Project</h1>
+              <h1 className="text-sm font-normal text-muted-foreground">Project</h1>
               <h2 className="text-lg font-normal">{selectedTask.project}</h2>
             </Stack>
 
             {/* Task Details */}
-            <Box className="bg-white/80 gap-6 grid grid-cols-1">
+            <Box className="bg-card/80 gap-6 grid grid-cols-1">
               {/* Task Title */}
               <Stack className="gap-2">
-                <h1 className="text-sm font-normal text-gray-500">
+                <h1 className="text-sm font-normal text-muted-foreground">
                   Task Title
                 </h1>
                 <h2 className="text-lg font-normal">{selectedTask.task}</h2>
@@ -375,22 +375,22 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
               {/* Task Description */}
               {selectedTask.description && (
                 <Stack className="gap-2">
-                  <h1 className="text-sm font-normal text-gray-500">
+                  <h1 className="text-sm font-normal text-muted-foreground">
                     Description
                   </h1>
-                  <p className="text-sm text-gray-700">
+                  <p className="text-sm text-foreground">
                     {selectedTask.description}
                   </p>
                 </Stack>
               )}
 
-              <hr className="border-gray-300 w-full" />
+              <hr className="border-border w-full" />
 
               {/* Task Details Grid */}
               <Center className="grid grid-cols-2 gap-4">
                 <Stack className="bg-[#FFFEE8] w-full text-center p-3 rounded-lg">
                   <h1 className="text-sm font-normal text-[#929292]">Status</h1>
-                  <h1 className="text-sm font-normal text-black capitalize">
+                  <h1 className="text-sm font-normal text-foreground capitalize">
                     {selectedTask.status}
                   </h1>
                 </Stack>
@@ -399,7 +399,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
                   <h1 className="text-sm font-normal text-[#929292]">
                     Due Date
                   </h1>
-                  <h1 className="text-sm font-normal text-black">
+                  <h1 className="text-sm font-normal text-foreground">
                     {selectedTask.duedate}
                   </h1>
                 </Stack>
@@ -408,7 +408,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
                   <h1 className="text-sm font-normal text-[#929292]">
                     Assigned By
                   </h1>
-                  <h1 className="text-sm font-normal text-black">
+                  <h1 className="text-sm font-normal text-foreground">
                     {selectedTask.submittedby}
                   </h1>
                 </Stack>
@@ -417,7 +417,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
                   <h1 className="text-sm font-normal text-[#929292]">
                     Task ID
                   </h1>
-                  <h1 className="text-sm font-normal text-black">
+                  <h1 className="text-sm font-normal text-foreground">
                     {selectedTask.id.slice(0, 8)}...
                   </h1>
                 </Stack>
@@ -442,7 +442,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
               <Flex className="justify-end gap-3">
                 <Button
                   variant="outline"
-                  className="bg-gray-100 hover:bg-gray-200 text-black border border-gray-200 font-normal rounded-full px-6 py-3 flex items-center gap-2 cursor-pointer"
+                  className="bg-muted hover:bg-muted text-foreground border border-border font-normal rounded-full px-6 py-3 flex items-center gap-2 cursor-pointer"
                   onClick={() => modalProps.onOpenChange(false)}
                 >
                   Close
@@ -463,7 +463,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
                 ) : (
                   <Button
                     variant="outline"
-                    className="bg-[#1797b9] hover:bg-[#1797b9]/80 hover:text-white text-white border border-gray-200 rounded-full px-6 py-3 flex items-center gap-2 cursor-pointer"
+                    className="bg-[#1797b9] hover:bg-[#1797b9]/80 hover:text-white text-white border border-border rounded-full px-6 py-3 flex items-center gap-2 cursor-pointer"
                     onClick={() => {
                       startTask(selectedTask.id);
                       modalProps.onOpenChange(false);

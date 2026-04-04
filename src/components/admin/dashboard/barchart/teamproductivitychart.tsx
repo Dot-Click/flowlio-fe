@@ -77,7 +77,7 @@ export const TeamProductivityChart: FC<BoxProps> = ({ className, ...props }) => 
       <ComponentWrapper className={cn("p-4", className)} {...props}>
         <h1 className="text-lg font-medium mb-4">Team Productivity</h1>
         <Box className="flex items-center justify-center h-[300px]">
-          <p className="text-gray-500">No productivity data available</p>
+          <p className="text-muted-foreground">No productivity data available</p>
         </Box>
       </ComponentWrapper>
     );
@@ -91,7 +91,7 @@ export const TeamProductivityChart: FC<BoxProps> = ({ className, ...props }) => 
             <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
             <h1 className="text-lg font-medium">Team Productivity</h1>
           </Flex>
-          <p className="text-xs text-gray-500 italic">Comparing hours & task completion</p>
+          <p className="text-xs text-muted-foreground italic">Comparing hours & task completion</p>
         </Flex>
       </Stack>
 

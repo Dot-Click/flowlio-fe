@@ -127,10 +127,10 @@ export default function TimeModal() {
 
       {open && (
         <Stack className="fixed bottom-6 right-6 z-50 items-end pointer-events-none gap-0">
-          <Box className="bg-white rounded-2xl shadow-xl w-[700px] max-lg:w-[500px] max-sm:w-[300px] max-w-full max-h-[90vh] p-0 pointer-events-auto relative">
+          <Box className="bg-background rounded-2xl shadow-xl w-[700px] max-lg:w-[500px] max-sm:w-[300px] max-w-full max-h-[90vh] p-0 pointer-events-auto relative">
             <button
               onClick={() => setOpen(false)}
-              className="absolute top-4 right-4 size-8 hover:text-gray-700 text-xl cursor-pointer bg-red-400 text-white rounded-full pb-1"
+              className="absolute top-4 right-4 size-8 hover:text-foreground text-xl cursor-pointer bg-red-400 text-white rounded-full pb-1"
               aria-label="Close timer"
               type="button"
             >
@@ -236,15 +236,15 @@ export default function TimeModal() {
                 {/* Timer Display */}
                 <Box className="flex-1">
                   <Stack className="gap-2">
-                    <label className="font-medium text-gray-700">
+                    <label className="font-medium text-foreground">
                       {isTracking ? "Elapsed Time" : "Timer"}
                     </label>
-                    <Box className="bg-white border-2 border-gray-200 rounded-lg p-4 text-center">
+                    <Box className="bg-card border-2 border-border rounded-lg p-4 text-center">
                       <span className="text-3xl font-mono font-bold text-blue-600">
                         {formatTime(elapsedTime)}
                       </span>
                       {isTracking && (
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-muted-foreground mt-1">
                           Tracking in progress...
                         </p>
                       )}

@@ -33,7 +33,7 @@ export const SettingsPayPal = () => {
                 {t("settings.paypalAccountSettings", "PayPal Account Settings")}
               </h1>
             </Flex>
-            <p className="text-sm text-gray-600 max-md:text-xs">
+            <p className="text-sm text-muted-foreground max-md:text-xs">
               {t("settings.paypalCheckWhich", "Check which PayPal account is configured and receiving payments")}
             </p>
           </Flex>

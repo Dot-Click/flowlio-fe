@@ -103,7 +103,7 @@ export const MyTaskHeader = () => {
       <Stack className="gap-4 py-2">
         <Center className="justify-between max-sm:flex-col max-sm:items-start gap-2">
           <Stack className="gap-1">
-            <h1 className="text-black text-2xl max-sm:text-xl font-medium">
+            <h1 className="text-foreground text-2xl max-sm:text-xl font-medium">
               My Tasks
             </h1>
             <h1 className={`max-sm:text-sm text-[#616572]`}>
@@ -121,7 +121,7 @@ export const MyTaskHeader = () => {
               placeholder="Search My Tasks"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full md:w-115 lg:w-80 xl:w-[400px] py-4 pl-10 bg-white h-10  placeholder:text-gray-700  placeholder:text-[15px] border border-gray-100 focus:outline-none active:border-gray-200 focus:ring-0 focus:ring-offset-0 rounded-full"
+              className="w-full md:w-115 lg:w-80 xl:w-[400px] py-4 pl-10 bg-card h-10  placeholder:text-foreground  placeholder:text-[15px] border border-border focus:outline-none active:border-border focus:ring-0 focus:ring-offset-0 rounded-full"
             />
           </Flex>
 
@@ -132,7 +132,7 @@ export const MyTaskHeader = () => {
                   variant="ghost"
                   aria-haspopup="dialog"
                   className={cn(
-                    "ml-auto cursor-pointer bg-white border border-gray-200 rounded-full h-10 w-40 text-black shadow-none flex p-3 gap-8"
+                    "ml-auto cursor-pointer bg-card border border-border rounded-full h-10 w-40 text-foreground shadow-none flex p-3 gap-8"
                   )}
                 >
                   {selectedProject === "all" ? "All Projects" : selectedProject}
@@ -160,21 +160,21 @@ export const MyTaskHeader = () => {
 
             <Button
               className={cn(
-                "bg-white text-white border border-gray-200 rounded-lg px-4 py-5 gap-2 cursor-pointer hover:bg-gray-100",
+                "bg-background text-white border border-border rounded-lg px-4 py-5 gap-2 cursor-pointer hover:bg-muted",
                 view === "table" && "bg-blue-50 border-blue-300"
               )}
               onClick={() => setView("table")}
             >
-              <List className="text-black size-5" />
+              <List className="text-foreground size-5" />
             </Button>
             <Button
               className={cn(
-                "bg-white text-white border border-gray-200 rounded-lg px-4 py-5 gap-2 cursor-pointer hover:bg-gray-100",
+                "bg-background text-white border border-border rounded-lg px-4 py-5 gap-2 cursor-pointer hover:bg-muted",
                 view === "kanban" && "bg-blue-50 border-blue-300"
               )}
               onClick={() => setView("kanban")}
             >
-              <Grip className="text-black size-4.5" />
+              <Grip className="text-foreground size-4.5" />
             </Button>
           </Flex>
         </Flex>

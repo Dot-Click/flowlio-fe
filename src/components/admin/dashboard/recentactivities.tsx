@@ -51,7 +51,7 @@ export const RecentActivities: FC<BoxProps> = ({ className, ...props }) => {
           )} */}
         </Flex>
 
-        <Box className="w-full h-0.5 bg-gray-200 rounded-full absolute top-14 left-0"></Box>
+        <Box className="w-full h-0.5 bg-muted rounded-full absolute top-14 left-0"></Box>
         <Box className="max-h-[21rem] overflow-auto scroll space-y-5 mt-5">
           {loading ? (
             <ListSkeleton rows={5} />
@@ -69,7 +69,7 @@ export const RecentActivities: FC<BoxProps> = ({ className, ...props }) => {
                         <h2 className="font-medium text-[13px]">{user}</h2>
                         <p className="text-xs text-slate-500 ml-2">{timeAgo}</p>
                       </Flex>
-                      <p className="text-sm text-slate-500 group-hover:text-black">
+                      <p className="text-sm text-slate-500 group-hover:text-foreground">
                         {activity}
                       </p>
                     </Stack>
@@ -79,7 +79,7 @@ export const RecentActivities: FC<BoxProps> = ({ className, ...props }) => {
             })
           ) : (
             <Center className="py-8">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {t("dashboard.noRecentActivities")}
               </p>
             </Center>

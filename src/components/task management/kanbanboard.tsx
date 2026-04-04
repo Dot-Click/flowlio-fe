@@ -122,8 +122,8 @@ function DraggableTask({
     <Box className="relative">
       <Box
         className={cn(
-          "bg-[#F6F6F6] rounded-lg border border-gray-200 p-4  min-w-[240px] mb-3 mx-2 transition-all duration-200",
-          "hover:shadow-md hover:border-gray-300 cursor-pointer",
+          "bg-muted/50 rounded-lg border border-border p-4  min-w-[240px] mb-3 mx-2 transition-all duration-200",
+          "hover:shadow-md hover:border-border cursor-pointer",
           isDragging && "opacity-50 shadow-lg scale-105"
         )}
         style={{
@@ -143,11 +143,11 @@ function DraggableTask({
           <Flex className="w-full justify-between items-center">
             {/* Drag handle */}
             <Flex
-              className="font-semibold text-gray-800 text-md leading-tight cursor-grab"
+              className="font-semibold text-foreground text-md leading-tight cursor-grab"
               {...attributes}
               {...listeners}
             >
-              <GripVertical className="text-gray-400 size-4" />
+              <GripVertical className="text-muted-foreground size-4" />
 
               {task.title}
             </Flex>
@@ -180,7 +180,7 @@ function DraggableTask({
               userSelect: "none",
             }}
           >
-            <Flex className="text-gray-600">
+            <Flex className="text-muted-foreground">
               <Flex className="gap-1 text-sm font-normal">
                 <img
                   src="/dashboard/analytics.svg"
@@ -190,12 +190,12 @@ function DraggableTask({
                 {t("taskManagement.projectLabel")}
               </Flex>
 
-              <span className="font-nromal text-black text-sm ml-4">
+              <span className="font-normal text-foreground text-sm ml-4">
                 {task.project}
               </span>
             </Flex>
 
-            <Flex className="mt-1 text-gray-600">
+            <Flex className="mt-1 text-muted-foreground">
               <Flex className="gap-1 text-sm">
                 <img
                   src="/dashboard/calendericonfordraging.svg"
@@ -252,21 +252,21 @@ function DraggableTask({
           >
             {t("taskManagement.closeComments")}
           </Button>
-          <Box className="flex-1 flex flex-col gap-2 max-h-70 overflow-y-auto bg-gray-50 p-2 rounded">
+          <Box className="flex-1 flex flex-col gap-2 max-h-70 overflow-y-auto bg-muted p-2 rounded">
             {displayComments && displayComments.length > 0 ? (
               displayComments.map((comment) => (
                 <Box
                   key={comment.id}
-                  className="bg-white p-2 rounded shadow text-sm"
+                  className="bg-card p-2 rounded shadow text-sm"
                 >
                   <Box>{comment.text}</Box>
-                  <Box className="text-xs text-gray-400 mt-1">
+                  <Box className="text-xs text-muted-foreground mt-1">
                     {format(comment.timestamp, "MMM d, yyyy hh:mm a")}
                   </Box>
                 </Box>
               ))
             ) : (
-              <Box className="text-gray-400 text-center">
+              <Box className="text-muted-foreground text-center">
                 {t("taskManagement.noCommentsYet")}
               </Box>
             )}
@@ -291,7 +291,7 @@ function DroppableColumn({
   return (
     <Flex
       className={cn(
-        "flex-col flex-1 min-w-[280px] bg-white rounded-xl border-1 border-gray-200",
+        "flex-col flex-1 min-w-[280px] bg-card rounded-xl border-1 border-border",
         "overflow-hidden max-h-[700px] transition-all duration-200",
         isOver && "border-dashed border-blue-400 bg-blue-50/30"
       )}
@@ -373,7 +373,7 @@ export default function KanbanBoard({
 
   return (
     <Box className="w-full">
-      <Flex className="w-full items-start gap-4 min-h-[600px] overflow-x-auto mt-5 p-0 bg-gray-100/50 rounded-lg">
+      <Flex className="w-full items-start gap-4 min-h-[600px] overflow-x-auto mt-5 p-0 bg-muted/20 rounded-lg">
         <DndContext
           collisionDetection={closestCenter}
           onDragStart={(event) => {
@@ -399,12 +399,12 @@ export default function KanbanBoard({
           ))}
           <DragOverlay>
             {activeTask ? (
-              <Box className="bg-white rounded-lg border-2 border-blue-400 p-4 min-w-[240px] shadow-xl">
+              <Box className="bg-card rounded-lg border-2 border-blue-400 p-4 min-w-[240px] shadow-xl">
                 <Flex className="flex-col w-full items-start gap-2">
-                  <Box className="font-semibold text-gray-800 text-sm leading-tight">
+                  <Box className="font-semibold text-foreground text-sm leading-tight">
                     {activeTask.title}
                   </Box>
-                  <Box className="text-gray-600 text-xs">
+                  <Box className="text-muted-foreground text-sm">
                     {t("taskManagement.dragOverlayProject")}{" "}
                     <span className="font-medium">{activeTask.project}</span>
                   </Box>

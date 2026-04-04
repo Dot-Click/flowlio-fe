@@ -130,7 +130,7 @@ export const SettingsNotification = () => {
               <h1 className="text-lg max-md:text-sm font-medium text-start">
                 {notification.label}
               </h1>
-              <p className="text-sm text-gray-600 max-md:text-xs">
+              <p className="text-sm text-muted-foreground max-md:text-xs">
                 {notification.description}
               </p>
             </Flex>

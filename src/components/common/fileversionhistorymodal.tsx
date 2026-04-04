@@ -59,12 +59,12 @@ export const FileVersionHistoryModal: React.FC<FileVersionHistoryModalProps> = (
       />
 
       {/* Modal */}
-      <Box className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 overflow-hidden border border-gray-200">
+      <Box className="relative bg-background rounded-2xl shadow-2xl max-w-2xl w-full mx-4 overflow-hidden border border-border">
         {/* Header */}
-        <Flex className="justify-between p-6 border-b border-gray-100 bg-gray-50/50">
+        <Flex className="justify-between p-6 border-b border-border bg-gray-50/50">
           <Stack className="gap-1">
-            <h2 className="text-xl font-bold text-gray-900">Version History</h2>
-            <p className="text-sm text-gray-500 flex items-center gap-1">
+            <h2 className="text-xl font-bold text-foreground">Version History</h2>
+            <p className="text-sm text-muted-foreground flex items-center gap-1">
               <FileText className="w-3 h-3" />
               {fileName}
             </p>
@@ -73,7 +73,7 @@ export const FileVersionHistoryModal: React.FC<FileVersionHistoryModalProps> = (
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="rounded-full hover:bg-gray-200 w-8 h-8 p-0"
+            className="rounded-full hover:bg-muted w-8 h-8 p-0"
           >
             <X className="w-5 h-5" />
           </Button>
@@ -82,12 +82,12 @@ export const FileVersionHistoryModal: React.FC<FileVersionHistoryModalProps> = (
         {/* Content */}
         <Box className="p-6 max-h-[60vh] overflow-y-auto">
           {isLoading ? (
-            <Box className="flex flex-col items-center justify-center py-20 text-gray-400">
+            <Box className="flex flex-col items-center justify-center py-20 text-muted-foreground">
               <Loader2 className="w-10 h-10 animate-spin mb-4" />
               <p>Fetching version history...</p>
             </Box>
           ) : sortedVersions.length === 0 ? (
-            <Box className="text-center py-10 text-gray-400">
+            <Box className="text-center py-10 text-muted-foreground">
               <Clock className="w-12 h-12 mx-auto mb-4 opacity-20" />
               <p>No previous versions found.</p>
             </Box>
@@ -100,7 +100,7 @@ export const FileVersionHistoryModal: React.FC<FileVersionHistoryModalProps> = (
                     "p-4 rounded-xl border transition-all",
                     index === 0
                       ? "bg-blue-50/50 border-blue-200"
-                      : "bg-white border-gray-100 hover:border-gray-200"
+                      : "bg-card border-border hover:border-border"
                   )}
                 >
                   <Flex className="justify-between items-start mb-3">
@@ -115,7 +115,7 @@ export const FileVersionHistoryModal: React.FC<FileVersionHistoryModalProps> = (
                           </span>
                         )}
                       </Flex>
-                      <p className="text-sm font-semibold text-gray-900 truncate max-w-[300px]" title={version.name}>
+                      <p className="text-sm font-semibold text-foreground truncate max-w-[300px]" title={version.name}>
                         {version.name}
                       </p>
                     </Stack>
@@ -146,7 +146,7 @@ export const FileVersionHistoryModal: React.FC<FileVersionHistoryModalProps> = (
                     </Flex>
                   </Flex>
 
-                  <Flex className="justify-between items-center text-[11px] text-gray-500 mt-2 pt-2 border-t border-gray-100">
+                  <Flex className="justify-between items-center text-[11px] text-muted-foreground mt-2 pt-2 border-t border-border">
                     <Flex className="gap-4">
                       <Flex className="gap-1.5">
                         <Calendar className="w-3 h-3" />
@@ -176,7 +176,7 @@ export const FileVersionHistoryModal: React.FC<FileVersionHistoryModalProps> = (
         </Box>
 
         {/* Footer */}
-        <Flex className="p-4 border-t border-gray-100 bg-gray-50/30 justify-end">
+        <Flex className="p-4 border-t border-border bg-gray-50/30 justify-end">
           <Button variant="secondary" onClick={onClose} className="rounded-full px-6">
             Close
           </Button>

@@ -41,11 +41,11 @@ export const DetailsPageSkeleton = memo(
         </div>
 
         {/* Divider */}
-        <div className="h-px bg-gray-200 w-full" />
+        <div className="h-px bg-border w-full" />
 
         {/* Tabs */}
         {withTabs && (
-          <div className="flex gap-6 border-b border-gray-200 pb-2">
+          <div className="flex gap-6 border-b border-border pb-2">
             {Array.from({ length: 4 }).map((_, i) => (
               <Skeleton key={i} className="h-5 w-20" />
             ))}
@@ -63,14 +63,14 @@ export const DetailsPageSkeleton = memo(
             <Skeleton className="h-4 w-3/4" />
 
             {/* Nested table mock */}
-            <div className="mt-4 rounded-lg border overflow-hidden">
-              <div className="bg-gray-50 px-4 py-3">
+            <div className="mt-4 rounded-lg border border-border overflow-hidden">
+              <div className="bg-muted px-4 py-3">
                 <Skeleton className="h-4 w-32" />
               </div>
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-4 px-4 py-3 border-t border-gray-100"
+                  className="flex items-center gap-4 px-4 py-3 border-t border-border"
                 >
                   <Skeleton className="h-6 w-6 rounded-full flex-shrink-0" />
                   <Skeleton className="h-4 flex-1" />
@@ -83,7 +83,7 @@ export const DetailsPageSkeleton = memo(
           {/* Right sidebar */}
           {withSidebar && (
             <div className="w-64 flex-shrink-0 flex flex-col gap-4">
-              <div className="bg-white rounded-xl border p-4 flex flex-col gap-3">
+              <div className="bg-card rounded-xl border p-4 flex flex-col gap-3">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <div key={i} className="flex flex-col gap-1.5">
                     <Skeleton className="h-3 w-20" />

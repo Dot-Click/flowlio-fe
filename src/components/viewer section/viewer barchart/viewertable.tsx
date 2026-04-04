@@ -111,7 +111,7 @@ export const columns: ColumnDef<Data>[] = [
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
         />
-        <Box className="text-center text-black">ID</Box>
+        <Box className="text-center text-foreground">ID</Box>
       </Flex>
     ),
     cell: ({ row }) => (
@@ -134,7 +134,7 @@ export const columns: ColumnDef<Data>[] = [
 
   {
     accessorKey: "taskname",
-    header: () => <Box className="text-black py-3">Task Name</Box>,
+    header: () => <Box className="text-foreground py-3">Task Name</Box>,
     cell: ({ row }) => (
       <Box className="capitalize py-3 w-24 max-sm:w-full">
         {row.original.taskname.length > 28
@@ -145,13 +145,13 @@ export const columns: ColumnDef<Data>[] = [
   },
   {
     accessorKey: "taskname",
-    header: () => <Box className="text-black"></Box>,
+    header: () => <Box className="text-foreground"></Box>,
     cell: () => <Box className="capitalize w-24 max-sm:w-full"></Box>,
   },
 
   {
     accessorKey: "project",
-    header: () => <Box className="text-black text-start">Project</Box>,
+    header: () => <Box className="text-foreground text-start">Project</Box>,
     cell: ({ row }) => (
       <Box className="captialize text-start">{row.original.project}</Box>
     ),
@@ -159,7 +159,7 @@ export const columns: ColumnDef<Data>[] = [
 
   {
     accessorKey: "status",
-    header: () => <Box className="text-center text-black">Status</Box>,
+    header: () => <Box className="text-center text-foreground">Status</Box>,
     cell: ({ row }) => {
       const status = row.original.status as
         | "in progress"
@@ -194,7 +194,7 @@ export const columns: ColumnDef<Data>[] = [
 
   {
     accessorKey: "trackedon",
-    header: () => <Box className="text-center text-black">Tracked</Box>,
+    header: () => <Box className="text-center text-foreground">Tracked</Box>,
     cell: ({ row }) => {
       return <Box className="text-center">{row.original.trackedon}</Box>;
     },
@@ -202,7 +202,7 @@ export const columns: ColumnDef<Data>[] = [
 
   {
     accessorKey: "actions",
-    header: () => <Box className="text-center text-black">Actions</Box>,
+    header: () => <Box className="text-center text-foreground">Actions</Box>,
     cell: () => {
       return (
         <Center className="space-x-2 text-blue-500 underline">
@@ -270,7 +270,7 @@ export const ViewerTable = () => {
     return (
       <PageWrapper className="h-full">
         <Center className="h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
         </Center>
       </PageWrapper>
     );
@@ -282,7 +282,7 @@ export const ViewerTable = () => {
         <Center className="justify-between">
           <Flex className="gap-1">
             <img src={TasklistIcon} alt="tasklisticon" className="size-8" />
-            <h1 className="text-black text-2xl max-sm:text-xl font-medium">
+            <h1 className="text-foreground text-2xl max-sm:text-xl font-medium">
               Task List
             </h1>
           </Flex>

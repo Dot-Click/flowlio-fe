@@ -124,7 +124,7 @@ export const SubAdminTable = () => {
   const tableColumns: ColumnDef<SubAdminData>[] = [
     {
       accessorKey: "logo",
-      header: () => <Box className="text-black font-semibold p-3">Logo</Box>,
+      header: () => <Box className="text-foreground font-semibold p-3">Logo</Box>,
       cell: ({ row }) => (
         <Box className="p-3">
           {row.original.image ? (
@@ -134,8 +134,8 @@ export const SubAdminTable = () => {
               className="w-10 h-10 rounded-full object-cover"
             />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center border border-gray-300">
-              <span className="text-[8px] text-gray-500 text-center px-1 leading-tight">
+            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center border border-border">
+              <span className="text-[8px] text-muted-foreground text-center px-1 leading-tight">
                 Null
               </span>
             </div>
@@ -145,7 +145,7 @@ export const SubAdminTable = () => {
     },
     {
       accessorKey: "name",
-      header: () => <Box className="text-black font-semibold p-3">{t("superadmin.subAdmins.table.name")}</Box>,
+      header: () => <Box className="text-foreground font-semibold p-3">{t("superadmin.subAdmins.table.name")}</Box>,
       cell: ({ row }) => (
         <Box className="p-3">
           <div className="font-medium capitalize">
@@ -157,7 +157,7 @@ export const SubAdminTable = () => {
     {
       accessorKey: "email",
       header: () => (
-        <Box className="text-black font-semibold text-center">{t("superadmin.subAdmins.table.email")}</Box>
+        <Box className="text-foreground font-semibold text-center">{t("superadmin.subAdmins.table.email")}</Box>
       ),
       cell: ({ row }) => (
         <Box className="text-center">{row.original.email || t("common.unknown")}</Box>
@@ -166,7 +166,7 @@ export const SubAdminTable = () => {
     {
       accessorKey: "contactNumber",
       header: () => (
-        <Box className="text-black font-semibold text-center">{t("settings.phone")}</Box>
+        <Box className="text-foreground font-semibold text-center">{t("settings.phone")}</Box>
       ),
       cell: ({ row }) => (
         <Box className="text-center">{row.original.contactNumber || t("common.notSet")}</Box>
@@ -175,7 +175,7 @@ export const SubAdminTable = () => {
     {
       accessorKey: "permission",
       header: () => (
-        <Box className="text-black font-semibold text-center">{t("superadmin.subAdmins.table.type")}</Box>
+        <Box className="text-foreground font-semibold text-center">{t("superadmin.subAdmins.table.type")}</Box>
       ),
       cell: ({ row }) => {
         return (
@@ -187,7 +187,7 @@ export const SubAdminTable = () => {
               }
               disabled={isUpdatingPermission}
             >
-              <SelectTrigger className="border rounded-md p-2 text-center bg-white w-32">
+              <SelectTrigger className="border rounded-md p-2 text-center bg-card w-32">
                 <SelectValue
                   placeholder="Select"
                   defaultValue={row.original.permission}
@@ -205,10 +205,10 @@ export const SubAdminTable = () => {
     {
       accessorKey: "createdAt",
       header: () => (
-        <Box className="text-black font-semibold text-center">{t("superadmin.subAdmins.table.addedOn")}</Box>
+        <Box className="text-foreground font-semibold text-center">{t("superadmin.subAdmins.table.addedOn")}</Box>
       ),
       cell: ({ row }) => (
-        <Box className="text-center text-sm text-gray-600">
+        <Box className="text-center text-sm text-muted-foreground">
           {new Date(row.original.createdAt).toLocaleDateString("en-US", {
             year: "numeric",
             month: "long",
@@ -220,7 +220,7 @@ export const SubAdminTable = () => {
     {
       accessorKey: "actions",
       header: () => (
-        <Box className="text-center text-black font-semibold">{t("superadmin.subAdmins.table.actions")}</Box>
+        <Box className="text-center text-foreground font-semibold">{t("superadmin.subAdmins.table.actions")}</Box>
       ),
       cell: ({ row }) => {
         return (

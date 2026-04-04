@@ -103,7 +103,7 @@ export const OngoingTasks: FC<BoxProps> = ({ className, ...props }) => {
             </h1>
           </Flex>
           <div className="flex items-center justify-center h-32">
-            <div className="text-gray-500">
+            <div className="text-muted-foreground">
               {t("dashboard.noOngoingTasksFound")}
             </div>
           </div>
@@ -145,7 +145,7 @@ export const OngoingTasks: FC<BoxProps> = ({ className, ...props }) => {
           {(emblaApi) => (
             <>
               <Button
-                className="rounded-full shadow-lg absolute bg-white top-0 left-0 inset-y-0 m-auto -translate-x-5"
+                className="rounded-full shadow-lg absolute bg-background top-0 left-0 inset-y-0 m-auto -translate-x-5"
                 onClick={() => emblaApi.scrollPrev()}
                 variant="ghost"
                 size="icon"
@@ -153,7 +153,7 @@ export const OngoingTasks: FC<BoxProps> = ({ className, ...props }) => {
                 <FaCaretLeft />
               </Button>
               <Button
-                className="rounded-full shadow-lg absolute bg-white top-0 right-0 inset-y-0 m-auto translate-x-5"
+                className="rounded-full shadow-lg absolute bg-background top-0 right-0 inset-y-0 m-auto translate-x-5"
                 onClick={() => emblaApi.scrollNext()}
                 variant="ghost"
                 size="icon"

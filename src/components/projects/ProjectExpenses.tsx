@@ -68,7 +68,7 @@ const EXPENSE_CATEGORIES = [
   {
     value: "miscellaneous",
     label: "Miscellaneous",
-    color: "bg-gray-100 text-gray-800",
+    color: "bg-muted text-gray-800",
   },
 ];
 
@@ -156,7 +156,7 @@ export const ProjectExpenses = ({
       EXPENSE_CATEGORIES.find((c) => c.value === cat) || {
         value: cat,
         label: cat,
-        color: "bg-gray-100 text-gray-800",
+        color: "bg-muted text-gray-800",
       }
     );
   };
@@ -178,7 +178,7 @@ export const ProjectExpenses = ({
       <Center className="h-48">
         <Box className="flex items-center justify-center p-8">
           <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
-          <Box className="ml-2 text-gray-600">{t("expenses.loading")}</Box>
+          <Box className="ml-2 text-muted-foreground">{t("expenses.loading")}</Box>
         </Box>
       </Center>
     );
@@ -196,7 +196,7 @@ export const ProjectExpenses = ({
             <Button
               variant="outline"
               size="sm"
-              className="bg-white/20 border-white/40 text-white hover:bg-white/30 cursor-pointer text-xs"
+              className="bg-card/20 border-white/40 text-white hover:bg-card/30 cursor-pointer text-xs"
               onClick={() => setShowAddForm(true)}
             >
               <Plus className="h-3 w-3 mr-1" />
@@ -211,7 +211,7 @@ export const ProjectExpenses = ({
           <Box className="space-y-4">
             <Box className="grid grid-cols-3 gap-3">
               {/* Total Budget */}
-              <Box className="p-3 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl border border-blue-200">
+              <Box className="p-3 bg-gradient-to-br from-blue-500/5 to-blue-500/10/50 rounded-xl border border-blue-200">
                 <Flex className="items-center gap-2 mb-1">
                   <Box className="p-1.5 bg-blue-200 rounded-lg">
                     <Wallet className="h-3.5 w-3.5 text-blue-700" />
@@ -226,7 +226,7 @@ export const ProjectExpenses = ({
               </Box>
 
               {/* Total Spent */}
-              <Box className="p-3 bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-xl border border-orange-200">
+              <Box className="p-3 bg-gradient-to-br from-orange-500/5 to-orange-500/10/50 rounded-xl border border-orange-200">
                 <Flex className="items-center gap-2 mb-1">
                   <Box className="p-1.5 bg-orange-200 rounded-lg">
                     <TrendingUp className="h-3.5 w-3.5 text-orange-700" />
@@ -241,7 +241,7 @@ export const ProjectExpenses = ({
               </Box>
 
               {/* Remaining */}
-              <Box className="p-3 bg-gradient-to-br from-green-50 to-green-100/50 rounded-xl border border-green-200">
+              <Box className="p-3 bg-gradient-to-br from-green-500/5 to-green-500/10/50 rounded-xl border border-green-200">
                 <Flex className="items-center gap-2 mb-1">
                   <Box className="p-1.5 bg-green-200 rounded-lg">
                     <PiggyBank className="h-3.5 w-3.5 text-green-700" />
@@ -262,14 +262,14 @@ export const ProjectExpenses = ({
             {/* Progress Bar */}
             <Box className="px-1">
               <Flex className="justify-between items-center mb-1.5">
-                <span className="text-xs text-gray-500">Budget Usage</span>
+                <span className="text-xs text-muted-foreground">Budget Usage</span>
                 <span className={`text-xs font-semibold ${getBudgetStatusColor()}`}>
                   {percentUsed.toFixed(1)}%
                 </span>
               </Flex>
               <Progress
                 value={percentUsed}
-                className={`h-2.5 bg-gray-200 rounded-full ${getProgressColor()}`}
+                className={`h-2.5 bg-muted rounded-full ${getProgressColor()}`}
               />
               {percentUsed >= 90 && (
                 <p className="text-xs text-red-500 mt-1 font-medium">
@@ -302,25 +302,25 @@ export const ProjectExpenses = ({
         <Box>
           <Flex className="items-center justify-between mb-3">
             <Flex className="items-center gap-2">
-              <Receipt className="h-4 w-4 text-gray-500" />
-              <span className="text-sm font-semibold text-gray-700">
+              <Receipt className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-semibold text-foreground">
                 Expense Log ({expenses.length})
               </span>
             </Flex>
             {expenses.length > 0 && (
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-muted-foreground">
                 Total: ${totalSpent.toLocaleString("en-US", { minimumFractionDigits: 2 })}
               </span>
             )}
           </Flex>
 
           {expenses.length === 0 ? (
-            <Box className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50/50">
+            <Box className="text-center py-8 border-2 border-dashed border-border rounded-lg bg-gray-50/50">
               <DollarSign className="h-10 w-10 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm text-gray-500 font-medium">
+              <p className="text-sm text-muted-foreground font-medium">
                 No expenses recorded yet
               </p>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 {!isClient
                   ? 'Click "Add Expense" to log your first expense'
                   : "No expenses have been logged for this project"}
@@ -333,7 +333,7 @@ export const ProjectExpenses = ({
                 return (
                   <Box
                     key={expense.id}
-                    className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100 hover:border-gray-200 transition-colors group"
+                    className="flex items-center justify-between p-3 bg-card rounded-lg border border-border hover:border-border transition-colors group"
                   >
                     <Flex className="items-center gap-3 flex-1 min-w-0">
                       <Box className="flex-shrink-0">
@@ -345,10 +345,10 @@ export const ProjectExpenses = ({
                         </Badge>
                       </Box>
                       <Stack className="gap-0 flex-1 min-w-0">
-                        <span className="text-sm font-medium text-gray-900 truncate">
+                        <span className="text-sm font-medium text-foreground truncate">
                           {expense.description}
                         </span>
-                        <span className="text-xs text-gray-400">
+                        <span className="text-xs text-muted-foreground">
                           {format(new Date(expense.date), "MMM d, yyyy")}
                           {expense.createdByName &&
                             ` • ${expense.createdByName}`}
@@ -356,7 +356,7 @@ export const ProjectExpenses = ({
                       </Stack>
                     </Flex>
                     <Flex className="items-center gap-2 flex-shrink-0 ml-2">
-                      <span className="text-sm font-bold text-gray-900">
+                      <span className="text-sm font-bold text-foreground">
                         ${Number(expense.amount).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                       </span>
                       {!isClient && (
@@ -407,7 +407,7 @@ export const ProjectExpenses = ({
           <Stack className="gap-4 py-2">
             {/* Amount */}
             <Box>
-              <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+              <label className="text-sm font-medium text-foreground mb-1.5 block">
                 Amount ($) <span className="text-red-500">*</span>
               </label>
               <Input
@@ -415,7 +415,7 @@ export const ProjectExpenses = ({
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="bg-white rounded-lg"
+                className="bg-card rounded-lg"
                 min="0"
                 step="0.01"
               />
@@ -423,11 +423,11 @@ export const ProjectExpenses = ({
 
             {/* Category */}
             <Box>
-              <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+              <label className="text-sm font-medium text-foreground mb-1.5 block">
                 Category <span className="text-red-500">*</span>
               </label>
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="bg-white rounded-lg">
+                <SelectTrigger className="bg-card rounded-lg">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -442,7 +442,7 @@ export const ProjectExpenses = ({
 
             {/* Description */}
             <Box>
-              <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+              <label className="text-sm font-medium text-foreground mb-1.5 block">
                 Description <span className="text-red-500">*</span>
               </label>
               <Input
@@ -450,20 +450,20 @@ export const ProjectExpenses = ({
                 placeholder="e.g. Contractor payment for week 1"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="bg-white rounded-lg"
+                className="bg-card rounded-lg"
               />
             </Box>
 
             {/* Date */}
             <Box>
-              <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+              <label className="text-sm font-medium text-foreground mb-1.5 block">
                 Date <span className="text-red-500">*</span>
               </label>
               <Input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="bg-white rounded-lg"
+                className="bg-card rounded-lg"
               />
             </Box>
           </Stack>

@@ -76,17 +76,17 @@ export const ViewerSupportHeader = () => {
           <h1 className="text-2xl font-medium capitalize">
             Support & Create Your Ticket
           </h1>
-          <p className="text-gray-500 mt-1 max-md:text-sm">
+          <p className="text-muted-foreground mt-1 max-md:text-sm">
             Need assistance? Create support ticket and our teams will get back
             to you promptly.
           </p>
         </Box>
       </Flex>
 
-      <Flex className="justify-between max-md:flex-col max-md:items-start rounded-none bg-transparent border-b-2 border-gray-200 py-8 mt-10">
+      <Flex className="justify-between max-md:flex-col max-md:items-start rounded-none bg-transparent border-b-2 border-border py-8 mt-10">
         <Box>
           <h1 className="text-md font-medium capitalize">Your Tickets</h1>
-          <p className="text-gray-500 mt-0 max-md:text-sm">
+          <p className="text-muted-foreground mt-0 max-md:text-sm">
             {ticketsData?.data?.tickets?.length === 0
               ? "You have no tickets assigned to you yet!"
               : `You have ${
@@ -99,7 +99,7 @@ export const ViewerSupportHeader = () => {
         {user?.user.role !== "viewer" && (
           <Button
             variant="outline"
-            className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer h-11"
+            className="bg-black text-white border border-border  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer h-11"
             onClick={() => modalProps.onOpenChange(true)}
           >
             Create Ticket
@@ -107,7 +107,7 @@ export const ViewerSupportHeader = () => {
         )}
       </Flex>
 
-      <Flex className="justify-between max-md:flex-col max-md:items-start bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200 mt-5">
+      <Flex className="justify-between max-md:flex-col max-md:items-start bg-gradient-to-r from-blue-500/5 to-indigo-50 p-6 rounded-lg border border-blue-200 mt-5">
         <Box className="flex-1">
           <Flex className="items-center gap-3 mb-2">
             <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
@@ -116,7 +116,7 @@ export const ViewerSupportHeader = () => {
             </h1>
           </Flex>
           <Flex className="justify-between items-center">
-            <p className="text-gray-600 text-sm">
+            <p className="text-muted-foreground text-sm">
               {notificationsData?.data?.notifications?.filter(
                 (n: any) => !n.read
               )?.length || 0}{" "}
@@ -196,11 +196,11 @@ export const ViewerSupportHeader = () => {
                         <p className="text-sm font-medium text-gray-800 truncate">
                           {notification.title}
                         </p>
-                        <p className="text-xs text-gray-600 truncate">
+                        <p className="text-xs text-muted-foreground truncate">
                           {notification.message}
                         </p>
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-muted-foreground">
                         {new Date(notification.createdAt).toLocaleDateString()}
                       </div>
                     </div>
@@ -210,7 +210,7 @@ export const ViewerSupportHeader = () => {
 
           {(!notificationsData?.data?.notifications ||
             notificationsData.data.notifications.length === 0) && (
-            <p className="text-gray-500 text-sm mt-2">
+            <p className="text-muted-foreground text-sm mt-2">
               No notifications to show
             </p>
           )}
@@ -254,7 +254,7 @@ export const ViewerSupportHeader = () => {
                 </AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-4 text-balance capitalize">
                   <p>{ticket.description}</p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     Priority: {ticket.priority} | Status: {ticket.status}
                   </p>
                 </AccordionContent>
@@ -268,7 +268,7 @@ export const ViewerSupportHeader = () => {
         <h2 className="text-lg font-normal mb-4">Create Ticket</h2>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <Box className="bg-white/80 gap-4 grid grid-cols-1">
+            <Box className="bg-card/80 gap-4 grid grid-cols-1">
               <FormField
                 control={form.control}
                 name="clientname"
@@ -277,7 +277,7 @@ export const ViewerSupportHeader = () => {
                     <FormLabel>Name</FormLabel>
                     <FormControl>
                       <Input
-                        className="bg-white rounded-full placeholder:text-gray-400"
+                        className="bg-background rounded-full placeholder:text-muted-foreground"
                         size="lg"
                         type="text"
                         placeholder="Enter your name"
@@ -297,7 +297,7 @@ export const ViewerSupportHeader = () => {
                     <FormControl>
                       <Textarea
                         rows={4}
-                        className="bg-white rounded-md placeholder:text-gray-400"
+                        className="bg-card rounded-md placeholder:text-muted-foreground"
                         maxLength={100}
                         placeholder="Enter your description"
                         {...field}
@@ -310,7 +310,7 @@ export const ViewerSupportHeader = () => {
 
               <Button
                 variant="outline"
-                className="bg-[#1797b9] hover:bg-[#1797b9]/80 hover:text-white text-white border border-gray-200 rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
+                className="bg-[#1797b9] hover:bg-[#1797b9]/80 hover:text-white text-white border border-border rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
                 type="submit"
               >
                 Create

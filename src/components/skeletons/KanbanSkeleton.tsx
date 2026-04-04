@@ -39,7 +39,7 @@ export const KanbanSkeleton = memo(
             {Array.from({ length: cardsPerColumn }).map((_, cardIdx) => (
               <div
                 key={cardIdx}
-                className="bg-white rounded-lg p-4 flex flex-col gap-3 shadow-sm border border-gray-100"
+                className="bg-card rounded-lg p-4 flex flex-col gap-3 shadow-sm border border-border"
               >
                 {/* Task title */}
                 <Skeleton className="h-4 w-full" />

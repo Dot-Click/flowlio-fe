@@ -81,10 +81,10 @@ const TimeDropdown = ({ value, onChange, options }: TimeDropdownProps) => {
   return (
     <Box className="relative w-40" ref={ref}>
       <Center
-        className="justify-between w-full p-3 rounded-full border border-gray-200 text-cyan-900 font-semibold"
+        className="justify-between w-full p-3 rounded-full border border-border text-cyan-900 font-semibold"
         onClick={() => setOpen((o: boolean) => !o)}
       >
-        <span className="flex items-center gap-2 font-normal text-gray-400">
+        <span className="flex items-center gap-2 font-normal text-muted-foreground">
           <Clock className="size-4 text-[#1797B9]" />
           {options.find((o) => o.value === value)?.label || "Select"}
         </span>
@@ -105,7 +105,7 @@ const TimeDropdown = ({ value, onChange, options }: TimeDropdownProps) => {
       </Center>
 
       {open && (
-        <ul className="absolute z-10 mt-2 w-full bg-white rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <ul className="absolute z-10 mt-2 w-full bg-card rounded-lg shadow-lg max-h-60 overflow-y-auto">
           {options.map((opt) => (
             <li
               key={opt.value}
@@ -203,12 +203,12 @@ export const EventModal: React.FC<EventModalProps> = ({
       <Box
         className={
           modalProps.contentProps?.className +
-          " bg-white rounded-xl p-0 min-w-[340px] min-h-[100px] z-[1001] relative box-shadow-[0_4px_32px_rgba(0,0,0,0.12)]"
+          " bg-card rounded-xl p-0 min-w-[340px] min-h-[100px] z-[1001] relative box-shadow-[0_4px_32px_rgba(0,0,0,0.12)]"
         }
         onClick={(e) => e.stopPropagation()}
       >
         <form
-          className="bg-white p-6 rounded-xl min-w-[340px] shadow-lg max-h-[620px] overflow-y-auto"
+          className="bg-card p-6 rounded-xl min-w-[340px] shadow-lg max-h-[620px] overflow-y-auto"
           onSubmit={handleSubmit((data) => {
             if (!(data.startHour < data.endHour && data.title && data.date))
               return;
@@ -240,7 +240,7 @@ export const EventModal: React.FC<EventModalProps> = ({
           })}
         >
           <Button
-            className="absolute top-4 right-4 text-black border-none font-normal shadow-none cursor-pointer"
+            className="absolute top-4 right-4 text-foreground border-none font-normal shadow-none cursor-pointer"
             onClick={onClose}
             variant="outline"
             size="icon"
@@ -258,7 +258,7 @@ export const EventModal: React.FC<EventModalProps> = ({
               size="lg"
               {...register("title", { required: true })}
               placeholder="Enter Event Title"
-              className="bg-white rounded-full placeholder:text-gray-400"
+              className="bg-background rounded-full placeholder:text-muted-foreground"
             />
             {errors.title && (
               <span className="text-red-500 text-xs">Title is required.</span>
@@ -270,7 +270,7 @@ export const EventModal: React.FC<EventModalProps> = ({
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-full justify-start text-left font-normal bg-white rounded-full h-12 border border-gray-200 relative"
+                  className="w-full justify-start text-left font-normal bg-background rounded-full h-12 border border-border relative"
                   type="button"
                 >
                   <CalendarIcon className="size-4.5 fill-[#1797B9] absolute left-3 top-1/2 -translate-y-1/2" />
@@ -283,7 +283,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                         day: "numeric",
                       })
                     ) : (
-                      <span className="text-gray-400">Pick a date</span>
+                      <span className="text-muted-foreground">Pick a date</span>
                     )}
                   </Box>
                 </Button>
@@ -317,7 +317,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                       options={hourOptions}
                       label=""
                     />
-                    <ArrowRight className="size-6 text-gray-400" />
+                    <ArrowRight className="size-6 text-muted-foreground" />
                     <TimeDropdown
                       value={endHour}
                       onChange={(v: number) => setValue("endHour", v)}
@@ -340,7 +340,7 @@ export const EventModal: React.FC<EventModalProps> = ({
             )}
           </Box>
           {date && (
-            <Flex className="rounded-full bg-white text-center p-2 w-full h-12 border border-gray-200 mt-1 text-sm text-gray-600">
+            <Flex className="rounded-full bg-background text-center p-2 w-full h-12 border border-border mt-1 text-sm text-muted-foreground">
               {new Date(date).toLocaleDateString("en-US", {
                 weekday: "long",
                 month: "long",
@@ -352,12 +352,12 @@ export const EventModal: React.FC<EventModalProps> = ({
             size="lg"
             {...register("description")}
             placeholder="Description"
-            className="bg-white rounded-full placeholder:text-gray-400 mt-3 font-light"
+            className="bg-background rounded-full placeholder:text-muted-foreground mt-3 font-light"
           />
           <Box className="my-2">
             <label className="font-medium text-sm">
               Platform
-              <span className="text-gray-400 text-xs ml-2">(Optional)</span>
+              <span className="text-muted-foreground text-xs ml-2">(Optional)</span>
             </label>
             <Flex>
               <button
@@ -402,7 +402,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                   name="meetLink"
                   placeholder="Google Meet Link"
                   required={platform === "google_meet"}
-                  className="w-full p-2 rounded-full border border-gray-200 placeholder:text-gray-400 bg-white h-12"
+                  className="w-full p-2 rounded-full border border-border placeholder:text-muted-foreground bg-card h-12"
                 />
               </div>
             ) : platform === "whatsapp" ? (
@@ -412,7 +412,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                   name="whatsappNumber"
                   placeholder="WhatsApp Number"
                   required={platform === "whatsapp"}
-                  className="w-full p-2 rounded-full border border-gray-200 placeholder:text-gray-400 bg-white h-12 text-sm"
+                  className="w-full p-2 rounded-full border border-border placeholder:text-muted-foreground bg-card h-12 text-sm"
                 />
               </div>
             ) : platform === "outlook" ? (
@@ -422,7 +422,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                   name="outlookEvent"
                   placeholder="Outlook Event"
                   required={platform === "outlook"}
-                  className="w-full p-2 rounded-full border border-gray-200 placeholder:text-gray-400 bg-white h-12 text-sm"
+                  className="w-full p-2 rounded-full border border-border placeholder:text-muted-foreground bg-card h-12 text-sm"
                 />
               </div>
             ) : null}
@@ -504,7 +504,7 @@ export const EventModal: React.FC<EventModalProps> = ({
             <Button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-full border border-gray-200 bg-[#1797B9]/30 font-normal cursor-pointer text-black hover:bg-[#1797B9]/40"
+              className="px-4 py-2 rounded-full border border-border bg-[#1797B9]/30 font-normal cursor-pointer text-foreground hover:bg-[#1797B9]/40"
             >
               Cancel
             </Button>

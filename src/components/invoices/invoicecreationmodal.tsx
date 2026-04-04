@@ -17,7 +17,7 @@ import { Flex } from "@/components/ui/flex";
 import { useCreateInvoice } from "@/hooks/usecreateinvoice";
 import { useCreateRecurringInvoice } from "@/hooks/usecreaterecurringinvoice";
 import { useFetchClients } from "@/hooks/usefetchclients";
-import { Upload, FileText, X } from "lucide-react";
+import { Upload, FileText, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { GeneralModal } from "../common/generalmodal";
 import { Switch } from "@/components/ui/switch";
@@ -195,10 +195,10 @@ export const InvoiceCreationModal: React.FC<InvoiceCreationModalProps> = ({
       contentProps={{ className: "h-[650px] overflow-y-auto" }}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <Flex className="items-center justify-between bg-gray-50 p-4 rounded-lg border border-gray-100">
+        <Flex className="items-center justify-between bg-muted/50 p-4 rounded-lg border border-border">
           <Box className="space-y-0.5">
-            <Label className="text-sm font-semibold text-gray-900">Make Recurring</Label>
-            <p className="text-xs text-gray-500">Automatically generate invoices at intervals</p>
+            <Label className="text-sm font-semibold text-foreground">Make Recurring</Label>
+            <p className="text-xs text-muted-foreground">Automatically generate invoices at intervals</p>
           </Box>
           <Switch 
             checked={isRecurring}
@@ -207,9 +207,9 @@ export const InvoiceCreationModal: React.FC<InvoiceCreationModalProps> = ({
         </Flex>
 
         {isRecurring && (
-          <Box className="space-y-4 p-4 border border-[#1797b9]/20 bg-[#1797b9]/5 rounded-lg animate-in fade-in slide-in-from-top-2">
+          <Box className="space-y-4 p-4 border border-primary/20 bg-primary/5 rounded-lg animate-in fade-in slide-in-from-top-2">
             <Box className="w-full">
-              <label className="text-sm font-medium text-gray-700">Template Name *</label>
+              <label className="text-sm font-medium text-foreground">Template Name *</label>
               <Input 
                 placeholder="e.g. Monthly Maintenance Fee"
                 {...register("templateName")}
@@ -221,7 +221,7 @@ export const InvoiceCreationModal: React.FC<InvoiceCreationModalProps> = ({
 
             <Flex className="gap-4 max-sm:flex-col">
               <Box className="flex-1">
-                <label className="text-sm font-medium text-gray-700">Frequency *</label>
+                <label className="text-sm font-medium text-foreground">Frequency *</label>
                 <Select
                   value={watch("frequency")}
                   onValueChange={(value) => setValue("frequency", value as any)}
@@ -238,7 +238,7 @@ export const InvoiceCreationModal: React.FC<InvoiceCreationModalProps> = ({
                 </Select>
               </Box>
               <Box className="flex-1">
-                <label className="text-sm font-medium text-gray-700">Start Date *</label>
+                <label className="text-sm font-medium text-foreground">Start Date *</label>
                 <Input type="date" {...register("startDate")} />
                 {errors.startDate && (
                   <p className="text-red-500 text-sm mt-1">{errors.startDate.message}</p>
@@ -249,7 +249,7 @@ export const InvoiceCreationModal: React.FC<InvoiceCreationModalProps> = ({
         )}
         {/* Client Selection */}
         <Box className="w-full">
-          <label className="text-sm font-medium text-gray-700">Client *</label>
+          <label className="text-sm font-medium text-foreground">Client *</label>
           <Select
             value={watch("clientId")}
             onValueChange={(value) => setValue("clientId", value)}
@@ -273,7 +273,7 @@ export const InvoiceCreationModal: React.FC<InvoiceCreationModalProps> = ({
         </Box>
         {!isRecurring && (
           <Box className="">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-foreground">
               Due Date
             </label>
             <Input type="date" {...register("dueDate")} />
@@ -286,7 +286,7 @@ export const InvoiceCreationModal: React.FC<InvoiceCreationModalProps> = ({
         )}
         {/* Amount */}
         <Box>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-foreground mb-2">
             Amount *
           </label>
           <Input
@@ -303,7 +303,7 @@ export const InvoiceCreationModal: React.FC<InvoiceCreationModalProps> = ({
 
         {/* Description */}
         <Box>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-foreground mb-2">
             Description
           </label>
           <Textarea
@@ -320,12 +320,12 @@ export const InvoiceCreationModal: React.FC<InvoiceCreationModalProps> = ({
 
         {!isRecurring && (
           <Box>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Attach PDF (Optional)
             </label>
 
             {!pdfFile ? (
-              <Box className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+              <Box className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
                 <input
                   type="file"
                   accept=".pdf"
@@ -334,25 +334,25 @@ export const InvoiceCreationModal: React.FC<InvoiceCreationModalProps> = ({
                   id="pdf-upload"
                 />
                 <label htmlFor="pdf-upload" className="cursor-pointer">
-                  <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <p className="text-sm text-gray-600 mb-2">
+                  <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-sm text-muted-foreground mb-2">
                     Click to upload PDF or drag and drop
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     PDF files only, max 10MB
                   </p>
                 </label>
               </Box>
             ) : (
-              <Box className="border border-gray-200 rounded-lg p-4">
+              <Box className="border border-border rounded-lg p-4">
                 <Flex className="items-center justify-between">
                   <Flex className="items-center space-x-3">
                     <FileText className="h-8 w-8 text-red-500" />
                     <Box>
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-foreground">
                         {pdfFile.name}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted-foreground">
                         {(pdfFile.size / 1024 / 1024).toFixed(2)} MB
                       </p>
                     </Box>
@@ -362,7 +362,7 @@ export const InvoiceCreationModal: React.FC<InvoiceCreationModalProps> = ({
                     variant="ghost"
                     size="sm"
                     onClick={removePdfFile}
-                    className="text-gray-400 hover:text-red-500"
+                    className="text-muted-foreground hover:text-red-500"
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -384,9 +384,18 @@ export const InvoiceCreationModal: React.FC<InvoiceCreationModalProps> = ({
           <Button
             type="submit"
             disabled={isPending}
-            className="bg-[#1797b9] hover:bg-[#1797b9]/90"
+            variant="default"
           >
-            {isPending ? "Creating..." : isRecurring ? "Create Template" : "Create Invoice"}
+            {isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creating...
+              </>
+            ) : isRecurring ? (
+              "Create Template"
+            ) : (
+              "Create Invoice"
+            )}
           </Button>
         </Flex>
       </form>

@@ -99,7 +99,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     editorProps: {
       attributes: {
         class: cn(
-          "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none min-h-[300px] p-6 text-gray-800 leading-relaxed max-w-none",
+          "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none min-h-[300px] p-6 text-foreground leading-relaxed max-w-none",
           className,
         ),
       },
@@ -197,7 +197,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         "h-9 w-9 p-0 rounded-md transition-all duration-200",
         isActive
           ? "bg-[#1797b9]/20 text-[#1797b9] font-bold cursor-pointer"
-          : "text-gray-600 hover:bg-gray-100 cursor-pointer",
+          : "text-muted-foreground hover:bg-muted cursor-pointer",
         disabled && "opacity-50 cursor-not-allowed",
       )}
     >
@@ -230,7 +230,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   ];
 
   return (
-    <Box className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm flex flex-col group focus-within:ring-2 focus-within:ring-[#1797b9]/30 transition-all duration-300">
+    <Box className="border border-border rounded-xl overflow-hidden bg-card shadow-sm flex flex-col group focus-within:ring-2 focus-within:ring-primary/30 transition-all duration-300">
       {/* Hidden File Input */}
       <input
         type="file"
@@ -241,7 +241,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       />
 
       {/* Toolbar */}
-      <Flex className="border-b border-gray-100 p-1 bg-gray-50/50 flex-wrap gap-0.5 sticky top-0 z-10">
+      <Flex className="border-b border-border p-1 bg-muted/30 flex-wrap gap-0.5 sticky top-0 z-10">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           isActive={editor.isActive("bold")}
@@ -271,7 +271,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           <Strikethrough size={18} />
         </ToolbarButton>
 
-        <Box className="w-px h-6 bg-gray-200 mx-1 self-center" />
+        <Box className="w-px h-6 bg-muted mx-1 self-center" />
 
         <ToolbarButton
           onClick={() =>
@@ -301,7 +301,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           <Heading3 size={18} />
         </ToolbarButton>
 
-        <Box className="w-px h-6 bg-gray-200 mx-1 self-center" />
+        <Box className="w-px h-6 bg-muted mx-1 self-center" />
 
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -318,7 +318,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           <ListOrdered size={18} />
         </ToolbarButton>
 
-        <Box className="w-px h-6 bg-gray-200 mx-1 self-center" />
+        <Box className="w-px h-6 bg-muted mx-1 self-center" />
 
         <ToolbarButton
           onClick={() => editor.chain().focus().setTextAlign("left").run()}
@@ -349,7 +349,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           <AlignJustify size={18} />
         </ToolbarButton>
 
-        <Box className="w-px h-6 bg-gray-200 mx-1 self-center" />
+        <Box className="w-px h-6 bg-muted mx-1 self-center" />
 
         <ToolbarButton
           onClick={setLink}
@@ -368,7 +368,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           <Minus size={18} />
         </ToolbarButton>
 
-        <Box className="w-px h-6 bg-gray-200 mx-1 self-center" />
+        <Box className="w-px h-6 bg-muted mx-1 self-center" />
 
         {/* Color Popover */}
         <Popover>
@@ -378,13 +378,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
               variant="ghost"
               size="icon"
               title="Text Color"
-              className="h-9 w-9 p-0 rounded-md text-gray-600 hover:bg-gray-100 cursor-pointer"
+              className="h-9 w-9 p-0 rounded-md text-muted-foreground hover:bg-muted cursor-pointer"
             >
               <Palette size={18} />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-48 p-2 z-[9999] pointer-events-auto">
-            <p className="text-xs font-medium mb-2 uppercase text-gray-400">
+            <p className="text-xs font-medium mb-2 uppercase text-muted-foreground">
               Colors
             </p>
             <Flex className="flex-wrap gap-1 cursor-default">
@@ -396,7 +396,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
                     e.preventDefault();
                     editor.chain().focus().setColor(c).run();
                   }}
-                  className="w-6 h-6 rounded-full border border-gray-200 hover:scale-110 transition-transform cursor-pointer"
+                  className="w-6 h-6 rounded-full border border-border hover:scale-110 transition-transform cursor-pointer"
                   style={{ backgroundColor: c }}
                 />
               ))}
@@ -406,7 +406,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
                   e.preventDefault();
                   editor.chain().focus().unsetColor().run();
                 }}
-                className="w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
+                className="w-6 h-6 rounded-full border border-border flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
                 title="Clear Color"
               >
                 <Eraser size={12} />
@@ -424,7 +424,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           <Eraser size={18} />
         </ToolbarButton>
 
-        <Box className="w-px h-6 bg-gray-200 mx-1 self-center ml-auto" />
+        <Box className="w-px h-6 bg-muted mx-1 self-center ml-auto" />
 
         <ToolbarButton
           onClick={() => editor.chain().focus().undo().run()}
@@ -454,7 +454,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       {editor && !isSourceMode && (
         <BubbleMenu
           editor={editor}
-          className="flex bg-white shadow-xl border border-gray-100 rounded-lg overflow-hidden p-1 gap-0.5"
+          className="flex bg-card shadow-xl border border-border rounded-lg overflow-hidden p-1 gap-0.5"
         >
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleBold().run()}
@@ -481,7 +481,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       )}
 
       {/* Editor Content Area */}
-      <Box className="flex-grow overflow-y-auto bg-white min-h-[400px]">
+      <Box className="flex-grow overflow-y-auto bg-card min-h-[400px]">
         {isSourceMode ? (
           <textarea
             value={content}
@@ -496,17 +496,17 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
       {/* Footer Info */}
       {!isSourceMode && (
-        <Flex className="border-t border-gray-50 p-2 px-4 justify-between items-center bg-gray-50/30">
-          <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">
+        <Flex className="border-t border-border p-2 px-4 justify-between items-center bg-muted/20">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
             Rich Text Mode
           </p>
-          <p className="text-[10px] text-gray-400">
+          <p className="text-[10px] text-muted-foreground">
             {editor.storage.characterCount?.characters?.() || 0} characters
           </p>
         </Flex>
       )}
       {isSourceMode && (
-        <Flex className="border-t border-gray-800 p-2 px-4 justify-between items-center bg-gray-900 text-gray-500">
+        <Flex className="border-t border-gray-800 p-2 px-4 justify-between items-center bg-gray-900 text-muted-foreground">
           <p className="text-[10px] uppercase tracking-widest font-bold text-orange-400">
             HTML Source Mode
           </p>

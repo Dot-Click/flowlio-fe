@@ -22,7 +22,7 @@ export const ChartSkeleton = memo(
     return (
       <div
         className={cn(
-          "bg-white rounded-xl shadow-[0_5px_10px_rgba(0,0,0,0.1)] p-5 w-full",
+          "bg-card rounded-xl shadow-[0_5px_10px_rgba(0,0,0,0.1)] p-5 w-full",
           className
         )}
       >

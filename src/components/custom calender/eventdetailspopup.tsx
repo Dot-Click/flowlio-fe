@@ -61,7 +61,7 @@ export const EventDetailsPopup = ({
       onMouseLeave={onMouseLeave}
     >
       <Box
-        className="relative bg-white p-4 rounded-xl min-w-[260px] h-auto shadow-xl border border-gray-200"
+        className="relative bg-card p-4 rounded-xl min-w-[260px] h-auto shadow-xl border border-border"
         onClick={(e) => e.stopPropagation()}
       >
         <Center className="justify-between mb-4">
@@ -101,7 +101,7 @@ export const EventDetailsPopup = ({
               size="icon"
               title="Close"
               onClick={onClose}
-              className="w-6 h-6 p-4 bg-white cursor-pointer text-black border-none rounded-full"
+              className="w-6 h-6 p-4 bg-card cursor-pointer text-foreground border-none rounded-full"
             >
               <X className="size-4" />
             </Button>
@@ -128,7 +128,7 @@ export const EventDetailsPopup = ({
           </span>
         </Flex>
 
-        <Box className="mb-4 text-sm text-gray-500">
+        <Box className="mb-4 text-sm text-muted-foreground">
           {event.date
             ? new Date(event.date).toLocaleDateString("en-US", {
                 weekday: "long",
@@ -143,11 +143,11 @@ export const EventDetailsPopup = ({
         {/* Description */}
         {event.description && (
           <>
-            <p className="text-sm text-gray-700 leading-relaxed">
+            <p className="text-sm text-foreground leading-relaxed">
               Description:
             </p>
-            <Box className="mb-3 p-2 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-700 leading-relaxed">
+            <Box className="mb-3 p-2 bg-muted/50 rounded-lg">
+              <p className="text-sm text-foreground leading-relaxed">
                 {event.description}
               </p>
             </Box>
@@ -158,13 +158,13 @@ export const EventDetailsPopup = ({
         {event.platform === "google_meet" && event.meetLink ? (
           <Flex className="mb-4 flex-col gap-2 items-start">
             <Flex className="gap-2 items-center justify-between w-full">
-              <span className="text-xs text-gray-500 truncate max-w-[120px]">
+              <span className="text-xs text-muted-foreground truncate max-w-[120px]">
                 {event.meetLink}
               </span>
               <Button
                 size="icon"
                 variant="ghost"
-                className="p-1 text-black rounded"
+                className="p-1 text-foreground rounded"
                 onClick={handleCopy}
                 title="Copy link"
               >
@@ -198,7 +198,7 @@ export const EventDetailsPopup = ({
             </Flex>
 
             <Flex
-              className="items-center justify-between w-full gap-2 bg-gray-200 hover:bg-gray-200/90 text-black px-4 py-2 rounded-lg text-base font-normal shadow-md cursor-pointer"
+              className="items-center justify-between w-full gap-2 bg-muted hover:bg-gray-200/90 text-foreground px-4 py-2 rounded-lg text-base font-normal shadow-md cursor-pointer"
               style={{ width: "100%" }}
             >
               <a
@@ -222,13 +222,13 @@ export const EventDetailsPopup = ({
           </Flex>
         ) : event.platform === "whatsapp" && event.whatsappNumber ? (
           <Flex className="gap-2 items-center justify-between w-full">
-            <span className="text-xs text-gray-500 truncate max-w-[120px]">
+            <span className="text-xs text-muted-foreground truncate max-w-[120px]">
               {event.whatsappNumber}
             </span>
             <Button
               size="icon"
               variant="ghost"
-              className="p-1 text-black rounded cursor-pointer"
+              className="p-1 text-foreground rounded cursor-pointer"
               title="Copy number"
               onClick={handleCopyNumber}
             >
@@ -262,13 +262,13 @@ export const EventDetailsPopup = ({
           </Flex>
         ) : event.platform === "outlook" && event.outlookEvent ? (
           <Flex className="gap-2 items-center justify-between w-full">
-            <span className="text-xs text-gray-500 truncate max-w-[120px]">
+            <span className="text-xs text-muted-foreground truncate max-w-[120px]">
               {event.outlookEvent}
             </span>
             <Button
               size="icon"
               variant="ghost"
-              className="p-1 text-black rounded cursor-pointer"
+              className="p-1 text-foreground rounded cursor-pointer"
               title="Copy event"
               onClick={handleCopyEvent}
             >

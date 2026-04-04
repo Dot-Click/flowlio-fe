@@ -85,7 +85,7 @@ export const WeekView: React.FC<WeekViewProps> = ({
       >
         {hours.map((hour) => (
           <React.Fragment key={hour}>
-            <Box className="text-center p-0 bg-white font-normal text-[#888] text-sm flex items-start justify-center">
+            <Box className="text-center p-0 bg-card font-normal text-[#888] text-sm flex items-start justify-center">
               {formatHour(hour)}
             </Box>
             {weekDates.map((_, dayIdx) => {
@@ -100,7 +100,7 @@ export const WeekView: React.FC<WeekViewProps> = ({
 
               return (
                 <Box
-                  className="text-center p-0 border border-gray-200 min-h-[79px] min-w-[86px] relative bg-white"
+                  className="text-center p-0 border border-border min-h-[79px] min-w-[86px] relative bg-card"
                   key={dayIdx}
                   style={{
                     border: "0.5px solid #eee",

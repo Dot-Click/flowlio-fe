@@ -46,7 +46,7 @@ export const ProjectStatusPieChart: FC<
                 <Flex key={index} className="flex-col items-center gap-1">
                   <img src={item.icon} alt={item.name} />
                   <h1>{item.value} %</h1>
-                  <h1 className="text-[12px] text-gray-400 flex-col">
+                  <h1 className="text-[12px] text-muted-foreground flex-col">
                     {item.name}
                   </h1>
                 </Flex>

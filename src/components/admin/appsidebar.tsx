@@ -126,7 +126,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
 
   return (
     <Sidebar
-      className="**:data-[sidebar=sidebar]:bg-slate-50 **:data-[sidebar=sidebar]:border-4 **:data-[sidebar=sidebar]:border-white"
+      className="**:data-[sidebar=sidebar]:bg-sidebar **:data-[sidebar=sidebar]:border-4 **:data-[sidebar=sidebar]:border-border"
       variant="floating"
       collapsible="icon"
       {...props}
@@ -137,7 +137,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
           isCompact={state === "collapsed" && !isMobile}
           className={state === "collapsed" ? "m-auto" : undefined}
           containerClassName={cn(
-            "bg-[#F8FAFB] py-5 rounded-md",
+            "bg-muted/50 py-5 rounded-md",
             state === "collapsed" && !isMobile
               ? "py-2 inset-0 bg-transparent"
               : "justify-start! ml-2"
@@ -195,7 +195,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                         <SidebarMenuButton
                           className={
                             isSubItemActive || isParentActive
-                              ? "bg-gray-300/50"
+                              ? "bg-accent/50"
                               : ""
                           }
                           tooltip={{
@@ -210,7 +210,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                                           <li
                                             key={subItem.url}
                                             className={cn(
-                                              `flex items-center gap-2 p-2 rounded-md hover:bg-white/10`
+                                              `flex items-center gap-2 p-2 rounded-md hover:bg-accent`
                                             )}
                                           >
                                             {renderIcon(subItem.icon, "invert")}
@@ -264,7 +264,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                         <CollapsibleContent
                           className={
                             isSubItemActive || isParentActive
-                              ? "bg-gray-300/50 rounded-sm mt-1"
+                              ? "bg-accent/50 rounded-sm mt-1"
                               : ""
                           }
                         >
@@ -281,17 +281,17 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                                   className={cn(
                                     "relative flex items-center gap-2 p-2",
                                     isSubItemActive
-                                      ? "text-black rounded-md"
-                                      : "text-gray-400"
+                                      ? "text-foreground rounded-md"
+                                      : "text-muted-foreground"
                                   )}
                                 >
                                   {/* Left-side indicator */}
                                   <Box
                                     className={cn(
-                                      "absolute -left-3.5 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-black",
+                                      "absolute -left-3.5 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full",
                                       isSubItemActive
-                                        ? "bg-black w-2 h-2"
-                                        : "border border-gray-400 bg-white"
+                                        ? "bg-foreground w-2 h-2"
+                                        : "border border-muted-foreground bg-background"
                                     )}
                                   >
                                     {/* Vertical Line */}
@@ -301,8 +301,8 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                                           ? "hidden"
                                           : "absolute left-1/2 top-full w-[1px] h-9 -translate-x-1/2",
                                         isSubItemActive
-                                          ? "bg-gray-500"
-                                          : "bg-gray-400"
+                                          ? "bg-muted-foreground"
+                                          : "bg-muted"
                                       )}
                                     />
                                   </Box>
@@ -387,7 +387,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
       </SidebarContent>
       <SidebarFooter>
         <Button
-          className="bg-transparent text-black hover:bg-red-50 cursor-pointer border-none flex items-start justify-start gap-2 shadow-none"
+          className="bg-transparent text-foreground hover:bg-destructive/10 cursor-pointer border-none flex items-start justify-start gap-2 shadow-none"
           onClick={handleLogout}
           disabled={isLoggingOut}
           aria-busy={isLoggingOut}

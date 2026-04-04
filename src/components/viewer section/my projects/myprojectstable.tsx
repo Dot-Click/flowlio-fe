@@ -61,7 +61,7 @@ export const MyProjectsTable = () => {
   if (projects.length === 0) {
     return (
       <Box className="text-center py-8">
-        <p className="text-gray-500">No projects assigned to you yet.</p>
+        <p className="text-muted-foreground">No projects assigned to you yet.</p>
       </Box>
     );
   }
@@ -69,7 +69,7 @@ export const MyProjectsTable = () => {
   const columns: ColumnDef<ViewerProject>[] = [
     {
       id: "select",
-      header: () => <Box className="text-center text-black p-2">#</Box>,
+      header: () => <Box className="text-center text-foreground p-2">#</Box>,
       cell: ({ row }) => (
         <Box className="text-center px-2 py-3">0{row.index + 1}</Box>
       ),
@@ -77,7 +77,7 @@ export const MyProjectsTable = () => {
     },
     {
       accessorKey: "name",
-      header: () => <Box className="text-black w-60">{t("projects.projectName")}</Box>,
+      header: () => <Box className="text-foreground w-60">{t("projects.projectName")}</Box>,
       cell: ({ row }) => (
         <Box className="capitalize w-60 max-sm:w-full">
           {row.original.name.length > 28
@@ -88,7 +88,7 @@ export const MyProjectsTable = () => {
     },
     {
       accessorKey: "clientName",
-      header: () => <Box className="text-black text-center">{t("projects.client")}</Box>,
+      header: () => <Box className="text-foreground text-center">{t("projects.client")}</Box>,
       cell: ({ row }) => (
         <Box className="capitalize text-center">{row.original.clientName}</Box>
       ),
@@ -96,7 +96,7 @@ export const MyProjectsTable = () => {
 
     {
       accessorKey: "progress",
-      header: () => <Box className="text-center text-black">{t("projects.progress")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("projects.progress")}</Box>,
       cell: ({ row }) => {
         return (
           <Center className="text-center gap-2">
@@ -112,7 +112,7 @@ export const MyProjectsTable = () => {
     },
     {
       accessorKey: "totalTasks",
-      header: () => <Box className="text-center text-black">{t("projects.totalTasks")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("projects.totalTasks")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center text-sm font-medium">
           {row.original.totalTasks || 0}
@@ -122,7 +122,7 @@ export const MyProjectsTable = () => {
     {
       accessorKey: "completedTasks",
       header: () => (
-        <Box className="text-center text-black">{t("projects.completedTasks")}</Box>
+        <Box className="text-center text-foreground">{t("projects.completedTasks")}</Box>
       ),
       cell: ({ row }) => (
         <Box className="text-center text-sm font-medium">
@@ -132,7 +132,7 @@ export const MyProjectsTable = () => {
     },
     {
       accessorKey: "status",
-      header: () => <Box className="text-center text-black">{t("projects.status")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("projects.status")}</Box>,
       cell: ({ row }) => {
         const status = row.original.status;
         const statusStyles = {
@@ -155,7 +155,7 @@ export const MyProjectsTable = () => {
     },
     {
       accessorKey: "actions",
-      header: () => <Box className="text-center text-black">{t("common.actions")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("common.actions")}</Box>,
       cell: ({ row }) => <ActionsCell projectId={row.original.id} />,
     },
   ];

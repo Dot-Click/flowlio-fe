@@ -44,7 +44,7 @@ export const TableSkeleton = memo(
         {/* Table container */}
         <div className="rounded-md border overflow-hidden mt-6">
           {/* Header row */}
-          <div className="bg-[#F3F5F5] flex items-center px-4 py-3 gap-4">
+          <div className="bg-muted flex items-center px-4 py-3 gap-4">
             {withAvatar && <Skeleton className="h-4 w-28 flex-shrink-0" />}
             {Array.from({ length: bodyColumns }).map((_, i) => (
               <Skeleton key={i} className="h-4 flex-1" />
@@ -53,7 +53,7 @@ export const TableSkeleton = memo(
           </div>
 
           {/* Body rows */}
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-border">
             {Array.from({ length: rows }).map((_, rowIdx) => (
               <div
                 key={rowIdx}

@@ -103,7 +103,7 @@ export const columns: ColumnDef<Data>[] = [
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
         />
-        <Box className="text-center text-black">Invoice Number</Box>
+        <Box className="text-center text-foreground">Invoice Number</Box>
       </Flex>
     ),
     cell: ({ row }) => (
@@ -124,21 +124,21 @@ export const columns: ColumnDef<Data>[] = [
 
   {
     accessorKey: "clientname",
-    header: () => <Box className="text-black">Client Name</Box>,
+    header: () => <Box className="text-foreground">Client Name</Box>,
     cell: ({ row }) => (
       <Box className="capitalize p-1">{row.original.clientname}</Box>
     ),
   },
   {
     accessorKey: "amount",
-    header: () => <Box className="text-center text-black">Amount</Box>,
+    header: () => <Box className="text-center text-foreground">Amount</Box>,
     cell: ({ row }) => {
       return <Box className="text-center">$ {row.original.amount}</Box>;
     },
   },
   {
     accessorKey: "dueDate",
-    header: () => <Box className="text-black text-center">Due Date</Box>,
+    header: () => <Box className="text-foreground text-center">Due Date</Box>,
     cell: ({ row }) => (
       <Box className="captialize text-center">
         {row.original.dueDate
@@ -154,7 +154,7 @@ export const columns: ColumnDef<Data>[] = [
 
   {
     accessorKey: "status",
-    header: () => <Box className="text-center text-black">Status</Box>,
+    header: () => <Box className="text-center text-foreground">Status</Box>,
     cell: ({ row }) => {
       const status = row.original.status.toLowerCase();
       const isPaid = status === "paid";
@@ -162,7 +162,7 @@ export const columns: ColumnDef<Data>[] = [
       return (
         <Center className="text-center space-x-2">
           <CircleCheck
-            className={`size-5 ${isPaid ? "text-green-500" : "text-gray-400"}`}
+            className={`size-5 ${isPaid ? "text-green-500" : "text-muted-foreground"}`}
           />
           <Box className="text-center text-[15px] capitalize">
             {row.original.status}
@@ -174,7 +174,7 @@ export const columns: ColumnDef<Data>[] = [
 
   {
     accessorKey: "actions",
-    header: () => <Box className="text-center text-black">Actions</Box>,
+    header: () => <Box className="text-center text-foreground">Actions</Box>,
     cell: ({ row }) => <InvoiceActions invoice={row.original} />,
   },
 ];

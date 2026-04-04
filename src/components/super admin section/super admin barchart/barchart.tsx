@@ -99,7 +99,7 @@ export const SuperAdminBarChartComponent: FC<BoxProps> = ({
           />
         ) : chartData.length === 0 ? (
           <div className="flex items-center justify-center h-full">
-            <div className="text-gray-500">
+            <div className="text-muted-foreground">
               No data available for the selected year
             </div>
           </div>

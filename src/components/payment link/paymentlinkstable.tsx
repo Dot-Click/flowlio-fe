@@ -36,7 +36,7 @@ export const PaymentLinksTable = () => {
             }
             aria-label="Select all"
           />
-          <Box className="text-center text-black">ID</Box>
+          <Box className="text-center text-foreground">ID</Box>
         </Flex>
       ),
       cell: ({ row }) => (
@@ -57,7 +57,7 @@ export const PaymentLinksTable = () => {
 
     {
       accessorKey: "clientname",
-      header: () => <Box className="text-black p-1">Client Name</Box>,
+      header: () => <Box className="text-foreground p-1">Client Name</Box>,
       cell: ({ row }) => (
         <Box className="capitalize p-1 w-24 max-sm:w-full">
           {row.original.clientname.length > 15
@@ -68,7 +68,7 @@ export const PaymentLinksTable = () => {
     },
     {
       accessorKey: "project",
-      header: () => <Box className="text-black text-start">Project</Box>,
+      header: () => <Box className="text-foreground text-start">Project</Box>,
       cell: ({ row }) => (
         <Box className="captialize text-start">{row.original.project}</Box>
       ),
@@ -76,7 +76,7 @@ export const PaymentLinksTable = () => {
 
     {
       accessorKey: "description",
-      header: () => <Box className="text-start text-black">Description</Box>,
+      header: () => <Box className="text-start text-foreground">Description</Box>,
       cell: ({ row }) => {
         return (
           <Box className="text-start">
@@ -90,7 +90,7 @@ export const PaymentLinksTable = () => {
 
     {
       accessorKey: "amount",
-      header: () => <Box className="text-center text-black">Amount</Box>,
+      header: () => <Box className="text-center text-foreground">Amount</Box>,
       cell: ({ row }) => (
         <Box className="text-center font-semibold text-green-600">
           ${parseFloat(row.original.amount).toFixed(2)}
@@ -100,7 +100,7 @@ export const PaymentLinksTable = () => {
 
     {
       accessorKey: "actions",
-      header: () => <Box className="text-center text-black">Actions</Box>,
+      header: () => <Box className="text-center text-foreground">Actions</Box>,
       cell: ({ row }) => {
         const handleCopyLink = async () => {
           try {
@@ -124,7 +124,7 @@ export const PaymentLinksTable = () => {
           <Center className="space-x-2">
             <Button
               onClick={handleCopyLink}
-              className="bg-[#e9eefd] border-none text-black hover:bg-[#e9eefd] cursor-pointer rounded-full border-2 border-blue-500"
+              className="bg-[#e9eefd] border-none text-foreground hover:bg-[#e9eefd] cursor-pointer rounded-full border-2 border-blue-500"
             >
               <Copy className="w-4 h-4 mr-1" />
               Copy Link

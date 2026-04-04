@@ -53,7 +53,7 @@ export const UsersTable = () => {
   const getColumns = (): ColumnDef<UserWithOrganizations>[] => [
     {
       id: "select",
-      header: () => <Box className="text-center text-black">ID</Box>,
+      header: () => <Box className="text-center text-foreground">ID</Box>,
       cell: ({ row }) => (
         <Box className="text-center">#{row.original.id.slice(0, 8)}</Box>
       ),
@@ -62,7 +62,7 @@ export const UsersTable = () => {
     },
     {
       accessorKey: "name",
-      header: () => <Box className="text-black">{t("superadmin.users.table.name", "Name")}</Box>,
+      header: () => <Box className="text-foreground">{t("superadmin.users.table.name", "Name")}</Box>,
       cell: ({ row }) => (
         <Flex className="items-center gap-2">
           {row.original.image ? (
@@ -72,26 +72,26 @@ export const UsersTable = () => {
               className="w-8 h-8 rounded-full"
             />
           ) : (
-            <Box className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold">
+            <Box className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-semibold">
               {row.original.name?.charAt(0).toUpperCase() || "U"}
             </Box>
           )}
-          <Box className="font-medium">{row.original.name}</Box>
+          <Box className="font-medium text-foreground">{row.original.name}</Box>
         </Flex>
       ),
       size: 200,
     },
     {
       accessorKey: "email",
-      header: () => <Box className="text-black">{t("superadmin.users.table.email", "Email")}</Box>,
+      header: () => <Box className="text-foreground">{t("superadmin.users.table.email", "Email")}</Box>,
       cell: ({ row }) => (
-        <Box className="text-gray-700">{row.original.email}</Box>
+        <Box className="text-muted-foreground">{row.original.email}</Box>
       ),
       size: 250,
     },
     {
       accessorKey: "role",
-      header: () => <Box className="text-black">{t("superadmin.users.table.role", "Role")}</Box>,
+      header: () => <Box className="text-foreground">{t("superadmin.users.table.role", "Role")}</Box>,
       cell: ({ row }) => (
         <Flex className="gap-2 items-center">
           {row.original.isSuperAdmin ? (
@@ -99,7 +99,7 @@ export const UsersTable = () => {
           ) : row.original.subadminId ? (
             <Badge className="bg-blue-100 text-blue-800">{t("superadminSettings.subAdmin", "Sub Admin")}</Badge>
           ) : (
-            <Badge className="bg-gray-100 text-gray-800">
+            <Badge className="bg-muted text-gray-800">
               {row.original.role ? t(`userManagement.roles.${row.original.role.toLowerCase()}`, row.original.role) : t("superadminSettings.user", "User")}
             </Badge>
           )}
@@ -109,9 +109,9 @@ export const UsersTable = () => {
     },
     {
       accessorKey: "organizations",
-      header: () => <Box className="text-black">{t("superadmin.users.table.company", "Organizations")}</Box>,
+      header: () => <Box className="text-foreground">{t("superadmin.users.table.company", "Organizations")}</Box>,
       cell: ({ row }) => (
-        <Box className="text-gray-700">
+        <Box className="text-muted-foreground">
           {row.original.organizationCount || 0} {t("appSidebar.companies", "Organizations")}
         </Box>
       ),
@@ -119,7 +119,7 @@ export const UsersTable = () => {
     },
     {
       accessorKey: "emailVerified",
-      header: () => <Box className="text-black">{t("superadmin.users.table.status", "Status")}</Box>,
+      header: () => <Box className="text-foreground">{t("superadmin.users.table.status", "Status")}</Box>,
       cell: ({ row }) => (
         <Badge
           className={
@@ -135,9 +135,9 @@ export const UsersTable = () => {
     },
     {
       accessorKey: "createdAt",
-      header: () => <Box className="text-black">{t("superadmin.users.table.addedOn", "Created At")}</Box>,
+      header: () => <Box className="text-foreground">{t("superadmin.users.table.addedOn", "Created At")}</Box>,
       cell: ({ row }) => (
-        <Box className="text-gray-600 text-sm">
+        <Box className="text-muted-foreground text-sm">
           {new Date(row.original.createdAt).toLocaleDateString()}
         </Box>
       ),
@@ -145,7 +145,7 @@ export const UsersTable = () => {
     },
     {
       accessorKey: "actions",
-      header: () => <Box className="text-center text-black">{t("superadmin.users.table.actions", "Actions")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("superadmin.users.table.actions", "Actions")}</Box>,
       cell: ({ row }) => (
         <Center>
           <Button

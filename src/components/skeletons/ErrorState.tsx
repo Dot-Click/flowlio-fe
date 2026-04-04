@@ -27,15 +27,15 @@ export const ErrorState = memo(
           className
         )}
       >
-        <div className="flex items-center justify-center w-14 h-14 rounded-full bg-red-50 mb-4">
-          <AlertCircle className="w-7 h-7 text-red-400" />
+        <div className="flex items-center justify-center w-14 h-14 rounded-full bg-destructive/10 mb-4">
+          <AlertCircle className="w-7 h-7 text-destructive" />
         </div>
-        <h3 className="text-base font-semibold text-gray-800 mb-1">{title}</h3>
-        <p className="text-sm text-gray-500 max-w-sm">{message}</p>
+        <h3 className="text-base font-semibold text-foreground mb-1">{title}</h3>
+        <p className="text-sm text-muted-foreground max-w-sm">{message}</p>
         {onRetry && (
           <button
             onClick={onRetry}
-            className="mt-5 inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium bg-black text-white hover:bg-gray-800 transition-colors cursor-pointer"
+            className="mt-5 inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer"
           >
             Try again
           </button>

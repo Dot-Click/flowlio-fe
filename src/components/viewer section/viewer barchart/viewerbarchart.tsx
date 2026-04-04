@@ -187,7 +187,7 @@ export const ViewerBarChartComponent: FC<
               if (!payload || !payload.length) return null;
               const fullMonth = monthFullNames[label] || label;
               return (
-                <Box className="rounded-lg border border-gray-200 bg-white p-2 text-[14px] font-normal text-gray-600 capitalize shadow-sm w-[140px] text-shadow-sm font-outfit">
+                <Box className="rounded-lg border border-border bg-card p-2 text-[14px] font-normal text-muted-foreground capitalize shadow-sm w-[140px] text-shadow-sm font-outfit">
                   <div style={{ fontWeight: 700, marginBottom: 4 }}>
                     {fullMonth}
                   </div>

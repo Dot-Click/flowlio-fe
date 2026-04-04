@@ -13,12 +13,12 @@ export const ClientPortalHeader: React.FC<ClientPortalHeaderProps> = ({
   description,
 }) => {
   return (
-    <Box className="p-4 bg-white border-b border-gray-200 mb-6 rounded-lg shadow-sm">
+    <Box className="p-4 bg-card border-b border-border mb-6 rounded-lg shadow-sm">
       <Flex className="justify-between items-center">
         <Stack className="gap-1">
-          <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+          <h1 className="text-2xl font-bold text-foreground">{title}</h1>
           {description && (
-            <p className="text-sm text-gray-500">{description}</p>
+            <p className="text-sm text-muted-foreground">{description}</p>
           )}
         </Stack>
       </Flex>

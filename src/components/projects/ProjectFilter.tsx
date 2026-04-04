@@ -133,7 +133,7 @@ export const ProjectFilter = ({ onFilterChange }: ProjectFilterProps) => {
             ))}
             
             {(!customFieldsData?.data || customFieldsData.data.length === 0) && (
-              <div className="text-xs text-gray-500 text-center py-4">
+              <div className="text-xs text-muted-foreground text-center py-4">
                 No custom fields available to filter.
               </div>
             )}

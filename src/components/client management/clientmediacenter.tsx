@@ -229,31 +229,31 @@ export const ClientMediaCenter: React.FC = () => {
       {/* Header */}
       <Box className="flex items-center justify-between">
         <Box>
-          <h1 className="text-3xl font-medium text-gray-900 tracking-tight">
+          <h1 className="text-3xl font-medium text-foreground tracking-tight">
             {t("appSidebar.mediaCenter")}
           </h1>
-          <p className="text-gray-500 mt-1">
+          <p className="text-muted-foreground mt-1">
             {t("media.desc")}
           </p>
         </Box>
       </Box>
 
       {/* Filters and Search */}
-      <Card className="border-none shadow-sm bg-white p-2 rounded-2xl">
+      <Card className="border-none shadow-sm bg-card p-2 rounded-2xl">
         <CardContent className="p-2">
           <Flex className="gap-3 flex-wrap">
             {/* Search Input */}
             <Box className="flex-1 min-w-[300px] relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder={t("media.searchPlaceholder")}
-                className="pl-11 h-12 rounded-xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-blue-100 placeholder:text-gray-400"
+                className="pl-11 h-12 rounded-xl bg-muted/50 border-none focus-visible:ring-2 focus-visible:ring-blue-100 placeholder:text-muted-foreground"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </Box>
             <Select value={projectFilter} onValueChange={setProjectFilter}>
-              <SelectTrigger className="h-12 rounded-xl bg-gray-50 border-none text-gray-700 font-medium">
+              <SelectTrigger className="h-12 rounded-xl bg-muted/50 border-none text-foreground font-medium">
                 <SelectValue placeholder={t("projects.allProjects")} />
               </SelectTrigger>
               <SelectContent className="rounded-xl">
@@ -266,7 +266,7 @@ export const ClientMediaCenter: React.FC = () => {
               </SelectContent>
             </Select>
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="h-12 rounded-xl bg-gray-50 border-none text-gray-700 font-medium">
+              <SelectTrigger className="h-12 rounded-xl bg-muted/50 border-none text-foreground font-medium">
                 <SelectValue placeholder={t("media.sortBy")} />
               </SelectTrigger>
               <SelectContent className="rounded-xl">
@@ -291,7 +291,7 @@ export const ClientMediaCenter: React.FC = () => {
           filteredMedia.map((file) => (
             <Box
               key={`${file.fileId}-${file.createdAt}`}
-              className="group relative aspect-square rounded-2xl overflow-hidden bg-gray-100 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 cursor-pointer border border-gray-100"
+              className="group relative aspect-square rounded-2xl overflow-hidden bg-muted hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 cursor-pointer border border-border"
             >
               {/* Media Preview */}
               <Box className="w-full h-full flex items-center justify-center pointer-events-none">
@@ -316,7 +316,7 @@ export const ClientMediaCenter: React.FC = () => {
                 ) : (
                   <Box className="flex flex-col items-center">
                     {getFileIcon(file.fileType)}
-                    <span className="text-[10px] font-bold text-gray-400 mt-2 uppercase tracking-widest">
+                    <span className="text-[10px] font-bold text-muted-foreground mt-2 uppercase tracking-widest">
                       {file.fileType?.split("/")[1] || "FILE"}
                     </span>
                   </Box>
@@ -327,7 +327,7 @@ export const ClientMediaCenter: React.FC = () => {
               <Flex className="absolute top-3 left-3 right-3 justify-between items-start z-10 pointer-events-none">
                 {/* Project Name Badge */}
                 <Box className="transition-transform duration-300 group-hover:translate-x-1 group-hover:translate-y-1">
-                  <span className="bg-white/90 backdrop-blur-md text-[9px] font-black px-1.5 py-0.5 rounded-md text-gray-800 shadow-sm border border-white/50">
+                  <span className="bg-card/90 backdrop-blur-md text-[9px] font-black px-1.5 py-0.5 rounded-md text-gray-800 shadow-sm border border-white/50">
                     V{file.latestVersion}
                   </span>
                 </Box>
@@ -392,7 +392,7 @@ export const ClientMediaCenter: React.FC = () => {
                   <Flex className="gap-2 mt-2">
                     <Button
                       size="sm"
-                      className="flex-1 bg-white hover:bg-white/90 text-black h-9 rounded-xl font-bold text-xs gap-2"
+                      className="flex-1 bg-card hover:bg-card/90 text-foreground h-9 rounded-xl font-bold text-xs gap-2"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleView(file);
@@ -403,7 +403,7 @@ export const ClientMediaCenter: React.FC = () => {
                     </Button>
                     <Button
                       size="sm"
-                      className="w-10 h-9 bg-white/10 hover:bg-white/20 text-white backdrop-blur-md rounded-xl p-0"
+                      className="w-10 h-9 bg-card/10 hover:bg-card/20 text-white backdrop-blur-md rounded-xl p-0"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDownload(file);
@@ -418,9 +418,9 @@ export const ClientMediaCenter: React.FC = () => {
           ))
         ) : (
           // Empty state
-          <Box className="col-span-full py-24 bg-white rounded-3xl border-2 border-dashed border-gray-100 flex flex-col items-center justify-center text-gray-300">
+          <Box className="col-span-full py-24 bg-background rounded-3xl border-2 border-dashed border-border flex flex-col items-center justify-center text-gray-300">
             <ImageIcon className="w-16 h-16 mb-4 opacity-10" />
-            <p className="text-xl font-bold text-gray-400">No assets found</p>
+            <p className="text-xl font-bold text-muted-foreground">No assets found</p>
             <p className="text-sm">Try broadening your search criteria.</p>
           </Box>
         )}

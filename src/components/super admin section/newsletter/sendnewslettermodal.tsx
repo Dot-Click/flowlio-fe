@@ -114,9 +114,9 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
           "max-w-4xl max-h-[95vh] overflow-y-auto w-[95vw] sm:w-[90vw] md:w-[85vw] lg:w-[80vw] xl:w-[75vw] p-0 border-none bg-transparent shadow-none",
       }}
     >
-      <Box className="bg-white rounded-2xl overflow-hidden flex flex-col h-full max-h-[90vh]">
+      <Box className="bg-card rounded-2xl overflow-hidden flex flex-col h-full max-h-[90vh]">
         {/* Header */}
-        <Flex className="items-center justify-between p-6 border-b border-gray-100 bg-gray-50/50">
+        <Flex className="items-center justify-between p-6 border-b border-border bg-gray-50/50">
           <Flex className="items-center gap-3">
             <Box className="p-2 bg-[#1797b9]/10 rounded-lg text-[#1797b9]">
               <Send size={20} />
@@ -131,7 +131,7 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
               setIsPreview(false);
               onClose();
             }}
-            className="rounded-full hover:bg-gray-200"
+            className="rounded-full hover:bg-muted"
           >
             <X size={20} />
           </Button>
@@ -146,11 +146,11 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
                 name="subject"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">{t("superadmin.newsletter.modal.subject", "Newsletter Subject")}</FormLabel>
+                    <FormLabel className="text-sm font-medium text-muted-foreground">{t("superadmin.newsletter.modal.subject", "Newsletter Subject")}</FormLabel>
                     <FormControl>
                       <input
                         {...field}
-                        className="bg-gray-50 border border-gray-200 rounded-xl w-full h-12 px-4 focus:ring-2 focus:ring-[#1797b9]/20 focus:border-[#1797b9] transition-all outline-none"
+                        className="bg-muted/50 border border-border rounded-xl w-full h-12 px-4 focus:ring-2 focus:ring-[#1797b9]/20 focus:border-[#1797b9] transition-all outline-none"
                         placeholder="e.g. Weekly Updates - March 2024"
                         disabled={sendNewsletterMutation.isPending}
                       />
@@ -169,7 +169,7 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
                   <p className="text-sm font-semibold text-gray-800">
                     {t("superadmin.newsletter.modal.recipientInfo", "Target Audience")}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     {stats ? (
                       t("superadmin.newsletter.modal.sendingToCount", "This newsletter will be sent to {{count}} active subscribers.", { count: stats.subscribed })
                     ) : (
@@ -180,8 +180,8 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
               </Flex>
 
               {/* Toggle Preview / Edit */}
-              <Flex className="justify-between items-center bg-gray-50 p-2 rounded-xl">
-                <p className="text-xs text-gray-500 font-medium px-2">
+              <Flex className="justify-between items-center bg-muted/50 p-2 rounded-xl">
+                <p className="text-xs text-muted-foreground font-medium px-2">
                   {isPreview ? t("superadmin.newsletter.modal.previewing", "Previewing Email Layout") : t("superadmin.newsletter.modal.composing", "Composing Newsletter Content")}
                 </p>
                 <Button
@@ -192,8 +192,8 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
                   className={cn(
                     "rounded-lg flex items-center gap-2 text-xs font-semibold px-3 py-1.5 transition-all",
                     isPreview 
-                      ? "bg-white text-[#1797b9] shadow-sm" 
-                      : "text-gray-600 hover:bg-gray-200"
+                      ? "bg-card text-[#1797b9] shadow-sm" 
+                      : "text-muted-foreground hover:bg-muted"
                   )}
                 >
                   {isPreview ? (
@@ -219,9 +219,9 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
                     <FormLabel className="sr-only">Content</FormLabel>
                     <FormControl>
                       {isPreview ? (
-                        <Box className="bg-gray-100 p-8 rounded-xl min-h-[400px] border border-gray-200 overflow-y-auto">
+                        <Box className="bg-muted p-8 rounded-xl min-h-[400px] border border-border overflow-y-auto">
                           {/* Simulated Email Browser Container */}
-                          <Box className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden border border-gray-100">
+                          <Box className="max-w-2xl mx-auto bg-card shadow-lg rounded-lg overflow-hidden border border-border">
                             {/* Email Header Simulation */}
                             <Box className="bg-[#1797b9] p-6 text-center">
                               <h1 className="text-white text-xl font-bold tracking-tight">NEWSLETTER</h1>
@@ -234,11 +234,11 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
                             />
                             
                             {/* Email Footer Simulation */}
-                            <Box className="bg-gray-50 p-6 border-t border-gray-100 text-center">
-                              <p className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">
+                            <Box className="bg-muted/50 p-6 border-t border-border text-center">
+                              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">
                                 Sent via Flowlio Newsletter Service
                               </p>
-                              <p className="text-[10px] text-gray-400 mt-2">
+                              <p className="text-[10px] text-muted-foreground mt-2">
                                 © 2024 Flowlio. All rights reserved.
                               </p>
                             </Box>
@@ -259,10 +259,10 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
             </Box>
 
             {/* Footer Actions */}
-            <Flex className="p-6 border-t border-gray-100 justify-end gap-3 bg-gray-50/50">
+            <Flex className="p-6 border-t border-border justify-end gap-3 bg-gray-50/50">
               <Button
                 variant="outline"
-                className="bg-white hover:bg-gray-50 text-gray-700 border-gray-200 rounded-full px-6 h-11 transition-all"
+                className="bg-card hover:bg-muted/50 text-muted-foreground border-border rounded-full px-6 h-11 transition-all"
                 type="button"
                 onClick={() => {
                   form.reset();

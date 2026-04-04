@@ -193,7 +193,7 @@ export const UserManagementTable = ({
   const columns: ColumnDef<Data>[] = [
     {
       accessorKey: "firstname",
-      header: () => <Box className="text-black pl-4">{t("table.name")}</Box>,
+      header: () => <Box className="text-foreground pl-4">{t("table.name")}</Box>,
       cell: ({ row }) => (
         <Flex className="capitalize pl-4 w-30 max-sm:w-full">
           <Avatar className="size-8">
@@ -217,7 +217,7 @@ export const UserManagementTable = ({
     {
       accessorKey: "email",
       header: () => (
-        <Box className="text-black text-start w-26 max-lg:w-full font-medium">
+        <Box className="text-foreground text-start w-26 max-lg:w-full font-medium">
           {t("table.email")}
         </Box>
       ),
@@ -230,7 +230,7 @@ export const UserManagementTable = ({
     {
       accessorKey: "companyname",
       header: () => (
-        <Box className="text-black text-center">{t("table.company")}</Box>
+        <Box className="text-foreground text-center">{t("table.company")}</Box>
       ),
       cell: ({ row }) => (
         <Box className="capitalize text-center">{row.original.companyname}</Box>
@@ -239,7 +239,7 @@ export const UserManagementTable = ({
     {
       accessorKey: "userrole",
       header: () => (
-        <Box className="text-center text-black">{t("table.role")}</Box>
+        <Box className="text-center text-foreground">{t("table.role")}</Box>
       ),
       cell: ({ row }) => (
         <Center className="text-center capitalize">
@@ -250,7 +250,7 @@ export const UserManagementTable = ({
     {
       accessorKey: "createdAt",
       header: () => (
-        <Box className="text-center text-black">{t("table.addedOn")}</Box>
+        <Box className="text-center text-foreground">{t("table.addedOn")}</Box>
       ),
       cell: ({ row }) => {
         const createdAt = new Date(row.original.createdAt);
@@ -271,7 +271,7 @@ export const UserManagementTable = ({
     {
       accessorKey: "status",
       header: () => (
-        <Box className="text-center text-black">{t("table.status")}</Box>
+        <Box className="text-center text-foreground">{t("table.status")}</Box>
       ),
       cell: ({ row }) => {
         const isActive = row.original.isActive;
@@ -311,7 +311,7 @@ export const UserManagementTable = ({
     {
       accessorKey: "actions",
       header: () => (
-        <Box className="text-center text-black">{t("common.actions")}</Box>
+        <Box className="text-center text-foreground">{t("common.actions")}</Box>
       ),
       cell: ({ row }) => {
         const { id, isActive, email, firstname, lastname, userrole } =
@@ -367,10 +367,10 @@ export const UserManagementTable = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    className={`text-white border-none w-9 h-9 cursor-pointer rounded-md ${
+                    className={`border-none w-9 h-9 cursor-pointer rounded-md ${
                       isActive
-                        ? "bg-red-300 hover:bg-red-500"
-                        : "bg-green-300 hover:bg-green-500"
+                        ? "bg-red-400 hover:bg-red-500 text-white"
+                        : "bg-green-400 hover:bg-green-500 text-white"
                     }`}
                     onClick={() => handleToggleUserStatus(id, isActive, email)}
                   >
@@ -393,7 +393,7 @@ export const UserManagementTable = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="bg-[#A50403] text-white border-none w-9 h-9 hover:bg-[#A50403]/80 cursor-pointer rounded-md"
+                    className="bg-destructive text-destructive-foreground border-none w-9 h-9 hover:bg-destructive/90 cursor-pointer rounded-md"
                     onClick={() => handleDeleteUserMember(id, email)}
                     disabled={deleteUserMember.isPending}
                   >

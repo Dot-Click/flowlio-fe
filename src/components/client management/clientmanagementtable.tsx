@@ -182,7 +182,7 @@ export const ClientManagementTable = () => {
   const columns: ColumnDef<Data>[] = [
     {
       accessorKey: "name",
-      header: () => <Box className="text-black pl-4">{t("table.name")}</Box>,
+      header: () => <Box className="text-foreground pl-4">{t("table.name")}</Box>,
       cell: ({ row }) => (
         <Flex className="capitalize pl-4 w-30 max-sm:w-full">
           <Avatar className="size-8">
@@ -203,7 +203,7 @@ export const ClientManagementTable = () => {
 
     {
       accessorKey: "cpfcnpj",
-      header: () => <Box className="text-black text-center">{t("table.vat")}</Box>,
+      header: () => <Box className="text-foreground text-center">{t("table.vat")}</Box>,
       cell: ({ row }) => (
         <Box className="captialize text-center">
           {row.original.cpfcnpj || t("clientManagement.notAvailable")}
@@ -214,7 +214,7 @@ export const ClientManagementTable = () => {
     {
       accessorKey: "address",
       header: () => (
-        <Box className="text-black text-center">{t("table.address")}</Box>
+        <Box className="text-foreground text-center">{t("table.address")}</Box>
       ),
       cell: ({ row }) => (
         <Box className="captialize text-center">
@@ -225,7 +225,7 @@ export const ClientManagementTable = () => {
     {
       accessorKey: "email",
       header: () => (
-        <Box className="text-black text-center">{t("table.email")}</Box>
+        <Box className="text-foreground text-center">{t("table.email")}</Box>
       ),
       cell: ({ row }) => (
         <Box className="captialize text-center">
@@ -237,7 +237,7 @@ export const ClientManagementTable = () => {
     // {
     //   id: "social",
     //   header: () => (
-    //     <Box className="text-center text-black">{t("table.social")}</Box>
+    //     <Box className="text-center text-foreground">{t("table.social")}</Box>
     //   ),
     //   cell: ({ row }) => {
     //     const socialLinks = row.original.socialMediaLinks
@@ -275,7 +275,7 @@ export const ClientManagementTable = () => {
     //             variant="ghost"
     //             className="w-8 h-8 p-0 flex items-center justify-center cursor-pointer"
     //           >
-    //             <Ellipsis className="text-gray-600" />
+    //             <Ellipsis className="text-muted-foreground" />
     //           </Button>
     //         </PopoverTrigger>
     //         <PopoverContent className="w-64">
@@ -311,7 +311,7 @@ export const ClientManagementTable = () => {
     //                       href={link.url}
     //                       target="_blank"
     //                       rel="noopener noreferrer"
-    //                       className="flex items-center gap-1 p-1.5 border border-gray-200 rounded hover:bg-gray-50 transition-colors"
+    //                       className="flex items-center gap-1 p-1.5 border border-border rounded hover:bg-muted/50 transition-colors"
     //                       title={link.type}
     //                     >
     //                       <Icon className="w-4 h-4" style={{ color }} />
@@ -330,7 +330,7 @@ export const ClientManagementTable = () => {
     {
       accessorKey: "businessIndustry",
       header: () => (
-        <Box className="text-black text-center">{t("table.industry")}</Box>
+        <Box className="text-foreground text-center">{t("table.industry")}</Box>
       ),
       cell: ({ row }) => (
         <Box className="captialize text-center">
@@ -342,7 +342,7 @@ export const ClientManagementTable = () => {
     {
       accessorKey: "status",
       header: () => (
-        <Box className="text-center text-black">{t("table.status")}</Box>
+        <Box className="text-center text-foreground">{t("table.status")}</Box>
       ),
       cell: ({ row }) => {
         const status = row.original.status as
@@ -385,7 +385,7 @@ export const ClientManagementTable = () => {
 
         // Default style if status is not found
         const defaultStyle = {
-          text: "text-white bg-gray-500 border-none rounded-full",
+          text: "text-white bg-muted/500 border-none rounded-full",
           dot: "bg-white",
         };
 
@@ -474,7 +474,7 @@ export const ClientManagementTable = () => {
       accessorKey: `customFields.${field.id}`,
       id: field.id,
       header: () => (
-        <Box className="text-center text-black p-1">{field.name}</Box>
+        <Box className="text-center text-foreground p-1">{field.name}</Box>
       ),
       cell: ({ row }: { row: any }) => {
         const val = row.original.customFields?.[field.id];
@@ -485,7 +485,7 @@ export const ClientManagementTable = () => {
           if (option) {
             return (
               <Center>
-                <Flex className="items-center gap-2 px-2 py-1 bg-gray-50 rounded-full border border-gray-100 text-xs">
+                <Flex className="items-center gap-2 px-2 py-1 bg-muted/50 rounded-full border border-border text-xs">
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: option.color }} />
                   <span className="capitalize">{val}</span>
                 </Flex>
@@ -519,7 +519,7 @@ export const ClientManagementTable = () => {
     {
       accessorKey: "actions",
       header: () => (
-        <Box className="text-center text-black">{t("common.actions")}</Box>
+        <Box className="text-center text-foreground">{t("common.actions")}</Box>
       ),
       cell: ({ row }) => {
         return (
@@ -701,21 +701,20 @@ export const ClientManagementTable = () => {
       {/* Edit Client Modal */}
       {selectedClient && (
         <GeneralModal open={props.open} onOpenChange={props.onOpenChange}>
-          <Box className="w-full h-[36rem] bg-white rounded-xl shadow-lg p-6 gap-4 overflow-y-auto">
+          <Box className="w-full bg-card rounded-xl border border-border p-6 gap-4 overflow-y-auto">
             <Stack className="items-center">
-              <Box className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mb-2">
+              <Box className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-2">
                 <img
                   src={selectedClient.image}
                   alt="Client"
-                  className="text-blue-400 rounded-full w-20 h-20"
+                  className="rounded-full w-20 h-20 object-cover"
                 />
               </Box>
-              <span className="text-2xl font-bold text-gray-800 capitalize">
+              <span className="text-2xl font-bold text-foreground capitalize">
                 {selectedClient.name}
               </span>
               <span
-                className="inline-block px-3 py-1 rounded-full text-xs font-semibold mt-1 mb-2"
-                style={{ background: "#F3F4F6", color: "#1797B9" }}
+                className="inline-block px-3 py-1 rounded-full text-xs font-semibold mt-1 mb-2 bg-primary/10 text-primary border border-primary/20"
               >
                 {translateClientStatus(selectedClient.status)}
               </span>
@@ -724,7 +723,7 @@ export const ClientManagementTable = () => {
             {/* Social Media Links */}
             {selectedClient.socialMediaLinks && (
               <Box className="mt-6">
-                <span className="text-lg font-semibold text-gray-800 mb-2 block">
+                <span className="text-lg font-semibold text-foreground mb-2 block">
                   {t("clientManagement.viewModal.socialMedia")}
                 </span>
                 <Box className="flex flex-wrap gap-3">
@@ -767,24 +766,24 @@ export const ClientManagementTable = () => {
                               href={link.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                              className="flex items-center gap-2 p-2 border border-border rounded-lg hover:bg-muted/50 transition-colors"
                             >
                               <Icon className="w-5 h-5" style={{ color }} />
-                              <span className="text-sm text-gray-700 capitalize">
+                              <span className="text-sm text-foreground capitalize">
                                 {link.type}
                               </span>
                             </a>
                           );
                         })
                       ) : (
-                        <Box className="text-center text-gray-500 text-sm">
+                        <Box className="text-center text-muted-foreground text-sm">
                           {t("clientManagement.viewModal.noSocialLinks")}
                         </Box>
                       );
                     } catch (err) {
                       console.error("Error parsing social media links:", err);
                       return (
-                        <Box className="text-center text-gray-500 text-sm">
+                        <Box className="text-center text-muted-foreground text-sm">
                           {t("clientManagement.viewModal.loadSocialError")}
                         </Box>
                       );
@@ -826,9 +825,9 @@ export const ClientManagementTable = () => {
                       return (
                         <Box
                           key={field.id}
-                          className="p-3 border border-gray-100 rounded-lg bg-gray-50/50"
+                          className="p-3 border border-border rounded-lg bg-gray-50/50"
                         >
-                          <span className="text-xs font-medium text-gray-500 block">
+                          <span className="text-xs font-medium text-muted-foreground block">
                             {field.name}
                           </span>
                           <Flex className="items-center gap-2">
@@ -857,7 +856,7 @@ export const ClientManagementTable = () => {
               </span>
               {!selectedClient.projects ||
               selectedClient.projects.length === 0 ? (
-                <Box className="text-center text-gray-500">
+                <Box className="text-center text-muted-foreground">
                   {t("clientManagement.viewModal.noProjects")}
                 </Box>
               ) : (
@@ -865,10 +864,10 @@ export const ClientManagementTable = () => {
                   {selectedClient.projects?.map((project) => (
                     <Box
                       key={project.id}
-                      className="border rounded-lg p-4 shadow-sm bg-gray-50"
+                      className="border rounded-lg p-4 shadow-sm bg-muted/50"
                     >
                       <Flex className="justify-between items-center mb-2">
-                        <span className="font-bold text-gray-700">
+                        <span className="font-bold text-foreground">
                           {project.name}
                         </span>
                         {project.status === "Completed" && (
@@ -878,7 +877,7 @@ export const ClientManagementTable = () => {
                         )}
                       </Flex>
                       <Flex className="items-center gap-2 mb-2">
-                        <span className="text-xs font-medium text-gray-600">
+                        <span className="text-xs font-medium text-muted-foreground">
                           {t("clientManagement.viewModal.statusLabel")}
                         </span>
                         <span
@@ -894,10 +893,10 @@ export const ClientManagementTable = () => {
                         </span>
                       </Flex>
                       <Flex className="items-center gap-2 mb-2">
-                        <span className="text-xs font-medium text-gray-600">
+                        <span className="text-xs font-medium text-muted-foreground">
                           {t("clientManagement.viewModal.completionLabel")}
                         </span>
-                        <Box className="w-32 h-2 bg-gray-200 rounded">
+                        <Box className="w-32 h-2 bg-muted rounded">
                           <Box
                             className="h-2 bg-blue-500 rounded"
                             style={{ width: `${project.completionRate}%` }}
@@ -908,7 +907,7 @@ export const ClientManagementTable = () => {
                         </span>
                       </Flex>
                       <Button
-                        className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white py-1 px-4 rounded font-semibold shadow hover:from-blue-600 hover:to-cyan-500 transition cursor-pointer mt-2"
+                        className="bg-gradient-to-r from-blue-500/50 to-cyan-400 text-white py-1 px-4 rounded font-semibold shadow hover:from-blue-600 hover:to-cyan-500 transition cursor-pointer mt-2"
                         onClick={() => {
                           // Simulate contract download
                           const blob = new Blob(

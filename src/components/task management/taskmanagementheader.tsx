@@ -171,7 +171,7 @@ export const TaskManagementHeader = () => {
       <Stack className="gap-4 py-2">
         <Center className="justify-between max-sm:flex-col max-sm:items-start gap-2">
           <Stack className="gap-1">
-            <h1 className="text-black text-3xl max-sm:text-xl font-medium">
+            <h1 className="text-foreground text-3xl max-sm:text-xl font-medium">
               {t("appSidebar.tasksManagement")}
             </h1>
             <h1 className={`max-sm:text-sm text-[#616572]`}>
@@ -181,10 +181,10 @@ export const TaskManagementHeader = () => {
 
             <Button
               variant="outline"
-              className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
+              className="bg-black text-white border border-border  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
               onClick={() => navigate("/dashboard/task-management/create-task")}
             >
-              <CirclePlus className="fill-white text-black size-5" />
+              <CirclePlus className="fill-white text-foreground size-5" />
               {t("taskManagement.createTask")}
             </Button>
         </Center>
@@ -197,7 +197,7 @@ export const TaskManagementHeader = () => {
               placeholder={t("taskManagement.searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full md:w-115 lg:w-80 xl:w-[400px] py-4 pl-10 bg-white h-10  placeholder:text-black  placeholder:text-[15px] border border-gray-100 rounded-md focus:outline-none active:border-gray-200 focus:ring-0 focus:ring-offset-0"
+              className="w-full md:w-115 lg:w-80 xl:w-[400px] py-4 pl-10 bg-card h-10  placeholder:text-foreground  placeholder:text-[15px] border border-border rounded-md focus:outline-none active:border-border focus:ring-0 focus:ring-offset-0"
             />
           </Flex>
 
@@ -215,7 +215,7 @@ export const TaskManagementHeader = () => {
                   variant="ghost"
                   aria-haspopup="dialog"
                   className={cn(
-                    "cursor-pointer bg-white border border-gray-200 rounded-full h-10 w-36 text-black shadow-none flex p-3 justify-between overflow-hidden"
+                    "cursor-pointer bg-card border border-border rounded-full h-10 w-36 text-foreground shadow-none flex p-3 justify-between overflow-hidden"
                   )}
                 >
                   <ChevronDown />
@@ -257,7 +257,7 @@ export const TaskManagementHeader = () => {
                   variant="ghost"
                   aria-haspopup="dialog"
                   className={cn(
-                    "ml-auto cursor-pointer bg-white border border-gray-200 rounded-full h-10 w-32 text-black shadow-none flex p-3 gap-8 overflow-hidden"
+                    "ml-auto cursor-pointer bg-card border border-border rounded-full h-10 w-32 text-foreground shadow-none flex p-3 gap-8 overflow-hidden"
                   )}
                 >
                   <ChevronDown />

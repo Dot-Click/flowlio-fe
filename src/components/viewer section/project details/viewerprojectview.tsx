@@ -142,7 +142,7 @@ export const ViewerProjectView = () => {
       case "pending":
         return <AlertCircle className="h-4 w-4 text-yellow-600" />;
       default:
-        return <Clock className="h-4 w-4 text-gray-600" />;
+        return <Clock className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
@@ -155,7 +155,7 @@ export const ViewerProjectView = () => {
       case "pending":
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-muted text-gray-800 border-border";
     }
   };
 
@@ -176,34 +176,34 @@ export const ViewerProjectView = () => {
       <Box className="flex items-center justify-between mb-6">
         <Box className="flex items-center gap-4">
           <Box
-            className="flex items-center gap-2 w-20 cursor-pointer transition-all duration-300 hover:bg-gray-200 rounded-full hover:p-2"
+            className="flex items-center gap-2 w-20 cursor-pointer transition-all duration-300 hover:bg-muted rounded-full hover:p-2"
             onClick={() => navigate(-1)}
           >
             <IoArrowBack />
-            <p className="text-black">Back</p>
+            <p className="text-foreground">Back</p>
           </Box>
 
           {/* Breadcrumb */}
-          <Box className="flex items-center gap-2 text-sm text-gray-600">
+          <Box className="flex items-center gap-2 text-sm text-muted-foreground">
             <Button
               variant="link"
-              className="p-0 h-auto text-gray-600 hover:text-gray-900"
+              className="p-0 h-auto text-muted-foreground hover:text-foreground"
               onClick={() => navigate("/viewer/my-projects")}
             >
               My Projects
             </Button>
             <span>/</span>
-            <span className="text-gray-900 font-medium">{project.name}</span>
+            <span className="text-foreground font-medium">{project.name}</span>
           </Box>
         </Box>
       </Box>
 
       {/* Project Header Card */}
-      <Card className="mb-6 border-0 shadow-xl bg-gradient-to-r from-blue-50 via-white to-purple-50">
+      <Card className="mb-6 border-0 shadow-xl bg-gradient-to-r from-blue-500/5 via-white to-purple-50">
         <CardHeader className="pb-6">
           <Box className="flex items-start justify-between max-sm:flex-col-reverse max-sm:gap-4">
             <Box className="flex-1">
-              <CardTitle className="text-3xl font-bold text-gray-900 mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
+              <CardTitle className="text-3xl font-bold text-foreground mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
                 {project.name || "Untitled Project"}
               </CardTitle>
               <Box className="flex items-center gap-6 mb-6">
@@ -217,13 +217,13 @@ export const ViewerProjectView = () => {
                   {project.status?.charAt(0).toUpperCase() +
                     project.status?.slice(1)}
                 </Badge>
-                <Box className="flex items-center gap-2 text-sm text-gray-600 bg-white/70 px-3 py-2 rounded-full">
+                <Box className="flex items-center gap-2 text-sm text-muted-foreground bg-card/70 px-3 py-2 rounded-full">
                   <FileText className="h-4 w-4 text-blue-600" />
                   <span className="font-medium">
                     Progress: {project.progress}%
                   </span>
                 </Box>
-                <Box className="flex items-center gap-2 text-sm text-gray-600 bg-white/70 px-3 py-2 rounded-full">
+                <Box className="flex items-center gap-2 text-sm text-muted-foreground bg-card/70 px-3 py-2 rounded-full">
                   <Building2 className="h-4 w-4 text-green-600" />
                   <span className="font-medium">
                     {project.clientName || "No Client"}
@@ -233,7 +233,7 @@ export const ViewerProjectView = () => {
               <Box className="relative">
                 <Progress
                   value={project.progress}
-                  className="w-full h-3 bg-gray-200 rounded-full overflow-hidden"
+                  className="w-full h-3 bg-muted rounded-full overflow-hidden"
                 />
                 <Box className="absolute inset-0 bg-gradient-to-r from-blue-300 to-purple-300 rounded-full opacity-20"></Box>
               </Box>
@@ -244,7 +244,7 @@ export const ViewerProjectView = () => {
                   variant="outline"
                   size="sm"
                   onClick={handleDownload}
-                  className="flex items-center gap-2 bg-white hover:bg-blue-50 border-blue-200 text-blue-700"
+                  className="flex items-center gap-2 bg-card hover:bg-blue-50 border-blue-200 text-blue-700"
                 >
                   <Download className="h-4 w-4" />
                   Contract
@@ -269,56 +269,56 @@ export const ViewerProjectView = () => {
             </CardHeader>
             <CardContent className="space-y-4 p-4">
               <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Box className="flex items-center gap-4 p-4 bg-white/70 rounded-lg border border-blue-100">
+                <Box className="flex items-center gap-4 p-4 bg-card/70 rounded-lg border border-blue-100">
                   <Box className="p-2 bg-blue-100 rounded-full">
                     <Building2 className="h-5 w-5 text-blue-600" />
                   </Box>
                   <Box>
-                    <p className="text-sm text-gray-600 font-medium">
+                    <p className="text-sm text-muted-foreground font-medium">
                       Project Number
                     </p>
-                    <p className="font-semibold text-gray-900">
+                    <p className="font-semibold text-foreground">
                       {project.projectNumber}
                     </p>
                   </Box>
                 </Box>
-                <Box className="flex items-center gap-4 p-4 bg-white/70 rounded-lg border border-green-100">
+                <Box className="flex items-center gap-4 p-4 bg-card/70 rounded-lg border border-green-100">
                   <Box className="p-2 bg-green-100 rounded-full">
                     <User className="h-5 w-5 text-green-600" />
                   </Box>
                   <Box>
-                    <p className="text-sm text-gray-600 font-medium">
+                    <p className="text-sm text-muted-foreground font-medium">
                       Assigned To
                     </p>
-                    <p className="font-semibold text-gray-900">
+                    <p className="font-semibold text-foreground">
                       {project.assignedUserName}
                     </p>
                   </Box>
                 </Box>
-                <Box className="flex items-center gap-4 p-4 bg-white/70 rounded-lg border border-purple-100">
+                <Box className="flex items-center gap-4 p-4 bg-card/70 rounded-lg border border-purple-100">
                   <Box className="p-2 bg-purple-100 rounded-full">
                     <Calendar className="h-5 w-5 text-purple-600" />
                   </Box>
                   <Box>
-                    <p className="text-sm text-gray-600 font-medium">
+                    <p className="text-sm text-muted-foreground font-medium">
                       Start Date
                     </p>
-                    <p className="font-semibold text-gray-900">
+                    <p className="font-semibold text-foreground">
                       {project.startDate
                         ? format(new Date(project.startDate), "MMM dd, yyyy")
                         : "Not set"}
                     </p>
                   </Box>
                 </Box>
-                <Box className="flex items-center gap-4 p-4 bg-white/70 rounded-lg border border-orange-100">
+                <Box className="flex items-center gap-4 p-4 bg-card/70 rounded-lg border border-orange-100">
                   <Box className="p-2 bg-orange-100 rounded-full">
                     <Calendar className="h-5 w-5 text-orange-600" />
                   </Box>
                   <Box>
-                    <p className="text-sm text-gray-600 font-medium">
+                    <p className="text-sm text-muted-foreground font-medium">
                       End Date
                     </p>
-                    <p className="font-semibold text-gray-900">
+                    <p className="font-semibold text-foreground">
                       {project.endDate
                         ? format(new Date(project.endDate), "MMM dd, yyyy")
                         : "Not set"}
@@ -329,11 +329,11 @@ export const ViewerProjectView = () => {
 
               {/* Project Description */}
               {project.description && (
-                <Box className="mt-6 p-4 bg-white/70 rounded-lg border border-gray-100">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <Box className="mt-6 p-4 bg-card/70 rounded-lg border border-border">
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
                     Description
                   </h3>
-                  <p className="text-gray-700 leading-relaxed">
+                  <p className="text-foreground leading-relaxed">
                     {project.description}
                   </p>
                 </Box>
@@ -341,12 +341,12 @@ export const ViewerProjectView = () => {
 
               {/* Project Address */}
               {project.address && (
-                <Box className="mt-4 p-4 bg-white/70 rounded-lg border border-gray-100">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-gray-600" />
+                <Box className="mt-4 p-4 bg-card/70 rounded-lg border border-border">
+                  <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-muted-foreground" />
                     Project Address
                   </h3>
-                  <p className="text-gray-700">{project.address}</p>
+                  <p className="text-foreground">{project.address}</p>
                 </Box>
               )}
             </CardContent>
@@ -372,10 +372,10 @@ export const ViewerProjectView = () => {
                   </AvatarFallback>
                 </Avatar>
                 <Box>
-                  <h3 className="font-semibold text-gray-900">
+                  <h3 className="font-semibold text-foreground">
                     {project.clientName}
                   </h3>
-                  <p className="text-sm text-gray-600">Client</p>
+                  <p className="text-sm text-muted-foreground">Client</p>
                 </Box>
               </Box>
 
@@ -384,20 +384,20 @@ export const ViewerProjectView = () => {
               <Box className="space-y-3">
                 {project.clientEmail && (
                   <Box className="flex items-center gap-3 text-sm">
-                    <Mail className="h-4 w-4 text-gray-500" />
-                    <span className="text-gray-700">{project.clientEmail}</span>
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-foreground">{project.clientEmail}</span>
                   </Box>
                 )}
                 {project.clientPhone && (
                   <Box className="flex items-center gap-3 text-sm">
-                    <Phone className="h-4 w-4 text-gray-500" />
-                    <span className="text-gray-700">{project.clientPhone}</span>
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-foreground">{project.clientPhone}</span>
                   </Box>
                 )}
                 {project.clientAddress && (
                   <Box className="flex items-center gap-3 text-sm">
-                    <MapPin className="h-4 w-4 text-gray-500" />
-                    <span className="text-gray-700">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-foreground">
                       {project.clientAddress}
                     </span>
                   </Box>
@@ -415,30 +415,30 @@ export const ViewerProjectView = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-4">
-              <Box className="flex items-center justify-between p-3 bg-white/70 rounded-lg border border-purple-100">
+              <Box className="flex items-center justify-between p-3 bg-card/70 rounded-lg border border-purple-100">
                 <Box className="flex items-center gap-3">
                   <Box className="p-2 bg-purple-100 rounded-full">
                     <Calendar className="h-4 w-4 text-purple-600" />
                   </Box>
                   <Box>
-                    <p className="text-sm font-medium text-gray-900">Created</p>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-sm font-medium text-foreground">Created</p>
+                    <p className="text-xs text-muted-foreground">
                       {format(new Date(project.createdAt), "MMM dd, yyyy")}
                     </p>
                   </Box>
                 </Box>
               </Box>
 
-              <Box className="flex items-center justify-between p-3 bg-white/70 rounded-lg border border-blue-100">
+              <Box className="flex items-center justify-between p-3 bg-card/70 rounded-lg border border-blue-100">
                 <Box className="flex items-center gap-3">
                   <Box className="p-2 bg-blue-100 rounded-full">
                     <Clock className="h-4 w-4 text-blue-600" />
                   </Box>
                   <Box>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-foreground">
                       Last Updated
                     </p>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs text-muted-foreground">
                       {format(new Date(project.updatedAt), "MMM dd, yyyy")}
                     </p>
                   </Box>
@@ -446,16 +446,16 @@ export const ViewerProjectView = () => {
               </Box>
 
               {project.startDate && (
-                <Box className="flex items-center justify-between p-3 bg-white/70 rounded-lg border border-green-100">
+                <Box className="flex items-center justify-between p-3 bg-card/70 rounded-lg border border-green-100">
                   <Box className="flex items-center gap-3">
                     <Box className="p-2 bg-green-100 rounded-full">
                       <PlayCircle className="h-4 w-4 text-green-600" />
                     </Box>
                     <Box>
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-foreground">
                         Start Date
                       </p>
-                      <p className="text-xs text-gray-600">
+                      <p className="text-xs text-muted-foreground">
                         {format(new Date(project.startDate), "MMM dd, yyyy")}
                       </p>
                     </Box>
@@ -464,16 +464,16 @@ export const ViewerProjectView = () => {
               )}
 
               {project.endDate && (
-                <Box className="flex items-center justify-between p-3 bg-white/70 rounded-lg border border-orange-100">
+                <Box className="flex items-center justify-between p-3 bg-card/70 rounded-lg border border-orange-100">
                   <Box className="flex items-center gap-3">
                     <Box className="p-2 bg-orange-100 rounded-full">
                       <CheckCircle className="h-4 w-4 text-orange-600" />
                     </Box>
                     <Box>
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-foreground">
                         End Date
                       </p>
-                      <p className="text-xs text-gray-600">
+                      <p className="text-xs text-muted-foreground">
                         {format(new Date(project.endDate), "MMM dd, yyyy")}
                       </p>
                     </Box>

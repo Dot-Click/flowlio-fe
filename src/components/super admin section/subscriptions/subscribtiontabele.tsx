@@ -43,7 +43,7 @@ export type Data = {
 export const getColumns = (t: any): ColumnDef<Data>[] => [
   {
     accessorKey: "companyName",
-    header: () => <Box className="text-black p-4">{t("superadmin.subscriptions.table.company", "Company Name")}</Box>,
+    header: () => <Box className="text-foreground p-4">{t("superadmin.subscriptions.table.company", "Company Name")}</Box>,
     cell: ({ row }) => (
       <Box className="capitalize p-4 w-30 max-sm:w-full">
         {row.original.companyName.length > 28
@@ -55,7 +55,7 @@ export const getColumns = (t: any): ColumnDef<Data>[] => [
   {
     accessorKey: "subscribtionplan",
     header: () => (
-      <Box className="text-black text-start">{t("superadmin.subscriptions.table.plan", "Subscription Plan")}</Box>
+      <Box className="text-foreground text-start">{t("superadmin.subscriptions.table.plan", "Subscription Plan")}</Box>
     ),
     cell: ({ row }) => (
       <Box className="captialize text-start">
@@ -66,7 +66,7 @@ export const getColumns = (t: any): ColumnDef<Data>[] => [
 
   {
     accessorKey: "startDate",
-    header: () => <Box className="text-center text-black">{t("superadmin.subscriptions.table.startDate", "Start Date")}</Box>,
+    header: () => <Box className="text-center text-foreground">{t("superadmin.subscriptions.table.startDate", "Start Date")}</Box>,
     cell: ({ row }) => {
       const startDate = row.original.startDate;
       try {
@@ -99,7 +99,7 @@ export const getColumns = (t: any): ColumnDef<Data>[] => [
 
   {
     accessorKey: "expiredate",
-    header: () => <Box className="text-center text-black">{t("superadmin.subscriptions.table.expireDate", "Expire Date")}</Box>,
+    header: () => <Box className="text-center text-foreground">{t("superadmin.subscriptions.table.expireDate", "Expire Date")}</Box>,
     cell: ({ row }) => {
       const expiredate = row.original.expiredate;
       try {
@@ -116,7 +116,7 @@ export const getColumns = (t: any): ColumnDef<Data>[] => [
 
   {
     accessorKey: "amount",
-    header: () => <Box className="text-center text-black">{t("superadmin.subscriptions.table.amount", "Amount")}</Box>,
+    header: () => <Box className="text-center text-foreground">{t("superadmin.subscriptions.table.amount", "Amount")}</Box>,
     cell: ({ row }) => {
       return (
         <Center className="text-center">{"$" + row.original.amount} </Center>
@@ -125,7 +125,7 @@ export const getColumns = (t: any): ColumnDef<Data>[] => [
   },
   {
     accessorKey: "lastbilledon",
-    header: () => <Box className="text-center text-black">{t("superadmin.subscriptions.table.lastBilled", "Last Billed On")}</Box>,
+    header: () => <Box className="text-center text-foreground">{t("superadmin.subscriptions.table.lastBilled", "Last Billed On")}</Box>,
     cell: ({ row }) => {
       return (
         <Box className="text-center">
@@ -136,7 +136,7 @@ export const getColumns = (t: any): ColumnDef<Data>[] => [
   },
   {
     accessorKey: "status",
-    header: () => <Box className="text-center text-black">{t("superadmin.subscriptions.table.status", "Status")}</Box>,
+    header: () => <Box className="text-center text-foreground">{t("superadmin.subscriptions.table.status", "Status")}</Box>,
     cell: ({ row }) => {
       const status = row.original.status as
         | "active"
@@ -146,15 +146,15 @@ export const getColumns = (t: any): ColumnDef<Data>[] => [
       const statusStyles: Record<string, { text: string; dot: string }> = {
         active: {
           text: "text-white bg-[#00A400] border-none rounded-full",
-          dot: "bg-white",
+          dot: "bg-card",
         },
         inActive: {
           text: "text-white bg-[#F98618] border-none rounded-full",
-          dot: "bg-white",
+          dot: "bg-card",
         },
         "non active": {
           text: "text-white bg-[#F98618] border-none rounded-full",
-          dot: "bg-white",
+          dot: "bg-card",
         },
       };
 
@@ -174,7 +174,7 @@ export const getColumns = (t: any): ColumnDef<Data>[] => [
   },
   {
     id: "actions",
-    header: () => <Box className="text-center text-black">{t("superadmin.subscriptions.table.actions", "Actions")}</Box>,
+    header: () => <Box className="text-center text-foreground">{t("superadmin.subscriptions.table.actions", "Actions")}</Box>,
     cell: ({ row, table }) => {
       const organizationId = row.original.id;
       const handleViewHistory = () => {
@@ -360,7 +360,7 @@ export const SubscribtionTabele = ({
       <Center className="justify-between">
         <Stack className="gap-1">
           <Flex className="items-center gap-3">
-            <h1 className="text-black text-2xl max-sm:text-xl font-medium">
+            <h1 className="text-foreground text-2xl max-sm:text-xl font-medium">
               {t("superadmin.subscriptions.allSubscriptions", "All Subscriptions")}
             </h1>
             <Button
@@ -373,7 +373,7 @@ export const SubscribtionTabele = ({
               {t("superadmin.subscriptions.auditPayment", "Audit Payment")}
             </Button>
           </Flex>
-          <h1 className="text-gray-500 text-sm max-sm:text-xs">
+          <h1 className="text-muted-foreground text-sm max-sm:text-xs">
             {t("superadmin.subscriptions.allSubscriptionsDesc", "Showing active and non-active subscriptions")}
           </h1>
         </Stack>
@@ -382,7 +382,7 @@ export const SubscribtionTabele = ({
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="border border-gray-100 max-md:ml-auto"
+              className="border border-border max-md:ml-auto"
             >
               <CalendarIcon className="fill-[#1797B9]" />
               This Month

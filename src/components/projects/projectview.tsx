@@ -247,7 +247,7 @@ export const ProjectView = () => {
       case "pending":
         return <AlertCircle className="h-4 w-4 text-yellow-600" />;
       default:
-        return <Clock className="h-4 w-4 text-gray-600" />;
+        return <Clock className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
@@ -260,7 +260,7 @@ export const ProjectView = () => {
       case "pending":
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-muted text-gray-800 border-border";
     }
   };
 
@@ -380,24 +380,24 @@ export const ProjectView = () => {
       <Box className="flex items-center justify-between mb-6">
         <Box className="flex items-center gap-4">
           <Box
-            className="flex items-center gap-2 w-20 cursor-pointer transition-all duration-300 hover:bg-gray-200 rounded-full hover:p-2"
+            className="flex items-center gap-2 w-20 cursor-pointer transition-all duration-300 hover:bg-muted rounded-full hover:p-2"
             onClick={() => navigate(-1)}
           >
             <IoArrowBack />
-            <p className="text-black">{t("common.back")}</p>
+            <p className="text-foreground">{t("common.back")}</p>
           </Box>
 
           {/* Breadcrumb */}
-          <Box className="flex items-center gap-2 text-sm text-gray-600">
+          <Box className="flex items-center gap-2 text-sm text-muted-foreground">
             <Button
               variant="link"
-              className="p-0 h-auto text-gray-600 hover:text-gray-900"
+              className="p-0 h-auto text-muted-foreground hover:text-foreground"
               onClick={() => navigate("/dashboard/project")}
             >
               {t("appSidebar.projects")}
             </Button>
             <span>/</span>
-            <span className="text-gray-900 font-medium">
+            <span className="text-foreground font-medium">
               {project.projectName}
             </span>
           </Box>
@@ -405,11 +405,11 @@ export const ProjectView = () => {
       </Box>
 
       {/* Project Header Card */}
-      <Card className="mb-6 border-0 shadow-xl bg-gradient-to-r from-blue-50 via-white to-purple-50">
+      <Card className="mb-6 border-0 shadow-xl bg-gradient-to-r from-blue-500/5 via-white to-purple-50">
         <CardHeader className="pb-6">
           <Box className="flex items-start justify-between max-sm:flex-col-reverse max-sm:gap-4">
             <Box className="flex-1">
-              <CardTitle className="text-3xl font-bold text-gray-900 mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
+              <CardTitle className="text-3xl font-bold text-foreground mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
                 {project.projectName || t("projects.untitled")}
               </CardTitle>
               <Box className="flex items-center gap-6 mb-6">
@@ -423,19 +423,19 @@ export const ProjectView = () => {
                   {project.status?.charAt(0).toUpperCase() +
                     project.status?.slice(1)}
                 </Badge>
-                <Box className="flex items-center gap-2 text-sm text-gray-600 bg-white/70 px-3 py-2 rounded-full">
+                <Box className="flex items-center gap-2 text-sm text-muted-foreground bg-card/70 px-3 py-2 rounded-full">
                   <BarChart3 className="h-4 w-4 text-blue-600" />
                   <span className="font-medium">
                     {t("projects.progress")}: {project.progress}%
                   </span>
                 </Box>
-                <Box className="flex items-center gap-2 text-sm text-gray-600 bg-white/70 px-3 py-2 rounded-full">
+                <Box className="flex items-center gap-2 text-sm text-muted-foreground bg-card/70 px-3 py-2 rounded-full">
                   <Building2 className="h-4 w-4 text-green-600" />
                   <span className="font-medium">
                     {project.clientName || t("common.noClient")}
                   </span>
                 </Box>
-                <Box className="flex items-center gap-2 text-sm text-gray-600 bg-white/70 px-3 py-2 rounded-full">
+                <Box className="flex items-center gap-2 text-sm text-muted-foreground bg-card/70 px-3 py-2 rounded-full">
                   {(project as any).visibility === "private" ? (
                     <Lock className="h-4 w-4 text-orange-500" />
                   ) : (
@@ -451,7 +451,7 @@ export const ProjectView = () => {
               <Box className="relative">
                 <Progress
                   value={project.progress}
-                  className="w-full h-3 bg-gray-200 rounded-full overflow-hidden"
+                  className="w-full h-3 bg-muted rounded-full overflow-hidden"
                 />
                 <Box className="absolute inset-0 bg-gradient-to-r from-blue-300 to-purple-300 rounded-full opacity-20"></Box>
               </Box>
@@ -462,7 +462,7 @@ export const ProjectView = () => {
                   variant="outline"
                   size="sm"
                   onClick={handleDownload}
-                  className="flex items-center gap-2 bg-white hover:bg-blue-50 border-blue-200 text-blue-700"
+                  className="flex items-center gap-2 bg-card hover:bg-blue-50 border-blue-200 text-blue-700"
                 >
                   <Download className="h-4 w-4" />
                   Contract
@@ -487,56 +487,56 @@ export const ProjectView = () => {
             </CardHeader>
             <CardContent className="space-y-4 p-4">
               <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Box className="flex items-center gap-4 p-4 bg-white/70 rounded-lg border border-blue-100">
+                <Box className="flex items-center gap-4 p-4 bg-card/70 rounded-lg border border-blue-100">
                   <Box className="p-2 bg-blue-100 rounded-full">
                     <Building2 className="h-5 w-5 text-blue-600" />
                   </Box>
                   <Box>
-                    <p className="text-sm text-gray-600 font-medium">
+                    <p className="text-sm text-muted-foreground font-medium">
                      {t("projects.projectNumber")}
                     </p>
-                    <p className="font-semibold text-gray-900">
+                    <p className="font-semibold text-foreground">
                       {project.projectNumber}
                     </p>
                   </Box>
                 </Box>
-                <Box className="flex items-center gap-4 p-4 bg-white/70 rounded-lg border border-green-100">
+                <Box className="flex items-center gap-4 p-4 bg-card/70 rounded-lg border border-green-100">
                   <Box className="p-2 bg-green-100 rounded-full">
                     <User className="h-5 w-5 text-green-600" />
                   </Box>
                   <Box>
-                    <p className="text-sm text-gray-600 font-medium">
+                    <p className="text-sm text-muted-foreground font-medium">
                      {t("projects.assignedTo")}
                     </p>
-                    <p className="font-semibold text-gray-900">
+                    <p className="font-semibold text-foreground">
                       {project.assignedProject || t("common.unassigned")}
                     </p>
                   </Box>
                 </Box>
-                <Box className="flex items-center gap-4 p-4 bg-white/70 rounded-lg border border-purple-100">
+                <Box className="flex items-center gap-4 p-4 bg-card/70 rounded-lg border border-purple-100">
                   <Box className="p-2 bg-purple-100 rounded-full">
                     <Calendar className="h-5 w-5 text-purple-600" />
                   </Box>
                   <Box>
-                    <p className="text-sm text-gray-600 font-medium">
+                    <p className="text-sm text-muted-foreground font-medium">
                      {t("projects.startDate")}
                     </p>
-                    <p className="font-semibold text-gray-900">
+                    <p className="font-semibold text-foreground">
                       {project.startDate
                         ? format(new Date(project.startDate), "MMM dd, yyyy")
                         : "Not set"}
                     </p>
                   </Box>
                 </Box>
-                <Box className="flex items-center gap-4 p-4 bg-white/70 rounded-lg border border-orange-100">
+                <Box className="flex items-center gap-4 p-4 bg-card/70 rounded-lg border border-orange-100">
                   <Box className="p-2 bg-orange-100 rounded-full">
                     <Calendar className="h-5 w-5 text-orange-600" />
                   </Box>
                   <Box>
-                    <p className="text-sm text-gray-600 font-medium">
+                    <p className="text-sm text-muted-foreground font-medium">
                      {t("projects.endDate")}
                     </p>
-                    <p className="font-semibold text-gray-900">
+                    <p className="font-semibold text-foreground">
                       {project.endDate
                         ? format(new Date(project.endDate), "MMM dd, yyyy")
                         : "Not set"}
@@ -546,15 +546,15 @@ export const ProjectView = () => {
               </Box>
 
               {project.address && (
-                <Box className="flex items-start gap-4 p-4 bg-white/70 rounded-lg border border-gray-100">
-                  <Box className="p-2 bg-gray-100 rounded-full mt-1">
-                    <MapPin className="h-5 w-5 text-gray-600" />
+                <Box className="flex items-start gap-4 p-4 bg-card/70 rounded-lg border border-border">
+                  <Box className="p-2 bg-muted rounded-full mt-1">
+                    <MapPin className="h-5 w-5 text-muted-foreground" />
                   </Box>
                   <Box>
-                    <p className="text-sm text-gray-600 font-medium mb-1">
+                    <p className="text-sm text-muted-foreground font-medium mb-1">
                      {t("projects.addressLabel")}
                     </p>
-                    <p className="font-semibold text-gray-900">
+                    <p className="font-semibold text-foreground">
                       {project.address}
                     </p>
                   </Box>
@@ -562,11 +562,11 @@ export const ProjectView = () => {
               )}
 
               {project.description && (
-                <Box className="p-4 bg-white/70 rounded-lg border border-gray-100">
-                  <p className="text-sm text-gray-600 font-medium mb-3">
+                <Box className="p-4 bg-card/70 rounded-lg border border-border">
+                  <p className="text-sm text-muted-foreground font-medium mb-3">
                      {t("projects.projectDescriptionLabel")}
                   </p>
-                  <p className="text-gray-900 leading-relaxed bg-white p-4 rounded-lg border border-gray-200">
+                  <p className="text-foreground leading-relaxed bg-card p-4 rounded-lg border border-border">
                     {project.description}
                   </p>
                 </Box>
@@ -577,7 +577,7 @@ export const ProjectView = () => {
                 customFieldsData.data.length > 0 &&
                 project.customFields &&
                 Object.keys(project.customFields).length > 0 && (
-                  <Box className="mt-6 pt-6 border-t border-gray-100">
+                  <Box className="mt-6 pt-6 border-t border-border">
                     <span className="text-lg font-semibold text-gray-800 mb-4 block">
                       {t("projects.customFields")}
                     </span>
@@ -606,9 +606,9 @@ export const ProjectView = () => {
                         return (
                           <Box
                             key={field.id}
-                            className="p-3 border border-blue-50 rounded-lg bg-white shadow-sm"
+                            className="p-3 border border-blue-50 rounded-lg bg-card shadow-sm"
                           >
-                            <span className="text-xs font-medium text-gray-400 block mb-1">
+                            <span className="text-xs font-medium text-muted-foreground block mb-1">
                               {field.name}
                             </span>
                             <Flex className="items-center gap-2">
@@ -650,12 +650,12 @@ export const ProjectView = () => {
                 {project.contractfile ? (
                   <Box className="space-y-4">
                     {/* PDF Showcase */}
-                    <Box className="border-2 border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                      <Box className="bg-gray-50 p-4 border-b">
+                    <Box className="border-2 border-border rounded-lg overflow-hidden shadow-sm">
+                      <Box className="bg-muted/50 p-4 border-b">
                         <Box className="flex items-center justify-between">
                           <Box className="flex items-center gap-2">
                             <FileText className="h-5 w-5 text-red-600" />
-                            <span className="font-medium text-gray-900">
+                            <span className="font-medium text-foreground">
                               {project.projectName || "Project"}-Contract.pdf
                             </span>
                           </Box>
@@ -707,7 +707,7 @@ export const ProjectView = () => {
                       </Box>
 
                       {/* PDF Preview */}
-                      <Box className="h-[500px] bg-white">
+                      <Box className="h-[500px] bg-card">
                         <iframe
                           src={`${project.contractfile}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
                           className="w-full h-full border-0"
@@ -726,14 +726,14 @@ export const ProjectView = () => {
 
                         {/* Fallback for PDF viewing */}
                         <Box
-                          className="pdf-fallback hidden h-full flex-col items-center justify-center bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+                          className="pdf-fallback hidden h-full flex-col items-center justify-center bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
                           onClick={() => handleViewImage(project.contractfile!)}
                         >
-                          <FileText className="h-20 w-20 text-gray-400 mb-4" />
-                          <p className="text-xl font-medium text-gray-700 mb-2">
+                          <FileText className="h-20 w-20 text-muted-foreground mb-4" />
+                          <p className="text-xl font-medium text-foreground mb-2">
                             Contract Document
                           </p>
-                          <p className="text-sm text-gray-500 mb-4 text-center max-w-sm">
+                          <p className="text-sm text-muted-foreground mb-4 text-center max-w-sm">
                             Click to view the contract file in full screen
                           </p>
                           <Button
@@ -751,12 +751,12 @@ export const ProjectView = () => {
                     </Box>
                   </Box>
                 ) : (
-                  <Box className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+                  <Box className="text-center py-8 border-2 border-dashed border-border rounded-lg">
                     <FileText className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    <h3 className="text-lg font-medium text-foreground mb-2">
                       No Contract File
                     </h3>
-                    <p className="text-gray-500">
+                    <p className="text-muted-foreground">
                       This project doesn't have a contract file uploaded.
                     </p>
                   </Box>
@@ -813,8 +813,8 @@ export const ProjectView = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
-              <Box className="flex items-center gap-4 p-4 bg-white/70 rounded-lg border border-green-100">
-                <Avatar className="h-12 w-12 bg-gradient-to-r from-green-500 to-emerald-500">
+              <Box className="flex items-center gap-4 p-4 bg-card/70 rounded-lg border border-green-100">
+                <Avatar className="h-12 w-12 bg-gradient-to-r from-green-500/50 to-emerald-500">
                   <AvatarImage
                     src={project.clientImage}
                     alt={project.clientName}
@@ -824,10 +824,10 @@ export const ProjectView = () => {
                   </AvatarFallback>
                 </Avatar>
                 <Box>
-                  <p className="font-semibold text-gray-900 text-lg capitalize">
+                  <p className="font-semibold text-foreground text-lg capitalize">
                     {project.clientName || "Unknown Client"}
                   </p>
-                  <p className="text-sm text-gray-600 bg-green-100 px-2 py-1 rounded-full inline-block">
+                  <p className="text-sm text-muted-foreground bg-green-100 px-2 py-1 rounded-full inline-block">
                     Client
                   </p>
                 </Box>
@@ -844,9 +844,9 @@ export const ProjectView = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 p-4">
-              <Box className="p-4 bg-white/70 rounded-lg border border-blue-100">
+              <Box className="p-4 bg-card/70 rounded-lg border border-blue-100">
                 <Box className="flex justify-between items-center mb-3">
-                  <span className="text-sm text-gray-600 font-medium">
+                  <span className="text-sm text-muted-foreground font-medium">
                     Progress
                   </span>
                   <span className="font-bold text-blue-600 text-lg">
@@ -865,27 +865,27 @@ export const ProjectView = () => {
                         if (isNaN(value)) return;
                         setEditProgress(Math.max(0, Math.min(100, value)));
                       }}
-                      className="w-24 bg-white"
+                      className="w-24 bg-card"
                       placeholder="0"
                     />
                   )}
                   <Progress
                     value={editProgress}
-                    className="h-3 bg-gray-200 flex-1"
+                    className="h-3 bg-muted flex-1"
                   />
                 </Box>
               </Box>
 
-              <Separator className="bg-gray-200" />
+              <Separator className="bg-muted" />
 
-              <Box className="p-4 bg-white/70 rounded-lg border border-gray-100">
+              <Box className="p-4 bg-card/70 rounded-lg border border-border">
                 <Stack className="justify-between">
-                  <Flex className="text-sm text-gray-600 font-medium justify-start items-start">
+                  <Flex className="text-sm text-muted-foreground font-medium justify-start items-start">
                     Status
                   </Flex>
                   <Box className="flex items-center gap-3">
                     <Select value={editStatus} onValueChange={setEditStatus}>
-                      <SelectTrigger className="w-36 bg-white">
+                      <SelectTrigger className="w-36 bg-card">
                         <SelectValue placeholder="Select status" />
                       </SelectTrigger>
                       <SelectContent>
@@ -930,23 +930,23 @@ export const ProjectView = () => {
                 </Button>
               )}
 
-              <Box className="p-4 bg-white/70 rounded-lg border border-gray-100">
+              <Box className="p-4 bg-card/70 rounded-lg border border-border">
                 <Box className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 font-medium">
+                  <span className="text-sm text-muted-foreground font-medium">
                     Created
                   </span>
-                  <span className="font-semibold text-gray-900">
+                  <span className="font-semibold text-foreground">
                     {format(new Date(project.createdAt), "MMM dd, yyyy")}
                   </span>
                 </Box>
               </Box>
 
-              <Box className="p-4 bg-white/70 rounded-lg border border-gray-100">
+              <Box className="p-4 bg-card/70 rounded-lg border border-border">
                 <Box className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 font-medium">
+                  <span className="text-sm text-muted-foreground font-medium">
                     Last Updated
                   </span>
-                  <span className="font-semibold text-gray-900">
+                  <span className="font-semibold text-foreground">
                     {format(new Date(project.updatedAt), "MMM dd, yyyy")}
                   </span>
                 </Box>
@@ -966,7 +966,7 @@ export const ProjectView = () => {
               {!isClient && (
                 <Button
                   variant="outline"
-                  className="w-full justify-start bg-white hover:bg-purple-50 border-purple-200 text-purple-700 cursor-pointer"
+                  className="w-full justify-start bg-card hover:bg-purple-50 border-purple-200 text-purple-700 cursor-pointer"
                   onClick={handleEdit}
                 >
                   <Edit className="h-4 w-4 mr-2" />
@@ -976,7 +976,7 @@ export const ProjectView = () => {
 
               <Button
                 variant="outline"
-                className="w-full justify-start bg-white hover:bg-blue-50 border-blue-200 text-blue-700 cursor-pointer"
+                className="w-full justify-start bg-card hover:bg-blue-50 border-blue-200 text-blue-700 cursor-pointer"
                 onClick={openCommentModal}
               >
                 <MessageCircle className="h-4 w-4 mr-2" />
@@ -997,11 +997,11 @@ export const ProjectView = () => {
               <Box className="space-y-4">
                 {/* Project PDF */}
                 {project.projectFiles?.projectPdf ? (
-                  <Box className="border border-gray-200 rounded-lg p-4 bg-gradient-to-r from-blue-50 to-indigo-50">
+                  <Box className="border border-border rounded-lg p-4 bg-gradient-to-r from-blue-500/5 to-indigo-50">
                     <Box className="flex items-center justify-between mb-3">
                       <Box className="flex items-center gap-2">
                         <FileText className="h-5 w-5 text-blue-600" />
-                        <span className="font-medium text-gray-900">
+                        <span className="font-medium text-foreground">
                           Project PDF
                         </span>
                       </Box>
@@ -1014,7 +1014,7 @@ export const ProjectView = () => {
                     </Box>
 
                     <Box className="space-y-3">
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-muted-foreground">
                         {project.projectFiles.projectPdf.name}
                       </p>
 
@@ -1027,7 +1027,7 @@ export const ProjectView = () => {
                               project.projectFiles?.projectPdf?.url || "",
                             )
                           }
-                          className="flex items-center gap-1 bg-white hover:bg-blue-50 cursor-pointer"
+                          className="flex items-center gap-1 bg-card hover:bg-blue-50 cursor-pointer"
                         >
                           <EyeIcon className="h-4 w-4" />
                           View PDF
@@ -1047,7 +1047,7 @@ export const ProjectView = () => {
                             document.body.removeChild(link);
                             toast.success("Project PDF downloaded!");
                           }}
-                          className="flex items-center gap-1 bg-white hover:bg-blue-50 cursor-pointer"
+                          className="flex items-center gap-1 bg-card hover:bg-blue-50 cursor-pointer"
                         >
                           <Download className="h-4 w-4" />
                           Download
@@ -1056,9 +1056,9 @@ export const ProjectView = () => {
                     </Box>
                   </Box>
                 ) : (
-                  <Box className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50">
-                    <FileText className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">
+                  <Box className="border-2 border-dashed border-border rounded-lg p-6 text-center bg-muted/50">
+                    <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">
                       No project PDF uploaded
                     </p>
                   </Box>
@@ -1085,10 +1085,10 @@ export const ProjectView = () => {
         {selectedImage && (
           <Box className="w-full h-[90vh] flex flex-col">
             {/* Modal Header */}
-            <Box className="flex items-center justify-between p-4 border-b bg-gray-50">
+            <Box className="flex items-center justify-between p-4 border-b bg-muted/50">
               <Box className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-red-600" />
-                <span className="font-medium text-gray-900">
+                <span className="font-medium text-foreground">
                   {project.projectName || "Project"}-Contract.pdf
                 </span>
                 <Badge variant="outline" className="text-xs">
@@ -1098,7 +1098,7 @@ export const ProjectView = () => {
             </Box>
 
             {/* PDF Showcase Viewer */}
-            <Box className="flex-1 bg-white">
+            <Box className="flex-1 bg-card">
               <iframe
                 src={`${selectedImage}#toolbar=1&navpanes=1&scrollbar=1&view=FitH`}
                 className="w-full h-full border-0"
@@ -1113,8 +1113,8 @@ export const ProjectView = () => {
             </Box>
 
             {/* Modal Footer */}
-            <Box className="p-4 border-t bg-gray-50">
-              <Box className="flex items-center justify-between text-sm text-gray-600">
+            <Box className="p-4 border-t bg-muted/50">
+              <Box className="flex items-center justify-between text-sm text-muted-foreground">
                 <span>
                   Contract document for {project.projectName || "this project"}
                 </span>
@@ -1136,13 +1136,13 @@ export const ProjectView = () => {
           </Box>
 
           {/* Comments list with nested replies */}
-          <Box className="flex flex-col gap-3 max-h-64 overflow-y-auto mb-4 bg-gray-50 p-3 rounded">
+          <Box className="flex flex-col gap-3 max-h-64 overflow-y-auto mb-4 bg-muted/50 p-3 rounded">
             {commentsLoading ? (
-              <Box className="text-gray-400 text-center py-4">
+              <Box className="text-muted-foreground text-center py-4">
                 Loading comments...
               </Box>
             ) : commentsWithReplies.length === 0 ? (
-              <Box className="text-gray-400 text-center py-4">
+              <Box className="text-muted-foreground text-center py-4">
                 No comments yet. Be the first to add a comment!
               </Box>
             ) : (
@@ -1150,14 +1150,14 @@ export const ProjectView = () => {
                 <Box key={comment.id} className="space-y-2">
                   {/* Main comment */}
                   <Box className="flex items-start gap-2 group">
-                    <Flex className="flex-1 items-start justify-between bg-white p-3 rounded shadow-sm text-sm">
+                    <Flex className="flex-1 items-start justify-between bg-card p-3 rounded shadow-sm text-sm">
                       <Stack className="flex-1">
                         <Flex className="justify-between">
                           <Box className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-xs text-gray-900">
+                            <span className="font-medium text-xs text-foreground">
                               {comment.userName}
                             </span>
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-muted-foreground">
                               {format(
                                 new Date(comment.createdAt),
                                 "MMM d, yyyy hh:mm a",
@@ -1201,7 +1201,7 @@ export const ProjectView = () => {
 
                   {/* Reply input for this comment */}
                   {replyTo === comment.id && (
-                    <Box className="ml-6 bg-white p-2 rounded border">
+                    <Box className="ml-6 bg-card p-2 rounded border">
                       <Input
                         value={replyContent}
                         onChange={(e) => setReplyContent(e.target.value)}
@@ -1240,13 +1240,13 @@ export const ProjectView = () => {
                     <Box className="ml-6 space-y-2">
                       {comment.replies.map((reply) => (
                         <Box key={reply.id} className="flex items-start gap-2">
-                          <Flex className="flex-1 items-start justify-between bg-white p-2 rounded shadow-sm text-sm border-l-2 border-blue-200">
+                          <Flex className="flex-1 items-start justify-between bg-card p-2 rounded shadow-sm text-sm border-l-2 border-blue-200">
                             <Stack className="flex-1">
                               <Box className="flex items-center gap-2 mb-1">
-                                <span className="font-medium text-xs text-gray-900">
+                                <span className="font-medium text-xs text-foreground">
                                   {reply.userName}
                                 </span>
-                                <span className="text-xs text-gray-400">
+                                <span className="text-xs text-muted-foreground">
                                   {format(
                                     new Date(reply.createdAt),
                                     "MMM d, yyyy hh:mm a",
@@ -1286,7 +1286,7 @@ export const ProjectView = () => {
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleAddComment();
               }}
-              className="bg-white rounded-full placeholder:text-gray-400 h-11 border border-gray-400"
+              className="bg-background rounded-full placeholder:text-muted-foreground h-11 border border-gray-400"
             />
 
             <Button

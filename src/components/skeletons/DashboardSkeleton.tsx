@@ -29,7 +29,7 @@ export const DashboardSkeleton = memo(({ className }: DashboardSkeletonProps) =>
           <ChartSkeleton height={280} withLegend />
 
           {/* Ongoing tasks carousel */}
-          <div className="bg-white rounded-xl shadow-[0_5px_10px_rgba(0,0,0,0.1)] p-5">
+          <div className="bg-card rounded-xl shadow-[0_5px_10px_rgba(0,0,0,0.1)] p-5">
             <div className="flex items-center gap-2 mb-5">
               <Skeleton className="h-5 w-5 rounded" />
               <Skeleton className="h-5 w-36" />
@@ -38,7 +38,7 @@ export const DashboardSkeleton = memo(({ className }: DashboardSkeletonProps) =>
               {Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={i}
-                  className="min-w-[17.5rem] bg-gray-50 rounded-lg p-4 flex flex-col gap-3"
+                  className="min-w-[17.5rem] bg-muted/50 rounded-lg p-4 flex flex-col gap-3"
                 >
                   <Skeleton className="h-4 w-3/4" />
                   <Skeleton className="h-3 w-1/2" />
@@ -59,7 +59,7 @@ export const DashboardSkeleton = memo(({ className }: DashboardSkeletonProps) =>
         {/* Right column */}
         <div className="max-[950px]:w-full flex flex-col items-start gap-3">
           {/* Pie chart */}
-          <div className="bg-white rounded-xl shadow-[0_5px_10px_rgba(0,0,0,0.1)] p-5 w-full">
+          <div className="bg-card rounded-xl shadow-[0_5px_10px_rgba(0,0,0,0.1)] p-5 w-full">
             <Skeleton className="h-5 w-36 mb-4" />
             <Skeleton className="h-40 w-40 rounded-full mx-auto" />
             <div className="flex flex-col gap-3 mt-4">
@@ -74,9 +74,9 @@ export const DashboardSkeleton = memo(({ className }: DashboardSkeletonProps) =>
           </div>
 
           {/* Recent activities */}
-          <div className="bg-white rounded-xl shadow-[0_5px_10px_rgba(0,0,0,0.1)] p-5 w-full">
+          <div className="bg-card rounded-xl shadow-[0_5px_10px_rgba(0,0,0,0.1)] p-5 w-full">
             <Skeleton className="h-5 w-40 mb-6" />
-            <div className="h-0.5 bg-gray-200 rounded-full mb-5" />
+            <div className="h-0.5 bg-muted rounded-full mb-5" />
             <ListSkeleton rows={5} />
           </div>
         </div>

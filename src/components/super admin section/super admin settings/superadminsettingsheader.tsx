@@ -110,8 +110,8 @@ export const SuperAdminSettingsHeader = ({ user }: { user: any }) => {
 
       <Stack className="gap-8">
         {/* Profile Information Section */}
-        <Stack className="gap-0 min-h-4 w-md max-md:w-full border border-gray-200 rounded-md overflow-hidden mt-4">
-          <Flex className="justify-between bg-white p-4 border-b border-gray-200">
+        <Stack className="gap-0 min-h-4 w-md max-md:w-full border border-border rounded-md overflow-hidden mt-4">
+          <Flex className="justify-between bg-card p-4 border-b border-border">
             <h1 className="text-lg font-semibold">{t("superadminSettings.profileInformation")}</h1>
             <Center className="text-green-600 gap-2 font-semibold text-sm">
               <span className="bg-green-600 rounded-full min-h-2 w-2 animate-pulse"></span>
@@ -134,7 +134,7 @@ export const SuperAdminSettingsHeader = ({ user }: { user: any }) => {
                 {/* Avatar Section */}
                 <Flex className="justify-between items-start mb-6">
                   <Box>
-                    <FormLabel className="text-sm font-medium text-gray-700 mb-2 block">
+                    <FormLabel className="text-sm font-medium text-muted-foreground mb-2 block">
                       {t("superadminSettings.profilePicture")}
                     </FormLabel>
                     <Flex className="gap-4 items-center justify-between w-full">
@@ -153,7 +153,7 @@ export const SuperAdminSettingsHeader = ({ user }: { user: any }) => {
                         variant="outline"
                         size="sm"
                         onClick={handleChangeLogo}
-                        className="bg-white hover:bg-gray-50 ml-auto cursor-pointer"
+                        className="bg-card hover:bg-muted/50 ml-auto cursor-pointer"
                       >
                         {t("superadminSettings.changeLogo")}
                       </Button>
@@ -167,13 +167,13 @@ export const SuperAdminSettingsHeader = ({ user }: { user: any }) => {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">
+                      <FormLabel className="text-sm font-medium text-muted-foreground">
                         {t("settings.fullName")}
                       </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
-                          className="bg-white rounded-full placeholder:text-gray-400"
+                          className="bg-card rounded-full placeholder:text-muted-foreground"
                           placeholder="Enter your full name"
                         />
                       </FormControl>
@@ -188,14 +188,14 @@ export const SuperAdminSettingsHeader = ({ user }: { user: any }) => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">
+                      <FormLabel className="text-sm font-medium text-muted-foreground">
                         {t("settings.email")}
                       </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
                           type="email"
-                          className="bg-white rounded-full placeholder:text-gray-400"
+                          className="bg-card rounded-full placeholder:text-muted-foreground"
                           placeholder="Enter your email address"
                         />
                       </FormControl>

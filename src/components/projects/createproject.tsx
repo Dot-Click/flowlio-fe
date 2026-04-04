@@ -1,4 +1,5 @@
 import { IoArrowBack } from "react-icons/io5";
+import { Loader2 } from "lucide-react";
 import { PageWrapper } from "../common/pagewrapper";
 import { Box } from "../ui/box";
 import { useNavigate, useParams, useSearchParams } from "react-router";
@@ -425,21 +426,21 @@ export const CreateProject = () => {
   return (
     <PageWrapper className="mt-6 p-6">
       <Box
-        className="flex items-center gap-2 w-20 cursor-pointer transition-all duration-300  hover:bg-gray-200 rounded-full hover:p-2 "
+        className="flex items-center gap-2 w-20 cursor-pointer transition-all duration-300  hover:bg-muted rounded-full hover:p-2 "
         onClick={() => navigate(-1)}
       >
         <IoArrowBack />
-        <p className="text-black">{t("common.back")}</p>
+        <p className="text-foreground">{t("common.back")}</p>
       </Box>
 
       <Center className="justify-between mt-6 max-sm:flex-col max-sm:items-start gap-2 relative">
         <Stack className="gap-0">
-          <h1 className="text-black text-xl font-medium">
+          <h1 className="text-foreground text-xl font-medium">
             {isEditMode
               ? t("projects.editProject")
               : t("projects.createProject")}
           </h1>
-          <h1 className="text-gray-500">
+          <h1 className="text-muted-foreground">
             {isEditMode
               ? t("projects.Updatetheprojectdetailsbelow")
               : t("projects.createProjectDesc")}
@@ -503,8 +504,8 @@ export const CreateProject = () => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 relative">
           <Button
-            variant="outline"
-            className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer absolute -top-20 right-0"
+            variant="default"
+            className="rounded-full px-6 py-5 flex items-center gap-2 absolute -top-20 right-0"
             type="submit"
             disabled={
               isCreating ||
@@ -514,16 +515,19 @@ export const CreateProject = () => {
               isLoadingProject
             }
           >
-            {isCreating || isUpdating
-              ? isEditMode
-                ? t("projects.updating...")
-                : t("projects.creating...")
-              : isEditMode
-                ? t("projects.updateProject")
-                : t("projects.saveProject")}
+            {isCreating || isUpdating ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {isEditMode ? t("projects.updating...") : t("projects.creating...")}
+              </>
+            ) : isEditMode ? (
+              t("projects.updateProject")
+            ) : (
+              t("projects.saveProject")
+            )}
           </Button>
 
-          <Box className="bg-gray-50 border border-gray-200 rounded-2xl p-4 flex items-center gap-4 mb-4">
+          <Box className="bg-muted/50 border border-border rounded-2xl p-4 flex items-center gap-4 mb-4">
             <FormField
               control={form.control}
               name="visibility"
@@ -540,7 +544,7 @@ export const CreateProject = () => {
                         ? "Private Project"
                         : "Public Project"}
                     </FormLabel>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                       {field.value === "private"
                         ? "Only members assigned to this project can see it."
                         : "Anyone in your organization can view this project."}
@@ -558,7 +562,7 @@ export const CreateProject = () => {
               )}
             />
           </Box>
-          <Box className="bg-white/80 rounded-xl border border-gray-200 p-6 gap-4 grid grid-cols-1">
+          <Box className="bg-card/80 rounded-xl border border-border p-6 gap-4 grid grid-cols-1">
             <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
               <Stack className="flex-1 w-full gap-6">
                 <FormField
@@ -572,7 +576,7 @@ export const CreateProject = () => {
                       </FormLabel>
                       <FormControl>
                         <Input
-                          className="bg-white rounded-full placeholder:text-gray-400"
+                          className="bg-background rounded-full placeholder:text-muted-foreground"
                           size="lg"
                           type="text"
                           placeholder={t("projects.enterProjectName")}
@@ -592,7 +596,7 @@ export const CreateProject = () => {
                       <FormLabel>{t("projects.projectNumberLabel")}</FormLabel>
                       <FormControl>
                         <Input
-                          className="bg-white rounded-full placeholder:text-gray-400"
+                          className="bg-background rounded-full placeholder:text-muted-foreground"
                           placeholder={t("projects.enterProjectNumber")}
                           type="number"
                           size="lg"
@@ -608,24 +612,24 @@ export const CreateProject = () => {
               <Box className="grid grid-cols-1 flex-1 w-full gap-4">
                 {!pdfPreview ? (
                   <Center
-                    className="flex-col border-2 border-[#62A1C0] border-dashed border-spacing-2 bg-[#f5fdfe] rounded-lg min-h-50 w-full cursor-pointer"
+                    className="flex-col border-2 border-primary border-dashed bg-muted/30 rounded-lg min-h-50 w-full cursor-pointer transition-colors hover:bg-muted/50"
                     onClick={openPdf}
                   >
                     <img
                       src="/dashboard/upload.svg"
                       alt="pdf-upload"
-                      className="size-12"
+                      className="size-12 brightness-0 dark:invert"
                     />
-                    <p className="text-gray-800 text-lg font-medium underline">
+                    <p className="text-foreground text-lg font-medium underline">
                       {t("projects.uploadProjectPdfCta")}
                     </p>
-                    <p className="text-gray-600 text-sm font-medium">
+                    <p className="text-muted-foreground text-sm font-medium">
                       {t("projects.pdfFilesOnly")}
                     </p>
                     <input {...getPdfInputProps()} />
                   </Center>
                 ) : (
-                  <Box className="border-2 border-[#62A1C0] rounded-lg p-4 relative">
+                  <Box className="border-2 border-primary rounded-lg p-4 relative">
                     <Stack className="gap-2">
                       <Box className="flex ml-auto w-full absolute top-0 right-0 p-2">
                         <Button
@@ -639,7 +643,7 @@ export const CreateProject = () => {
                         </Button>
                       </Box>
                       {pdfPreview && (
-                        <Box className="w-full h-[150px] border-dashed border-gray-200 rounded">
+                        <Box className="w-full h-[150px] border-dashed border-border rounded">
                           <img
                             src={pdfPreview}
                             title="PDF Preview"
@@ -654,21 +658,21 @@ export const CreateProject = () => {
 
                       {/* File Information */}
                       {projectFiles.find((f) => f.type === "projectPdf") && (
-                        <Box className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded">
+                        <Box className="mt-2 p-3 bg-muted/50 border border-border rounded-lg">
                           <Box className="flex items-center justify-between text-sm">
-                            <span className="font-medium text-blue-900">
+                            <span className="font-medium text-foreground">
                               {
                                 projectFiles.find(
                                   (f) => f.type === "projectPdf",
                                 )?.name
                               }
                             </span>
-                            <span className="text-blue-700">
+                            <span className="text-muted-foreground">
                               {(
                                 (projectFiles.find(
                                   (f) => f.type === "projectPdf",
                                 )?.file.size || 0) /
-                                102 /
+                                1024 /
                                 1024
                               ).toFixed(2)}{" "}
                               MB
@@ -700,7 +704,7 @@ export const CreateProject = () => {
                     </FormLabel>
                     <FormControl>
                       <Textarea
-                        className="bg-white rounded-md placeholder:text-gray-400 h-32"
+                        className="bg-card rounded-md placeholder:text-muted-foreground h-32"
                         placeholder={t("projects.enterProjectDescription")}
                         rows={6}
                         cols={18}
@@ -722,7 +726,7 @@ export const CreateProject = () => {
                     </FormLabel>
                     <FormControl>
                       <Input
-                        className="bg-white rounded-full placeholder:text-gray-400"
+                        className="bg-background rounded-full placeholder:text-muted-foreground"
                         size="lg"
                         type="text"
                         placeholder={t("projects.enterAddress")}
@@ -747,7 +751,7 @@ export const CreateProject = () => {
                     </FormLabel>
                     <FormControl>
                       <Input
-                        className="bg-white rounded-full placeholder:text-gray-400"
+                        className="bg-background rounded-full placeholder:text-muted-foreground"
                         size="lg"
                         type="number"
                         min="0"
@@ -782,7 +786,7 @@ export const CreateProject = () => {
                               !field.value && "text-muted-foreground",
                             )}
                           >
-                            <CalendarIcon className="size-5" fill="#62A1C0" />
+                            <CalendarIcon className="size-5 text-primary" />
                             {field.value ? (
                               format(new Date(field.value), "PPP")
                             ) : (
@@ -876,7 +880,7 @@ export const CreateProject = () => {
                       <FormControl className="w-full h-11">
                         <SelectTrigger
                           size="lg"
-                          className="bg-white border border-gray-300 rounded-full w-full h-12"
+                          className="bg-card border border-border rounded-full w-full h-12"
                         >
                           <SelectValue
                             placeholder={
@@ -916,7 +920,7 @@ export const CreateProject = () => {
                       <FormControl className="w-full h-11">
                         <SelectTrigger
                           size="lg"
-                          className="bg-gray-100 border border-gray-100 rounded-full w-full h-11"
+                          className="bg-muted border border-border rounded-full w-full h-11"
                         >
                           <SelectValue
                             placeholder={
@@ -952,7 +956,7 @@ export const CreateProject = () => {
                     <FormLabel>{t("projects.contractFileLabel")}</FormLabel>
                     <FormControl>
                       <Input
-                        className="bg-white rounded-full placeholder:text-gray-400"
+                        className="bg-background rounded-full placeholder:text-muted-foreground"
                         size="lg"
                         type="file"
                         placeholder={t("projects.enterContractFile")}
@@ -974,8 +978,8 @@ export const CreateProject = () => {
 
             {/* Custom Fields Section */}
             {customFieldsData?.data && customFieldsData.data.length > 0 && (
-              <Box className="space-y-6 mt-6 pt-6 border-t border-gray-200">
-                <h3 className="text-lg font-medium text-black">
+              <Box className="space-y-6 mt-6 pt-6 border-t border-border">
+                <h3 className="text-lg font-medium text-foreground">
                   Custom Fields
                 </h3>
                 <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
@@ -993,7 +997,7 @@ export const CreateProject = () => {
                                 onValueChange={formField.onChange}
                                 value={formField.value}
                               >
-                                <SelectTrigger className="bg-white rounded-full h-12">
+                                <SelectTrigger className="bg-background rounded-full h-12">
                                   <SelectValue
                                     placeholder={`Select ${field.name}`}
                                   />
@@ -1034,7 +1038,7 @@ export const CreateProject = () => {
                                   <Button
                                     variant={"outline"}
                                     className={cn(
-                                      "w-full justify-start text-left font-normal rounded-full h-12 bg-white",
+                                      "w-full justify-start text-left font-normal rounded-full h-12 bg-card",
                                       !formField.value &&
                                         "text-muted-foreground",
                                     )}
@@ -1066,7 +1070,7 @@ export const CreateProject = () => {
                               </Popover>
                             ) : (
                               <Input
-                                className="bg-white rounded-full placeholder:text-gray-400"
+                                className="bg-background rounded-full placeholder:text-muted-foreground"
                                 size="lg"
                                 type={
                                   field.type === "number" ? "number" : "text"

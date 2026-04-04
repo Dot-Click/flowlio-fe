@@ -29,21 +29,21 @@ const ClientTasksPage = () => {
   const columns: ColumnDef<ClientTask>[] = [
     {
       accessorKey: "title",
-      header: () => <Box className="text-center text-black">{t("tasks.taskTitle")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("tasks.taskTitle")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center font-medium">{row.original.title}</Box>
       ),
     },
     {
       accessorKey: "projectName",
-      header: () => <Box className="text-center text-black">{t("projects.projectName")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("projects.projectName")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center">{row.original.projectName}</Box>
       ),
     },
     {
       accessorKey: "assigneeName",
-      header: () => <Box className="text-center text-black">{t("projects.assignedTo")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("projects.assignedTo")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center">
           {row.original.assigneeName || t("common.unassigned")}
@@ -52,7 +52,7 @@ const ClientTasksPage = () => {
     },
     {
       accessorKey: "startDate",
-      header: () => <Box className="text-center text-black">{t("projects.startDate")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("projects.startDate")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center">
           {row.original.startDate
@@ -63,7 +63,7 @@ const ClientTasksPage = () => {
     },
     {
       accessorKey: "endDate",
-      header: () => <Box className="text-center text-black">{t("projects.endDate")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("projects.endDate")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center">
           {row.original.endDate
@@ -74,7 +74,7 @@ const ClientTasksPage = () => {
     },
     {
       accessorKey: "status",
-      header: () => <Box className="text-center text-black">{t("projects.status")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("projects.status")}</Box>,
       cell: ({ row }) => {
         const status = row.original.status as
           | "pending"
@@ -101,7 +101,7 @@ const ClientTasksPage = () => {
         };
 
         const currentStyle = statusStyles[status] || {
-          text: "text-white bg-gray-500 border-none rounded-full",
+          text: "text-white bg-muted/500 border-none rounded-full",
           dot: "bg-white",
         };
 
@@ -124,15 +124,15 @@ const ClientTasksPage = () => {
   return (
     <PageWrapper className="mt-6">
       <Stack className="gap-1 p-6 mb-6">
-        <h1 className="text-2xl font-medium text-black">{t("tasks.myTasks")}</h1>
-        <p className="text-gray-500">
+        <h1 className="text-2xl font-medium text-foreground">{t("tasks.myTasks")}</h1>
+        <p className="text-muted-foreground">
           {t("tasks.myTasksDesc")}
         </p>
       </Stack>
       {isLoading ? (
         <Box className="flex justify-center p-10">Loading tasks...</Box>
       ) : (
-        <Box className=" rounded-xl   border border-gray-100 overflow-hidden">
+        <Box className=" rounded-xl   border border-border overflow-hidden">
           <ReusableTable
             data={tasks}
             columns={columns}

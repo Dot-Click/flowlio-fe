@@ -59,7 +59,7 @@ export const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
   const [showPlatforms, setShowPlatforms] = useState(true);
 
   return (
-    <Flex className="w-[290px] bg-white flex-col gap-6 items-start h-[127rem]">
+    <Flex className="w-[290px] bg-card flex-col gap-6 items-start h-[127rem]">
       {/* Mini Calendar */}
       <Stack className="w-full p-3">
         <Button
@@ -86,9 +86,9 @@ export const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
         <Flex className="items-center justify-between">
           <span className="font-semibold">My Calendars</span>
           <Flex className="items-center gap-2">
-            <Plus className="size-4 cursor-pointer text-gray-500" />
+            <Plus className="size-4 cursor-pointer text-muted-foreground" />
             <ChevronDown
-              className={`size-4 cursor-pointer text-gray-500 transition-transform duration-300 ${
+              className={`size-4 cursor-pointer text-muted-foreground transition-transform duration-300 ${
                 showMyCalendars ? "rotate-180" : ""
               }`}
               onClick={() => setShowMyCalendars(!showMyCalendars)}
@@ -116,9 +116,9 @@ export const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
         <Flex className="items-center justify-between">
           <Box className="font-semibold mb-4">Platforms</Box>
           <Flex className="items-center">
-            <Plus className="size-4 cursor-pointer text-gray-500" />
+            <Plus className="size-4 cursor-pointer text-muted-foreground" />
             <ChevronDown
-              className={`size-4 cursor-pointer text-gray-500 transition-transform duration-300 ${
+              className={`size-4 cursor-pointer text-muted-foreground transition-transform duration-300 ${
                 showPlatforms ? "rotate-180" : ""
               }`}
               onClick={() => setShowPlatforms(!showPlatforms)}
@@ -150,7 +150,7 @@ export const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
         <Flex className="items-center justify-between">
           <Box className="font-semibold mb-4">All Events</Box>
           <Flex className="items-center">
-            <ChevronDown className="size-4 cursor-pointer text-gray-500" />
+            <ChevronDown className="size-4 cursor-pointer text-muted-foreground" />
           </Flex>
         </Flex>
         <Flex className="flex-col gap-2 items-start max-h-80 overflow-y-auto">
@@ -158,7 +158,7 @@ export const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
             allMeetings.map((meeting: any, index: number) => (
               <Center
                 key={meeting.id || index}
-                className="gap-3 cursor-pointer hover:bg-gray-50 p-1 rounded-md w-full transition-colors justify-between"
+                className="gap-3 cursor-pointer hover:bg-muted/50 p-1 rounded-md w-full transition-colors justify-between"
                 onClick={() => navigateToMeetingWeek(meeting)}
               >
                 <Flex>
@@ -172,7 +172,7 @@ export const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
                   </span>
                 </Flex>
                 <Flex className="items-center min-w-0">
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-muted-foreground">
                     {new Date(meeting.date).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
@@ -182,7 +182,7 @@ export const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
               </Center>
             ))
           ) : (
-            <Box className="text-sm text-gray-500 italic">
+            <Box className="text-sm text-muted-foreground italic">
               No meetings scheduled
             </Box>
           )}

@@ -73,7 +73,7 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
       <Button
         variant="ghost"
         size="icon"
-        className="bg-white w-24 h-9 border cursor-pointer"
+        className="bg-card w-24 h-9 border cursor-pointer"
         onClick={onToday}
       >
         Today
@@ -88,8 +88,8 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
             className={`px-6 py-1.5 rounded-lg font-normal transition-colors duration-150
             ${
               viewMode === mode
-                ? "bg-white text-[#1797B9] font-semibold"
-                : "bg-transparent text-[#323334]/80 hover:text-[#1797B9] hover:bg-white"
+                ? "bg-background text-[#1797B9] font-semibold"
+                : "bg-transparent text-[#323334]/80 hover:text-[#1797B9] hover:bg-card"
             }
           `}
             style={{

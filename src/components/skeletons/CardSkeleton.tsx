@@ -28,7 +28,7 @@ export const CardSkeleton = memo(
         {Array.from({ length: count }).map((_, i) => (
           <div
             key={i}
-            className="bg-white rounded-xl shadow-[0_5px_10px_rgba(0,0,0,0.1)] px-2.5 py-3"
+            className="bg-card rounded-xl shadow-[0_5px_10px_rgba(0,0,0,0.1)] px-2.5 py-3"
             style={{ minHeight: height }}
           >
             {/* Title + Icon row */}

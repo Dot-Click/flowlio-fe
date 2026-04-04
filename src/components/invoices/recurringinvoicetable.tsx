@@ -52,28 +52,28 @@ const RecurringActions: React.FC<{ template: RecurringInvoice }> = ({ template }
 export const columns: ColumnDef<RecurringInvoice>[] = [
   {
     accessorKey: "templateName",
-    header: () => <Box className="text-black">Template Name</Box>,
+    header: () => <Box className="text-foreground">Template Name</Box>,
     cell: ({ row }) => (
       <Box className="font-medium p-1">{row.original.templateName}</Box>
     ),
   },
   {
     accessorKey: "clientname",
-    header: () => <Box className="text-black">Client</Box>,
+    header: () => <Box className="text-foreground">Client</Box>,
     cell: ({ row }) => (
       <Box className="capitalize p-1">{row.original.clientname}</Box>
     ),
   },
   {
     accessorKey: "amount",
-    header: () => <Box className="text-center text-black">Amount</Box>,
+    header: () => <Box className="text-center text-foreground">Amount</Box>,
     cell: ({ row }) => {
       return <Box className="text-center font-semibold">$ {row.original.amount}</Box>;
     },
   },
   {
     accessorKey: "frequency",
-    header: () => <Box className="text-center text-black">Frequency</Box>,
+    header: () => <Box className="text-center text-foreground">Frequency</Box>,
     cell: ({ row }) => (
       <Center>
         <Badge variant="outline" className="capitalize bg-blue-50 text-[#1797b9] border-[#1797b9]/20 px-2 py-0">
@@ -85,9 +85,9 @@ export const columns: ColumnDef<RecurringInvoice>[] = [
   },
   {
     accessorKey: "nextRunDate",
-    header: () => <Box className="text-black text-center">Next Run</Box>,
+    header: () => <Box className="text-foreground text-center">Next Run</Box>,
     cell: ({ row }) => (
-      <Center className="text-sm text-gray-600">
+      <Center className="text-sm text-muted-foreground">
         <Calendar className="size-3 mr-1" />
         {new Date(row.original.nextRunDate).toLocaleDateString()}
       </Center>
@@ -95,10 +95,10 @@ export const columns: ColumnDef<RecurringInvoice>[] = [
   },
   {
     accessorKey: "status",
-    header: () => <Box className="text-center text-black">Status</Box>,
+    header: () => <Box className="text-center text-foreground">Status</Box>,
     cell: ({ row }) => {
       const status = row.original.status;
-      let colorClass = "bg-gray-100 text-gray-600";
+      let colorClass = "bg-muted text-muted-foreground";
       if (status === "active") colorClass = "bg-green-100 text-green-700";
       if (status === "paused") colorClass = "bg-yellow-100 text-yellow-700";
       if (status === "completed") colorClass = "bg-blue-100 text-blue-700";
@@ -114,7 +114,7 @@ export const columns: ColumnDef<RecurringInvoice>[] = [
   },
   {
     id: "actions",
-    header: () => <Box className="text-center text-black">Actions</Box>,
+    header: () => <Box className="text-center text-foreground">Actions</Box>,
     cell: ({ row }) => <RecurringActions template={row.original} />,
   },
 ];
@@ -127,7 +127,7 @@ export const RecurringInvoiceTable = () => {
       <Center className="py-8">
         <Box className="flex items-center justify-center p-8">
           <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1797b9]"></Box>
-          <Box className="ml-2 text-gray-600">Loading templates...</Box>
+          <Box className="ml-2 text-muted-foreground">Loading templates...</Box>
         </Box>
       </Center>
     );
@@ -148,12 +148,12 @@ export const RecurringInvoiceTable = () => {
   if (templatesData.length === 0) {
     return (
       <Center className="py-12 flex-col space-y-4">
-        <Box className="p-4 bg-gray-50 rounded-full">
-          <Clock className="size-12 text-gray-400" />
+        <Box className="p-4 bg-muted/50 rounded-full">
+          <Clock className="size-12 text-muted-foreground" />
         </Box>
         <Box className="text-center">
-          <p className="text-lg font-semibold text-gray-900">No recurring templates</p>
-          <p className="text-sm text-gray-500">Create your first recurring invoice to automate your billing.</p>
+          <p className="text-lg font-semibold text-foreground">No recurring templates</p>
+          <p className="text-sm text-muted-foreground">Create your first recurring invoice to automate your billing.</p>
         </Box>
       </Center>
     );

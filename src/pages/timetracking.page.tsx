@@ -276,7 +276,7 @@ const TimeTrackingPage = () => {
           <span className="font-semibold px-2 py-2 text-left block">#</span>
         ),
         cell: ({ row }) => (
-          <span className="text-sm text-gray-600 px-2 py-2 block">
+          <span className="text-sm text-muted-foreground px-2 py-2 block">
             {row.index + 1}
           </span>
         ),
@@ -317,7 +317,7 @@ const TimeTrackingPage = () => {
           const d = new Date(row.original.startTime as any);
           const valid = !isNaN(d.getTime());
           return (
-            <span className="text-sm text-gray-600 px-2 py-2 block">
+            <span className="text-sm text-muted-foreground px-2 py-2 block">
               {valid ? format(d, "PPp") : "-"}
             </span>
           );
@@ -335,7 +335,7 @@ const TimeTrackingPage = () => {
           const d = endVal ? new Date(endVal) : null;
           const valid = d ? !isNaN(d.getTime()) : false;
           return (
-            <span className="text-sm text-gray-600 px-2 py-2 block">
+            <span className="text-sm text-muted-foreground px-2 py-2 block">
               {valid ? format(d!, "PPp") : "-"}
             </span>
           );
@@ -354,7 +354,7 @@ const TimeTrackingPage = () => {
               <ActiveTableTimer startTime={row.original.startTime as any} />
             </Box>
           ) : (
-            <span className="font-mono font-semibold text-gray-700 px-2 py-2 block">
+            <span className="font-mono font-semibold text-muted-foreground px-2 py-2 block">
               {formatDuration(
                 typeof row.original.duration === "number"
                   ? (row.original.duration as any)
@@ -390,7 +390,7 @@ const TimeTrackingPage = () => {
               Active
             </span>
           ) : (
-            <span className="px-2 py-1 mx-auto block bg-gray-100 text-gray-800 text-xs font-medium rounded-full w-20 text-center capitalize">
+            <span className="px-2 py-1 mx-auto block bg-muted text-gray-800 text-xs font-medium rounded-full w-20 text-center capitalize">
               Completed
             </span>
           );
@@ -467,11 +467,11 @@ const TimeTrackingPage = () => {
   return (
     <Stack className="pt-5 gap-6 px-2">
       {/* Header */}
-      <Box className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+      <Box className="bg-card rounded-xl p-6 shadow-sm border border-border">
         <Flex className="items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Time Tracking</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="text-2xl font-bold text-foreground">Time Tracking</h1>
+            <p className="text-muted-foreground mt-1">
               Track your work hours and manage time efficiently
             </p>
           </div>
@@ -490,31 +490,31 @@ const TimeTrackingPage = () => {
           </>
         ) : (
           <>
-            <Box className="flex-1 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            <Box className="flex-1 bg-card rounded-xl p-6 shadow-sm border border-border">
               <Flex className="items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-foreground">
                     Weekly Hours
                   </h3>
                   <p className="text-3xl font-bold text-blue-600 mt-2">
                     {formatHours(weeklyHours?.data?.weeklyHours || 0)}
                   </p>
-                  <p className="text-sm text-gray-500 mt-1">This week</p>
+                  <p className="text-sm text-muted-foreground mt-1">This week</p>
                 </div>
                 <BarChart3 className="w-8 h-8 text-blue-600" />
               </Flex>
             </Box>
  
-            <Box className="flex-1 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            <Box className="flex-1 bg-card rounded-xl p-6 shadow-sm border border-border">
               <Flex className="items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-foreground">
                     Active Tracking
                   </h3>
                   <p className="text-3xl font-bold text-green-600 mt-2">
                     {isTracking ? "Yes" : "No"}
                   </p>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     {isTracking ? "Currently tracking" : "Not tracking"}
                   </p>
                 </div>
@@ -526,8 +526,8 @@ const TimeTrackingPage = () => {
       </Flex>
 
       {/* Time Tracking Controls */}
-      <Box className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">
+      <Box className="bg-card rounded-xl p-6 shadow-sm border border-border">
+        <h2 className="text-xl font-semibold text-foreground mb-6">
           Quick Time Tracking
         </h2>
 
@@ -561,12 +561,12 @@ const TimeTrackingPage = () => {
                 </Stack>
               </div>
               <div className="flex flex-col items-center gap-4">
-                <Box className="bg-white border-2 border-green-400 rounded-lg p-4 text-center min-w-[200px]">
-                  <p className="text-sm text-gray-600 mb-2">Elapsed Time</p>
+                <Box className="bg-card border-2 border-green-400 rounded-lg p-4 text-center min-w-[200px]">
+                  <p className="text-sm text-muted-foreground mb-2">Elapsed Time</p>
                   <span className="text-4xl font-mono font-bold text-green-600">
                     {formatTime(elapsedTime)}
                   </span>
-                  <p className="text-xs text-gray-500 mt-2">Running...</p>
+                  <p className="text-xs text-muted-foreground mt-2">Running...</p>
                 </Box>
                 <Button
                   onClick={handleStop}
@@ -584,7 +584,7 @@ const TimeTrackingPage = () => {
         {/* Project and Task Selection */}
         <Flex className="gap-4 mb-6">
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Project
             </label>
             <Select
@@ -607,7 +607,7 @@ const TimeTrackingPage = () => {
           </div>
 
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Task
             </label>
             <Select
@@ -643,15 +643,15 @@ const TimeTrackingPage = () => {
       </Box>
 
       {/* Time Entries History */}
-      <Box className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">
+      <Box className="bg-card rounded-xl p-6 shadow-sm border border-border">
+        <h2 className="text-xl font-semibold text-foreground mb-6">
           Time Entries History
         </h2>
 
         {/* Filters */}
         <Flex className="gap-4 mb-4 flex-wrap">
           <div className="min-w-[220px]">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Project
             </label>
             <Select
@@ -677,7 +677,7 @@ const TimeTrackingPage = () => {
           </div>
 
           <div className="min-w-[220px]">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Task
             </label>
             <Select
@@ -699,7 +699,7 @@ const TimeTrackingPage = () => {
           </div>
 
           <div className="min-w-[180px]">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Status
             </label>
             <Select
@@ -810,9 +810,9 @@ const TimeTrackingPage = () => {
 
             return (
               <div className="text-center py-8">
-                <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">{message}</p>
-                <p className="text-sm text-gray-400 mt-1">
+                <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">{message}</p>
+                <p className="text-sm text-muted-foreground mt-1">
                   Start tracking time to see your entries here
                 </p>
               </div>

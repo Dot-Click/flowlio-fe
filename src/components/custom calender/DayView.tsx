@@ -72,11 +72,11 @@ export const DayView: React.FC<DayViewProps> = ({
       >
         {hours.map((hour) => (
           <React.Fragment key={hour}>
-            <Box className="text-center p-3 bg-white font-normal text-[#888] text-sm flex items-center justify-center">
+            <Box className="text-center p-3 bg-card font-normal text-[#888] text-sm flex items-center justify-center">
               {formatHour(hour)}
             </Box>
             <Box
-              className="text-center p-0 border border-gray-200 min-h-[79px] min-w-[86px] relative bg-white"
+              className="text-center p-0 border border-border min-h-[79px] min-w-[86px] relative bg-card"
               style={{
                 border: "0.5px solid #eee",
               }}

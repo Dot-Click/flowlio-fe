@@ -474,7 +474,7 @@ export const ClientForm = ({
   return (
     <PageWrapper className="mt-6 p-6 relative">
       <Box
-        className="flex items-center gap-2 w-20 cursor-pointer transition-all duration-300  hover:bg-gray-200 rounded-full hover:p-2 "
+        className="flex items-center gap-2 w-20 cursor-pointer transition-all duration-300  hover:bg-muted rounded-full hover:p-2 "
         onClick={() => {
           if (mode === "edit") {
             // In edit mode, go back to client management
@@ -486,11 +486,11 @@ export const ClientForm = ({
         }}
       >
         <IoArrowBack />
-        <p className="text-black">Back</p>
+        <p className="text-foreground">Back</p>
       </Box>
 
       <Center className="justify-between mt-4">
-        <Box className="text-2xl font-bold text-black">
+        <Box className="text-2xl font-bold text-foreground">
           {mode === "edit" ? "Update Client" : "Create Client"}
         </Box>
       </Center>
@@ -500,8 +500,8 @@ export const ClientForm = ({
           <Button
             type="submit"
             disabled={isPending || isCompressing}
-            // className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-            className="bg-black text-white border border-gray-200 rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer mb-6 absolute top-15 right-5"
+            variant="default"
+            className="rounded-full px-6 py-5 flex items-center gap-2 absolute top-15 right-5 shadow-lg"
           >
             {isCompressing ? (
               <>
@@ -519,9 +519,9 @@ export const ClientForm = ({
               "Create Client"
             )}
           </Button>
-          <Box className="bg-white/80 rounded-xl border border-gray-200 p-6 gap-6 grid grid-cols-1">
+          <Box className="bg-card/80 rounded-xl border border-border p-6 gap-6 grid grid-cols-1">
             <Stack className="gap-0">
-              <h1 className="text-black text-xl font-medium">Client Details</h1>
+              <h1 className="text-foreground text-xl font-medium">Client Details</h1>
             </Stack>
 
             {!pdfPreview ? (
@@ -530,19 +530,19 @@ export const ClientForm = ({
                   Upload Profile Picture (Optional)
                 </p>
                 <Center
-                  className="flex-col border-dashed border-2 border-[#62A1C0] bg-gray-100/50 rounded-lg min-h-40 w-44 max-md:w-full cursor-pointer"
+                  className="flex-col border-dashed border-2 border-primary bg-muted/30 rounded-lg min-h-40 w-44 max-md:w-full cursor-pointer transition-colors hover:bg-muted/50"
                   onClick={open}
                 >
                   <img
                     src="/dashboard/camera.svg"
                     alt="task-image"
-                    className="size-14"
+                    className="size-14 brightness-0 dark:invert"
                   />
                   <Stack className="text-center gap-0 mt-4">
-                    <p className="text-gray-800 text-sm font-medium">
+                    <p className="text-foreground text-sm font-medium">
                       Upload Profile Picture (Optional)
                     </p>
-                    <p className="text-gray-500 text-xs">500px by 500px</p>
+                    <p className="text-muted-foreground text-xs">500px by 500px</p>
                   </Stack>
                 </Center>
                 <input {...getInputProps()} />
@@ -551,7 +551,7 @@ export const ClientForm = ({
                 )}
               </Box>
             ) : (
-              <Box className="border-2 border-[#62A1C0] rounded-lg p-4 relative w-50 h-50">
+              <Box className="border-2 border-primary rounded-lg p-4 relative w-50 h-50">
                 <Stack className="gap-2">
                   <Box className="flex w-full absolute top-0 right-0 p-2">
                     <Button variant="outline" size="sm" onClick={removeImage}>
@@ -559,7 +559,7 @@ export const ClientForm = ({
                     </Button>
                   </Box>
                   {pdfPreview && (
-                    <Box className="w-40 h-40 border-dashed border-gray-200 rounded">
+                    <Box className="w-40 h-40 border-dashed border-border rounded">
                       <img
                         src={pdfPreview}
                         title="Profile Preview"
@@ -587,7 +587,7 @@ export const ClientForm = ({
                     <FormLabel>Full Name:</FormLabel>
                     <FormControl>
                       <Input
-                        className="bg-white rounded-full placeholder:text-gray-400"
+                        className="bg-background rounded-full placeholder:text-muted-foreground"
                         size="xl"
                         type="text"
                         placeholder="Enter Full Name"
@@ -607,7 +607,7 @@ export const ClientForm = ({
                     <FormLabel>Email Address:</FormLabel>
                     <FormControl>
                       <Input
-                        className="bg-white rounded-full placeholder:text-gray-400"
+                        className="bg-background rounded-full placeholder:text-muted-foreground"
                         size="xl"
                         type="email"
                         placeholder="Enter Email Address"
@@ -630,9 +630,9 @@ export const ClientForm = ({
                         country={"us"}
                         placeholder="Phone Number:"
                         enableSearch={true}
-                        inputClass="mt-2 w-full h-14 bg-white border border-gray-300 rounded-full px-4 text-black focus:ring-0 focus:outline-none"
-                        buttonClass="border-r h-12 border-gray-300 bg-transparent"
-                        dropdownClass="bg-white border border-gray-300"
+                        inputClass="mt-2 w-full h-14 bg-card border border-border rounded-full px-4 text-foreground focus:ring-0 focus:outline-none"
+                        buttonClass="border-r h-12 border-border bg-transparent"
+                        dropdownClass="bg-card border border-border"
                         {...field}
                       />
                     </FormControl>
@@ -649,7 +649,7 @@ export const ClientForm = ({
                     <FormLabel>VAT:</FormLabel>
                     <FormControl>
                       <Input
-                        className="bg-white rounded-full placeholder:text-gray-400"
+                        className="bg-background rounded-full placeholder:text-muted-foreground"
                         size="xl"
                         type="text"
                         placeholder="Enter VAT number"
@@ -669,7 +669,7 @@ export const ClientForm = ({
                     <FormLabel>Address:</FormLabel>
                     <FormControl>
                       <Input
-                        className="bg-white rounded-full placeholder:text-gray-400"
+                        className="bg-background rounded-full placeholder:text-muted-foreground"
                         size="xl"
                         type="text"
                         placeholder="Enter Address"
@@ -689,7 +689,7 @@ export const ClientForm = ({
                     <FormLabel>Business Industry:</FormLabel>
                     <FormControl>
                       <Input
-                        className="bg-white rounded-full placeholder:text-gray-400"
+                        className="bg-background rounded-full placeholder:text-muted-foreground"
                         size="xl"
                         type="text"
                         placeholder="Enter Industry"
@@ -704,12 +704,12 @@ export const ClientForm = ({
 
             {/* Grant Portal Access - Create mode only */}
             {mode === "create" && (
-              <Box className="mt-6 p-4 border border-gray-200 rounded-xl bg-gray-50/80">
+              <Box className="mt-6 p-4 border border-border rounded-xl bg-muted/30">
                 <Stack className="gap-4">
-                  <h1 className="text-black text-xl font-medium">
+                  <h1 className="text-foreground text-xl font-medium">
                     Client Portal Access
                   </h1>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-muted-foreground text-sm">
                     Every client will have portal access to view projects, tasks
                     & invoices
                   </p>
@@ -722,7 +722,7 @@ export const ClientForm = ({
                         <FormControl>
                           <div className="relative max-w-md">
                             <Input
-                              className="bg-white rounded-full placeholder:text-gray-400 w-full pr-12"
+                              className="bg-background rounded-full placeholder:text-muted-foreground w-full pr-12"
                               size="xl"
                               type={showPassword ? "text" : "password"}
                               placeholder="Min. 8 characters"
@@ -731,7 +731,7 @@ export const ClientForm = ({
                             <button
                               type="button"
                               onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                              className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
                             >
                               {showPassword ? (
                                 <EyeOff className="h-5 w-5" />
@@ -752,7 +752,7 @@ export const ClientForm = ({
             {/* Social Media Links Section */}
             <Box className="mt-6">
               <Stack className="gap-4">
-                <h1 className="text-black text-xl font-medium">
+                <h1 className="text-foreground text-xl font-medium">
                   Social Media Links
                 </h1>
                 <Box className="space-y-4">
@@ -771,7 +771,7 @@ export const ClientForm = ({
                     return (
                       <Box
                         key={index}
-                        className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg bg-white"
+                        className="flex items-center gap-3 p-4 border border-border rounded-lg bg-card"
                       >
                         <Select
                           value={link.type}
@@ -781,7 +781,7 @@ export const ClientForm = ({
                             setSocialMediaLinks(updated);
                           }}
                         >
-                          <SelectTrigger className="w-40 bg-white">
+                          <SelectTrigger className="w-40 bg-card">
                             <SelectValue>
                               <Box className="flex items-center gap-2">
                                 {socialType && (
@@ -815,7 +815,7 @@ export const ClientForm = ({
                         </Select>
 
                         <Input
-                          className="flex-1 bg-white rounded-full placeholder:text-gray-400"
+                          className="flex-1 bg-background rounded-full placeholder:text-muted-foreground"
                           size="xl"
                           type="url"
                           placeholder="Enter social media URL"
@@ -864,7 +864,7 @@ export const ClientForm = ({
                     disabled={
                       socialMediaLinks.length >= socialMediaTypes.length
                     }
-                    className="w-full border-dashed border-2 border-gray-300 hover:border-gray-400"
+                    className="w-full border-dashed border-2 border-border hover:border-gray-400"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Add Social Media Link
@@ -875,8 +875,8 @@ export const ClientForm = ({
 
             {/* Custom Fields Section */}
             {customFieldsData?.data && customFieldsData.data.length > 0 && (
-              <Box className="space-y-6 mt-6 pt-6 border-t border-gray-200">
-                <h1 className="text-black text-xl font-medium">
+              <Box className="space-y-6 mt-6 pt-6 border-t border-border">
+                <h1 className="text-foreground text-xl font-medium">
                   Custom Fields
                 </h1>
                 <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
@@ -894,7 +894,7 @@ export const ClientForm = ({
                                 onValueChange={formField.onChange}
                                 value={formField.value}
                               >
-                                <SelectTrigger className="bg-white rounded-full h-14">
+                                <SelectTrigger className="bg-background rounded-full h-14">
                                   <SelectValue
                                     placeholder={`Select ${field.name}`}
                                   />
@@ -935,12 +935,12 @@ export const ClientForm = ({
                                   <Button
                                     variant={"outline"}
                                     className={cn(
-                                      "w-full justify-start text-left font-normal rounded-full h-14 bg-white",
+                                      "w-full justify-start text-left font-normal rounded-full h-14 bg-card",
                                       !formField.value &&
                                         "text-muted-foreground",
                                     )}
                                   >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    <CalendarIcon className="size-5 text-primary" />
                                     {formField.value ? (
                                       format(new Date(formField.value), "PPP")
                                     ) : (
@@ -967,7 +967,7 @@ export const ClientForm = ({
                               </Popover>
                             ) : (
                               <Input
-                                className="bg-white rounded-full placeholder:text-gray-400"
+                                className="bg-background rounded-full placeholder:text-muted-foreground"
                                 size="xl"
                                 type={
                                   field.type === "number" ? "number" : "text"

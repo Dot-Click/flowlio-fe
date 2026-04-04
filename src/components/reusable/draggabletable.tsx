@@ -228,7 +228,7 @@ export const DraggableTable = React.forwardRef<
                   className={`w-5 h-5 ${
                     shouldDisableDrag
                       ? "text-gray-300"
-                      : "text-gray-400 hover:text-gray-600"
+                      : "text-muted-foreground hover:text-muted-foreground"
                   }`}
                 />
               </Box>

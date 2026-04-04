@@ -191,21 +191,21 @@ const SupportHeader = () => {
       <Flex className="justify-between max-md:flex-col max-md:items-start">
         <Box>
           <h1 className="text-2xl font-medium capitalize">Support Center</h1>
-          <p className="text-gray-500 mt-1 max-md:text-sm">
+          <p className="text-muted-foreground mt-1 max-md:text-sm">
             Need Help? We’ve Got You Covered.
           </p>
         </Box>
       </Flex>
 
-      <Flex className="justify-between max-md:flex-col max-md:items-start bg-white p-6 rounded-lg border border-gray-200 mt-5 shadow-sm">
+      <Flex className="justify-between max-md:flex-col max-md:items-start bg-card p-6 rounded-lg border border-border mt-5 shadow-sm">
         <Box className="flex-1">
           <Flex className="items-center gap-3 mb-2">
             <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-            <h1 className="text-lg font-semibold text-gray-800">
+            <h1 className="text-lg font-semibold text-foreground">
               Your Tickets
             </h1>
           </Flex>
-          <p className="text-gray-600 text-sm">
+          <p className="text-muted-foreground text-sm">
             {submittedData?.data?.tickets.length || 0} total tickets •{" "}
             {submittedData?.data?.tickets.filter(
               (ticket) => ticket.status === "open"
@@ -240,16 +240,16 @@ const SupportHeader = () => {
         </Button>
       </Flex>
 
-      <Flex className="justify-between max-md:flex-col max-md:items-start bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200 mt-5">
+      <Flex className="justify-between max-md:flex-col max-md:items-start bg-card p-6 rounded-lg border border-border mt-5 shadow-sm">
         <Box className="flex-1">
           <Flex className="items-center gap-3 mb-2">
             <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-            <h1 className="text-lg font-semibold text-gray-800">
+            <h1 className="text-lg font-semibold text-foreground">
               Recent Notifications
             </h1>
           </Flex>
           <Flex className="justify-between items-center">
-            <p className="text-gray-600 text-sm">
+            <p className="text-muted-foreground text-sm">
               {notificationsData?.data?.notifications?.filter(
                 (n: any) => !n.read
               )?.length || 0}{" "}
@@ -292,7 +292,7 @@ const SupportHeader = () => {
                   .map((notification: any) => (
                     <div
                       key={notification.id}
-                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-blue-100 cursor-pointer transition-colors"
+                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted cursor-pointer transition-colors"
                       onClick={() => handleNotificationClick(notification)}
                     >
                       <div
@@ -301,14 +301,14 @@ const SupportHeader = () => {
                         }`}
                       ></div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-800 truncate">
+                        <p className="text-sm font-medium text-foreground truncate">
                           {notification.title}
                         </p>
-                        <p className="text-xs text-gray-600 truncate">
+                        <p className="text-xs text-muted-foreground truncate">
                           {notification.message}
                         </p>
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-muted-foreground">
                         {new Date(notification.createdAt).toLocaleDateString()}
                       </div>
                     </div>
@@ -318,11 +318,11 @@ const SupportHeader = () => {
         </Box>
       </Flex>
 
-      <Flex className="flex-col items-start bg-white p-6 rounded-lg border border-gray-200 mt-5 w-full shadow-sm">
+      <Flex className="flex-col items-start bg-card p-6 rounded-lg border border-border mt-5 w-full shadow-sm">
         <Flex className="justify-between items-center w-full mb-6">
           <Flex className="items-center gap-3">
             <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-            <h1 className="text-lg font-semibold text-gray-800">
+            <h1 className="text-lg font-semibold text-foreground">
               Support Tickets
             </h1>
           </Flex>
@@ -369,14 +369,14 @@ const SupportHeader = () => {
         {activeTab === "submitted" && (
           <>
             {submittedLoading ? (
-              <p className="text-gray-500">Loading your tickets...</p>
+              <p className="text-muted-foreground">Loading your tickets...</p>
             ) : submittedError ? (
               <p className="text-red-500">
                 Error loading tickets:{" "}
                 {submittedError?.message || "Unknown error"}
               </p>
             ) : submittedData?.data?.tickets.length === 0 ? (
-              <p className="text-gray-500">No tickets submitted yet.</p>
+              <p className="text-muted-foreground">No tickets submitted yet.</p>
             ) : (
               <Accordion type="single" collapsible className="w-full">
                 {submittedData?.data?.tickets?.map(
@@ -415,7 +415,7 @@ const SupportHeader = () => {
                       <AccordionContent className="flex flex-col gap-4 text-balance">
                         <p>Description: {ticket.description}</p>
                         {ticket.submittedbyName && (
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-muted-foreground">
                             <strong>Sent By:</strong> {ticket.submittedbyName}
                           </p>
                         )}
@@ -432,11 +432,11 @@ const SupportHeader = () => {
           <>
             {activitiesLoading ? (
               <Center className="flex items-center justify-center h-64">
-                <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
               </Center>
             ) : activitiesResponse?.data?.activities?.length === 0 ? (
               <Center className="h-64">
-                <Box className="text-lg text-gray-500">
+                <Box className="text-lg text-muted-foreground">
                   No recent activities
                 </Box>
               </Center>
@@ -476,7 +476,7 @@ const SupportHeader = () => {
                     return (
                       <Flex
                         key={activity.id}
-                        className="items-start justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                        className="items-start justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors"
                       >
                         <Flex className="items-start gap-3 flex-1">
                           <Box className="size-2.5 border outline outline-slate-300 outline-offset-1 bg-slate-200 rounded-full mt-1.5" />
@@ -539,7 +539,7 @@ const SupportHeader = () => {
                 if (sentTickets.length === 0) {
                   return (
                     <Center className="h-64">
-                      <Box className="text-lg text-gray-500">
+                      <Box className="text-lg text-muted-foreground">
                         You haven't sent any tickets yet.
                       </Box>
                     </Center>
@@ -550,7 +550,7 @@ const SupportHeader = () => {
                   {
                     id: "ticketNumber",
                     header: () => (
-                      <Box className="text-center text-black p-3">Ticket #</Box>
+                      <Box className="text-center text-foreground p-3">Ticket #</Box>
                     ),
                     cell: ({ row }) => (
                       <Box className="text-center p-3">
@@ -561,7 +561,7 @@ const SupportHeader = () => {
                   },
                   {
                     accessorKey: "subject",
-                    header: () => <Box className="text-black">Subject</Box>,
+                    header: () => <Box className="text-foreground">Subject</Box>,
                     cell: ({ row }) => (
                       <Box className="capitalize w-30 max-sm:w-full">
                         {row.original.subject.length > 28
@@ -573,7 +573,7 @@ const SupportHeader = () => {
                   {
                     accessorKey: "priority",
                     header: () => (
-                      <Box className="text-center text-black">Priority</Box>
+                      <Box className="text-center text-foreground">Priority</Box>
                     ),
                     cell: ({ row }) => {
                       const priority = row.original.priority;
@@ -593,7 +593,7 @@ const SupportHeader = () => {
                   {
                     accessorKey: "status",
                     header: () => (
-                      <Box className="text-center text-black">Status</Box>
+                      <Box className="text-center text-foreground">Status</Box>
                     ),
                     cell: ({ row }) => {
                       const status = row.original.status as
@@ -649,7 +649,7 @@ const SupportHeader = () => {
                   {
                     accessorKey: "createdon",
                     header: () => (
-                      <Box className="text-center text-black">Created</Box>
+                      <Box className="text-center text-foreground">Created</Box>
                     ),
                     cell: ({ row }) => {
                       const createdon = row.original.createdon;
@@ -674,7 +674,7 @@ const SupportHeader = () => {
                   {
                     accessorKey: "actions",
                     header: () => (
-                      <Box className="text-center text-black">Actions</Box>
+                      <Box className="text-center text-foreground">Actions</Box>
                     ),
                     cell: ({ row }) => {
                       const ticket = row.original;
@@ -807,7 +807,7 @@ const SupportHeader = () => {
         </h2>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <Box className="bg-white/80 gap-4 grid grid-cols-1">
+            <Box className="bg-card/80 gap-4 grid grid-cols-1">
               <FormField
                 control={form.control}
                 name="subject"
@@ -816,7 +816,7 @@ const SupportHeader = () => {
                     <FormLabel>Subject</FormLabel>
                     <FormControl>
                       <Input
-                        className="bg-white rounded-full placeholder:text-gray-400"
+                        className="bg-background rounded-full placeholder:text-muted-foreground"
                         size="lg"
                         type="text"
                         placeholder="Enter ticket subject"
@@ -923,7 +923,7 @@ const SupportHeader = () => {
                     <FormControl>
                       <Textarea
                         rows={4}
-                        className="bg-white rounded-md placeholder:text-gray-400"
+                        className="bg-card rounded-md placeholder:text-muted-foreground"
                         placeholder="Describe your issue in detail"
                         {...field}
                       />
@@ -941,7 +941,7 @@ const SupportHeader = () => {
                     <FormLabel>Client (Optional)</FormLabel>
                     <FormControl>
                       <Input
-                        className="bg-white rounded-full placeholder:text-gray-400"
+                        className="bg-background rounded-full placeholder:text-muted-foreground"
                         size="lg"
                         type="text"
                         placeholder="Enter client name if applicable"
@@ -955,7 +955,7 @@ const SupportHeader = () => {
 
               <Button
                 variant="outline"
-                className="bg-[#1797b9] hover:bg-[#1797b9]/80 hover:text-white text-white border border-gray-200 rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
+                className="bg-[#1797b9] hover:bg-[#1797b9]/80 hover:text-white text-white border border-border rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
                 type="submit"
                 disabled={createTicketMutation.isPending}
               >
@@ -988,7 +988,7 @@ const SupportHeader = () => {
                 variant="outline"
                 size="sm"
                 onClick={handleCloseViewModal}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-muted-foreground hover:text-foreground"
               >
                 ✕
               </Button>
@@ -996,10 +996,10 @@ const SupportHeader = () => {
 
             <div className="space-y-6">
               {/* Ticket Header Info */}
-              <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="bg-muted/50 p-4 rounded-lg">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium text-muted-foreground">
                       Subject
                     </label>
                     <p className="text-lg font-semibold text-gray-800">
@@ -1007,7 +1007,7 @@ const SupportHeader = () => {
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium text-muted-foreground">
                       Status
                     </label>
                     <div className="mt-1">
@@ -1021,7 +1021,7 @@ const SupportHeader = () => {
                     </div>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium text-muted-foreground">
                       Priority
                     </label>
                     <div className="mt-1">
@@ -1035,7 +1035,7 @@ const SupportHeader = () => {
                     </div>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium text-muted-foreground">
                       Created
                     </label>
                     <p className="text-sm text-gray-800">
@@ -1047,10 +1047,10 @@ const SupportHeader = () => {
 
               {/* Description */}
               <div>
-                <label className="text-sm font-medium text-gray-600 mb-2 block">
+                <label className="text-sm font-medium text-muted-foreground mb-2 block">
                   Description
                 </label>
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="bg-card border border-border rounded-lg p-4">
                   <p className="text-gray-800 whitespace-pre-wrap">
                     {selectedTicket.description}
                   </p>
@@ -1060,7 +1060,7 @@ const SupportHeader = () => {
               {/* Additional Info */}
               {selectedTicket.client && (
                 <div>
-                  <label className="text-sm font-medium text-gray-600 mb-2 block">
+                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
                     Client
                   </label>
                   <p className="text-gray-800 capitalize">
@@ -1073,7 +1073,7 @@ const SupportHeader = () => {
                 selectedTicket.assignedOrganization ||
                 selectedTicket.assignedto) && (
                 <div>
-                  <label className="text-sm font-medium text-gray-600 mb-2 block">
+                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
                     Assigned To
                   </label>
                   <p className="text-gray-800 capitalize">
@@ -1086,7 +1086,7 @@ const SupportHeader = () => {
               )}
 
               {/* Action Buttons */}
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex gap-3 pt-4 border-t border-border">
                 {selectedTicket.status === "open" && (
                   <Button
                     variant="outline"

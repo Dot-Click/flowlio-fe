@@ -16,10 +16,10 @@ export const NewsletterHeader = () => {
     <PageWrapper className="mt-6">
       <Center className="justify-between px-4 py-6 max-sm:flex-col max-sm:items-start gap-2">
         <Stack className="gap-1">
-          <h1 className="text-black text-3xl max-sm:text-xl font-medium">
+          <h1 className="text-foreground text-3xl max-sm:text-xl font-medium">
             {t("superadmin.newsletter.title", "Newsletter Subscribers")}
           </h1>
-          <h1 className={`max-sm:text-sm max-w-[700px] text-gray-500`}>
+          <h1 className={`max-sm:text-sm max-w-[700px] text-muted-foreground`}>
             {t("superadmin.newsletter.subtitle", "View and manage all newsletter subscribers. Track subscription statistics and manage email lists.")}
           </h1>
         </Stack>
@@ -27,7 +27,7 @@ export const NewsletterHeader = () => {
         <Button
           onClick={() => setIsSendModalOpen(true)}
           variant="outline"
-          className="bg-black text-white border border-gray-200 rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
+          className="bg-foreground text-background hover:bg-foreground/90 border border-transparent rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
         >
           <Mail className="size-5" />
           {t("superadmin.newsletter.sendNewsletter", "Send Newsletter")}

@@ -92,10 +92,10 @@ export const InvoiceHeader: FC = () => {
     <PageWrapper className="mt-6">
       <Center className="justify-between px-4 py-6 max-sm:flex-col max-sm:items-start gap-2">
         <Stack className="gap-1">
-          <h1 className="text-black text-2xl max-sm:text-xl font-medium">
+          <h1 className="text-foreground text-2xl max-sm:text-xl font-medium">
             Invoices
           </h1>
-          <h1 className={`max-sm:text-sm max-w-[600px] text-gray-500`}>
+          <h1 className={`max-sm:text-sm max-w-[600px] text-muted-foreground`}>
             {activeTab === "all" 
               ? "View and Download All Generated Invoices with Ease"
               : "Manage and Monitor Your Automated Recurring Billing Templates"}
@@ -145,7 +145,7 @@ export const InvoiceHeader: FC = () => {
 
       <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="w-full">
         <Box className="px-4 mb-6">
-          <TabsList className="bg-gray-100/50 p-1 rounded-full border border-gray-200">
+          <TabsList className="bg-gray-100/50 p-1 rounded-full border border-border">
             <TabsTrigger 
               value="all" 
               className="rounded-full px-6 flex items-center gap-2 data-[state=active]:bg-[#1797b9] data-[state=active]:text-white"

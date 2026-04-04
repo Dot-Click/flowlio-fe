@@ -98,7 +98,7 @@ export const SupportTicketTable = ({
   const columns: ColumnDef<Data>[] = [
     {
       id: "select",
-      header: () => <Box className="text-center text-black p-3">{t("superadmin.support.table.ticketId", "Ticket ID")}</Box>,
+      header: () => <Box className="text-center text-foreground p-3">{t("superadmin.support.table.ticketId", "Ticket ID")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center p-3">#{row.original.ticketNumber}</Box>
       ),
@@ -108,7 +108,7 @@ export const SupportTicketTable = ({
 
     {
       accessorKey: "subject",
-      header: () => <Box className="text-black ">{t("superadmin.support.table.subject", "Subject")}</Box>,
+      header: () => <Box className="text-foreground ">{t("superadmin.support.table.subject", "Subject")}</Box>,
       cell: ({ row }) => (
         <Box className="capitalize w-30 max-sm:w-full">
           {row.original.subject.length > 28
@@ -120,7 +120,7 @@ export const SupportTicketTable = ({
 
     {
       accessorKey: "client",
-      header: () => <Box className="text-black text-center">{t("superadmin.support.table.client", "Client")}</Box>,
+      header: () => <Box className="text-foreground text-center">{t("superadmin.support.table.client", "Client")}</Box>,
       cell: ({ row }) => (
         <Box className="capitalize text-center">
           {row.original.clientOrganization?.name ||
@@ -132,7 +132,7 @@ export const SupportTicketTable = ({
 
     {
       accessorKey: "assignedto",
-      header: () => <Box className="text-black text-center">{t("superadmin.support.table.assignedTo", "Assigned To")}</Box>,
+      header: () => <Box className="text-foreground text-center">{t("superadmin.support.table.assignedTo", "Assigned To")}</Box>,
       cell: ({ row }) => (
         <Box className="capitalize text-center">
           {row.original.assignedUser?.name ||
@@ -145,7 +145,7 @@ export const SupportTicketTable = ({
 
     {
       accessorKey: "priority",
-      header: () => <Box className="text-center text-black">{t("superadmin.support.table.priority", "Priority")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("superadmin.support.table.priority", "Priority")}</Box>,
       cell: ({ row }) => {
         return (
           <Center className="text-center font-semibold capitalize">
@@ -157,7 +157,7 @@ export const SupportTicketTable = ({
 
     {
       accessorKey: "createdon",
-      header: () => <Box className="text-center text-black">{t("superadmin.support.table.createdOn", "Created On")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("superadmin.support.table.createdOn", "Created On")}</Box>,
       cell: ({ row }) => {
         const createdon = row.original.createdon;
         try {
@@ -174,7 +174,7 @@ export const SupportTicketTable = ({
 
     {
       accessorKey: "status",
-      header: () => <Box className="text-center text-black">{t("superadmin.support.table.status", "Status")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("superadmin.support.table.status", "Status")}</Box>,
       cell: ({ row }) => {
         const status = row.original.status as "open" | "closed";
 
@@ -184,11 +184,11 @@ export const SupportTicketTable = ({
         > = {
           open: {
             text: "text-white bg-[#00A400] border-none rounded-full",
-            dot: "bg-white",
+            dot: "bg-card",
           },
           closed: {
             text: "text-white bg-[#F98618] border-none rounded-full",
-            dot: "bg-white",
+            dot: "bg-card",
           },
         };
 
@@ -211,7 +211,7 @@ export const SupportTicketTable = ({
 
     {
       accessorKey: "actions",
-      header: () => <Box className="text-center text-black">{t("superadmin.support.table.actions", "Actions")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("superadmin.support.table.actions", "Actions")}</Box>,
       cell: ({ row }) => {
         return (
           <Center className="space-x-2">
@@ -293,7 +293,7 @@ export const SupportTicketTable = ({
   if (!data || data.length === 0) {
     return (
       <Center className="h-64">
-        <Box className="text-lg text-gray-500">No support tickets found.</Box>
+        <Box className="text-lg text-muted-foreground">No support tickets found.</Box>
       </Center>
     );
   }

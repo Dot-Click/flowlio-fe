@@ -40,7 +40,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
     calendarDays.push(
       <Box
         key={`empty-${i}`}
-        className="min-h-[120px] border border-gray-200 bg-gray-50"
+        className="min-h-[120px] border border-border bg-muted/50"
       ></Box>
     );
   }
@@ -61,7 +61,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
       <Box
         key={day}
         className={cn(
-          "min-h-[120px] border border-gray-200 bg-white p-2 relative",
+          "min-h-[120px] border border-border bg-card p-2 relative",
           currentDay.toDateString() === new Date().toDateString() &&
             "bg-blue-50"
         )}
@@ -143,7 +143,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
             );
           })}
           {dayEvents.length > 3 && (
-            <Box className="text-xs text-gray-500">
+            <Box className="text-xs text-muted-foreground">
               +{dayEvents.length - 3} more
             </Box>
           )}

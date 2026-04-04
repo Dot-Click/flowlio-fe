@@ -92,7 +92,7 @@ const SubscriptionsPage = () => {
 
   if (loading && (!subscriptionData || !plansData)) {
     return (
-      <ComponentWrapper className="bg-gray-50 p-8 mt-5">
+      <ComponentWrapper className="bg-background p-8 mt-5">
         <DetailsPageSkeleton withSidebar={false} withTabs={false} />
         <Stack className="mt-10 gap-4">
           <CardSkeleton />
@@ -105,7 +105,7 @@ const SubscriptionsPage = () => {
 
   if (subscriptionError || plansError) {
     return (
-      <ComponentWrapper className="bg-gray-50 p-8 mt-5">
+      <ComponentWrapper className="bg-background p-8 mt-5">
         <ErrorState
           title="Subscription Load Failed"
           message="We couldn't retrieve your subscription details. This might be a temporary connection issue."
@@ -330,24 +330,24 @@ const SubscriptionsPage = () => {
   };
 
   return (
-    <ComponentWrapper className="bg-gray-50 p-8 mt-5">
+    <ComponentWrapper className="bg-background p-8 mt-5">
       <Center className="flex-col max-md:pb-10">
         <Stack className="text-center justify-center items-center px-4 max-sm:mt-5">
-          <Flex className="text-center text-black font-[100] max-w-2xl max-sm:w-full text-4xl max-sm:text-3xl">
+          <Flex className="text-center text-foreground font-[100] max-w-2xl max-sm:w-full text-4xl max-sm:text-3xl">
             My
             <Box className="text-[#F98618] font-semibold"> Subscriptions</Box>
           </Flex>
 
-          <Box className="w-lg max-sm:w-full font-[200] text-black text-[15px]">
+          <Box className="w-lg max-sm:w-full font-[200] text-muted-foreground text-[15px]">
             Manage your active subscriptions and billing information.
           </Box>
         </Stack>
 
         {/* Current Subscription Status */}
         {subscriptionStatus && (
-          <Box className="mt-8 p-6 bg-white rounded-lg shadow max-w-2xl w-full">
+          <Box className="mt-8 p-6 bg-card rounded-lg border border-border max-w-2xl w-full">
             <Flex className="justify-between items-center mb-4">
-              <Box className="text-xl font-semibold">Current Status</Box>
+              <Box className="text-xl font-semibold text-foreground">Current Status</Box>
               <Button
                 onClick={handleRefresh}
                 variant="outline"
@@ -366,7 +366,7 @@ const SubscriptionsPage = () => {
 
             <Flex className="justify-between items-center mb-4">
               <Box>
-                <Box className="text-sm text-gray-600">Subscription Status</Box>
+                <Box className="text-sm text-muted-foreground">Subscription Status</Box>
                 <Box className="font-semibold">
                   {subscriptionStatus.message}
                 </Box>
@@ -377,7 +377,7 @@ const SubscriptionsPage = () => {
             {(subscriptionStatus.subscription || subscriptionStatus.plan) && (
               <Box className="space-y-3">
                 <Flex className="justify-between">
-                  <Box className="text-sm text-gray-600 flex items-center gap-2">
+                  <Box className="text-sm text-muted-foreground flex items-center gap-2">
                     <CreditCard className="h-4 w-4" />
                     Plan:
                   </Box>
@@ -390,7 +390,7 @@ const SubscriptionsPage = () => {
                 {subscriptionStatus.subscription && (
                   <>
                     <Flex className="justify-between">
-                      <Box className="text-sm text-gray-600">Status:</Box>
+                      <Box className="text-sm text-muted-foreground">Status:</Box>
                       <Box className="font-semibold capitalize">
                         {subscriptionStatus.subscription.status ||
                           subscriptionStatus.status}
@@ -399,7 +399,7 @@ const SubscriptionsPage = () => {
                     {subscriptionStatus.subscription.currentPeriodEnd && (
                       <>
                         <Flex className="justify-between">
-                          <Box className="text-sm text-gray-600 flex items-center gap-2">
+                          <Box className="text-sm text-muted-foreground flex items-center gap-2">
                             <Calendar className="h-4 w-4" />
                             {subscriptionStatus.isTrial ||
                             subscriptionStatus.subscription?.isTrial
@@ -524,7 +524,7 @@ const SubscriptionsPage = () => {
                                   ? "Cancelling..."
                                   : "Cancel Subscription"}
                               </Button>
-                              <Box className="text-xs text-gray-500 mt-2 text-center">
+                              <Box className="text-xs text-muted-foreground mt-2 text-center">
                                 Note: Cancellation is non-refundable. Your
                                 subscription will remain active until the end of
                                 the current billing period.
@@ -560,10 +560,10 @@ const SubscriptionsPage = () => {
         {/* Available Plans */}
         {availablePlans.length > 0 && subscriptionStatus?.hasSubscription && (
           <Box className="mt-8 max-w-5xl w-full">
-            <Box className="text-2xl font-semibold mb-2 text-center text-gray-900">
+            <Box className="text-2xl font-semibold mb-2 text-center text-foreground">
               Upgrade Your Subscription
             </Box>
-            <Box className="text-sm text-gray-600 text-center mb-6">
+            <Box className="text-sm text-muted-foreground text-center mb-6">
               Choose a plan that best fits your business needs. Upgrades are
               prorated based on your remaining billing period.
             </Box>
@@ -580,10 +580,10 @@ const SubscriptionsPage = () => {
                 return (
                   <Box
                     key={plan.id}
-                    className={`bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 p-6 cursor-default ${
+                    className={`bg-card rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 p-6 cursor-default ${
                       isCurrentPlan
                         ? "border-2 border-[#1797B9] ring-2 ring-[#1797B9]/20"
-                        : "border border-gray-200"
+                        : "border border-border"
                     }`}
                   >
                     <Flex className="justify-between items-start mb-4">
@@ -596,13 +596,13 @@ const SubscriptionsPage = () => {
                             </Badge>
                           )}
                         </Box>
-                        <Box className="text-sm text-gray-600">
+                        <Box className="text-sm text-muted-foreground">
                           {plan.description}
                         </Box>
                       </Box>
                       <Box className="text-right">
                         <Box className="text-2xl font-bold">${plan.price}</Box>
-                        <Box className="text-sm text-gray-600">
+                        <Box className="text-sm text-muted-foreground">
                           per {plan.billingCycle || "month"}
                         </Box>
                       </Box>
@@ -653,19 +653,19 @@ const SubscriptionsPage = () => {
             </Box>
             <Stack className="gap-4">
               {availablePlans.map((plan) => (
-                <Box key={plan.id} className="bg-white rounded-lg shadow p-6">
+                <Box key={plan.id} className="bg-card rounded-lg shadow border border-border p-6">
                   <Flex className="justify-between items-start mb-4">
                     <Box>
                       <Box className="text-xl font-semibold mb-1">
                         {plan.name}
                       </Box>
-                      <Box className="text-sm text-gray-600">
+                      <Box className="text-sm text-muted-foreground">
                         {plan.description}
                       </Box>
                     </Box>
                     <Box className="text-right">
                       <Box className="text-2xl font-bold">${plan.price}</Box>
-                      <Box className="text-sm text-gray-600">
+                      <Box className="text-sm text-muted-foreground">
                         per {plan.interval}
                       </Box>
                     </Box>
@@ -678,7 +678,7 @@ const SubscriptionsPage = () => {
                         {plan.features.map((feature, index) => (
                           <li
                             key={index}
-                            className="text-sm text-gray-600 flex items-center gap-2"
+                            className="text-sm text-muted-foreground flex items-center gap-2"
                           >
                             <CheckCircle className="h-3 w-3 text-green-600" />
                             {feature}
@@ -714,11 +714,11 @@ const SubscriptionsPage = () => {
 
         {availablePlans.length === 0 &&
           !subscriptionStatus?.hasSubscription && (
-            <Box className="mt-8 p-8 bg-white rounded-lg shadow text-center">
-              <Box className="text-xl font-semibold mb-2">
+            <Box className="mt-8 p-8 bg-card border border-border rounded-lg shadow text-center">
+              <Box className="text-xl font-semibold mb-2 text-foreground">
                 No Plans Available
               </Box>
-              <Box className="text-gray-600 mb-4">
+              <Box className="text-muted-foreground mb-4">
                 There are currently no subscription plans available.
               </Box>
               <Button

@@ -41,7 +41,7 @@ const CustomTooltip = ({
     );
 
     return (
-      <Box className="bg-white border border-gray-200 rounded-md p-2 shadow-md">
+      <Box className="bg-card border border-border rounded-md p-2 shadow-md">
         <p style={{ margin: 0, fontWeight: 600 }}>{label}</p>
         {hasNoTasks ? (
           <p style={{ color: "#9CA3AF", margin: 0 }}>No tasks in there</p>
@@ -147,7 +147,7 @@ export const BarChartComponent: FC<BoxProps> = ({ className, ...props }) => {
           </Flex>
         </Stack>
         <Box className="flex items-center justify-center h-[21.8rem]">
-          <p className="text-gray-500">{t("dashboard.noProjectData")}</p>
+          <p className="text-muted-foreground">{t("dashboard.noProjectData")}</p>
         </Box>
       </ComponentWrapper>
     );
@@ -172,7 +172,7 @@ export const BarChartComponent: FC<BoxProps> = ({ className, ...props }) => {
         </Flex>
       </Stack>
 
-      <Box className="absolute top-65 left-6 transform -translate-y-1/2 -rotate-90 origin-left text-sm max-sm:hidden font-light text-gray-600 max-md:top-80">
+      <Box className="absolute top-65 left-6 transform -translate-y-1/2 -rotate-90 origin-left text-sm max-sm:hidden font-light text-muted-foreground max-md:top-80">
         {t("dashboard.taskLabel")}
       </Box>
 

@@ -120,7 +120,7 @@ export const CustomFieldsManager = ({
 
   return (
     <Box className="space-y-6">
-      <Box className="space-y-4 border p-4 rounded-md bg-gray-50">
+      <Box className="space-y-4 border p-4 rounded-md bg-muted/50">
         <h3 className="font-medium text-sm">Add New Custom Field</h3>
         <Flex className="gap-4 items-end flex-wrap">
           <Box className="flex-1 min-w-[200px]">
@@ -129,7 +129,7 @@ export const CustomFieldsManager = ({
               value={newFieldName}
               onChange={(e) => setNewFieldName(e.target.value)}
               placeholder="e.g. Budget, Priority"
-              className="bg-white h-9"
+              className="bg-card h-9"
             />
           </Box>
           <Box className="w-[150px]">
@@ -138,7 +138,7 @@ export const CustomFieldsManager = ({
               value={newFieldType}
               onValueChange={(val) => setNewFieldType(val as CustomFieldType)}
             >
-              <SelectTrigger className="h-9 bg-white">
+              <SelectTrigger className="h-9 bg-card">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -166,21 +166,21 @@ export const CustomFieldsManager = ({
         </Flex>
 
         {newFieldType === "select" && (
-          <Box className="mt-2 pl-4 border-l-2 border-gray-200">
+          <Box className="mt-2 pl-4 border-l-2 border-border">
             <Label className="text-xs mb-1.5 block">Options</Label>
             <Flex className="gap-2 mb-2">
               {/* Inline color picker - avoids Radix portal conflicts with parent Dialog */}
               <Box className="relative" ref={colorPickerRef}>
                 <button
                   type="button"
-                  className="w-8 h-8 rounded-md border border-gray-200 cursor-pointer flex-shrink-0"
+                  className="w-8 h-8 rounded-md border border-border cursor-pointer flex-shrink-0"
                   style={{ backgroundColor: selectedColor }}
                   title="Pick color"
                   onClick={(e) => { e.stopPropagation(); setColorPickerOpen((o) => !o); }}
                 />
                 {colorPickerOpen && (
                   <div
-                    className="absolute left-0 top-10 z-[9999] bg-white border border-gray-200 rounded-md shadow-lg p-2 w-48"
+                    className="absolute left-0 top-10 z-[9999] bg-card border border-border rounded-md shadow-lg p-2 w-48"
                     onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => e.stopPropagation()}
                   >
@@ -189,7 +189,7 @@ export const CustomFieldsManager = ({
                         <button
                           key={color}
                           type="button"
-                          className="w-7 h-7 rounded-sm border border-gray-100 cursor-pointer hover:scale-110 transition-transform"
+                          className="w-7 h-7 rounded-sm border border-border cursor-pointer hover:scale-110 transition-transform"
                           style={{ backgroundColor: color }}
                           onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
                           onClick={(e) => { e.stopPropagation(); setSelectedColor(color); setColorPickerOpen(false); }}
@@ -210,7 +210,7 @@ export const CustomFieldsManager = ({
                 value={optionInput}
                 onChange={(e) => setOptionInput(e.target.value)}
                 placeholder="Option label"
-                className="bg-white h-8 text-sm"
+                className="bg-card h-8 text-sm"
                 onKeyDown={(e) => e.key === "Enter" && addOption()}
               />
               <Button
@@ -227,7 +227,7 @@ export const CustomFieldsManager = ({
               {newFieldOptions.map((opt, i) => (
                 <span
                   key={i}
-                  className="bg-white border rounded-full px-3 py-1 text-xs flex items-center gap-2"
+                  className="bg-card border rounded-full px-3 py-1 text-xs flex items-center gap-2"
                 >
                   <div
                     className="w-2 h-2 rounded-full"
@@ -251,9 +251,9 @@ export const CustomFieldsManager = ({
       <Box className="space-y-2">
         <h3 className="font-medium text-sm">Existing Fields</h3>
         {isLoading ? (
-          <Box className="text-sm text-gray-500">Loading fields...</Box>
+          <Box className="text-sm text-muted-foreground">Loading fields...</Box>
         ) : customFieldsData?.data.length === 0 ? (
-          <Box className="text-sm text-gray-500 italic">
+          <Box className="text-sm text-muted-foreground italic">
             No custom fields defined.
           </Box>
         ) : (
@@ -261,20 +261,20 @@ export const CustomFieldsManager = ({
             {customFieldsData?.data.map((field) => (
               <Flex
                 key={field.id}
-                className="p-3 items-center justify-between bg-white first:rounded-t-md last:rounded-b-md capitalize"
+                className="p-3 items-center justify-between bg-card first:rounded-t-md last:rounded-b-md capitalize"
               >
                 <Box>
                   <div className="font-medium text-sm">{field.name}</div>
-                  <div className="text-xs text-gray-500 capitalize">
+                  <div className="text-xs text-muted-foreground capitalize">
                     {field.type}
                   </div>
                   {field.type === "select" && (
-                    <Flex className="text-xs text-gray-400 mt-1 gap-2 flex-wrap">
+                    <Flex className="text-xs text-muted-foreground mt-1 gap-2 flex-wrap">
                       Options:{" "}
                       {field.options?.map((opt, idx) => (
                         <Flex
                           key={idx}
-                          className="items-center gap-1 px-1.5 py-0.5 bg-gray-50 rounded border border-gray-100"
+                          className="items-center gap-1 px-1.5 py-0.5 bg-muted/50 rounded border border-border"
                         >
                           <div
                             className="w-1.5 h-1.5 rounded-full"

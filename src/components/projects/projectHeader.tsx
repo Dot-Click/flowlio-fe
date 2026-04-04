@@ -30,10 +30,10 @@ export const ProjectHeader = () => {
     <PageWrapper className="mt-6">
       <Center className="justify-between px-4 py-6 max-sm:flex-col max-sm:items-start gap-2">
         <Stack className="gap-1">
-          <h1 className="text-black text-3xl max-sm:text-xl font-medium">
+          <h1 className="text-foreground text-3xl max-sm:text-xl font-medium">
             {t("projects.title")}
           </h1>
-          <h1 className={`max-sm:text-sm max-w-[600px] text-gray-500`}>
+          <h1 className={`max-sm:text-sm max-w-[600px] text-muted-foreground`}>
             {t("projects.subtitle")}
           </h1>
         </Stack>
@@ -42,7 +42,7 @@ export const ProjectHeader = () => {
           <Flex className="gap-2">
             <Button
               variant="outline"
-              className="bg-black text-white border border-gray-200 rounded-full px-6 py-5 items-center gap-2 cursor-pointer hover:bg-gray-50"
+              className="bg-black text-white border border-border rounded-full px-6 py-5 items-center gap-2 cursor-pointer hover:bg-muted/50"
               onClick={() => customFieldsModal.onOpenChange(true)}
             >
               <Settings2 className="w-4 h-4" />
@@ -50,22 +50,22 @@ export const ProjectHeader = () => {
             </Button>
             <Button
               variant="outline"
-              className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
+              className="bg-black text-white border border-border  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
               onClick={() =>
                 !showGranttChart
                   ? setShowGranttChart(true)
                   : setShowGranttChart(false)
               }
             >
-              <Eye className="fill-white text-black size-5" />
+              <Eye className="fill-white text-foreground size-5" />
               {showGranttChart ? "Hide Project Grantt" : "View Project Grantt"}
             </Button>
             <Button
               variant="outline"
-              className="bg-black text-white border border-gray-200  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
+              className="bg-black text-white border border-border  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
               onClick={() => navigate("/dashboard/project/create-project")}
             >
-              <CirclePlus className="fill-white text-black size-5" />
+              <CirclePlus className="fill-white text-foreground size-5" />
               {t("projects.createNewProject")}
             </Button>
           </Flex>

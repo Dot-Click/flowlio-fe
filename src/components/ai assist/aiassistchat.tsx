@@ -132,7 +132,7 @@ export const AiAssistChat: React.FC<{ withoutWelcomeGrids?: boolean }> = ({
             </svg>
             New Chat
           </Button>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-muted-foreground">
             {activeChat?.messages?.length || 0} messages
           </div>
         </Flex>
@@ -158,9 +158,9 @@ const WelcomeContent = () => {
         alt="frame"
         className="size-20"
       />
-      <h2 className="text-gray-500 text-sm mt-6">Hi there, 👋</h2>
+      <h2 className="text-muted-foreground text-sm mt-6">Hi there, 👋</h2>
       <h2 className="text-xl">What would you like to explore today?</h2>
-      <p className="text-gray-600 text-sm text-center max-w-md">
+      <p className="text-muted-foreground text-sm text-center max-w-md">
         I'm Flowlio AI, powered by GPT-5! I can help you with absolutely
         anything - answer questions, analyze files (PDFs, images, documents),
         generate images with DALL-E. What would you like to explore today?
@@ -175,7 +175,7 @@ const WelcomeContent = () => {
               <a.Icon className={a.iconStyle} />
             </Flex>
             <h1 className="font-semibold">{a.title}</h1>
-            <Box className="text-gray-500 text-xs">{a.titleChild}</Box>
+            <Box className="text-muted-foreground text-xs">{a.titleChild}</Box>
           </Stack>
         ))}
       </Flex>
@@ -306,7 +306,7 @@ const ChatBox: React.FC<{
       ) : (
         <Stack
           ref={chatRef}
-          className={`w-full max-w-3xl mx-auto p-2 mb-4 rounded-md border border-gray-300 bg-white ${
+          className={`w-full max-w-3xl mx-auto p-2 mb-4 rounded-md border border-border bg-card ${
             showWelcome
               ? "min-h-[200px] max-h-[400px]"
               : "flex-1 h-full min-h-[300px] max-h-[60vh]"
@@ -314,7 +314,7 @@ const ChatBox: React.FC<{
           style={{ transition: "max-height 0.2s" }}
         >
           {messages.length === 0 ? (
-            <p className="text-gray-400 text-center w-full">
+            <p className="text-muted-foreground text-center w-full">
               No messages yet. Start the conversation!
             </p>
           ) : (
@@ -329,7 +329,7 @@ const ChatBox: React.FC<{
                   className={
                     msg.role === "user"
                       ? "bg-blue-100 text-blue-900 rounded-xl px-4 py-2 m-1 max-w-[70%]"
-                      : "bg-gray-100 text-gray-800 rounded-xl px-4 py-2 m-1 max-w-[70%]"
+                      : "bg-muted text-gray-800 rounded-xl px-4 py-2 m-1 max-w-[70%]"
                   }
                 >
                   {msg.isLoading ? (
@@ -344,7 +344,7 @@ const ChatBox: React.FC<{
                             <span className="text-sm text-purple-600 font-medium">
                               🎨 Creating your image...
                             </span>
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-muted-foreground">
                               This may take 10-15 seconds
                             </span>
                           </div>
@@ -352,7 +352,7 @@ const ChatBox: React.FC<{
                       ) : (
                         <>
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
-                          <span className="text-sm text-gray-500">
+                          <span className="text-sm text-muted-foreground">
                             AI is thinking...
                           </span>
                         </>
@@ -369,7 +369,7 @@ const ChatBox: React.FC<{
                             <img
                               src={msg.imageUrl}
                               alt="Generated image"
-                              className="max-w-full h-auto rounded-lg border border-gray-200"
+                              className="max-w-full h-auto rounded-lg border border-border"
                               style={{ maxHeight: "400px" }}
                             />
                             <button
@@ -398,7 +398,7 @@ const ChatBox: React.FC<{
                                   window.open(msg.imageUrl!, "_blank");
                                 }
                               }}
-                              className="absolute top-1 right-1 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-1.5 rounded-full shadow-lg border border-gray-200 transition-all duration-200 cursor-pointer"
+                              className="absolute top-1 right-1 bg-card/90 hover:bg-background text-foreground hover:text-foreground p-1.5 rounded-full shadow-lg border border-border transition-all duration-200 cursor-pointer"
                               title="Download image"
                             >
                               <svg
@@ -424,7 +424,7 @@ const ChatBox: React.FC<{
                           {msg.attachments.map((file, idx) => (
                             <div
                               key={idx}
-                              className="flex items-center gap-1 bg-gray-200 rounded px-2 py-1 text-xs"
+                              className="flex items-center gap-1 bg-muted rounded px-2 py-1 text-xs"
                             >
                               {file.type && file.type.startsWith("image/") ? (
                                 <ImageIcon className="w-3 h-3" />
@@ -441,7 +441,7 @@ const ChatBox: React.FC<{
                     </div>
                   )}
                   {msg.timestamp && (
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       {new Date(msg.timestamp).toLocaleTimeString()}
                     </p>
                   )}
@@ -454,8 +454,8 @@ const ChatBox: React.FC<{
 
       {/* Input area */}
       <Stack
-        className={`w-full max-w-3xl mx-auto p-2 mb-4 rounded-md border sticky bottom-0 bg-white ${
-          dragOver ? "border-blue-400 bg-blue-50" : "border-gray-300"
+        className={`w-full max-w-3xl mx-auto p-2 mb-4 rounded-md border sticky bottom-0 bg-card ${
+          dragOver ? "border-blue-400 bg-blue-50" : "border-border"
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -467,7 +467,7 @@ const ChatBox: React.FC<{
             {attachments.map((file, index) => (
               <div
                 key={index}
-                className="flex items-center gap-1 bg-gray-100 rounded px-2 py-1 text-xs"
+                className="flex items-center gap-1 bg-muted rounded px-2 py-1 text-xs"
               >
                 {file.type && file.type.startsWith("image/") ? (
                   <ImageIcon className="w-3 h-3" />
@@ -493,7 +493,7 @@ const ChatBox: React.FC<{
           placeholder="Ask me anything... (Shift+Enter for new line)"
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="w-full p-3 bg-white border-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none shadow-none resize-none min-h-[44px] max-h-32 rounded-md transition-all duration-200 focus:ring-2 focus:ring-blue-200"
+          className="w-full p-3 bg-card border-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:outline-none shadow-none resize-none min-h-[44px] max-h-32 rounded-md transition-all duration-200 focus:ring-2 focus:ring-blue-200"
           style={{
             boxShadow: "none !important",
             outline: "none !important",
@@ -521,7 +521,7 @@ const ChatBox: React.FC<{
           />
           <Button
             variant={"ghost"}
-            className="text-sm gap-1 text-gray-400"
+            className="text-sm gap-1 text-muted-foreground"
             onClick={() => fileInputRef.current?.click()}
           >
             <Upload className="size-4" />
@@ -529,7 +529,7 @@ const ChatBox: React.FC<{
           </Button>
           <Button
             variant={"ghost"}
-            className="text-sm gap-1 text-gray-400"
+            className="text-sm gap-1 text-muted-foreground"
             onClick={() => setIsImageModalOpen(true)}
           >
             <ImageIcon className="size-4" />
@@ -547,13 +547,13 @@ const ChatBox: React.FC<{
         </Flex>
       </Stack>
 
-      <p className="text-sm text-gray-500 text-center w-full">
+      <p className="text-sm text-muted-foreground text-center w-full">
         Press{" "}
-        <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">
+        <kbd className="px-1 py-0.5 bg-muted rounded text-xs">
           Shift + Enter
         </kbd>{" "}
         for new line,{" "}
-        <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Enter</kbd> to
+        <kbd className="px-1 py-0.5 bg-muted rounded text-xs">Enter</kbd> to
         send
       </p>
 

@@ -96,8 +96,8 @@ function DraggableTask({ task }: { task: Task }) {
   return (
     <Box
       className={cn(
-        "bg-white rounded-lg border border-gray-200 p-4 cursor-grab min-w-[240px] mb-3 mx-2 transition-all duration-200 shadow-sm",
-        "hover:shadow-md hover:border-gray-300 active:cursor-grabbing",
+        "bg-card rounded-lg border border-border p-4 cursor-grab min-w-[240px] mb-3 mx-2 transition-all duration-200 shadow-sm",
+        "hover:shadow-md hover:border-border active:cursor-grabbing",
         isDragging && "opacity-50 shadow-lg scale-105"
       )}
       style={{
@@ -117,15 +117,15 @@ function DraggableTask({ task }: { task: Task }) {
 
         {/* Project and Due Date */}
         <Flex className="flex-col items-start gap-2 w-full">
-          <Flex className="text-gray-600 items-center gap-2">
+          <Flex className="text-muted-foreground items-center gap-2">
             <Box className="w-2 h-2 bg-blue-500 rounded-full"></Box>
-            <span className="text-xs font-medium text-gray-700">
+            <span className="text-xs font-medium text-foreground">
               {task.project}
             </span>
           </Flex>
 
           {task.endDate && (
-            <Flex className="text-gray-600 items-center gap-2">
+            <Flex className="text-muted-foreground items-center gap-2">
               <Box className="w-2 h-2 bg-red-500 rounded-full"></Box>
               <span className="text-xs text-red-600 font-medium">
                 Due: {task.endDate}
@@ -134,16 +134,16 @@ function DraggableTask({ task }: { task: Task }) {
           )}
 
           {task.creatorName && (
-            <Flex className="text-gray-600 items-center gap-2">
+            <Flex className="text-muted-foreground items-center gap-2">
               <Box className="w-2 h-2 bg-green-500 rounded-full"></Box>
-              <span className="text-xs font-medium text-gray-700">
+              <span className="text-xs font-medium text-foreground">
                 Assigned by: {task.creatorName}
               </span>
             </Flex>
           )}
 
           {task.comments && (
-            <Flex className="text-gray-500 items-center gap-2">
+            <Flex className="text-muted-foreground items-center gap-2">
               <Box className="w-2 h-2 bg-gray-400 rounded-full"></Box>
               <span className="text-xs italic">{task.comments}</span>
             </Flex>
@@ -169,7 +169,7 @@ function DroppableColumn({
   return (
     <Flex
       className={cn(
-        "flex-col flex-1 min-w-[280px] bg-white rounded-xl border-1 border-gray-200",
+        "flex-col flex-1 min-w-[280px] bg-card rounded-xl border-1 border-border",
         "overflow-hidden max-h-[700px] transition-all duration-200",
         isOver && "border-dashed border-blue-400 bg-blue-50/30",
         highlight && "border-green-300 bg-green-50"
@@ -254,7 +254,7 @@ export default function KanbanBoard({ filteredTasks }: KanbanBoardProps) {
           {STATUS_COLUMNS.map((status) => (
             <Flex
               key={status}
-              className="flex-col flex-1 min-w-[280px] bg-white rounded-xl border border-gray-200 overflow-hidden max-h-[700px]"
+              className="flex-col flex-1 min-w-[280px] bg-card rounded-xl border border-border overflow-hidden max-h-[700px]"
             >
               <Box
                 className="text-base font-semibold text-white w-full px-4 py-3 flex items-center justify-between"
@@ -265,8 +265,8 @@ export default function KanbanBoard({ filteredTasks }: KanbanBoardProps) {
               </Box>
               <Box className="flex-1 overflow-y-auto p-2">
                 <Box className="animate-pulse space-y-3">
-                  <Box className="bg-gray-200 h-20 rounded-lg"></Box>
-                  <Box className="bg-gray-200 h-20 rounded-lg"></Box>
+                  <Box className="bg-muted h-20 rounded-lg"></Box>
+                  <Box className="bg-muted h-20 rounded-lg"></Box>
                 </Box>
               </Box>
             </Flex>
@@ -311,17 +311,17 @@ export default function KanbanBoard({ filteredTasks }: KanbanBoardProps) {
           ))}
           <DragOverlay>
             {activeTask ? (
-              <Box className="bg-white rounded-lg border-2 border-blue-400 p-4 min-w-[240px] shadow-xl">
+              <Box className="bg-card rounded-lg border-2 border-blue-400 p-4 min-w-[240px] shadow-xl">
                 <Flex className="flex-col w-full items-start gap-2">
                   <Box className="font-semibold text-gray-800 text-sm leading-tight">
                     {activeTask.title}
                   </Box>
-                  <Box className="text-gray-600 text-xs">
+                  <Box className="text-muted-foreground text-xs">
                     Project:{" "}
                     <span className="font-medium">{activeTask.project}</span>
                   </Box>
                   {activeTask.creatorName && (
-                    <Box className="text-gray-600 text-xs">
+                    <Box className="text-muted-foreground text-xs">
                       Assigned by:{" "}
                       <span className="font-medium">
                         {activeTask.creatorName}
@@ -329,7 +329,7 @@ export default function KanbanBoard({ filteredTasks }: KanbanBoardProps) {
                     </Box>
                   )}
                   {activeTask.comments && (
-                    <Box className="text-gray-500 text-xs italic">
+                    <Box className="text-muted-foreground text-xs italic">
                       {activeTask.comments}
                     </Box>
                   )}

@@ -102,28 +102,28 @@ const ClientProjectsPage = () => {
   const columns: ColumnDef<any>[] = [
     {
       accessorKey: "projectNumber",
-      header: () => <Box className="text-center text-black">#</Box>,
+      header: () => <Box className="text-center text-foreground">#</Box>,
       cell: ({ row }) => (
         <Box className="text-center">{row.original.projectNumber}</Box>
       ),
     },
     {
       accessorKey: "projectName",
-      header: () => <Box className="text-center text-black">{t("projects.projectName")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("projects.projectName")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center">{row.original.projectName}</Box>
       ),
     },
     {
       accessorKey: "clientName",
-      header: () => <Box className="text-center text-black">{t("projects.client")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("projects.client")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center">{row.original.clientName}</Box>
       ),
     },
     {
       accessorKey: "assignedTo",
-      header: () => <Box className="text-center text-black">{t("projects.assignedTo")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("projects.assignedTo")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center">
           {row.original.assignedProject || t("common.unassigned")}
@@ -132,7 +132,7 @@ const ClientProjectsPage = () => {
     },
     {
       accessorKey: "startDate",
-      header: () => <Box className="text-center text-black">{t("projects.startDate")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("projects.startDate")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center">
           {row.original.startDate
@@ -143,7 +143,7 @@ const ClientProjectsPage = () => {
     },
     {
       accessorKey: "endDate",
-      header: () => <Box className="text-center text-black">{t("projects.endDate")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("projects.endDate")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center">
           {row.original.endDate
@@ -154,7 +154,7 @@ const ClientProjectsPage = () => {
     },
     {
       accessorKey: "progress",
-      header: () => <Box className="text-center text-black">{t("projects.progress")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("projects.progress")}</Box>,
       cell: ({ row }) => (
         <Center className="text-center">
           {row.original.progress + "%"}{" "}
@@ -164,7 +164,7 @@ const ClientProjectsPage = () => {
     },
     {
       accessorKey: "status",
-      header: () => <Box className="text-center text-black">{t("projects.status")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("projects.status")}</Box>,
       cell: ({ row }) => {
         const status = row.original.status as
           | "pending"
@@ -191,7 +191,7 @@ const ClientProjectsPage = () => {
         };
 
         const currentStyle = statusStyles[status] || {
-          text: "text-white bg-gray-500 border-none rounded-full",
+          text: "text-white bg-muted/500 border-none rounded-full",
           dot: "bg-white",
         };
 
@@ -211,7 +211,7 @@ const ClientProjectsPage = () => {
     },
     {
       id: "actions",
-      header: () => <Box className="text-center text-black">{t("common.actions")}</Box>,
+      header: () => <Box className="text-center text-foreground">{t("common.actions")}</Box>,
       cell: ({ row }) => (
         <Center className="space-x-2">
           <TooltipProvider>
@@ -219,12 +219,12 @@ const ClientProjectsPage = () => {
               <TooltipTrigger asChild>
                 <Button
                   variant="outline"
-                  className="bg-black border-none w-10 h-9 hover:bg-black/80 cursor-pointer rounded-md p-0"
+                  className="bg-foreground border-none w-10 h-9 hover:bg-foreground/80 cursor-pointer rounded-md p-0"
                   onClick={() =>
                     navigate(`/clients/projects/view/${row.original.id}`)
                   }
                 >
-                  <Eye className="text-white size-5 fill-white" />
+                  <Eye className="text-background size-5 fill-background" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="mb-2">
@@ -278,8 +278,8 @@ const ClientProjectsPage = () => {
   return (
     <PageWrapper className="mt-6">
       <Stack className="gap-1 p-6 mb-6">
-        <h1 className="text-2xl font-medium text-black">{t("projects.myProjects")}</h1>
-        <p className="text-gray-500">
+        <h1 className="text-2xl font-medium text-foreground">{t("projects.myProjects")}</h1>
+        <p className="text-muted-foreground">
           {t("projects.myProjectsDesc")}
         </p>
       </Stack>
@@ -287,7 +287,7 @@ const ClientProjectsPage = () => {
       {isLoading ? (
         <Box className="flex justify-center p-10">{t("projects.loadingProjects")}</Box>
       ) : (
-        <Box className=" rounded-xl   border border-gray-100 overflow-hidden">
+        <Box className=" rounded-xl   border border-border overflow-hidden">
           <ReusableTable
             data={projects}
             columns={columns}
@@ -304,27 +304,27 @@ const ClientProjectsPage = () => {
         <Box>
           <Box className="mb-4 text-lg font-semibold">{t("projects.comments")}</Box>
 
-          <Box className="flex flex-col gap-3 max-h-64 overflow-y-auto mb-4 bg-gray-50 p-3 rounded">
+          <Box className="flex flex-col gap-3 max-h-64 overflow-y-auto mb-4 bg-muted p-3 rounded">
             {commentsLoading ? (
-              <Box className="text-gray-400 text-center py-4">
+              <Box className="text-muted-foreground text-center py-4">
                 {t("common.loading")}
               </Box>
             ) : activeProjectId && commentsWithReplies.length === 0 ? (
-              <Box className="text-gray-400 text-center py-4">
+              <Box className="text-muted-foreground text-center py-4">
                 {t("projects.noComments")}
               </Box>
             ) : (
               commentsWithReplies.map((comment: any) => (
                 <Box key={comment.id} className="space-y-2">
                   <Box className="flex items-start gap-2 group">
-                    <Flex className="flex-1 items-start justify-between bg-white p-3 rounded shadow-sm text-sm">
+                    <Flex className="flex-1 items-start justify-between bg-card border border-border p-3 rounded shadow-sm text-sm">
                       <Stack className="flex-1">
                         <Flex className="justify-between">
                           <Box className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-xs text-gray-900">
+                            <span className="font-medium text-xs text-foreground">
                               {comment.userName}
                             </span>
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-muted-foreground">
                               {format(
                                 new Date(comment.createdAt),
                                 "MMM d, yyyy hh:mm a",
@@ -350,7 +350,7 @@ const ClientProjectsPage = () => {
                   </Box>
 
                   {replyTo === comment.id && (
-                    <Box className="ml-6 bg-white p-2 rounded border">
+                    <Box className="ml-6 bg-card p-2 rounded border border-border">
                       <Input
                         value={replyContent}
                         onChange={(e) => setReplyContent(e.target.value)}
@@ -388,13 +388,13 @@ const ClientProjectsPage = () => {
                     <Box className="ml-6 space-y-2">
                       {comment.replies.map((reply: any) => (
                         <Box key={reply.id} className="flex items-start gap-2">
-                          <Flex className="flex-1 items-start justify-between bg-white p-2 rounded shadow-sm text-sm border-l-2 border-blue-200">
+                          <Flex className="flex-1 items-start justify-between bg-card border border-border p-2 rounded shadow-sm text-sm border-l-2 border-l-blue-200">
                             <Stack className="flex-1">
                               <Box className="flex items-center gap-2 mb-1">
-                                <span className="font-medium text-xs text-gray-900">
+                                <span className="font-medium text-xs text-foreground">
                                   {reply.userName}
                                 </span>
-                                <span className="text-xs text-gray-400">
+                                <span className="text-xs text-muted-foreground">
                                   {format(
                                     new Date(reply.createdAt),
                                     "MMM d, yyyy hh:mm a",
@@ -433,7 +433,7 @@ const ClientProjectsPage = () => {
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleAddComment();
               }}
-              className="bg-white rounded-full placeholder:text-gray-400 h-11 border border-gray-400"
+              className="bg-background rounded-full placeholder:text-muted-foreground h-11 border border-border"
             />
             <Button
               onClick={() => handleAddComment()}

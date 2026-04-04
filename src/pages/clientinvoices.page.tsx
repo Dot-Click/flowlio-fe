@@ -33,13 +33,13 @@ const ClientInvoicesPage = () => {
       case "paid":
         return "bg-green-100 text-green-800 border-green-200";
       case "draft":
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-muted text-gray-800 border-border";
       case "pending":
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "overdue":
         return "bg-red-100 text-red-800 border-red-200";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-muted text-gray-800 border-border";
     }
   };
 
@@ -117,23 +117,23 @@ const ClientInvoicesPage = () => {
   return (
     <PageWrapper className="mt-6">
       <Stack className="gap-1 p-6 mb-6">
-        <h1 className="text-2xl font-medium text-black">{t("invoices.title")}</h1>
-        <p className="text-gray-500">
+        <h1 className="text-2xl font-medium text-foreground">{t("invoices.title")}</h1>
+        <p className="text-muted-foreground">
           {t("invoices.desc")}
         </p>
       </Stack>
       {isLoading ? (
         <Box className="flex justify-center p-10">Loading invoices...</Box>
       ) : invoices?.length === 0 ? (
-        <Box className="flex flex-col items-center justify-center p-20 bg-white rounded-xl border border-gray-100 shadow-sm">
+        <Box className="flex flex-col items-center justify-center p-20 bg-card rounded-xl border border-border shadow-sm">
           <FileText className="h-12 w-12 text-gray-300 mb-4" />
-          <p className="text-gray-500 font-medium">No invoices found</p>
-          <p className="text-gray-400 text-sm">
+          <p className="text-muted-foreground font-medium">No invoices found</p>
+          <p className="text-muted-foreground text-sm">
             When an invoice is generated for you, it will appear here.
           </p>
         </Box>
       ) : (
-        <Box className=" rounded-xl   border border-gray-100 overflow-hidden">
+        <Box className=" rounded-xl   border border-border overflow-hidden">
           <ReusableTable
             data={invoices}
             columns={columns}

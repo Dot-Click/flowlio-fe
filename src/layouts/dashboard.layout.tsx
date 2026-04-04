@@ -60,7 +60,7 @@ export const DashboardLayout = () => {
 
   return (
     // <SubscriptionGuard>
-    <Box className="bg-gradient-to-l from-indigo-50 via-slate-50 to-indigo-50 border-[2px] rounded-none border-white p-1 min-h-screen">
+    <Box className="bg-background min-h-screen">
       <SidebarProvider
         style={
           {

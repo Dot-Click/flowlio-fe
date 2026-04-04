@@ -99,7 +99,7 @@ export const NewsletterSubscribersTable = () => {
           size="sm"
           onClick={() => handleDelete(row.original)}
           disabled={deleteMutation.isPending}
-          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+          className="text-destructive hover:text-destructive hover:bg-destructive/10"
         >
           <FaRegTrashAlt className="h-4 w-4" />
         </Button>
@@ -132,21 +132,21 @@ export const NewsletterSubscribersTable = () => {
       {/* Statistics Cards */}
       {stats && (
         <Flex className="gap-4 mb-6 max-sm:flex-col">
-          <Box className="flex-1 bg-white border border-gray-200 rounded-lg p-4">
-            <div className="text-sm text-gray-500 mb-1">{t("superadmin.newsletter.totalSubscribers", "Total Subscribers")}</div>
-            <div className="text-2xl font-semibold text-gray-900">
+          <Box className="flex-1 bg-card border border-border rounded-lg p-4">
+            <div className="text-sm text-muted-foreground mb-1">{t("superadmin.newsletter.totalSubscribers", "Total Subscribers")}</div>
+            <div className="text-2xl font-semibold text-foreground">
               {stats.total}
             </div>
           </Box>
-          <Box className="flex-1 bg-white border border-gray-200 rounded-lg p-4">
-            <div className="text-sm text-gray-500 mb-1">{t("superadmin.newsletter.active", "Active")}</div>
+          <Box className="flex-1 bg-card border border-border rounded-lg p-4">
+            <div className="text-sm text-muted-foreground mb-1">{t("superadmin.newsletter.active", "Active")}</div>
             <div className="text-2xl font-semibold text-green-600">
               {stats.subscribed}
             </div>
           </Box>
-          <Box className="flex-1 bg-white border border-gray-200 rounded-lg p-4">
-            <div className="text-sm text-gray-500 mb-1">{t("superadmin.newsletter.unsubscribed", "Unsubscribed")}</div>
-            <div className="text-2xl font-semibold text-red-600">
+          <Box className="flex-1 bg-card border border-border rounded-lg p-4">
+            <div className="text-sm text-muted-foreground mb-1">{t("superadmin.newsletter.unsubscribed", "Unsubscribed")}</div>
+            <div className="text-2xl font-semibold text-destructive">
               {stats.unsubscribed}
             </div>
           </Box>

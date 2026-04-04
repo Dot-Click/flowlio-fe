@@ -30,11 +30,11 @@ export const EmptyState = memo(
           className
         )}
       >
-        <div className="flex items-center justify-center w-14 h-14 rounded-full bg-gray-100 mb-4">
-          {icon ?? <InboxIcon className="w-7 h-7 text-gray-400" />}
+        <div className="flex items-center justify-center w-14 h-14 rounded-full bg-muted mb-4">
+          {icon ?? <InboxIcon className="w-7 h-7 text-muted-foreground" />}
         </div>
-        <h3 className="text-base font-semibold text-gray-800 mb-1">{title}</h3>
-        <p className="text-sm text-gray-500 max-w-sm">{description}</p>
+        <h3 className="text-base font-semibold text-foreground mb-1">{title}</h3>
+        <p className="text-sm text-muted-foreground max-w-sm">{description}</p>
         {action && <div className="mt-5">{action}</div>}
       </div>
     );

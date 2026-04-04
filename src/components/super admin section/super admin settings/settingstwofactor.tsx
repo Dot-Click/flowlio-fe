@@ -127,7 +127,7 @@ export const SettingsTwoFactor = () => {
   };
 
   return (
-    <Flex className="justify-between w-full bg-white border border-gray-400/50 p-8 rounded-md max-md:px-3">
+    <Flex className="justify-between w-full bg-card border border-gray-400/50 p-8 rounded-md max-md:px-3">
       <Stack className="w-full">
         <h1 className="text-3xl font-semibold max-sm:text-xl">
           {t("settings.twoFATitle", "Two-Factor Authentication (2FA)")}

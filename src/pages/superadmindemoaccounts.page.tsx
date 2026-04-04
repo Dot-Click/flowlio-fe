@@ -273,13 +273,13 @@ const SuperAdminDemoAccountsPage = () => {
 
   return (
     <Stack className="pt-5 gap-3 px-2">
-      <Box className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 overflow-hidden">
+      <Box className="bg-card rounded-xl p-6 shadow-sm border border-border overflow-hidden">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-1">
+            <h2 className="text-xl font-semibold text-foreground mb-1">
               {t("superadmin.demoAccounts.createDemoAccount", "Create Demo Account")}
             </h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               Create a new demo account with temporary access credentials
             </p>
           </div>
@@ -305,7 +305,7 @@ const SuperAdminDemoAccountsPage = () => {
             <div className="space-y-2">
               <Label
                 htmlFor="name"
-                className="text-sm font-medium text-gray-700"
+                className="text-sm font-medium text-foreground"
               >
                 Organization Name <span className="text-red-500">*</span>
               </Label>
@@ -316,7 +316,7 @@ const SuperAdminDemoAccountsPage = () => {
                 onChange={(e) => setName(e.target.value)}
                 className="w-full"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 The name of the demo organization
               </p>
             </div>
@@ -324,7 +324,7 @@ const SuperAdminDemoAccountsPage = () => {
             <div className="space-y-2">
               <Label
                 htmlFor="email"
-                className="text-sm font-medium text-gray-700"
+                className="text-sm font-medium text-foreground"
               >
                 Email Address <span className="text-red-500">*</span>
               </Label>
@@ -336,7 +336,7 @@ const SuperAdminDemoAccountsPage = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Login email for the demo account
               </p>
             </div>
@@ -344,7 +344,7 @@ const SuperAdminDemoAccountsPage = () => {
             <div className="space-y-2">
               <Label
                 htmlFor="password"
-                className="text-sm font-medium text-gray-700"
+                className="text-sm font-medium text-foreground"
               >
                 Password <span className="text-red-500">*</span>
               </Label>
@@ -356,7 +356,7 @@ const SuperAdminDemoAccountsPage = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Login password for the demo account
               </p>
             </div>
@@ -364,7 +364,7 @@ const SuperAdminDemoAccountsPage = () => {
             <div className="space-y-2">
               <Label
                 htmlFor="trialDays"
-                className="text-sm font-medium text-gray-700"
+                className="text-sm font-medium text-foreground"
               >
                 Trial Duration (Days)
               </Label>
@@ -378,7 +378,7 @@ const SuperAdminDemoAccountsPage = () => {
                 onChange={(e) => setTrialDays(Number(e.target.value))}
                 className="w-full"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Number of days the demo account will be active (default: 14)
               </p>
             </div>
@@ -386,7 +386,7 @@ const SuperAdminDemoAccountsPage = () => {
             <div className="space-y-2">
               <Label
                 htmlFor="role"
-                className="text-sm font-medium text-gray-700"
+                className="text-sm font-medium text-foreground"
               >
                 User Role
               </Label>
@@ -399,7 +399,7 @@ const SuperAdminDemoAccountsPage = () => {
                   <SelectItem value="user">User</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Permission level for the demo account
               </p>
             </div>
@@ -417,7 +417,7 @@ const SuperAdminDemoAccountsPage = () => {
               onClick={handleCancel}
               variant="outline"
               disabled={loading || isAnimating}
-              className="border-gray-300 hover:bg-gray-50 h-10 px-6 cursor-pointer"
+              className="border-border hover:bg-muted/50 h-10 px-6 cursor-pointer"
             >
               <X className="w-4 h-4 mr-2" />
               Cancel
@@ -428,14 +428,14 @@ const SuperAdminDemoAccountsPage = () => {
         {/* Loading section below form - shows when form is hidden and loading */}
         {!showForm && loading && (
           <div className="mt-6 animate-in fade-in slide-in-from-top-4 duration-500">
-            <Box className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-8 border-2 border-blue-200 shadow-lg">
+            <Box className="bg-gradient-to-r from-blue-500/5 to-indigo-50 rounded-lg p-8 border-2 border-blue-200 shadow-lg">
               <Center className="flex-col gap-4">
                 <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
                     Creating Demo Account...
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     Please wait while we set up your demo account
                   </p>
                 </div>
@@ -445,16 +445,16 @@ const SuperAdminDemoAccountsPage = () => {
         )}
       </Box>
 
-      <Box className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+      <Box className="bg-card rounded-xl p-6 shadow-sm border border-border">
+        <h2 className="text-xl font-semibold text-foreground mb-4">
           {t("superadmin.demoAccounts.title", "Demo Accounts")}
         </h2>
         {fetchingDemos ? (
           <TableSkeleton rows={5} columns={7} withActions />
         ) : (
-          <div className="overflow-x-auto border border-gray-200 rounded-lg shadow-sm ">
+          <div className="overflow-x-auto border border-border rounded-lg shadow-sm ">
             <Table className="w-full ">
-              <TableHeader className="bg-gray-100">
+              <TableHeader className="bg-muted">
                 <TableRow>
                   <TableHead>{t("superadmin.demoAccounts.table.organization", "Organization")}</TableHead>
                   <TableHead>{t("superadmin.demoAccounts.table.user", "User")}</TableHead>
@@ -470,7 +470,7 @@ const SuperAdminDemoAccountsPage = () => {
                 {demos.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8">
-                      <p className="text-gray-500">No demo accounts found</p>
+                      <p className="text-muted-foreground">No demo accounts found</p>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -479,7 +479,7 @@ const SuperAdminDemoAccountsPage = () => {
                       key={d.id}
                       className={
                         loadingActions[d.id] === "delete"
-                          ? "opacity-60 bg-gray-50"
+                          ? "opacity-60 bg-muted/50"
                           : ""
                       }
                     >
@@ -590,11 +590,11 @@ const SuperAdminDemoAccountsPage = () => {
                   id="convertToClient"
                   checked={convertToClient}
                   onChange={(e) => setConvertToClient(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-blue-600 border-border rounded focus:ring-blue-500"
                 />
                 <Label
                   htmlFor="convertToClient"
-                  className="text-sm text-gray-700 cursor-pointer"
+                  className="text-sm text-foreground cursor-pointer"
                 >
                   Convert this demo account to a regular client account
                 </Label>
@@ -620,7 +620,7 @@ const SuperAdminDemoAccountsPage = () => {
                     onChange={(e) => setEditTrialDays(Number(e.target.value))}
                     className="w-full"
                   />
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     Number of days to extend from current trial end date
                   </p>
                 </div>
@@ -640,7 +640,7 @@ const SuperAdminDemoAccountsPage = () => {
                     onChange={(e) => setEditTrialEndsAt(e.target.value)}
                     className="w-full"
                   />
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     Set a specific end date for the trial period
                   </p>
                 </div>

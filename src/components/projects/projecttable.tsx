@@ -267,14 +267,14 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
   const columns: ColumnDef<Data>[] = [
     {
       id: "select",
-      header: () => <Box className="text-center text-black">#</Box>,
+      header: () => <Box className="text-center text-foreground">#</Box>,
       cell: ({ row }) => <Box className="text-center">{row.index + 1}</Box>,
       enableSorting: false,
     },
     {
       accessorKey: "projectName",
       header: () => (
-        <Box className="text-black p-1">{t("projects.projectName")}</Box>
+        <Box className="text-foreground p-1">{t("projects.projectName")}</Box>
       ),
       cell: ({ row }) => (
         <Box className="capitalize p-1 w-30 max-sm:w-full">
@@ -288,7 +288,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
     {
       accessorKey: "clientName",
       header: () => (
-        <Box className="text-black text-center">{t("projects.client")}</Box>
+        <Box className="text-foreground text-center">{t("projects.client")}</Box>
       ),
       cell: ({ row }) => (
         <Box className="capitalize text-center">{row.original.clientName}</Box>
@@ -297,7 +297,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
     {
       accessorKey: "assignedProject",
       header: () => (
-        <Box className="text-black text-center">{t("projects.assignedTo")}</Box>
+        <Box className="text-foreground text-center">{t("projects.assignedTo")}</Box>
       ),
       cell: ({ row }) => (
         <Box className="capitalize text-center">
@@ -308,7 +308,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
     {
       accessorKey: "startDate",
       header: () => (
-        <Box className="text-center text-black">{t("common.startDate")}</Box>
+        <Box className="text-center text-foreground">{t("common.startDate")}</Box>
       ),
       cell: ({ row }) => {
         const startDate = row.original.startDate;
@@ -344,7 +344,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
     {
       accessorKey: "endDate",
       header: () => (
-        <Box className="text-center text-black">{t("common.endDate")}</Box>
+        <Box className="text-center text-foreground">{t("common.endDate")}</Box>
       ),
       cell: ({ row }) => {
         const endDate = row.original.endDate;
@@ -364,7 +364,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
     {
       accessorKey: "progress",
       header: () => (
-        <Box className="text-center text-black">{t("projects.progress")}</Box>
+        <Box className="text-center text-foreground">{t("projects.progress")}</Box>
       ),
       cell: ({ row }) => {
         return (
@@ -378,7 +378,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
     {
       accessorKey: "budget",
       header: () => (
-        <Box className="text-center text-black">{t("projects.budget")}</Box>
+        <Box className="text-center text-foreground">{t("projects.budget")}</Box>
       ),
       cell: ({ row }) => {
         const budget = (row.original as any).budget;
@@ -394,7 +394,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
     {
       accessorKey: "visibility",
       header: () => (
-        <Box className="text-center text-black">{t("projects.visibility")}</Box>
+        <Box className="text-center text-foreground">{t("projects.visibility")}</Box>
       ),
       cell: ({ row }) => {
         const visibility = row.original.visibility || "private";
@@ -428,7 +428,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
     {
       accessorKey: "status",
       header: () => (
-        <Box className="text-center text-black">{t("projects.status")}</Box>
+        <Box className="text-center text-foreground">{t("projects.status")}</Box>
       ),
       cell: ({ row }) => {
         const status = row.original.status as
@@ -461,7 +461,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
 
         // Default style if status is not found
         const defaultStyle = {
-          text: "text-white bg-gray-500 border-none rounded-full",
+          text: "text-white bg-muted/500 border-none rounded-full",
           dot: "bg-white",
         };
 
@@ -530,7 +530,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
       accessorKey: `customFields.${field.id}`,
       id: field.id,
       header: () => (
-        <Box className="text-center text-black p-1">{field.name}</Box>
+        <Box className="text-center text-foreground p-1">{field.name}</Box>
       ),
       cell: ({ row }: { row: any }) => {
         const val = row.original.customFields?.[field.id];
@@ -542,7 +542,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
           if (option) {
             return (
               <Center>
-                <Flex className="items-center gap-2 px-2 py-1 bg-gray-50 rounded-full border border-gray-100 text-xs">
+                <Flex className="items-center gap-2 px-2 py-1 bg-muted/50 rounded-full border border-border text-xs">
                   <div
                     className="w-2 h-2 rounded-full"
                     style={{ backgroundColor: option.color }}
@@ -560,7 +560,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
     {
       accessorKey: "actions",
       header: () => (
-        <Box className="text-center text-black">{t("common.actions")}</Box>
+        <Box className="text-center text-foreground">{t("common.actions")}</Box>
       ),
       // ... existing actions cell
       cell: ({ row }) => {
@@ -702,13 +702,13 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
           <Box className="mb-4 text-lg font-semibold">Project Comments</Box>
 
           {/* Comments list with nested replies */}
-          <Box className="flex flex-col gap-3 max-h-64 overflow-y-auto mb-4 bg-gray-50 p-3 rounded">
+          <Box className="flex flex-col gap-3 max-h-64 overflow-y-auto mb-4 bg-muted/50 p-3 rounded">
             {commentsLoading ? (
-              <Box className="text-gray-400 text-center py-4">
+              <Box className="text-muted-foreground text-center py-4">
                 Loading comments...
               </Box>
             ) : activeProjectId && commentsWithReplies.length === 0 ? (
-              <Box className="text-gray-400 text-center py-4">
+              <Box className="text-muted-foreground text-center py-4">
                 No comments yet.
               </Box>
             ) : (
@@ -716,14 +716,14 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
                 <Box key={comment.id} className="space-y-2">
                   {/* Main comment */}
                   <Box className="flex items-start gap-2 group">
-                    <Flex className="flex-1 items-start justify-between bg-white p-3 rounded shadow-sm text-sm">
+                    <Flex className="flex-1 items-start justify-between bg-card p-3 rounded shadow-sm text-sm">
                       <Stack className="flex-1">
                         <Flex className="justify-between">
                           <Box className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-xs text-gray-900">
+                            <span className="font-medium text-xs text-foreground">
                               {comment.userName}
                             </span>
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-muted-foreground">
                               {format(
                                 new Date(comment.createdAt),
                                 "MMM d, yyyy hh:mm a",
@@ -752,7 +752,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
 
                   {/* Reply input for this comment */}
                   {replyTo === comment.id && (
-                    <Box className="ml-6 bg-white p-2 rounded border">
+                    <Box className="ml-6 bg-card p-2 rounded border">
                       <Input
                         value={replyContent}
                         onChange={(e) => setReplyContent(e.target.value)}
@@ -791,13 +791,13 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
                     <Box className="ml-6 space-y-2">
                       {comment.replies.map((reply) => (
                         <Box key={reply.id} className="flex items-start gap-2">
-                          <Flex className="flex-1 items-start justify-between bg-white p-2 rounded shadow-sm text-sm border-l-2 border-blue-200">
+                          <Flex className="flex-1 items-start justify-between bg-card p-2 rounded shadow-sm text-sm border-l-2 border-primary/30">
                             <Stack className="flex-1">
                               <Box className="flex items-center gap-2 mb-1">
-                                <span className="font-medium text-xs text-gray-900">
+                                <span className="font-medium text-xs text-foreground">
                                   {reply.userName}
                                 </span>
-                                <span className="text-xs text-gray-400">
+                                <span className="text-xs text-muted-foreground">
                                   {format(
                                     new Date(reply.createdAt),
                                     "MMM d, yyyy hh:mm a",
@@ -837,7 +837,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleAddComment();
               }}
-              className="bg-white rounded-full placeholder:text-gray-400 h-11 border border-gray-400"
+              className="bg-background rounded-full placeholder:text-muted-foreground h-11 border border-border"
             />
 
             <Button

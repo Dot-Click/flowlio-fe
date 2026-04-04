@@ -84,10 +84,10 @@ export const AiAssistPage = () => {
               <Lock className="w-12 h-12 text-red-600" />
             </div>
             <Stack className="gap-2 text-center max-w-md">
-              <h2 className="text-2xl font-semibold text-gray-900">
+              <h2 className="text-2xl font-semibold text-foreground">
                 AI Assist Not Available
               </h2>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 {featureAccess?.data?.reason ||
                   "AI Assist is not available in your current plan. Please upgrade to access this feature."}
               </p>
@@ -145,7 +145,7 @@ export const AiAssistPage = () => {
 
                   <SidebarTrigger
                     className={cn(
-                      "text-black bg-gray-100/20 hover:bg-gray-100/30 hidden max-md:block p-2",
+                      "text-foreground bg-gray-100/20 hover:bg-gray-100/30 hidden max-md:block p-2",
                       state === "collapsed" ? " rotate-180" : "ml-auto"
                     )}
                   />

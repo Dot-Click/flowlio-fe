@@ -8,10 +8,10 @@ export const MyProjectsHeader = () => {
     <PageWrapper className="mt-6">
       <Center className="justify-between px-4 py-6 max-sm:flex-col max-sm:items-start gap-2">
         <Stack className="gap-1">
-          <h1 className="text-black text-3xl max-sm:text-xl font-medium">
+          <h1 className="text-foreground text-3xl max-sm:text-xl font-medium">
             My Projects
           </h1>
-          <h1 className={`max-sm:text-sm max-w-[600px] text-gray-500`}>
+          <h1 className={`max-sm:text-sm max-w-[600px] text-muted-foreground`}>
             Track and manage projects efficiently
           </h1>
         </Stack>
