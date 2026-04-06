@@ -51,14 +51,14 @@ export const DayView: React.FC<DayViewProps> = ({
   return (
     <>
       {/* Date Row */}
-      <Box className="grid grid-cols-[80px_1fr] bg-[#F8FAFC] border-b border-[#E5E7EB] mt-6">
+      <Box className="grid grid-cols-[80px_1fr] bg-background border-b border-border mt-6">
         <Box></Box>
         <Center
           className={cn(
-            "gap-1 text-center text-sm font-normal text-[#323334] rounded-lg w-17 h-8 m-auto mb-3",
+            "gap-1 text-center text-sm font-normal text-foreground rounded-lg w-17 h-8 m-auto mb-3",
             currentDate.toDateString() === new Date().toDateString() &&
-              "text-white bg-[#1797B9]",
-            currentDate.getDay() === 0 && "bg-[#FFE5E5] text-[#D32F2F]"
+              "text-primary-foreground bg-primary",
+            currentDate.getDay() === 0 && "bg-destructive/10 text-destructive"
           )}
           style={{
             padding: "12px 0 8px 0",
@@ -79,7 +79,7 @@ export const DayView: React.FC<DayViewProps> = ({
       >
         {hours.map((hour) => (
           <React.Fragment key={hour}>
-            <Box className="text-center p-3 bg-card font-normal text-[#888] text-sm flex items-center justify-center">
+            <Box className="text-center p-3 bg-card font-normal text-muted-foreground text-sm flex items-center justify-center">
               {formatHour(hour, currentLanguage)}
             </Box>
             <Box

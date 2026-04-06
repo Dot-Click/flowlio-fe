@@ -67,14 +67,14 @@ export const MonthView: React.FC<MonthViewProps> = ({
         className={cn(
           "min-h-[120px] border border-border bg-card p-2 relative",
           currentDay.toDateString() === new Date().toDateString() &&
-            "bg-blue-50"
+            "bg-primary/10"
         )}
       >
         <Box
           className={cn(
             "text-sm font-medium mb-1",
             currentDay.toDateString() === new Date().toDateString() &&
-              "text-blue-600"
+              "text-primary"
           )}
         >
           {day}
@@ -91,7 +91,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
             return (
               <Box
                 key={idx}
-                className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded truncate cursor-pointer hover:bg-blue-200 max-w-full overflow-hidden"
+                className="text-xs bg-primary/20 text-primary-foreground px-2 py-1 rounded truncate cursor-pointer hover:bg-primary/30 max-w-full overflow-hidden"
                 title={eventText} // Show full text on hover
                 onClick={(e) => {
                   setSelectedEvent(event);
@@ -159,11 +159,11 @@ export const MonthView: React.FC<MonthViewProps> = ({
   return (
     <>
       {/* Date Row */}
-      <Box className="grid grid-cols-7 bg-[#F8FAFC] border-b border-[#E5E7EB] mt-6">
+      <Box className="grid grid-cols-7 bg-background border-b border-border mt-6">
         {daysShort.map((day) => (
           <Center
             key={day}
-            className="text-center text-sm font-semibold text-[#323334] py-3"
+            className="text-center text-sm font-semibold text-foreground py-3"
           >
             {day}
           </Center>

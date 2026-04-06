@@ -173,7 +173,7 @@ export const CustomCalendarHeader = () => {
           />
 
           {/* Main Calendar Area */}
-          <Box className="flex-1 bg-[#F8FAFC]" style={{ flex: 1 }}>
+          <Box className="flex-1 bg-background" style={{ flex: 1 }}>
             {/* Calendar Header */}
             <CalendarHeader
               viewMode={viewMode}

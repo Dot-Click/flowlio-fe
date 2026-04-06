@@ -77,7 +77,7 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
       </Button>
 
       {/* View Mode Toggle */}
-      <Flex className="gap-0 bg-[#F2F3F7] p-1 rounded-lg">
+      <Flex className="gap-0 bg-secondary p-1 rounded-lg">
         {["day", "week", "month"].map((mode) => (
           <button
             key={mode}
@@ -85,8 +85,8 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
             className={`px-6 py-1.5 rounded-lg font-normal transition-colors duration-150
             ${
               viewMode === mode
-                ? "bg-background text-[#1797B9] font-semibold"
-                : "bg-transparent text-[#323334]/80 hover:text-[#1797B9] hover:bg-card"
+                ? "bg-background text-primary font-semibold shadow-sm"
+                : "bg-transparent text-muted-foreground hover:text-primary hover:bg-card"
             }
           `}
             style={{

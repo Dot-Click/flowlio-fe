@@ -126,7 +126,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
 
   return (
     <Sidebar
-      className="**:data-[sidebar=sidebar]:bg-sidebar **:data-[sidebar=sidebar]:border-4 **:data-[sidebar=sidebar]:border-border"
+      className="**:data-[sidebar=sidebar]:bg-sidebar **:data-[sidebar=sidebar]:border-4 **:data-[sidebar=sidebar]:border-border dark:**:data-[sidebar=sidebar]:bg-[#1d1d1d]"
       variant="floating"
       collapsible="icon"
       {...props}
@@ -137,10 +137,10 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
           isCompact={state === "collapsed" && !isMobile}
           className={state === "collapsed" ? "m-auto" : undefined}
           containerClassName={cn(
-            "bg-muted/50 py-5 rounded-md",
+            "  py-5 rounded-md",
             state === "collapsed" && !isMobile
               ? "py-2 inset-0 bg-transparent"
-              : "justify-start! ml-2"
+              : "justify-start! ml-2",
           )}
         />
 
@@ -154,7 +154,9 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
               />
             </TooltipTrigger>
             <TooltipContent className="mb-2">
-              <p>{state === "collapsed" ? t("common.open") : t("common.close")}</p>
+              <p>
+                {state === "collapsed" ? t("common.open") : t("common.close")}
+              </p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -173,11 +175,13 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
 
                 const theSubPath = item.subItems?.map((subItem) => subItem.url);
                 const isSubItemActive = theSubPath?.some(
-                  (subPath) => normalizePath(subPath) === currentPath
+                  (subPath) => normalizePath(subPath) === currentPath,
                 );
 
                 const isAnotherTopLevelActive = navItems.some(
-                  (ni) => ni.url !== item.url && normalizePath(ni.url) === currentPath
+                  (ni) =>
+                    ni.url !== item.url &&
+                    normalizePath(ni.url) === currentPath,
                 );
 
                 const isParentActive =
@@ -210,7 +214,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                                           <li
                                             key={subItem.url}
                                             className={cn(
-                                              `flex items-center gap-2 p-2 rounded-md hover:bg-accent`
+                                              `flex items-center gap-2 p-2 rounded-md hover:bg-accent`,
                                             )}
                                           >
                                             {renderIcon(subItem.icon, "invert")}
@@ -241,15 +245,15 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                                   item.icon,
                                   `${
                                     state === "collapsed" ? "ml-1" : undefined
-                                  } `
+                                  } `,
                                 )}
                                 <span
                                   className={
                                     state === "collapsed" && !is768
                                       ? "hidden"
                                       : is768
-                                      ? "block"
-                                      : undefined
+                                        ? "block"
+                                        : undefined
                                   }
                                 >
                                   {t(`appSidebar.${item.title}`)}
@@ -282,7 +286,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                                     "relative flex items-center gap-2 p-2",
                                     isSubItemActive
                                       ? "text-foreground rounded-md"
-                                      : "text-muted-foreground"
+                                      : "text-muted-foreground",
                                   )}
                                 >
                                   {/* Left-side indicator */}
@@ -291,7 +295,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                                       "absolute -left-3.5 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full",
                                       isSubItemActive
                                         ? "bg-foreground w-2 h-2"
-                                        : "border border-muted-foreground bg-background"
+                                        : "border border-muted-foreground bg-background",
                                     )}
                                   >
                                     {/* Vertical Line */}
@@ -302,7 +306,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                                           : "absolute left-1/2 top-full w-[1px] h-9 -translate-x-1/2",
                                         isSubItemActive
                                           ? "bg-muted-foreground"
-                                          : "bg-muted"
+                                          : "bg-muted",
                                       )}
                                     />
                                   </Box>
@@ -317,8 +321,8 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                                         state === "collapsed" && !is768
                                           ? "hidden"
                                           : is768
-                                          ? "block"
-                                          : undefined
+                                            ? "block"
+                                            : undefined,
                                       )}
                                     >
                                       {t(`appSidebar.${subItem.title}`)}
@@ -361,7 +365,7 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                               index === 0 && state !== "collapsed"
                                 ? "transform rotate-180"
                                 : ""
-                            }`
+                            }`,
                           )}
 
                           <span
@@ -369,8 +373,8 @@ export const AppSidebar: FC<AppSidebarProps> = ({ navItems, ...props }) => {
                               state === "collapsed" && !is768
                                 ? "hidden"
                                 : is768
-                                ? "block"
-                                : undefined
+                                  ? "block"
+                                  : undefined
                             }
                           >
                             {t(`appSidebar.${item.title}`)}
