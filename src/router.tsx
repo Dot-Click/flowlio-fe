@@ -1,5 +1,7 @@
-import { lazy } from "react";
-import { BrowserRouter, Route, Routes } from "react-router";
+import { lazy, useEffect } from "react";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router";
+import { ThemeProvider } from "./components/theme-provider";
+import { useTheme } from "next-themes";
 import { LazyWrapper } from "./components/common/LazyWrapper";
 import {
   ProtectedRoute,
@@ -188,6 +190,33 @@ const ReportsPage = lazy(() => import("./pages/reports.page"));
 const ClientProjectsPage = lazy(() => import("./pages/clientprojects.page"));
 const ClientTasksPage = lazy(() => import("./pages/clienttasks.page"));
 const ClientInvoicesPage = lazy(() => import("./pages/clientinvoices.page"));
+
+// Force Light Theme on non-dashboard paths
+const ThemeWatcher = () => {
+  const { setTheme, theme } = useTheme();
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    // List of dashboard/CRM route prefixes
+    const dashboardPrefixes = [
+      "/dashboard",
+      "/superadmin",
+      "/clients",
+      "/viewer",
+    ];
+    const isDashboard = dashboardPrefixes.some((prefix) =>
+      pathname.startsWith(prefix),
+    );
+
+    if (!isDashboard) {
+      if (theme !== "light") {
+        setTheme("light");
+      }
+    }
+  }, [pathname, setTheme, theme]);
+
+  return null;
+};
 
 // Main app routes component
 const AppRoutes = () => {
@@ -554,7 +583,15 @@ const AppRoutes = () => {
 export const AppRouter = () => {
   return (
     <BrowserRouter>
-      <AppRoutes />
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <ThemeWatcher />
+        <AppRoutes />
+      </ThemeProvider>
     </BrowserRouter>
   );
 };

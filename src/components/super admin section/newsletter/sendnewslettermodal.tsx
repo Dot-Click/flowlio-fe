@@ -116,12 +116,12 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
     >
       <Box className="bg-card rounded-2xl overflow-hidden flex flex-col h-full max-h-[90vh]">
         {/* Header */}
-        <Flex className="items-center justify-between p-6 border-b border-border bg-gray-50/50">
+        <Flex className="items-center justify-between p-6 border-b border-border bg-muted/30">
           <Flex className="items-center gap-3">
             <Box className="p-2 bg-[#1797b9]/10 rounded-lg text-[#1797b9]">
               <Send size={20} />
             </Box>
-            <h2 className="text-xl font-semibold text-gray-800">{t("superadmin.newsletter.sendNewsletter", "Send Newsletter")}</h2>
+            <h2 className="text-xl font-semibold text-foreground">{t("superadmin.newsletter.sendNewsletter", "Send Newsletter")}</h2>
           </Flex>
           <Button
             variant="ghost"
@@ -166,7 +166,7 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
                   <ClipboardList size={18} />
                 </Box>
                 <Box>
-                  <p className="text-sm font-semibold text-gray-800">
+                  <p className="text-sm font-semibold text-foreground">
                     {t("superadmin.newsletter.modal.recipientInfo", "Target Audience")}
                   </p>
                   <p className="text-xs text-muted-foreground">
@@ -259,7 +259,7 @@ export const SendNewsletterModal: FC<SendNewsletterModalProps> = ({
             </Box>
 
             {/* Footer Actions */}
-            <Flex className="p-6 border-t border-border justify-end gap-3 bg-gray-50/50">
+            <Flex className="p-6 border-t border-border justify-end gap-3 bg-muted/30">
               <Button
                 variant="outline"
                 className="bg-card hover:bg-muted/50 text-muted-foreground border-border rounded-full px-6 h-11 transition-all"

@@ -197,7 +197,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         "h-9 w-9 p-0 rounded-md transition-all duration-200",
         isActive
           ? "bg-[#1797b9]/20 text-[#1797b9] font-bold cursor-pointer"
-          : "text-muted-foreground hover:bg-muted cursor-pointer",
+          : "text-muted-foreground hover:bg-muted hover:text-foreground cursor-pointer",
         disabled && "opacity-50 cursor-not-allowed",
       )}
     >
@@ -241,7 +241,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       />
 
       {/* Toolbar */}
-      <Flex className="border-b border-border p-1 bg-muted/30 flex-wrap gap-0.5 sticky top-0 z-10">
+      <Flex className="border-b border-border p-1 bg-muted/40 flex-wrap gap-0.5 sticky top-0 z-10">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           isActive={editor.isActive("bold")}

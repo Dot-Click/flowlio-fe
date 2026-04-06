@@ -48,7 +48,7 @@ export const TeamProductivityChart: FC<BoxProps> = ({ className, ...props }) => 
     return (
       <ComponentWrapper className={cn("p-4", className)} {...props}>
         <Flex className="gap-2 mb-4">
-          <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
+            <img src="/dashboard/stat.svg" alt="stat" className="size-5 dark:invert" />
           <h1 className="text-lg font-medium">Team Productivity</h1>
         </Flex>
         <ChartSkeleton height={300} className="shadow-none border-0 p-0" />
@@ -83,7 +83,7 @@ export const TeamProductivityChart: FC<BoxProps> = ({ className, ...props }) => 
       <Stack className="gap-5 mb-6">
         <Flex className="items-center justify-between">
           <Flex className="gap-2">
-            <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
+              <img src="/dashboard/stat.svg" alt="stat" className="size-5 dark:invert" />
             <h1 className="text-lg font-medium">Team Productivity</h1>
           </Flex>
           <p className="text-xs text-muted-foreground italic">Comparing hours & task completion</p>

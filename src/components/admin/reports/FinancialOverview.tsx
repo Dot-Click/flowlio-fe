@@ -82,7 +82,7 @@ const FinancialOverview: React.FC = () => {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map((card, index) => (
-          <Card key={index} className="border-none shadow-sm bg-card/50 backdrop-blur-md">
+          <Card key={index} className="border border-border shadow-sm bg-card/50 backdrop-blur-md">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 {card.title}
@@ -99,7 +99,7 @@ const FinancialOverview: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue vs Expenses Chart */}
-        <Card className="border-none shadow-sm bg-card/50 backdrop-blur-md">
+        <Card className="border border-border shadow-sm bg-card/50 backdrop-blur-md">
           <CardHeader>
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
               <TrendingUp className="w-5 h-5" />
@@ -124,7 +124,7 @@ const FinancialOverview: React.FC = () => {
         </Card>
 
         {/* Expense Category Breakdown */}
-        <Card className="border-none shadow-sm bg-card/50 backdrop-blur-md">
+        <Card className="border border-border shadow-sm bg-card/50 backdrop-blur-md">
           <CardHeader>
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
               <PieChartIcon className="w-5 h-5" />
@@ -157,7 +157,7 @@ const FinancialOverview: React.FC = () => {
       </div>
 
       {/* Project Performance */}
-      <Card className="border-none shadow-sm bg-card/50 backdrop-blur-md">
+      <Card className="border border-border shadow-sm bg-card/50 backdrop-blur-md">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">Budget vs Actual (Top Projects)</CardTitle>
         </CardHeader>

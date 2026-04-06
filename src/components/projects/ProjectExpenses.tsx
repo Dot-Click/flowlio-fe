@@ -211,46 +211,46 @@ export const ProjectExpenses = ({
           <Box className="space-y-4">
             <Box className="grid grid-cols-3 gap-3">
               {/* Total Budget */}
-              <Box className="p-3 bg-gradient-to-br from-blue-500/5 to-blue-500/10/50 rounded-xl border border-blue-200">
+              <Box className="p-3 bg-gradient-to-br from-blue-500/5 to-blue-500/10 rounded-xl border border-blue-200 dark:border-blue-900/40">
                 <Flex className="items-center gap-2 mb-1">
-                  <Box className="p-1.5 bg-blue-200 rounded-lg">
-                    <Wallet className="h-3.5 w-3.5 text-blue-700" />
+                  <Box className="p-1.5 bg-blue-200 dark:bg-blue-900/50 rounded-lg">
+                    <Wallet className="h-3.5 w-3.5 text-blue-700 dark:text-blue-400" />
                   </Box>
-                  <span className="text-xs text-blue-600 font-medium">
+                  <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
                     Budget
                   </span>
                 </Flex>
-                <p className="text-xl font-bold text-blue-900">
+                <p className="text-xl font-bold text-blue-900 dark:text-blue-300">
                   ${budget.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                 </p>
               </Box>
 
               {/* Total Spent */}
-              <Box className="p-3 bg-gradient-to-br from-orange-500/5 to-orange-500/10/50 rounded-xl border border-orange-200">
+              <Box className="p-3 bg-gradient-to-br from-orange-500/5 to-orange-500/10 rounded-xl border border-orange-200 dark:border-orange-900/40">
                 <Flex className="items-center gap-2 mb-1">
-                  <Box className="p-1.5 bg-orange-200 rounded-lg">
-                    <TrendingUp className="h-3.5 w-3.5 text-orange-700" />
+                  <Box className="p-1.5 bg-orange-200 dark:bg-orange-900/50 rounded-lg">
+                    <TrendingUp className="h-3.5 w-3.5 text-orange-700 dark:text-orange-400" />
                   </Box>
-                  <span className="text-xs text-orange-600 font-medium">
+                  <span className="text-xs text-orange-600 dark:text-orange-400 font-medium">
                     Spent
                   </span>
                 </Flex>
-                <p className="text-xl font-bold text-orange-900">
+                <p className="text-xl font-bold text-orange-900 dark:text-orange-300">
                   ${totalSpent.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                 </p>
               </Box>
 
               {/* Remaining */}
-              <Box className="p-3 bg-gradient-to-br from-green-500/5 to-green-500/10/50 rounded-xl border border-green-200">
+              <Box className="p-3 bg-gradient-to-br from-green-500/5 to-green-500/10 rounded-xl border border-green-200 dark:border-green-900/40">
                 <Flex className="items-center gap-2 mb-1">
-                  <Box className="p-1.5 bg-green-200 rounded-lg">
-                    <PiggyBank className="h-3.5 w-3.5 text-green-700" />
+                  <Box className="p-1.5 bg-green-200 dark:bg-green-900/50 rounded-lg">
+                    <PiggyBank className="h-3.5 w-3.5 text-green-700 dark:text-green-400" />
                   </Box>
-                  <span className="text-xs text-green-600 font-medium">
+                  <span className="text-xs text-green-600 dark:text-green-400 font-medium">
                     Remaining
                   </span>
                 </Flex>
-                <p className={`text-xl font-bold ${remaining >= 0 ? "text-green-900" : "text-red-600"}`}>
+                <p className={`text-xl font-bold ${remaining >= 0 ? "text-green-900 dark:text-green-300" : "text-red-600"}`}>
                   ${Math.abs(remaining).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                   {remaining < 0 && (
                     <span className="text-xs ml-1 font-normal">(over)</span>
@@ -281,10 +281,10 @@ export const ProjectExpenses = ({
         )}
 
         {budget === 0 && (
-          <Box className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <Box className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900/40 rounded-lg">
             <Flex className="items-center gap-2">
-              <Wallet className="h-4 w-4 text-yellow-600" />
-              <p className="text-sm text-yellow-800">
+              <Wallet className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+              <p className="text-sm text-yellow-800 dark:text-yellow-300">
                 No budget set for this project.{" "}
                 {!isClient && (
                   <span className="font-medium">
@@ -315,7 +315,7 @@ export const ProjectExpenses = ({
           </Flex>
 
           {expenses.length === 0 ? (
-            <Box className="text-center py-8 border-2 border-dashed border-border rounded-lg bg-gray-50/50">
+            <Box className="text-center py-8 border-2 border-dashed border-border rounded-lg bg-gray-50/50 dark:bg-muted/20">
               <DollarSign className="h-10 w-10 text-gray-300 mx-auto mb-2" />
               <p className="text-sm text-muted-foreground font-medium">
                 No expenses recorded yet
@@ -363,7 +363,7 @@ export const ProjectExpenses = ({
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-red-400 hover:text-red-600 hover:bg-red-50 h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                          className="text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                           onClick={() => setDeleteConfirmId(expense.id)}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -385,7 +385,7 @@ export const ProjectExpenses = ({
       {isModal ? (
         <Box className="space-y-5">{content}</Box>
       ) : (
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-emerald-50/30 p-0">
+        <Card className="border border-border/60 shadow-lg bg-gradient-to-br from-white dark:from-card to-emerald-50/30 dark:to-emerald-900/10 p-0">
           {content}
         </Card>
       )}

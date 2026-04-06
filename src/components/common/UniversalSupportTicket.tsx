@@ -135,7 +135,7 @@ export const UniversalSupportTicket: FC<UniversalSupportTicketProps> = ({
           variant="outline"
           className="bg-foreground text-background border border-border rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
         >
-          <CirclePlus className="fill-white text-foreground size-5" />
+          <CirclePlus className="size-5 text-white" />
           Create New Ticket
         </Button>
       </Center>

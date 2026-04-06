@@ -592,7 +592,7 @@ export const ClientManagementTable = () => {
                     {isDeleting ? (
                       <Box className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ) : (
-                      <FaRegTrashAlt className="text-white fill-white size-4 " />
+                      <FaRegTrashAlt className="size-4 text-white" />
                     )}
                   </Button>
                 </TooltipTrigger>

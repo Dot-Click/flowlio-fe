@@ -91,7 +91,7 @@ const getColumns = (
               navigate(`/superadmin/companies/details/${slug}`);
             }}
           >
-            <IoEye className="size-6 fill-white" />
+            <IoEye className="size-5 text-white" />
           </Button>
         </Center>
       );

@@ -104,7 +104,7 @@ export const BarChartComponent: FC<BoxProps> = ({ className, ...props }) => {
       <ComponentWrapper className={cn("p-4 relative", className)} {...props}>
         <Flex className="max-lg:flex-col items-center justify-between mb-4">
           <Flex className="justify-between max-md:justify-start max-lg:w-full gap-2">
-            <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
+            <img src="/dashboard/stat.svg" alt="stat" className="size-5 dark:invert" />
             <h1 className="text-lg font-medium">
               {t("charts.projectScheduleOverview")}
             </h1>
@@ -134,7 +134,7 @@ export const BarChartComponent: FC<BoxProps> = ({ className, ...props }) => {
         <Stack className="gap-5">
           <Flex className="max-lg:flex-col items-center justify-between">
             <Flex className="justify-between max-md:justify-start max-lg:w-full">
-              <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
+              <img src="/dashboard/stat.svg" alt="stat" className="size-5 dark:invert" />
               <h1 className="text-lg font-medium">
                 {t("charts.projectScheduleOverview")}
               </h1>
@@ -158,7 +158,7 @@ export const BarChartComponent: FC<BoxProps> = ({ className, ...props }) => {
       <Stack className="gap-5">
         <Flex className="max-lg:flex-col items-center justify-between">
           <Flex className="justify-between max-md:justify-start max-lg:w-full">
-            <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
+            <img src="/dashboard/stat.svg" alt="stat" className="size-5 dark:invert" />
             <h1 className="text-lg font-medium">
               {t("charts.projectScheduleOverview")}
             </h1>

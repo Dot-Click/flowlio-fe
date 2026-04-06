@@ -53,7 +53,7 @@ export const OngoingTasks: FC<BoxProps> = ({ className, ...props }) => {
       >
         <Stack className="gap-5">
           <Flex className="justify-start mr-auto gap-2">
-            <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
+          <img src="/dashboard/stat.svg" alt="stat" className="size-5 dark:invert" />
             <h1 className="text-lg font-medium">
               {t("dashboard.ongoingTasksTitle")}
             </h1>
@@ -73,7 +73,7 @@ export const OngoingTasks: FC<BoxProps> = ({ className, ...props }) => {
       >
         <Stack className="gap-5 items-center">
           <Flex className="justify-start mr-auto">
-            <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
+          <img src="/dashboard/stat.svg" alt="stat" className="size-5 dark:invert" />
             <h1 className="text-lg font-medium">
               {t("dashboard.ongoingTasksTitle")}
             </h1>
@@ -97,7 +97,7 @@ export const OngoingTasks: FC<BoxProps> = ({ className, ...props }) => {
       >
         <Stack className="gap-5 items-center">
           <Flex className="justify-start mr-auto">
-            <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
+          <img src="/dashboard/stat.svg" alt="stat" className="size-5 dark:invert" />
             <h1 className="text-lg font-medium">
               {t("dashboard.ongoingTasksTitle")}
             </h1>
@@ -119,7 +119,7 @@ export const OngoingTasks: FC<BoxProps> = ({ className, ...props }) => {
     >
       <Stack className="gap-5 items-center">
         <Flex className="justify-start mr-auto">
-          <img src="/dashboard/stat.svg" alt="stat" className="size-5" />
+          <img src="/dashboard/stat.svg" alt="stat" className="size-5 dark:invert" />
           <h1 className="text-lg font-medium">
             {t("dashboard.ongoingTasksTitle")}
           </h1>

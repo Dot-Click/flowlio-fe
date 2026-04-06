@@ -27,7 +27,7 @@ export const SubAdminHeader = () => {
           className="bg-black text-white border border-border  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer w-42 h-12"
           onClick={() => navigate("/superadmin/sub-admin/create-sub-admin")}
         >
-          <CirclePlus className="fill-white text-foreground size-5" />
+          <CirclePlus className="size-5 text-white" />
           {t("superadmin.subAdmins.create")}
         </Button>
       </Center>

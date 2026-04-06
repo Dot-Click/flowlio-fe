@@ -152,7 +152,7 @@ export const AiAssistChat: React.FC<{ withoutWelcomeGrids?: boolean }> = ({
 
 const WelcomeContent = () => {
   return (
-    <Stack className="w-full max-w-3xl mx-auto items-center justify-center bg-gradient-to-r from-[#F2F2F2] to-[#f0f2f7] h-full p-2">
+    <Stack className="w-full max-w-3xl mx-auto items-center justify-center bg-background h-full p-2">
       <img
         src="/dashboard/ailogocircleicon.svg"
         alt="frame"
@@ -169,7 +169,7 @@ const WelcomeContent = () => {
         {content.map((a, i) => (
           <Stack
             key={i}
-            className="bg-zinc-100 border-1 border-gray-400 p-4 rounded-xl h-34  flex-1 w-56"
+            className="bg-card border-1 border-border p-4 rounded-xl h-34  flex-1 w-56 hover:bg-muted transition-colors cursor-pointer"
           >
             <Flex className={a.iconStyleBox}>
               <a.Icon className={a.iconStyle} />
@@ -328,8 +328,8 @@ const ChatBox: React.FC<{
                 <Box
                   className={
                     msg.role === "user"
-                      ? "bg-blue-100 text-blue-900 rounded-xl px-4 py-2 m-1 max-w-[70%]"
-                      : "bg-muted text-gray-800 rounded-xl px-4 py-2 m-1 max-w-[70%]"
+                      ? "bg-primary/20 text-foreground rounded-xl px-4 py-2 m-1 max-w-[70%]"
+                      : "bg-muted text-foreground rounded-xl px-4 py-2 m-1 max-w-[70%]"
                   }
                 >
                   {msg.isLoading ? (
@@ -455,7 +455,7 @@ const ChatBox: React.FC<{
       {/* Input area */}
       <Stack
         className={`w-full max-w-3xl mx-auto p-2 mb-4 rounded-md border sticky bottom-0 bg-card ${
-          dragOver ? "border-blue-400 bg-blue-50" : "border-border"
+          dragOver ? "border-primary bg-primary/10" : "border-border"
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}

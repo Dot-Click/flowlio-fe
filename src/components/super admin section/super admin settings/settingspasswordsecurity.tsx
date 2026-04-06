@@ -86,13 +86,13 @@ export const SettingsPasswordSecurity = () => {
   }
 
   return (
-    <Stack className="w-full bg-card border border-gray-400/50  p-8 rounded-md max-md:px-3">
+    <Stack className="w-full bg-card border border-border/80 p-8 rounded-md max-md:px-3">
       <Stack>
-        <h1 className="text-2xl font-semibold">{t("settings.passwordTitle", "Password & Security")}</h1>
-        <h1>{t("settings.passwordDesc", "Manage your passwords, login preferences and recovery methods.")}</h1>
+        <h1 className="text-2xl font-semibold mb-1">{t("settings.passwordTitle", "Password & Security")}</h1>
+        <p className="text-muted-foreground">{t("settings.passwordDesc", "Manage your passwords, login preferences and recovery methods.")}</p>
       </Stack>
 
-      <Box className=" bg-gray-100/80 border border-gray-400/50 mt-4 min-h-6 w-2xl p-4 rounded-md max-md:w-full max-md:text-xs">
+      <Box className="bg-muted/30 border border-border/80 mt-6 min-h-6 w-2xl p-6 rounded-lg max-md:w-full max-md:text-xs">
         Your password must be at least 8 characters and include:
         <ul className="list-disc list-inside mt-2 space-y-1">
           <li>At least one uppercase letter (A-Z)</li>

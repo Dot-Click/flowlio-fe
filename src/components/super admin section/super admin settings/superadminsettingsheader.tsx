@@ -110,7 +110,7 @@ export const SuperAdminSettingsHeader = ({ user }: { user: any }) => {
 
       <Stack className="gap-8">
         {/* Profile Information Section */}
-        <Stack className="gap-0 min-h-4 w-md max-md:w-full border border-border rounded-md overflow-hidden mt-4">
+        <Stack className="gap-0 min-h-4 w-md max-md:w-full border border-border/60 rounded-md overflow-hidden mt-4">
           <Flex className="justify-between bg-card p-4 border-b border-border">
             <h1 className="text-lg font-semibold">{t("superadminSettings.profileInformation")}</h1>
             <Center className="text-green-600 gap-2 font-semibold text-sm">
@@ -125,7 +125,7 @@ export const SuperAdminSettingsHeader = ({ user }: { user: any }) => {
             </Center>
           </Flex>
 
-          <Box className="bg-[#F8F8F8] p-6">
+          <Box className="bg-card/50 dark:bg-muted/10 p-6">
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
@@ -138,7 +138,7 @@ export const SuperAdminSettingsHeader = ({ user }: { user: any }) => {
                       {t("superadminSettings.profilePicture")}
                     </FormLabel>
                     <Flex className="gap-4 items-center justify-between w-full">
-                      <Avatar className="relative hover:z-1 border-2 border-white size-20">
+                      <Avatar className="relative hover:z-1 border-2 border-border/40 size-20">
                         <AvatarImage
                           src={user.image || "https://github.com/shadcn.png"}
                           alt={user.name || "User"}

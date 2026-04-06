@@ -240,7 +240,10 @@
     "passwordMismatch": "New passwords do not match",
     "passwordTooShort": "Password must be at least 8 characters long",
     "fillAllPasswords": "Please fill in all password fields",
-    "passwordChangeError": "Failed to change password. Please try again."
+    "passwordChangeError": "Failed to change password. Please try again.",
+    "languageSettings": "Language Settings",
+    "selectLanguage": "Select Language",
+    "languageChanged": "Language changed successfully!"
   },
   "dashboard": {
     "title": "Dashboard",

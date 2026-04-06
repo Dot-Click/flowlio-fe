@@ -119,8 +119,8 @@ export const AiAssistPage = () => {
           >
             <AiAssitSidebar className="hidden sm:block" />
 
-            <SidebarInset className="bg-gradient-to-r from-[#F2F2F2] to-[#f0f2f7] overflow-auto w-full max-w-full">
-              <Stack className="p-3 h-16 justify-between bg-gradient-to-r from-white to-indigo-50 w-full ml-auto">
+            <SidebarInset className="bg-background overflow-auto w-full max-w-full">
+              <Stack className="p-3 h-16 justify-between bg-card w-full ml-auto border-b border-border">
                 <Flex className="justify-end gap-2 flex-wrap sm:flex-nowrap w-full min-w-0">
                   <Button
                     className="rounded-full h-11 sm:w-32 min-w-0"

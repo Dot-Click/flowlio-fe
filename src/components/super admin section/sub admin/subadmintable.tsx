@@ -233,7 +233,7 @@ export const SubAdminTable = () => {
                     variant="outline"
                     className="bg-[#A50403] border-none w-30 h-10 hover:bg-[#A50403]/80 cursor-pointer rounded-md text-white hover:text-white"
                   >
-                    <FaRegTrashAlt className="text-white fill-white size-4 " />
+                    <FaRegTrashAlt className="size-4 text-white" />
                     {t("common.delete")}
                   </Button>
                 </TooltipTrigger>

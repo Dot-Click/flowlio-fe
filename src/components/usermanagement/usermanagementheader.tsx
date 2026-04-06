@@ -72,7 +72,7 @@ export const UserManagementHeader = () => {
             navigate("/dashboard/user-management/add-user-members")
           }
         >
-          <CirclePlus className="fill-white text-foreground size-5" />
+          <CirclePlus className="text-white size-5" />
           {t("userManagement.addMembers")}
         </Button>
       </Center>

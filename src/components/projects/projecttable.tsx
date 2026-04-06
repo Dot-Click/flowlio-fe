@@ -577,7 +577,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
                     }}
                     onMouseEnter={() => prefetchProject(row.original.id)}
                   >
-                    <Eye className="fill-white size-7 " />
+                    <Eye className="size-5 text-white" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="mb-2">
@@ -596,7 +596,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
                       navigate(`/dashboard/project/edit/${row.original.id}`);
                     }}
                   >
-                    <PencilLine className="fill-white text-white" />
+                    <PencilLine className="size-5 text-white" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="mb-2">
@@ -656,7 +656,7 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
                     }
                     disabled={isDeletingProject}
                   >
-                    <FaRegTrashAlt className="text-white fill-white size-4 " />
+                    <FaRegTrashAlt className="size-4 text-white" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="mb-2">

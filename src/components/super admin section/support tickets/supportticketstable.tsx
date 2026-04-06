@@ -223,7 +223,7 @@ export const SupportTicketTable = ({
                     variant="outline"
                     className="bg-black border-none w-10 h-9 hover:bg-black cursor-pointer rounded-md "
                   >
-                    <Eye className="fill-white size-7 " />
+                    <Eye className="size-5 text-white" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="mb-2">

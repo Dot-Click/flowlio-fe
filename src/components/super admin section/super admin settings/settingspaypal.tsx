@@ -25,7 +25,7 @@ export const SettingsPayPal = () => {
       </h4>
 
       <Box className="mt-8">
-        <Flex className="justify-between text-start w-full bg-accent border border-gray-400/50 py-4 px-8 rounded-md max-md:px-3">
+        <Flex className="justify-between text-start w-full bg-accent dark:bg-accent/40 border border-border/80 py-4 px-8 rounded-md max-md:px-3">
           <Flex className="flex-col gap-1 justify-start text-start">
             <Flex className="items-center gap-2">
               <CreditCard className="h-5 w-5 text-blue-600" />

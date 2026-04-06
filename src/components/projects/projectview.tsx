@@ -100,7 +100,9 @@ export const ProjectView = () => {
   const { mutate: updateProject, isPending: isUpdating } = useUpdateProject();
 
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
-  const [activeAttachment, setActiveAttachment] = useState<Attachment | null>(null);
+  const [activeAttachment, setActiveAttachment] = useState<Attachment | null>(
+    null,
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadVersion = useUploadFileVersion();
 
@@ -284,7 +286,7 @@ export const ProjectView = () => {
 
   const handleOpenHistory = () => {
     if (!project.contractfile) return;
-    
+
     // Create a virtual attachment for the contract if it doesn't have one
     const contractAttachment: Attachment = {
       id: (project as any).contractFileId || "contract-" + project.id,
@@ -292,9 +294,9 @@ export const ProjectView = () => {
       url: project.contractfile,
       size: 0,
       type: "application/pdf",
-      versions: (project as any).contractVersions || []
+      versions: (project as any).contractVersions || [],
     };
-    
+
     setActiveAttachment(contractAttachment);
     setHistoryModalOpen(true);
   };
@@ -303,10 +305,13 @@ export const ProjectView = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
-    const attachmentId = (project as any).contractFileId || "contract-" + project.id;
-    
+    const attachmentId =
+      (project as any).contractFileId || "contract-" + project.id;
+
     if (file) {
       try {
         await uploadVersion.mutateAsync({
@@ -405,7 +410,7 @@ export const ProjectView = () => {
       </Box>
 
       {/* Project Header Card */}
-      <Card className="mb-6 border-0 shadow-xl bg-gradient-to-r from-blue-500/5 via-white to-purple-50">
+      <Card className="mb-6 border border-border/60 shadow-xl bg-gradient-to-r from-blue-500/5 via-white dark:via-card/80 to-purple-50 dark:from-blue-500/10 dark:to-purple-900/10">
         <CardHeader className="pb-6">
           <Box className="flex items-start justify-between max-sm:flex-col-reverse max-sm:gap-4">
             <Box className="flex-1">
@@ -478,7 +483,7 @@ export const ProjectView = () => {
         {/* Left Column - Project Details */}
         <Box className="lg:col-span-2 space-y-6">
           {/* Project Information */}
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-blue-50/30 p-0">
+          <Card className="border border-border/60 shadow-lg bg-gradient-to-br from-white dark:from-card to-blue-50/30 dark:to-blue-900/10 p-0">
             <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg p-3">
               <CardTitle className="flex items-center gap-2 text-white">
                 <FileText className="h-5 w-5" />
@@ -487,39 +492,39 @@ export const ProjectView = () => {
             </CardHeader>
             <CardContent className="space-y-4 p-4">
               <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Box className="flex items-center gap-4 p-4 bg-card/70 rounded-lg border border-blue-100">
-                  <Box className="p-2 bg-blue-100 rounded-full">
-                    <Building2 className="h-5 w-5 text-blue-600" />
+                <Box className="flex items-center gap-4 p-4 bg-card/70 rounded-lg border border-blue-100 dark:border-blue-900/40">
+                  <Box className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                    <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </Box>
                   <Box>
                     <p className="text-sm text-muted-foreground font-medium">
-                     {t("projects.projectNumber")}
+                      {t("projects.projectNumber")}
                     </p>
                     <p className="font-semibold text-foreground">
                       {project.projectNumber}
                     </p>
                   </Box>
                 </Box>
-                <Box className="flex items-center gap-4 p-4 bg-card/70 rounded-lg border border-green-100">
-                  <Box className="p-2 bg-green-100 rounded-full">
-                    <User className="h-5 w-5 text-green-600" />
+                <Box className="flex items-center gap-4 p-4 bg-card/70 rounded-lg border border-green-100 dark:border-green-900/40">
+                  <Box className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full">
+                    <User className="h-5 w-5 text-green-600 dark:text-green-400" />
                   </Box>
                   <Box>
                     <p className="text-sm text-muted-foreground font-medium">
-                     {t("projects.assignedTo")}
+                      {t("projects.assignedTo")}
                     </p>
                     <p className="font-semibold text-foreground">
                       {project.assignedProject || t("common.unassigned")}
                     </p>
                   </Box>
                 </Box>
-                <Box className="flex items-center gap-4 p-4 bg-card/70 rounded-lg border border-purple-100">
-                  <Box className="p-2 bg-purple-100 rounded-full">
-                    <Calendar className="h-5 w-5 text-purple-600" />
+                <Box className="flex items-center gap-4 p-4 bg-card/70 rounded-lg border border-purple-100 dark:border-purple-900/40">
+                  <Box className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-full">
+                    <Calendar className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                   </Box>
                   <Box>
                     <p className="text-sm text-muted-foreground font-medium">
-                     {t("projects.startDate")}
+                      {t("projects.startDate")}
                     </p>
                     <p className="font-semibold text-foreground">
                       {project.startDate
@@ -528,13 +533,13 @@ export const ProjectView = () => {
                     </p>
                   </Box>
                 </Box>
-                <Box className="flex items-center gap-4 p-4 bg-card/70 rounded-lg border border-orange-100">
-                  <Box className="p-2 bg-orange-100 rounded-full">
-                    <Calendar className="h-5 w-5 text-orange-600" />
+                <Box className="flex items-center gap-4 p-4 bg-card/70 rounded-lg border border-orange-100 dark:border-orange-900/40">
+                  <Box className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-full">
+                    <Calendar className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                   </Box>
                   <Box>
                     <p className="text-sm text-muted-foreground font-medium">
-                     {t("projects.endDate")}
+                      {t("projects.endDate")}
                     </p>
                     <p className="font-semibold text-foreground">
                       {project.endDate
@@ -552,7 +557,7 @@ export const ProjectView = () => {
                   </Box>
                   <Box>
                     <p className="text-sm text-muted-foreground font-medium mb-1">
-                     {t("projects.addressLabel")}
+                      {t("projects.addressLabel")}
                     </p>
                     <p className="font-semibold text-foreground">
                       {project.address}
@@ -564,7 +569,7 @@ export const ProjectView = () => {
               {project.description && (
                 <Box className="p-4 bg-card/70 rounded-lg border border-border">
                   <p className="text-sm text-muted-foreground font-medium mb-3">
-                     {t("projects.projectDescriptionLabel")}
+                    {t("projects.projectDescriptionLabel")}
                   </p>
                   <p className="text-foreground leading-relaxed bg-card p-4 rounded-lg border border-border">
                     {project.description}
@@ -637,7 +642,7 @@ export const ProjectView = () => {
           </Card>
 
           {/* Project Documents Showcase */}
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-purple-50/30 p-0">
+          <Card className="border border-border/60 shadow-lg bg-gradient-to-br from-white dark:from-card to-purple-50/30 dark:to-purple-900/10 p-0">
             <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-t-lg p-3">
               <CardTitle className="flex items-center gap-2 text-white">
                 <FileText className="h-5 w-5" />
@@ -764,14 +769,14 @@ export const ProjectView = () => {
 
                 {/* Document Information */}
                 {project.contractfile && (
-                  <Box className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <Box className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900/50 rounded-lg p-4">
                     <Box className="flex items-center gap-2 mb-2">
-                      <FileText className="h-4 w-4 text-blue-600" />
-                      <span className="text-sm font-medium text-blue-900">
+                      <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      <span className="text-sm font-medium text-blue-900 dark:text-blue-300">
                         Document Information
                       </span>
                     </Box>
-                    <Box className="text-sm text-blue-800 space-y-1">
+                    <Box className="text-sm text-blue-800 dark:text-blue-400 space-y-1">
                       <p>
                         • Contract document for{" "}
                         {project.projectName || "this project"}
@@ -805,7 +810,7 @@ export const ProjectView = () => {
         {/* Right Column - Sidebar */}
         <Box className="space-y-6">
           {/* Client Information */}
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-green-50/30 p-0">
+          <Card className="border border-border/60 shadow-lg bg-gradient-to-br from-white dark:from-card to-green-50/30 dark:to-green-900/10 p-0">
             <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg p-3">
               <CardTitle className="flex items-center gap-2 text-white">
                 <Building2 className="h-5 w-5" />
@@ -813,7 +818,7 @@ export const ProjectView = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
-              <Box className="flex items-center gap-4 p-4 bg-card/70 rounded-lg border border-green-100">
+              <Box className="flex items-center gap-4 p-4 bg-card/70 rounded-lg border border-green-100 dark:border-green-900/40">
                 <Avatar className="h-12 w-12 bg-gradient-to-r from-green-500/50 to-emerald-500">
                   <AvatarImage
                     src={project.clientImage}
@@ -827,7 +832,7 @@ export const ProjectView = () => {
                   <p className="font-semibold text-foreground text-lg capitalize">
                     {project.clientName || "Unknown Client"}
                   </p>
-                  <p className="text-sm text-muted-foreground bg-green-100 px-2 py-1 rounded-full inline-block">
+                  <p className="text-sm text-muted-foreground bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full inline-block">
                     Client
                   </p>
                 </Box>
@@ -836,7 +841,7 @@ export const ProjectView = () => {
           </Card>
 
           {/* Project Stats */}
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-blue-50/30 p-0">
+          <Card className="border border-border/60 shadow-lg bg-gradient-to-br from-white dark:from-card to-blue-50/30 dark:to-blue-900/10 p-0">
             <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg p-3">
               <CardTitle className="flex items-center gap-2 text-white">
                 <BarChart3 className="h-5 w-5" />
@@ -844,7 +849,7 @@ export const ProjectView = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 p-4">
-              <Box className="p-4 bg-card/70 rounded-lg border border-blue-100">
+              <Box className="p-4 bg-card/70 rounded-lg border border-blue-100 dark:border-blue-900/40">
                 <Box className="flex justify-between items-center mb-3">
                   <span className="text-sm text-muted-foreground font-medium">
                     Progress
@@ -955,7 +960,7 @@ export const ProjectView = () => {
           </Card>
 
           {/* Quick Actions */}
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-purple-50/30 p-0">
+          <Card className="border border-border/60 shadow-lg bg-gradient-to-br from-white dark:from-card to-purple-50/30 dark:to-purple-900/10 p-0">
             <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-t-lg p-3">
               <CardTitle className="flex items-center gap-2 text-white">
                 <Users className="h-5 w-5" />
@@ -966,7 +971,7 @@ export const ProjectView = () => {
               {!isClient && (
                 <Button
                   variant="outline"
-                  className="w-full justify-start bg-card hover:bg-purple-50 border-purple-200 text-purple-700 cursor-pointer"
+                  className="w-full justify-start bg-card hover:bg-purple-50 dark:hover:bg-purple-900/20 border-purple-200 dark:border-purple-800/50 text-purple-700 dark:text-purple-400 cursor-pointer"
                   onClick={handleEdit}
                 >
                   <Edit className="h-4 w-4 mr-2" />
@@ -976,7 +981,7 @@ export const ProjectView = () => {
 
               <Button
                 variant="outline"
-                className="w-full justify-start bg-card hover:bg-blue-50 border-blue-200 text-blue-700 cursor-pointer"
+                className="w-full justify-start bg-card hover:bg-blue-50 dark:hover:bg-blue-900/20 border-blue-200 dark:border-blue-800/50 text-blue-700 dark:text-blue-400 cursor-pointer"
                 onClick={openCommentModal}
               >
                 <MessageCircle className="h-4 w-4 mr-2" />
@@ -986,7 +991,7 @@ export const ProjectView = () => {
           </Card>
 
           {/* Additional Project PDFs */}
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-orange-50/30 p-0">
+          <Card className="border border-border/60 shadow-lg bg-gradient-to-br from-white dark:from-card to-orange-50/30 dark:to-orange-900/10 p-0">
             <CardHeader className="bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-t-lg p-3">
               <CardTitle className="flex items-center gap-2 text-white">
                 <FileText className="h-5 w-5" />
@@ -997,7 +1002,7 @@ export const ProjectView = () => {
               <Box className="space-y-4">
                 {/* Project PDF */}
                 {project.projectFiles?.projectPdf ? (
-                  <Box className="border border-border rounded-lg p-4 bg-gradient-to-r from-blue-500/5 to-indigo-50">
+                  <Box className="border border-border rounded-lg p-4 bg-gradient-to-r from-blue-500/5 to-indigo-50 dark:to-indigo-900/10">
                     <Box className="flex items-center justify-between mb-3">
                       <Box className="flex items-center gap-2">
                         <FileText className="h-5 w-5 text-blue-600" />

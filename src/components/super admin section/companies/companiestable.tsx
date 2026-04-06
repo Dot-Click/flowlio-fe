@@ -343,7 +343,7 @@ export const CompaniesTable = () => {
                     variant="outline"
                     className="bg-[#A50403] border-none w-9 h-9 hover:bg-[#A50403]/80 cursor-pointer rounded-md "
                   >
-                    <FaRegTrashAlt className="text-white fill-white size-4 " />
+                    <FaRegTrashAlt className="size-4 text-white" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="mb-2">

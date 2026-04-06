@@ -26,8 +26,7 @@ export const NewsletterHeader = () => {
 
         <Button
           onClick={() => setIsSendModalOpen(true)}
-          variant="outline"
-          className="bg-foreground text-background hover:bg-foreground/90 border border-transparent rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
+          className="bg-foreground text-background hover:bg-foreground/90 hover:text-background border border-transparent rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer transition-colors"
         >
           <Mail className="size-5" />
           {t("superadmin.newsletter.sendNewsletter", "Send Newsletter")}

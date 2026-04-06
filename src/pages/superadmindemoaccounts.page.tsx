@@ -428,7 +428,7 @@ const SuperAdminDemoAccountsPage = () => {
         {/* Loading section below form - shows when form is hidden and loading */}
         {!showForm && loading && (
           <div className="mt-6 animate-in fade-in slide-in-from-top-4 duration-500">
-            <Box className="bg-gradient-to-r from-blue-500/5 to-indigo-50 rounded-lg p-8 border-2 border-blue-200 shadow-lg">
+            <Box className="bg-gradient-to-r from-blue-500/5 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-lg p-8 border-2 border-blue-200 dark:border-blue-900/50 shadow-lg">
               <Center className="flex-col gap-4">
                 <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
                 <div className="text-center">
@@ -509,11 +509,11 @@ const SuperAdminDemoAccountsPage = () => {
                         <Center className="gap-2">
                           <Button
                             variant="ghost"
-                            className={`cursor-pointer border ${
+                            className={`cursor-pointer border-2 shadow-sm transition-all duration-200 ${
                               d.status === "suspended" ||
                               d.status === "inactive"
-                                ? "hover:bg-green-50 bg-green-50 text-green-700"
-                                : "hover:bg-yellow-50 bg-yellow-50 text-yellow-700"
+                                ? "hover:bg-green-50 bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/40 dark:hover:bg-green-900/40"
+                                : "hover:bg-yellow-50 bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-900/40 dark:hover:bg-yellow-900/40"
                             }`}
                             onClick={() => handleToggleStatus(d.id, d.status)}
                             disabled={loadingActions[d.id] !== undefined}
@@ -537,7 +537,7 @@ const SuperAdminDemoAccountsPage = () => {
                           </Button>
                           <Button
                             variant="ghost"
-                            className="hover:bg-blue-50 cursor-pointer border bg-blue-50 text-blue-700"
+                            className="hover:bg-blue-50 cursor-pointer border-2 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900/40 dark:hover:bg-blue-900/40 shadow-sm transition-all duration-200"
                             onClick={() => handleEditClick(d)}
                             disabled={loadingActions[d.id] !== undefined}
                           >
@@ -545,7 +545,7 @@ const SuperAdminDemoAccountsPage = () => {
                           </Button>
                           <Button
                             variant="ghost"
-                            className="hover:bg-red-50 cursor-pointer border bg-red-50 text-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="hover:bg-red-50 cursor-pointer border-2 bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/40 dark:hover:bg-red-900/40 shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                             onClick={() => handleDelete(d.id)}
                             disabled={loadingActions[d.id] !== undefined}
                           >
