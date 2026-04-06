@@ -129,7 +129,8 @@ const TimeTrackingPage = () => {
   } = useFetchOrganizationWeeklyHoursTracked();
 
   const loading = activeLoading || allLoading || projectsLoading || tasksLoading || weeklyLoading || 
-                  activeFetching || allFetching || projectsFetching || tasksFetching || weeklyFetching;
+                  activeFetching || allFetching || projectsFetching || tasksFetching || weeklyFetching ||
+                  viewerProjectsLoading || viewerTasksLoading || viewerProjectsFetching || viewerTasksFetching;
   
   const hasError = activeError || allError;
 

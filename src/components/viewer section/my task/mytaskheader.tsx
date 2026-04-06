@@ -25,12 +25,12 @@ type Task = {
   comments?: string;
   endDate: string;
   status:
-    | "To Do"
-    | "In Progress"
-    | "Completed"
-    | "Updated"
-    | "Delay"
-    | "Changes";
+    | "todo"
+    | "in_progress"
+    | "completed"
+    | "updated"
+    | "delay"
+    | "changes";
   creatorName?: string;
   creatorEmail?: string;
 };
@@ -39,19 +39,19 @@ type Task = {
 const mapStatusToDisplay = (status: string): Task["status"] => {
   switch (status) {
     case "todo":
-      return "To Do";
+      return "todo";
     case "in_progress":
-      return "In Progress";
+      return "in_progress";
     case "completed":
-      return "Completed";
+      return "completed";
     case "updated":
-      return "Updated";
+      return "updated";
     case "delay":
-      return "Delay";
+      return "delay";
     case "changes":
-      return "Changes";
+      return "changes";
     default:
-      return "To Do";
+      return "todo";
   }
 };
 

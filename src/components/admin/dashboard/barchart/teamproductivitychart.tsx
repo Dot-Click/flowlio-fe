@@ -4,10 +4,7 @@ import {
   CartesianGrid, 
   XAxis, 
   YAxis, 
-  Tooltip, 
-  ResponsiveContainer, 
-  Legend,
-  Cell
+  Legend
 } from "recharts";
 import { type FC } from "react";
 import { cn } from "@/lib/utils";
@@ -16,12 +13,10 @@ import { Stack } from "@/components/ui/stack";
 import { Box, type BoxProps } from "@/components/ui/box";
 import { ComponentWrapper } from "@/components/common/componentwrapper";
 import { useFetchTeamProductivity } from "@/hooks/useFetchTeamProductivity";
-import { useTranslation } from "react-i18next";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { ChartSkeleton, ErrorState } from "@/components/skeletons";
 
 export const TeamProductivityChart: FC<BoxProps> = ({ className, ...props }) => {
-  const { t } = useTranslation();
   const { data: productivityResponse, isLoading, error } = useFetchTeamProductivity();
 
   const chartData = productivityResponse?.data || [];

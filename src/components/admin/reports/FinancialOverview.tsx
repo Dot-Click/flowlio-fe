@@ -16,7 +16,7 @@ import { useFetchFinancialOverview } from "@/hooks/useFetchFinancialOverview";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DollarSign, TrendingUp, TrendingDown, PieChart as PieChartIcon } from "lucide-react";
-import { useTranslation } from "react-i18next";
+
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d"];
 

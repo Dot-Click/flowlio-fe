@@ -14,7 +14,7 @@ import { useFetchNewsletterStats } from "@/hooks/usefetchnewslettersubscribers";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { TableSkeleton, CardSkeleton, ErrorState, SkeletonWrapper } from "@/components/skeletons";
+import { TableSkeleton, CardSkeleton, ErrorState } from "@/components/skeletons";
 
 export const NewsletterSubscribersTable = () => {
   const { t } = useTranslation();
