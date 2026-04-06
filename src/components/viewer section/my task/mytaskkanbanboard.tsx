@@ -7,46 +7,16 @@ import { cn } from "@/lib/utils";
 import { useFetchViewerTasks, ViewerTask } from "@/hooks/useFetchViewerTasks";
 import { useUpdateTaskStatus } from "@/hooks/useupdatetask";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
-// Map backend status to frontend status
-const mapStatusToDisplay = (status: string): StatusType => {
-  switch (status) {
-    case "todo":
-      return "To Do";
-    case "in_progress":
-      return "In Progress";
-    case "completed":
-      return "Completed";
-    case "updated":
-      return "Updated";
-    case "delay":
-      return "Delay";
-    case "changes":
-      return "Changes";
-    default:
-      return "To Do";
-  }
-};
-
-// Map frontend status to backend status
-const mapStatusToBackend = (status: StatusType): string => {
-  switch (status) {
-    case "To Do":
-      return "todo";
-    case "In Progress":
-      return "in_progress";
-    case "Completed":
-      return "completed";
-    case "Updated":
-      return "updated";
-    case "Delay":
-      return "delay";
-    case "Changes":
-      return "changes";
-    default:
-      return "todo";
-  }
-};
+// Status keys for consistency
+type StatusType =
+  | "todo"
+  | "in_progress"
+  | "delay"
+  | "changes"
+  | "updated"
+  | "completed";
 
 // Task type for display
 export type Task = {
@@ -60,34 +30,27 @@ export type Task = {
   creatorEmail?: string;
 };
 
-type StatusType =
-  | "To Do"
-  | "In Progress"
-  | "Delay"
-  | "Changes"
-  | "Updated"
-  | "Completed";
-
 const STATUS_COLORS: Record<StatusType, string> = {
-  "To Do": "#5B60FE",
-  "In Progress": "#FFA632",
-  Delay: "#FF0080",
-  Changes: "#4DCDC9",
-  Updated: "#A94DCD",
-  Completed: "#CD4D4F",
+  todo: "#5B60FE",
+  in_progress: "#FFA632",
+  delay: "#FF0080",
+  changes: "#4DCDC9",
+  updated: "#A94DCD",
+  completed: "#CD4D4F",
 };
 
 const STATUS_COLUMNS: StatusType[] = [
-  "To Do",
-  "In Progress",
-  "Delay",
-  "Changes",
-  "Updated",
-  "Completed",
+  "todo",
+  "in_progress",
+  "delay",
+  "changes",
+  "updated",
+  "completed",
 ];
 
 // Draggable Task Card
 function DraggableTask({ task }: { task: Task }) {
+  const { t } = useTranslation();
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: task.id,
@@ -128,7 +91,7 @@ function DraggableTask({ task }: { task: Task }) {
             <Flex className="text-muted-foreground items-center gap-2">
               <Box className="w-2 h-2 bg-red-500 rounded-full"></Box>
               <span className="text-xs text-red-600 font-medium">
-                Due: {task.endDate}
+                {t("tasks.dueDate")}: {task.endDate}
               </span>
             </Flex>
           )}
@@ -137,7 +100,7 @@ function DraggableTask({ task }: { task: Task }) {
             <Flex className="text-muted-foreground items-center gap-2">
               <Box className="w-2 h-2 bg-green-500 rounded-full"></Box>
               <span className="text-xs font-medium text-foreground">
-                Assigned by: {task.creatorName}
+                {t("support.sentBy")}: {task.creatorName}
               </span>
             </Flex>
           )}
@@ -164,6 +127,7 @@ function DroppableColumn({
   children: React.ReactNode;
   highlight?: boolean;
 }) {
+  const { t } = useTranslation();
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
   return (
@@ -180,7 +144,7 @@ function DroppableColumn({
         className="text-base font-semibold text-white w-full px-4 py-3 flex items-center justify-between"
         style={{ backgroundColor: STATUS_COLORS[status] }}
       >
-        <span>{status}</span>
+        <span>{t(`tasks.statusValue.${status}`)}</span>
         <span className="text-xs opacity-80">
           {React.Children.count(children)}
         </span>
@@ -195,6 +159,7 @@ interface KanbanBoardProps {
 }
 
 export default function KanbanBoard({ filteredTasks }: KanbanBoardProps) {
+  const { t } = useTranslation();
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const { data: tasksResponse, isLoading, error } = useFetchViewerTasks();
   const updateTaskStatus = useUpdateTaskStatus();
@@ -208,7 +173,7 @@ export default function KanbanBoard({ filteredTasks }: KanbanBoardProps) {
       endDate: task.endDate
         ? format(new Date(task.endDate), "MMM dd, yyyy")
         : "",
-      status: mapStatusToDisplay(task.status),
+      status: task.status as StatusType,
       comments: task.description,
       creatorName: task.creatorName,
       creatorEmail: task.creatorEmail,
@@ -236,11 +201,9 @@ export default function KanbanBoard({ filteredTasks }: KanbanBoardProps) {
     const overStatus = STATUS_COLUMNS.find((col) => col === over.id);
 
     if (overStatus) {
-      const backendStatus = mapStatusToBackend(overStatus);
-
       updateTaskStatus.mutate({
         taskId: active.id as string,
-        status: backendStatus as any,
+        status: overStatus as any,
       });
     } else {
       console.log("❌ No valid status column found");
@@ -260,7 +223,7 @@ export default function KanbanBoard({ filteredTasks }: KanbanBoardProps) {
                 className="text-base font-semibold text-white w-full px-4 py-3 flex items-center justify-between"
                 style={{ backgroundColor: STATUS_COLORS[status] }}
               >
-                <span>{status}</span>
+                <span>{t(`tasks.statusValue.${status}`)}</span>
                 <span className="text-xs opacity-80">0</span>
               </Box>
               <Box className="flex-1 overflow-y-auto p-2">
@@ -279,7 +242,7 @@ export default function KanbanBoard({ filteredTasks }: KanbanBoardProps) {
   if (error) {
     return (
       <Box className="w-full text-center py-8">
-        <p className="text-red-600">Error loading tasks: {error.message}</p>
+        <p className="text-red-600">{t("tasks.loadingError")} {error.message}</p>
       </Box>
     );
   }
@@ -300,7 +263,7 @@ export default function KanbanBoard({ filteredTasks }: KanbanBoardProps) {
             <DroppableColumn
               key={status}
               status={status}
-              highlight={status === "Completed"}
+              highlight={status === "completed"}
             >
               {displayTasks
                 .filter((task) => task.status === status)
@@ -317,12 +280,12 @@ export default function KanbanBoard({ filteredTasks }: KanbanBoardProps) {
                     {activeTask.title}
                   </Box>
                   <Box className="text-muted-foreground text-xs">
-                    Project:{" "}
+                    {t("tasks.project")}:{" "}
                     <span className="font-medium">{activeTask.project}</span>
                   </Box>
                   {activeTask.creatorName && (
                     <Box className="text-muted-foreground text-xs">
-                      Assigned by:{" "}
+                      {t("support.sentBy")}:{" "}
                       <span className="font-medium">
                         {activeTask.creatorName}
                       </span>

@@ -38,6 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TableSkeleton, CardSkeleton, ErrorState } from "@/components/skeletons";
+import { useTranslation } from "react-i18next";
 
 // Active Timer Component for table cells
 const ActiveTableTimer = ({ startTime }: { startTime: string }) => {
@@ -79,6 +80,7 @@ const ActiveTableTimer = ({ startTime }: { startTime: string }) => {
 };
 
 const TimeTrackingPage = () => {
+  const { t } = useTranslation();
   const [selectedProject, setSelectedProject] = useState<string>("");
   const [selectedTask, setSelectedTask] = useState<string>("");
   // History filters for custom table
@@ -190,12 +192,12 @@ const TimeTrackingPage = () => {
   // Handle starting time tracking
   const handleStart = async () => {
     if (!selectedTask) {
-      toast.error("Please select a task to track");
+      toast.error(t("timeTracking.selectTaskError"));
       return;
     }
 
     if (isTracking) {
-      toast.error("You are already tracking a task");
+      toast.error(t("timeTracking.alreadyTrackingError"));
       return;
     }
 
@@ -209,7 +211,7 @@ const TimeTrackingPage = () => {
   // Handle stopping time tracking
   const handleStop = async () => {
     if (!activeTimeEntry) {
-      toast.error("No active time tracking found");
+      toast.error(t("timeTracking.noActiveTrackingError"));
       return;
     }
 
@@ -222,7 +224,7 @@ const TimeTrackingPage = () => {
 
   // Handle deleting time entry
   const handleDelete = async (entryId: string) => {
-    if (!confirm("Are you sure you want to delete this time entry?")) {
+    if (!confirm(t("timeTracking.deleteConfirm"))) {
       return;
     }
 
@@ -236,7 +238,7 @@ const TimeTrackingPage = () => {
   // Handle restarting task from history
   const handleRestart = async (taskId: string) => {
     if (isTracking) {
-      toast.error("Please stop the current task before starting a new one");
+      toast.error(t("timeTracking.stopCurrentTaskError"));
       return;
     }
 
@@ -286,7 +288,7 @@ const TimeTrackingPage = () => {
         accessorKey: "projectName",
         header: () => (
           <span className="font-semibold px-2 py-2 text-left block">
-            Project
+            {t("timeTracking.project")}
           </span>
         ),
         cell: ({ row }) => (
@@ -298,7 +300,7 @@ const TimeTrackingPage = () => {
       {
         accessorKey: "taskTitle",
         header: () => (
-          <span className="font-semibold px-2 py-2 text-left block">Task</span>
+          <span className="font-semibold px-2 py-2 text-left block">{t("timeTracking.task")}</span>
         ),
         cell: ({ row }) => (
           <span className="font-medium px-2 py-2 text-left block">
@@ -310,7 +312,7 @@ const TimeTrackingPage = () => {
         accessorKey: "startTime",
         header: () => (
           <span className="font-semibold px-2 py-2 text-left block">
-            Start Time
+            {t("timeTracking.startTime")}
           </span>
         ),
         cell: ({ row }) => {
@@ -327,7 +329,7 @@ const TimeTrackingPage = () => {
         accessorKey: "endTime",
         header: () => (
           <span className="font-semibold px-2 py-2 text-left block">
-            End Time
+            {t("timeTracking.endTime")}
           </span>
         ),
         cell: ({ row }) => {
@@ -345,7 +347,7 @@ const TimeTrackingPage = () => {
         accessorKey: "duration",
         header: () => (
           <span className="font-semibold px-2 py-2 text-left block">
-            Duration
+            {t("timeTracking.duration")}
           </span>
         ),
         cell: ({ row }) =>
@@ -387,11 +389,11 @@ const TimeTrackingPage = () => {
               : row.original.status;
           return normalized === "active" ? (
             <span className="px-2 py-1 mx-auto block bg-green-100 text-green-800 text-xs font-medium rounded-full w-20 text-center capitalize">
-              Active
+              {t("timeTracking.active")}
             </span>
           ) : (
             <span className="px-2 py-1 mx-auto block bg-muted text-gray-800 text-xs font-medium rounded-full w-20 text-center capitalize">
-              Completed
+              {t("timeTracking.completed")}
             </span>
           );
         },
@@ -400,7 +402,7 @@ const TimeTrackingPage = () => {
         id: "actions",
         header: () => (
           <span className="font-semibold px-2 py-2 text-center block">
-            Actions
+            {t("timeTracking.actions")}
           </span>
         ),
         cell: ({ row }) => (
@@ -412,7 +414,7 @@ const TimeTrackingPage = () => {
                 onClick={() => handleRestart(row.original.taskId)}
                 disabled={isTracking || startTaskMutation.isPending}
                 className="h-8 px-2 hover:bg-blue-50 cursor-pointer"
-                title="Restart this task"
+                title={t("timeTracking.restartTaskTooltip")}
               >
                 <RotateCcw className="h-4 w-4 text-blue-600" />
               </Button>
@@ -423,7 +425,7 @@ const TimeTrackingPage = () => {
               onClick={() => handleDelete(row.original.id)}
               disabled={deleteEntryMutation.isPending}
               className="h-8 px-2 hover:bg-red-50 cursor-pointer"
-              title="Delete this entry"
+              title={t("timeTracking.deleteEntryTooltip")}
             >
               <Trash2 className="h-4 w-4 text-red-600" />
             </Button>
@@ -470,9 +472,9 @@ const TimeTrackingPage = () => {
       <Box className="bg-card rounded-xl p-6 shadow-sm border border-border">
         <Flex className="items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Time Tracking</h1>
+            <h1 className="text-2xl font-bold text-foreground">{t("timeTracking.title")}</h1>
             <p className="text-muted-foreground mt-1">
-              Track your work hours and manage time efficiently
+              {t("timeTracking.subtitle")}
             </p>
           </div>
           <Center className="w-16 h-16 bg-blue-100 rounded-full">
@@ -494,12 +496,12 @@ const TimeTrackingPage = () => {
               <Flex className="items-center justify-between">
                 <div>
                   <h3 className="text-lg font-semibold text-foreground">
-                    Weekly Hours
+                    {t("timeTracking.weeklyHours")}
                   </h3>
                   <p className="text-3xl font-bold text-blue-600 mt-2">
                     {formatHours(weeklyHours?.data?.weeklyHours || 0)}
                   </p>
-                  <p className="text-sm text-muted-foreground mt-1">This week</p>
+                  <p className="text-sm text-muted-foreground mt-1">{t("timeTracking.thisWeek")}</p>
                 </div>
                 <BarChart3 className="w-8 h-8 text-blue-600" />
               </Flex>
@@ -509,13 +511,13 @@ const TimeTrackingPage = () => {
               <Flex className="items-center justify-between">
                 <div>
                   <h3 className="text-lg font-semibold text-foreground">
-                    Active Tracking
+                    {t("timeTracking.activeTracking")}
                   </h3>
                   <p className="text-3xl font-bold text-green-600 mt-2">
-                    {isTracking ? "Yes" : "No"}
+                    {isTracking ? t("timeTracking.yes") : t("timeTracking.no")}
                   </p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {isTracking ? "Currently tracking" : "Not tracking"}
+                    {isTracking ? t("timeTracking.currentlyTracking") : t("timeTracking.notTracking")}
                   </p>
                 </div>
                 <Play className="w-8 h-8 text-green-600" />
@@ -528,7 +530,7 @@ const TimeTrackingPage = () => {
       {/* Time Tracking Controls */}
       <Box className="bg-card rounded-xl p-6 shadow-sm border border-border">
         <h2 className="text-xl font-semibold text-foreground mb-6">
-          Quick Time Tracking
+          {t("timeTracking.quickTimeTracking")}
         </h2>
 
         {/* Show active tracking info with real-time timer */}
@@ -539,34 +541,34 @@ const TimeTrackingPage = () => {
                 <Flex className="items-center gap-2 mb-3">
                   <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
                   <h3 className="font-bold text-green-800 text-lg">
-                    Currently Tracking
+                    {t("timeTracking.currentlyTrackingHeader")}
                   </h3>
                 </Flex>
                 <Stack className="gap-2">
                   <p className="text-green-700">
-                    <strong>Task:</strong> {activeTimeEntry.taskTitle}
+                    <strong>{t("timeTracking.task")}:</strong> {activeTimeEntry.taskTitle}
                   </p>
                   <p className="text-green-700">
-                    <strong>Project:</strong> {activeTimeEntry.projectName}
+                    <strong>{t("timeTracking.project")}:</strong> {activeTimeEntry.projectName}
                   </p>
                   <p className="text-green-700">
-                    <strong>Started at:</strong>{" "}
+                    <strong>{t("timeTracking.startedAt")}:</strong>{" "}
                     {format(new Date(activeTimeEntry.startTime), "PPpp")}
                   </p>
                   <p className="text-green-700 text-sm">
-                    Started{" "}
+                    {t("timeTracking.started")}{" "}
                     {formatDistanceToNow(new Date(activeTimeEntry.startTime))}{" "}
-                    ago
+                    {t("timeTracking.ago")}
                   </p>
                 </Stack>
               </div>
               <div className="flex flex-col items-center gap-4">
                 <Box className="bg-card border-2 border-green-400 rounded-lg p-4 text-center min-w-[200px]">
-                  <p className="text-sm text-muted-foreground mb-2">Elapsed Time</p>
+                  <p className="text-sm text-muted-foreground mb-2">{t("timeTracking.elapsedTime")}</p>
                   <span className="text-4xl font-mono font-bold text-green-600">
                     {formatTime(elapsedTime)}
                   </span>
-                  <p className="text-xs text-muted-foreground mt-2">Running...</p>
+                  <p className="text-xs text-muted-foreground mt-2">{t("timeTracking.running")}</p>
                 </Box>
                 <Button
                   onClick={handleStop}
@@ -574,7 +576,7 @@ const TimeTrackingPage = () => {
                   className="bg-red-500 hover:bg-red-600 text-white px-6 cursor-pointer"
                 >
                   <Square className="w-4 h-4 mr-2" />
-                  {endTaskMutation.isPending ? "Stopping..." : "Stop Tracking"}
+                  {endTaskMutation.isPending ? t("timeTracking.stopping") : t("timeTracking.stopTracking")}
                 </Button>
               </div>
             </Flex>
@@ -593,7 +595,7 @@ const TimeTrackingPage = () => {
               disabled={isTracking}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Project" />
+                <SelectValue placeholder={t("timeTracking.selectProjectPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {projectOptions.map((p: any) => (
@@ -616,7 +618,7 @@ const TimeTrackingPage = () => {
               disabled={isTracking || !selectedProject}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Task" />
+                <SelectValue placeholder={t("timeTracking.selectTaskPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {filteredTasks.map((task) => (
@@ -637,7 +639,7 @@ const TimeTrackingPage = () => {
             className="w-full bg-green-500 hover:bg-green-600 text-white py-3"
           >
             <Play className="w-5 h-5 mr-2" />
-            {startTaskMutation.isPending ? "Starting..." : "Start Tracking"}
+            {startTaskMutation.isPending ? t("timeTracking.starting") : t("timeTracking.startTracking")}
           </Button>
         )}
       </Box>
@@ -645,7 +647,7 @@ const TimeTrackingPage = () => {
       {/* Time Entries History */}
       <Box className="bg-card rounded-xl p-6 shadow-sm border border-border">
         <h2 className="text-xl font-semibold text-foreground mb-6">
-          Time Entries History
+          {t("timeTracking.history")}
         </h2>
 
         {/* Filters */}
@@ -662,10 +664,10 @@ const TimeTrackingPage = () => {
               }}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="All Projects" />
+                <SelectValue placeholder={t("timeTracking.allProjects")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Projects</SelectItem>
+                <SelectItem value="all">{t("timeTracking.allProjects")}</SelectItem>
                 {projectOptions.map((p: any) => (
                   <SelectItem key={p.id} value={p.id}>
                     {p.projectName || p.name}{" "}
@@ -685,10 +687,10 @@ const TimeTrackingPage = () => {
               onValueChange={(v) => setHistoryTask(v)}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder={"All Tasks"} />
+                <SelectValue placeholder={t("timeTracking.allTasks")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all_tasks">All Tasks</SelectItem>
+                <SelectItem value="all_tasks">{t("timeTracking.allTasks")}</SelectItem>
                 {historyTasksOptions.map((t) => (
                   <SelectItem key={t.id} value={t.id}>
                     {t.title}
@@ -700,19 +702,19 @@ const TimeTrackingPage = () => {
 
           <div className="min-w-[180px]">
             <label className="block text-sm font-medium text-foreground mb-2">
-              Status
+              {t("timeTracking.status")}
             </label>
             <Select
               value={historyStatus}
               onValueChange={(v) => setHistoryStatus(v as any)}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="All Status" />
+                <SelectValue placeholder={t("timeTracking.allStatus")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="all">{t("timeTracking.allStatus")}</SelectItem>
+                <SelectItem value="active">{t("timeTracking.active")}</SelectItem>
+                <SelectItem value="completed">{t("timeTracking.completed")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -728,7 +730,7 @@ const TimeTrackingPage = () => {
                   setHistoryStatus("all");
                 }}
               >
-                Clear
+                {t("timeTracking.clear")}
               </Button>
               <Button
                 className="cursor-pointer"
@@ -738,7 +740,7 @@ const TimeTrackingPage = () => {
                   setAppliedStatus(historyStatus as any);
                 }}
               >
-                Apply Filter
+                {t("timeTracking.applyFilter")}
               </Button>
             </Flex>
           </div>

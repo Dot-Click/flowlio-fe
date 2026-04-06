@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatHour, platformColors, CustomEvent } from "./calendarUtils";
+import { useTranslation } from "react-i18next";
+import { format } from "date-fns";
+import { es, enUS } from "date-fns/locale";
 import GoogleMeetIcon from "/dashboard/google-meet.svg";
 import WhatsappIcon from "/dashboard/whatsapp-icon.svg";
 import OutlookIcon from "/dashboard/google-drive.svg";
@@ -41,6 +44,10 @@ export const DayView: React.FC<DayViewProps> = ({
   editEventModalProps,
   hidePopupTimeout,
 }) => {
+  const { t, i18n } = useTranslation();
+  const currentLanguage = i18n.language;
+  const currentLocale = currentLanguage === "es" ? es : enUS;
+
   return (
     <>
       {/* Date Row */}
@@ -58,7 +65,7 @@ export const DayView: React.FC<DayViewProps> = ({
           }}
         >
           <Box>
-            {currentDate.toLocaleDateString("en-US", { weekday: "short" })}
+            {format(currentDate, "EEE", { locale: currentLocale })}
           </Box>
           <Box>{currentDate.getDate()}</Box>
         </Center>
@@ -73,7 +80,7 @@ export const DayView: React.FC<DayViewProps> = ({
         {hours.map((hour) => (
           <React.Fragment key={hour}>
             <Box className="text-center p-3 bg-card font-normal text-[#888] text-sm flex items-center justify-center">
-              {formatHour(hour)}
+              {formatHour(hour, currentLanguage)}
             </Box>
             <Box
               className="text-center p-0 border border-border min-h-[79px] min-w-[86px] relative bg-card"
@@ -200,8 +207,8 @@ export const DayView: React.FC<DayViewProps> = ({
 
                       {/* Event time */}
                       <span className={cn("text-xs text-black/80")}>
-                        {formatHour(event.startHour)} -{" "}
-                        {formatHour(event.endHour)}
+                        {formatHour(event.startHour, currentLanguage)} -{" "}
+                        {formatHour(event.endHour, currentLanguage)}
                       </span>
 
                       {/* Edit icon on hover */}
@@ -215,7 +222,7 @@ export const DayView: React.FC<DayViewProps> = ({
                             setEditEvent(event);
                             editEventModalProps.onOpenChange(true);
                           }}
-                          title="Edit"
+                          title={t("common.edit")}
                         >
                           <Pencil />
                         </Button>

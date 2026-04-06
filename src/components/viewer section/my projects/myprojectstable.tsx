@@ -51,7 +51,7 @@ export const MyProjectsTable = () => {
   if (error) {
     return (
       <Box className="text-center py-8">
-        <p className="text-red-600">Error loading projects: {error.message}</p>
+        <p className="text-red-600">{t("projects.loadingError")} {error.message}</p>
       </Box>
     );
   }
@@ -61,7 +61,7 @@ export const MyProjectsTable = () => {
   if (projects.length === 0) {
     return (
       <Box className="text-center py-8">
-        <p className="text-muted-foreground">No projects assigned to you yet.</p>
+        <p className="text-muted-foreground">{t("projects.noProjectsAssigned")}</p>
       </Box>
     );
   }
@@ -147,7 +147,7 @@ export const MyProjectsTable = () => {
               variant="outline"
               className={`${statusStyles[status]} text-xs px-2 py-1`}
             >
-              {status.charAt(0).toUpperCase() + status.slice(1)}
+              {t(`projects.statusValue.${status}`)}
             </Badge>
           </Center>
         );

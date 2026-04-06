@@ -26,8 +26,10 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "react-i18next";
 
 export const ViewerProjectView = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
@@ -119,11 +121,11 @@ export const ViewerProjectView = () => {
       <PageWrapper className="mt-6 p-6">
         <Box className="bg-red-50 border border-red-200 rounded-lg p-6">
           <p className="text-red-600 text-center">
-            {error?.message || "Project not found"}
+            {error?.message || t("projects.projectNotFound")}
           </p>
           <Center className="mt-4">
             <Button onClick={() => navigate(-1)} variant="outline">
-              Go Back
+              {t("common.goBack")}
             </Button>
           </Center>
         </Box>
@@ -180,7 +182,7 @@ export const ViewerProjectView = () => {
             onClick={() => navigate(-1)}
           >
             <IoArrowBack />
-            <p className="text-foreground">Back</p>
+            <p className="text-foreground">{t("common.back")}</p>
           </Box>
 
           {/* Breadcrumb */}
@@ -190,7 +192,7 @@ export const ViewerProjectView = () => {
               className="p-0 h-auto text-muted-foreground hover:text-foreground"
               onClick={() => navigate("/viewer/my-projects")}
             >
-              My Projects
+              {t("projects.myProjects")}
             </Button>
             <span>/</span>
             <span className="text-foreground font-medium">{project.name}</span>
@@ -204,7 +206,7 @@ export const ViewerProjectView = () => {
           <Box className="flex items-start justify-between max-sm:flex-col-reverse max-sm:gap-4">
             <Box className="flex-1">
               <CardTitle className="text-3xl font-bold text-foreground mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
-                {project.name || "Untitled Project"}
+                {project.name || t("projects.untitled")}
               </CardTitle>
               <Box className="flex items-center gap-6 mb-6">
                 <Badge
@@ -214,19 +216,18 @@ export const ViewerProjectView = () => {
                   )} flex items-center gap-2 px-4 py-2 text-sm font-medium`}
                 >
                   {getStatusIcon(project.status)}
-                  {project.status?.charAt(0).toUpperCase() +
-                    project.status?.slice(1)}
+                  {t(`projects.statusValue.${project.status}`)}
                 </Badge>
                 <Box className="flex items-center gap-2 text-sm text-muted-foreground bg-card/70 px-3 py-2 rounded-full">
                   <FileText className="h-4 w-4 text-blue-600" />
                   <span className="font-medium">
-                    Progress: {project.progress}%
+                    {t("projects.progress")}: {project.progress}%
                   </span>
                 </Box>
                 <Box className="flex items-center gap-2 text-sm text-muted-foreground bg-card/70 px-3 py-2 rounded-full">
                   <Building2 className="h-4 w-4 text-green-600" />
                   <span className="font-medium">
-                    {project.clientName || "No Client"}
+                    {project.clientName || t("common.noClient")}
                   </span>
                 </Box>
               </Box>
@@ -247,7 +248,7 @@ export const ViewerProjectView = () => {
                   className="flex items-center gap-2 bg-card hover:bg-blue-50 border-blue-200 text-blue-700"
                 >
                   <Download className="h-4 w-4" />
-                  Contract
+                  {t("projects.contract")}
                 </Button>
               )}
             </Box>
@@ -264,7 +265,7 @@ export const ViewerProjectView = () => {
             <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg p-3">
               <CardTitle className="flex items-center gap-2 text-white">
                 <FileText className="h-5 w-5" />
-                Project Information
+                {t("projects.projectInfo")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 p-4">
@@ -275,7 +276,7 @@ export const ViewerProjectView = () => {
                   </Box>
                   <Box>
                     <p className="text-sm text-muted-foreground font-medium">
-                      Project Number
+                      {t("projects.projectNumber")}
                     </p>
                     <p className="font-semibold text-foreground">
                       {project.projectNumber}
@@ -288,7 +289,7 @@ export const ViewerProjectView = () => {
                   </Box>
                   <Box>
                     <p className="text-sm text-muted-foreground font-medium">
-                      Assigned To
+                      {t("projects.assignedTo")}
                     </p>
                     <p className="font-semibold text-foreground">
                       {project.assignedUserName}
@@ -301,12 +302,12 @@ export const ViewerProjectView = () => {
                   </Box>
                   <Box>
                     <p className="text-sm text-muted-foreground font-medium">
-                      Start Date
+                      {t("projects.startDate")}
                     </p>
                     <p className="font-semibold text-foreground">
                       {project.startDate
                         ? format(new Date(project.startDate), "MMM dd, yyyy")
-                        : "Not set"}
+                        : t("common.notSet")}
                     </p>
                   </Box>
                 </Box>
@@ -316,12 +317,12 @@ export const ViewerProjectView = () => {
                   </Box>
                   <Box>
                     <p className="text-sm text-muted-foreground font-medium">
-                      End Date
+                      {t("projects.endDate")}
                     </p>
                     <p className="font-semibold text-foreground">
                       {project.endDate
                         ? format(new Date(project.endDate), "MMM dd, yyyy")
-                        : "Not set"}
+                        : t("common.notSet")}
                     </p>
                   </Box>
                 </Box>
@@ -331,7 +332,7 @@ export const ViewerProjectView = () => {
               {project.description && (
                 <Box className="mt-6 p-4 bg-card/70 rounded-lg border border-border">
                   <h3 className="text-lg font-semibold text-foreground mb-2">
-                    Description
+                    {t("projects.description")}
                   </h3>
                   <p className="text-foreground leading-relaxed">
                     {project.description}
@@ -344,7 +345,7 @@ export const ViewerProjectView = () => {
                 <Box className="mt-4 p-4 bg-card/70 rounded-lg border border-border">
                   <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
                     <MapPin className="h-5 w-5 text-muted-foreground" />
-                    Project Address
+                    {t("projects.addressLabel")}
                   </h3>
                   <p className="text-foreground">{project.address}</p>
                 </Box>
@@ -360,7 +361,7 @@ export const ViewerProjectView = () => {
             <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg p-3">
               <CardTitle className="flex items-center gap-2 text-white">
                 <Building2 className="h-5 w-5" />
-                Client Information
+                {t("projects.clientInformation")}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
@@ -375,7 +376,7 @@ export const ViewerProjectView = () => {
                   <h3 className="font-semibold text-foreground">
                     {project.clientName}
                   </h3>
-                  <p className="text-sm text-muted-foreground">Client</p>
+                  <p className="text-sm text-muted-foreground">{t("projects.client")}</p>
                 </Box>
               </Box>
 
@@ -411,7 +412,7 @@ export const ViewerProjectView = () => {
             <CardHeader className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-t-lg p-3">
               <CardTitle className="flex items-center gap-2 text-white">
                 <Clock className="h-5 w-5" />
-                Project Timeline
+                {t("projects.projectTimeline")}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-4">
@@ -421,7 +422,7 @@ export const ViewerProjectView = () => {
                     <Calendar className="h-4 w-4 text-purple-600" />
                   </Box>
                   <Box>
-                    <p className="text-sm font-medium text-foreground">Created</p>
+                    <p className="text-sm font-medium text-foreground">{t("projects.created")}</p>
                     <p className="text-xs text-muted-foreground">
                       {format(new Date(project.createdAt), "MMM dd, yyyy")}
                     </p>
@@ -436,7 +437,7 @@ export const ViewerProjectView = () => {
                   </Box>
                   <Box>
                     <p className="text-sm font-medium text-foreground">
-                      Last Updated
+                      {t("projects.lastUpdated")}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {format(new Date(project.updatedAt), "MMM dd, yyyy")}
@@ -453,7 +454,7 @@ export const ViewerProjectView = () => {
                     </Box>
                     <Box>
                       <p className="text-sm font-medium text-foreground">
-                        Start Date
+                        {t("projects.startDate")}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {format(new Date(project.startDate), "MMM dd, yyyy")}
@@ -471,7 +472,7 @@ export const ViewerProjectView = () => {
                     </Box>
                     <Box>
                       <p className="text-sm font-medium text-foreground">
-                        End Date
+                        {t("projects.endDate")}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {format(new Date(project.endDate), "MMM dd, yyyy")}

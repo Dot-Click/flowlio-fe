@@ -9,8 +9,9 @@ import {
   formatHour,
   platformColors,
   CustomEvent,
-  daysShort,
+  getDaysShort,
 } from "./calendarUtils";
+import { useTranslation } from "react-i18next";
 import GoogleMeetIcon from "/dashboard/google-meet.svg";
 import WhatsappIcon from "/dashboard/whatsapp-icon.svg";
 import OutlookIcon from "/dashboard/google-drive.svg";
@@ -43,7 +44,6 @@ export const WeekView: React.FC<WeekViewProps> = ({
   weekEvents,
   hours,
   hoveredEventId,
-  //   hoveredGridTime,
   gridContainerRef,
   setHoveredEventId,
   setHoveredGridTime,
@@ -53,6 +53,9 @@ export const WeekView: React.FC<WeekViewProps> = ({
   editEventModalProps,
   hidePopupTimeout,
 }) => {
+  const { t, i18n } = useTranslation();
+  const currentLanguage = i18n.language;
+  const daysShort = getDaysShort(currentLanguage);
   return (
     <>
       {/* Date Row */}
@@ -86,7 +89,7 @@ export const WeekView: React.FC<WeekViewProps> = ({
         {hours.map((hour) => (
           <React.Fragment key={hour}>
             <Box className="text-center p-0 bg-card font-normal text-[#888] text-sm flex items-start justify-center">
-              {formatHour(hour)}
+              {formatHour(hour, currentLanguage)}
             </Box>
             {weekDates.map((_, dayIdx) => {
               const event = weekEvents.find(
@@ -223,8 +226,8 @@ export const WeekView: React.FC<WeekViewProps> = ({
 
                       {/* Event time */}
                       <span className={cn("text-xs text-black/80")}>
-                        {formatHour(event.startHour)} -{" "}
-                        {formatHour(event.endHour)}
+                        {formatHour(event.startHour, currentLanguage)} -{" "}
+                        {formatHour(event.endHour, currentLanguage)}
                       </span>
 
                       {/* Edit icon on hover */}
@@ -238,7 +241,7 @@ export const WeekView: React.FC<WeekViewProps> = ({
                             setEditEvent(event);
                             editEventModalProps.onOpenChange(true);
                           }}
-                          title="Edit"
+                          title={t("common.edit")}
                         >
                           <Pencil />
                         </Button>

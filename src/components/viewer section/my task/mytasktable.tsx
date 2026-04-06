@@ -24,6 +24,7 @@ import {
 } from "@/hooks/useTimeTracking";
 import { Checkbox } from "@radix-ui/react-checkbox";
 import { useAllTimeEntries } from "@/hooks/useAllTimeEntries";
+import { useTranslation } from "react-i18next";
 
 export type Data = {
   id: string;
@@ -50,6 +51,7 @@ interface MyTaskTableProps {
 }
 
 export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
+  const { t } = useTranslation();
   const updateTaskStatus = useUpdateTaskStatus();
   const startTaskMutation = useStartTask();
   const endTaskMutation = useEndTask();
@@ -109,7 +111,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
         task: task.title,
         duedate: task.endDate
           ? new Date(task.endDate).toLocaleDateString()
-          : "No due date",
+          : t("common.noDueDate"),
         description: task.description || "",
         timeSpent,
         isActive,
@@ -195,7 +197,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
     },
     {
       accessorKey: "project",
-      header: () => <Box className="text-foreground">Project Name</Box>,
+      header: () => <Box className="text-foreground">{t("tasks.project")}</Box>,
       cell: ({ row }) => (
         <Box className="capitalize max-sm:w-full">
           {row.original.project.length > 28
@@ -206,14 +208,14 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
     },
     {
       accessorKey: "task",
-      header: () => <Box className="text-foreground text-center">Task Name</Box>,
+      header: () => <Box className="text-foreground text-center">{t("tasks.taskName")}</Box>,
       cell: ({ row }) => (
         <Box className="captialize text-center">{row.original.task}</Box>
       ),
     },
     {
       accessorKey: "duedate",
-      header: () => <Box className="text-foreground text-center">Due Date</Box>,
+      header: () => <Box className="text-foreground text-center">{t("tasks.dueDate")}</Box>,
       cell: ({ row }) => (
         <Box className="captialize text-center">
           {new Date(row.original.duedate)
@@ -225,14 +227,14 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
     },
     {
       accessorKey: "submittedby",
-      header: () => <Box className="text-foreground text-center">Assigned By</Box>,
+      header: () => <Box className="text-foreground text-center">{t("support.sentBy")}</Box>,
       cell: ({ row }) => (
         <Box className="captialize text-center">{row.original.submittedby}</Box>
       ),
     },
     {
       accessorKey: "timeSpent",
-      header: () => <Box className="text-foreground text-center">Time Spent</Box>,
+      header: () => <Box className="text-foreground text-center">{t("timeTracking.timeSpent")}</Box>,
       cell: ({ row }) => (
         <Box className="text-center">
           <div className="flex flex-col items-center gap-1">
@@ -247,7 +249,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
             </span>
             {row.original.isActive && (
               <div className="flex items-center gap-2">
-                <div className="text-xs text-green-500">● Active</div>
+                <div className="text-xs text-green-500">● {t("timeTracking.active")}</div>
                 <Button
                   size="sm"
                   variant="outline"
@@ -258,7 +260,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
                   }}
                   disabled={endTaskMutation.isPending}
                 >
-                  {endTaskMutation.isPending ? "..." : "Stop"}
+                  {endTaskMutation.isPending ? "..." : t("timeTracking.stop")}
                 </Button>
               </div>
             )}
@@ -268,16 +270,17 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
     },
     {
       accessorKey: "status",
-      header: () => <Box className="text-center text-foreground">Status</Box>,
+      header: () => <Box className="text-center text-foreground">{t("tasks.status")}</Box>,
       cell: ({ row }) => {
         const currentStatus = row.original.status;
+        const normalizedStatus = currentStatus === "in progress" ? "in_progress" : currentStatus === "to do" ? "todo" : currentStatus;
         return (
           <Center>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Center className="bg-black text-white cursor-pointer hover:bg-black/80 hover:text-white rounded-full w-34 h-10 justify-between items-center">
                   <h1 className="text-[14px] px-4 capitalize">
-                    {currentStatus}
+                    {t(`tasks.statusValue.${normalizedStatus}`)}
                   </h1>
                   <Center className="bg-[#3e3e3f] rounded-tr-full rounded-br-full h-10 w-10">
                     <ChevronDown className="size-4" />
@@ -295,22 +298,25 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
                     "changes",
                     "updated",
                   ] as Data["status"][]
-                ).map((status) => (
-                  <Flex
-                    className="cursor-pointer p-2 hover:bg-muted rounded-md"
-                    key={status}
-                    onClick={() => handleStatusChange(row.original.id, status)}
-                  >
-                    <DropdownMenuCheckboxItem
-                      checked={currentStatus === status}
+                ).map((status) => {
+                  const normalizedItemStatus = status === "in progress" ? "in_progress" : status === "to do" ? "todo" : status;
+                  return (
+                    <Flex
+                      className="cursor-pointer p-2 hover:bg-muted rounded-md"
+                      key={status}
+                      onClick={() => handleStatusChange(row.original.id, status)}
                     >
-                      <Checkbox checked={currentStatus === status} />
-                    </DropdownMenuCheckboxItem>
-                    <h1 className="text-foreground capitalize">
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </h1>
-                  </Flex>
-                ))}
+                      <DropdownMenuCheckboxItem
+                        checked={currentStatus === status}
+                      >
+                        <Checkbox checked={currentStatus === status} />
+                      </DropdownMenuCheckboxItem>
+                      <h1 className="text-foreground capitalize">
+                        {t(`tasks.statusValue.${normalizedItemStatus}`)}
+                      </h1>
+                    </Flex>
+                  )
+                })}
               </DropdownMenuContent>
             </DropdownMenu>
           </Center>
@@ -319,7 +325,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
     },
     {
       accessorKey: "actions",
-      header: () => <Box className="text-center text-foreground">Actions</Box>,
+      header: () => <Box className="text-center text-foreground">{t("tasks.actions")}</Box>,
       cell: ({ row }) => {
         return (
           <Center
@@ -329,7 +335,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
               modalProps.onOpenChange(true);
             }}
           >
-            View Details
+            {t("projects.viewDetails")}
           </Center>
         );
       },
@@ -358,7 +364,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
           <Stack className="gap-4">
             {/* Task Header */}
             <Stack className="gap-2">
-              <h1 className="text-sm font-normal text-muted-foreground">Project</h1>
+              <h1 className="text-sm font-normal text-muted-foreground">{t("tasks.project")}</h1>
               <h2 className="text-lg font-normal">{selectedTask.project}</h2>
             </Stack>
 
@@ -367,7 +373,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
               {/* Task Title */}
               <Stack className="gap-2">
                 <h1 className="text-sm font-normal text-muted-foreground">
-                  Task Title
+                  {t("tasks.taskTitle")}
                 </h1>
                 <h2 className="text-lg font-normal">{selectedTask.task}</h2>
               </Stack>
@@ -376,7 +382,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
               {selectedTask.description && (
                 <Stack className="gap-2">
                   <h1 className="text-sm font-normal text-muted-foreground">
-                    Description
+                    {t("support.description")}
                   </h1>
                   <p className="text-sm text-foreground">
                     {selectedTask.description}
@@ -389,15 +395,15 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
               {/* Task Details Grid */}
               <Center className="grid grid-cols-2 gap-4">
                 <Stack className="bg-[#FFFEE8] w-full text-center p-3 rounded-lg">
-                  <h1 className="text-sm font-normal text-[#929292]">Status</h1>
+                  <h1 className="text-sm font-normal text-[#929292]">{t("tasks.status")}</h1>
                   <h1 className="text-sm font-normal text-foreground capitalize">
-                    {selectedTask.status}
+                     {t(`tasks.statusValue.${selectedTask.status === "in progress" ? "in_progress" : selectedTask.status === "to do" ? "todo" : selectedTask.status}`)}
                   </h1>
                 </Stack>
 
                 <Stack className="bg-[#FFFEE8] w-full text-center p-3 rounded-lg">
                   <h1 className="text-sm font-normal text-[#929292]">
-                    Due Date
+                    {t("tasks.dueDate")}
                   </h1>
                   <h1 className="text-sm font-normal text-foreground">
                     {selectedTask.duedate}
@@ -406,7 +412,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
 
                 <Stack className="bg-[#FFFEE8] w-full text-center p-3 rounded-lg">
                   <h1 className="text-sm font-normal text-[#929292]">
-                    Assigned By
+                    {t("support.sentBy")}
                   </h1>
                   <h1 className="text-sm font-normal text-foreground">
                     {selectedTask.submittedby}
@@ -415,7 +421,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
 
                 <Stack className="bg-[#FFFEE8] w-full text-center p-3 rounded-lg">
                   <h1 className="text-sm font-normal text-[#929292]">
-                    Task ID
+                    {t("support.ticketId")}
                   </h1>
                   <h1 className="text-sm font-normal text-foreground">
                     {selectedTask.id.slice(0, 8)}...
@@ -427,52 +433,52 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
               {selectedTask.isActive && (
                 <Stack className="bg-green-50 border border-green-200 rounded-lg p-3">
                   <h1 className="text-sm font-medium text-green-800">
-                    Task is currently active
+                    {t("timeTracking.taskIsActive")}
                   </h1>
                   <p className="text-sm text-green-600">
-                    Started at: {selectedTask.startTime?.toLocaleTimeString()}
+                    {t("timeTracking.startedAt")}: {selectedTask.startTime?.toLocaleTimeString()}
                   </p>
                   <p className="text-sm text-green-600">
-                    Time spent: {selectedTask.timeSpent}
+                    {t("timeTracking.timeSpent")}: {selectedTask.timeSpent}
                   </p>
                 </Stack>
               )}
 
               {/* Action Buttons */}
               <Flex className="justify-end gap-3">
-                <Button
-                  variant="outline"
-                  className="bg-muted hover:bg-muted text-foreground border border-border font-normal rounded-full px-6 py-3 flex items-center gap-2 cursor-pointer"
-                  onClick={() => modalProps.onOpenChange(false)}
-                >
-                  Close
-                </Button>
+                  <Button
+                    variant="outline"
+                    className="bg-muted hover:bg-muted text-foreground border border-border font-normal rounded-full px-6 py-3 flex items-center gap-2 cursor-pointer"
+                    onClick={() => modalProps.onOpenChange(false)}
+                  >
+                    {t("common.close")}
+                  </Button>
 
-                {selectedTask.isActive ? (
-                  <Button
-                    variant="outline"
-                    className="bg-red-500 hover:bg-red-600 text-white border border-red-500 rounded-full px-6 py-3 flex items-center gap-2 cursor-pointer"
-                    onClick={() => {
-                      endTask(selectedTask.id);
-                      modalProps.onOpenChange(false);
-                    }}
-                    disabled={endTaskMutation.isPending}
-                  >
-                    {endTaskMutation.isPending ? "Ending..." : "End Task"}
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outline"
-                    className="bg-[#1797b9] hover:bg-[#1797b9]/80 hover:text-white text-white border border-border rounded-full px-6 py-3 flex items-center gap-2 cursor-pointer"
-                    onClick={() => {
-                      startTask(selectedTask.id);
-                      modalProps.onOpenChange(false);
-                    }}
-                    disabled={startTaskMutation.isPending}
-                  >
-                    {startTaskMutation.isPending ? "Starting..." : "Start Task"}
-                  </Button>
-                )}
+                  {selectedTask.isActive ? (
+                    <Button
+                      variant="outline"
+                      className="bg-red-500 hover:bg-red-600 text-white border border-red-500 rounded-full px-6 py-3 flex items-center gap-2 cursor-pointer"
+                      onClick={() => {
+                        endTask(selectedTask.id);
+                        modalProps.onOpenChange(false);
+                      }}
+                      disabled={endTaskMutation.isPending}
+                    >
+                      {endTaskMutation.isPending ? t("common.ending") : t("timeTracking.stop")}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      className="bg-[#1797b9] hover:bg-[#1797b9]/80 hover:text-white text-white border border-border rounded-full px-6 py-3 flex items-center gap-2 cursor-pointer"
+                      onClick={() => {
+                        startTask(selectedTask.id);
+                        modalProps.onOpenChange(false);
+                      }}
+                      disabled={startTaskMutation.isPending}
+                    >
+                      {startTaskMutation.isPending ? t("common.starting") : t("timeTracking.start")}
+                    </Button>
+                  )}
               </Flex>
             </Box>
           </Stack>

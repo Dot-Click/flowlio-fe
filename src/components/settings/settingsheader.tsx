@@ -875,10 +875,10 @@ export const SettingsHeader = () => {
                 <Flex className="justify-between w-full rounded-md max-md:px-3">
                   <Stack className="gap-0">
                     <span className="text-[#7184B4]">
-                      {t("settings.projectActivityUpdates")}
+                      {t("settings.projectActivity")}
                     </span>
                     <h1 className="text-md max-md:text-sm">
-                      {t("settings.projectActivityUpdatesDesc")}
+                      {t("settings.projectActivityDesc")}
                     </h1>
                   </Stack>
                   <Switch
@@ -892,12 +892,12 @@ export const SettingsHeader = () => {
                 <Flex className="items-center justify-between w-full py-4 border-t border-border">
                   <div className="flex-1">
                     <h3 className="text-sm font-medium text-foreground mb-1">
-                      {t("settings.twoFactorAuthentication")}
+                      {t("settings.twoFactorAuth")}
                     </h3>
                     <p className="text-xs text-muted-foreground">
                       {local2FAStatus
-                        ? t("settings.twoFactorAuthenticationDesc")
-                        : t("settings.twoFactorAuthenticationDesc2")}
+                        ? t("settings.twoFactorDesc")
+                        : t("settings.twoFactorDesc")}
                     </p>
                   </div>
                   <Button

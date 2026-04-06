@@ -13,6 +13,7 @@ import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { DropdownMenuContent } from "@/components/ui/dropdown-menu";
 import { DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
 import { MyTaskTable } from "./mytasktable";
+import { useTranslation } from "react-i18next";
 import { useFetchViewerTasks, ViewerTask } from "@/hooks/useFetchViewerTasks";
 import { format } from "date-fns";
 
@@ -55,6 +56,7 @@ const mapStatusToDisplay = (status: string): Task["status"] => {
 };
 
 export const MyTaskHeader = () => {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"kanban" | "table">("kanban");
   const [selectedProject, setSelectedProject] = useState<string>("all");
@@ -104,11 +106,10 @@ export const MyTaskHeader = () => {
         <Center className="justify-between max-sm:flex-col max-sm:items-start gap-2">
           <Stack className="gap-1">
             <h1 className="text-foreground text-2xl max-sm:text-xl font-medium">
-              My Tasks
+              {t("tasks.myTasks")}
             </h1>
             <h1 className={`max-sm:text-sm text-[#616572]`}>
-              Track and manage your assigned tasks with real-time progress and
-              time logging. Drag and drop tasks to update their status.
+              {t("tasks.myTasksDesc")}
             </h1>
           </Stack>
         </Center>
@@ -118,7 +119,7 @@ export const MyTaskHeader = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5.5 w-5.5 text-gray-300 font-light" />
             <Input
               type="search"
-              placeholder="Search My Tasks"
+              placeholder={t("tasks.searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full md:w-115 lg:w-80 xl:w-[400px] py-4 pl-10 bg-card h-10  placeholder:text-foreground  placeholder:text-[15px] border border-border focus:outline-none active:border-border focus:ring-0 focus:ring-offset-0 rounded-full"
@@ -135,7 +136,7 @@ export const MyTaskHeader = () => {
                     "ml-auto cursor-pointer bg-card border border-border rounded-full h-10 w-40 text-foreground shadow-none flex p-3 gap-8"
                   )}
                 >
-                  {selectedProject === "all" ? "All Projects" : selectedProject}
+                  {selectedProject === "all" ? t("tasks.allProjects") : selectedProject}
                   <ChevronDown />
                 </Button>
               </DropdownMenuTrigger>
@@ -144,7 +145,7 @@ export const MyTaskHeader = () => {
                   checked={selectedProject === "all"}
                   onCheckedChange={() => setSelectedProject("all")}
                 >
-                  All Projects
+                  {t("tasks.allProjects")}
                 </DropdownMenuCheckboxItem>
                 {uniqueProjects.map((projectName) => (
                   <DropdownMenuCheckboxItem

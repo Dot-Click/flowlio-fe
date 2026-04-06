@@ -3,7 +3,8 @@ import { Box } from "@/components/ui/box";
 import { Flex } from "@/components/ui/flex";
 import { Center } from "@/components/ui/center";
 import { cn } from "@/lib/utils";
-import { formatHour, CustomEvent, daysShort } from "./calendarUtils";
+import { formatHour, CustomEvent, getDaysShort } from "./calendarUtils";
+import { useTranslation } from "react-i18next";
 
 interface MonthViewProps {
   currentDate: Date;
@@ -20,6 +21,9 @@ export const MonthView: React.FC<MonthViewProps> = ({
   setPopupPosition,
   gridContainerRef,
 }) => {
+  const { t, i18n } = useTranslation();
+  const currentLanguage = i18n.language;
+  const daysShort = getDaysShort(currentLanguage);
   const firstDayOfMonth = new Date(
     currentDate.getFullYear(),
     currentDate.getMonth(),
@@ -77,7 +81,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
         </Box>
         <Flex className="flex-col gap-1">
           {dayEvents.slice(0, 3).map((event: any, idx: number) => {
-            const eventText = `${formatHour(event.startHour)} ${event.title}`;
+            const eventText = `${formatHour(event.startHour, currentLanguage)} ${event.title}`;
             const maxLength = 20; // Maximum characters before truncation
             const displayText =
               eventText.length > maxLength
@@ -144,7 +148,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
           })}
           {dayEvents.length > 3 && (
             <Box className="text-xs text-muted-foreground">
-              +{dayEvents.length - 3} more
+              +{dayEvents.length - 3} {t("calendar.more")}
             </Box>
           )}
         </Flex>

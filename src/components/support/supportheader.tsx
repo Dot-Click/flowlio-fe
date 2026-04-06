@@ -67,6 +67,7 @@ import {
 import { useFetchOrganizationActivities } from "@/hooks/useFetchOrganizationActivities";
 import { useDeleteActivity } from "@/hooks/useDeleteActivity";
 import { Trash2, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const formSchema = z.object({
   subject: z.string().min(1, "Subject is required"),
@@ -77,6 +78,7 @@ const formSchema = z.object({
 });
 
 const SupportHeader = () => {
+  const { t } = useTranslation();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -152,10 +154,10 @@ const SupportHeader = () => {
         refetchSubmitted();
       }
       refetchSentTickets();
-      toast.success("Support ticket created successfully!");
+      toast.success(t("support.ticketCreatedSuccess"));
     } catch (error) {
       console.error("Error creating support ticket:", error);
-      toast.error("Failed to create support ticket");
+      toast.error(t("support.ticketCreateError"));
     }
   }
 
@@ -190,9 +192,9 @@ const SupportHeader = () => {
     <ComponentWrapper className="mt-6 p-5 shadow-none">
       <Flex className="justify-between max-md:flex-col max-md:items-start">
         <Box>
-          <h1 className="text-2xl font-medium capitalize">Support Center</h1>
+          <h1 className="text-2xl font-medium capitalize">{t("support.centerTitle")}</h1>
           <p className="text-muted-foreground mt-1 max-md:text-sm">
-            Need Help? We’ve Got You Covered.
+            {t("support.centerSubtitle")}
           </p>
         </Box>
       </Flex>
@@ -202,19 +204,19 @@ const SupportHeader = () => {
           <Flex className="items-center gap-3 mb-2">
             <div className="w-3 h-3 bg-green-500 rounded-full"></div>
             <h1 className="text-lg font-semibold text-foreground">
-              Your Tickets
+              {t("support.yourTickets")}
             </h1>
           </Flex>
           <p className="text-muted-foreground text-sm">
-            {submittedData?.data?.tickets.length || 0} total tickets •{" "}
+            {submittedData?.data?.tickets.length || 0} {t("support.totalTickets")} •{" "}
             {submittedData?.data?.tickets.filter(
               (ticket) => ticket.status === "open"
             ).length || 0}{" "}
-            open •{" "}
+            {t("support.open")} •{" "}
             {submittedData?.data?.tickets.filter(
               (ticket) => ticket.status === "closed"
             ).length || 0}{" "}
-            resolved
+            {t("support.resolved")}
           </p>
         </Box>
 
@@ -236,7 +238,7 @@ const SupportHeader = () => {
               d="M12 4v16m8-8H4"
             />
           </svg>
-          Create New Ticket
+          {t("support.createNewTicket")}
         </Button>
       </Flex>
 
@@ -245,7 +247,7 @@ const SupportHeader = () => {
           <Flex className="items-center gap-3 mb-2">
             <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
             <h1 className="text-lg font-semibold text-foreground">
-              Recent Notifications
+              {t("support.recentNotifications")}
             </h1>
           </Flex>
           <Flex className="justify-between items-center">
@@ -253,10 +255,10 @@ const SupportHeader = () => {
               {notificationsData?.data?.notifications?.filter(
                 (n: any) => !n.read
               )?.length || 0}{" "}
-              unread notifications
+              {t("support.unreadNotifications")}
               {notificationsData?.data?.notifications?.filter(
                 (n: any) => !n.read
-              )?.length === 0 && " - You're all caught up!"}
+              )?.length === 0 && ` - ${t("support.caughtUp")}`}
             </p>
             {notificationsData?.data?.notifications &&
               notificationsData.data.notifications.length > 0 && (
@@ -268,8 +270,8 @@ const SupportHeader = () => {
                   disabled={clearAllNotificationsMutation.isPending}
                 >
                   {clearAllNotificationsMutation.isPending
-                    ? "Clearing..."
-                    : "Clear All Notifications"}
+                    ? t("support.clearing")
+                    : t("support.clearAllNotifications")}
                 </Button>
               )}
           </Flex>
@@ -323,7 +325,7 @@ const SupportHeader = () => {
           <Flex className="items-center gap-3">
             <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
             <h1 className="text-lg font-semibold text-foreground">
-              Support Tickets
+              {t("support.supportTickets")}
             </h1>
           </Flex>
           <Flex className="gap-2">
@@ -337,7 +339,7 @@ const SupportHeader = () => {
               }
               onClick={() => setActiveTab("submitted")}
             >
-              My Tickets
+              {t("support.myTickets")}
             </Button>
             <Button
               variant={activeTab === "recent" ? "default" : "outline"}
@@ -349,7 +351,7 @@ const SupportHeader = () => {
               }
               onClick={() => setActiveTab("recent")}
             >
-              Recent Activity
+              {t("support.recentActivity")}
             </Button>
             <Button
               variant={activeTab === "sent" ? "default" : "outline"}
@@ -361,7 +363,7 @@ const SupportHeader = () => {
               }
               onClick={() => setActiveTab("sent")}
             >
-              Sent Tickets
+              {t("support.sentTickets")}
             </Button>
           </Flex>
         </Flex>
@@ -369,14 +371,14 @@ const SupportHeader = () => {
         {activeTab === "submitted" && (
           <>
             {submittedLoading ? (
-              <p className="text-muted-foreground">Loading your tickets...</p>
+              <p className="text-muted-foreground">{t("support.loadingTickets")}</p>
             ) : submittedError ? (
               <p className="text-red-500">
-                Error loading tickets:{" "}
-                {submittedError?.message || "Unknown error"}
+                {t("support.errorLoadingTickets")}:{" "}
+                {submittedError?.message || t("support.unknownError")}
               </p>
             ) : submittedData?.data?.tickets.length === 0 ? (
-              <p className="text-muted-foreground">No tickets submitted yet.</p>
+              <p className="text-muted-foreground">{t("support.noTicketsYet")}</p>
             ) : (
               <Accordion type="single" collapsible className="w-full">
                 {submittedData?.data?.tickets?.map(
@@ -437,7 +439,7 @@ const SupportHeader = () => {
             ) : activitiesResponse?.data?.activities?.length === 0 ? (
               <Center className="h-64">
                 <Box className="text-lg text-muted-foreground">
-                  No recent activities
+                  {t("support.noRecentActivity")}
                 </Box>
               </Center>
             ) : (
@@ -456,11 +458,11 @@ const SupportHeader = () => {
                           source: activity.source || "recent",
                         });
                       });
-                      toast.success("Clearing all activities...");
+                      toast.success(t("support.clearingActivities"));
                     }}
                     disabled={activitiesLoading}
                   >
-                    Clear All Activities
+                    {t("support.clearAllActivities")}
                   </Button>
                 </Flex>
                 <Box className="w-full space-y-3 max-h-[500px] overflow-y-auto">
@@ -520,13 +522,13 @@ const SupportHeader = () => {
           <>
             {sentTicketsLoading ? (
               <Center className="flex items-center justify-center h-64">
-                <Box className="text-lg">Loading your sent tickets...</Box>
+                <Box className="text-lg">{t("support.loadingSentTickets")}</Box>
               </Center>
             ) : sentTicketsError ? (
               <Center className="h-64">
                 <Box className="text-lg text-red-600">
-                  Error loading sent tickets:{" "}
-                  {sentTicketsError?.message || "Unknown error"}
+                  {t("support.errorLoadingSentTickets")}:{" "}
+                  {sentTicketsError?.message || t("support.unknownError")}
                 </Box>
               </Center>
             ) : (
@@ -540,7 +542,7 @@ const SupportHeader = () => {
                   return (
                     <Center className="h-64">
                       <Box className="text-lg text-muted-foreground">
-                        You haven't sent any tickets yet.
+                        {t("support.noSentTicketsYet")}
                       </Box>
                     </Center>
                   );
@@ -550,7 +552,7 @@ const SupportHeader = () => {
                   {
                     id: "ticketNumber",
                     header: () => (
-                      <Box className="text-center text-foreground p-3">Ticket #</Box>
+                      <Box className="text-center text-foreground p-3">{t("support.ticketNumber")}</Box>
                     ),
                     cell: ({ row }) => (
                       <Box className="text-center p-3">
@@ -561,7 +563,7 @@ const SupportHeader = () => {
                   },
                   {
                     accessorKey: "subject",
-                    header: () => <Box className="text-foreground">Subject</Box>,
+                    header: () => <Box className="text-foreground">{t("support.subject")}</Box>,
                     cell: ({ row }) => (
                       <Box className="capitalize w-30 max-sm:w-full">
                         {row.original.subject.length > 28
@@ -573,7 +575,7 @@ const SupportHeader = () => {
                   {
                     accessorKey: "priority",
                     header: () => (
-                      <Box className="text-center text-foreground">Priority</Box>
+                      <Box className="text-center text-foreground">{t("support.priority")}</Box>
                     ),
                     cell: ({ row }) => {
                       const priority = row.original.priority;
@@ -593,7 +595,7 @@ const SupportHeader = () => {
                   {
                     accessorKey: "status",
                     header: () => (
-                      <Box className="text-center text-foreground">Status</Box>
+                      <Box className="text-center text-foreground">{t("support.status")}</Box>
                     ),
                     cell: ({ row }) => {
                       const status = row.original.status as
@@ -649,7 +651,7 @@ const SupportHeader = () => {
                   {
                     accessorKey: "createdon",
                     header: () => (
-                      <Box className="text-center text-foreground">Created</Box>
+                      <Box className="text-center text-foreground">{t("support.created")}</Box>
                     ),
                     cell: ({ row }) => {
                       const createdon = row.original.createdon;
@@ -665,7 +667,7 @@ const SupportHeader = () => {
                             {formatTicketDate(createdon)}
                             {error instanceof Error
                               ? error.message
-                              : "Unknown error"}
+                              : t("support.unknownError")}
                           </Box>
                         );
                       }
@@ -674,7 +676,7 @@ const SupportHeader = () => {
                   {
                     accessorKey: "actions",
                     header: () => (
-                      <Box className="text-center text-foreground">Actions</Box>
+                      <Box className="text-center text-foreground">{t("support.actions")}</Box>
                     ),
                     cell: ({ row }) => {
                       const ticket = row.original;
@@ -692,11 +694,11 @@ const SupportHeader = () => {
                                     handleViewTicket(ticket);
                                   }}
                                 >
-                                  View
+                                  {t("support.view")}
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent className="mb-2">
-                                <p>View Ticket</p>
+                                <p>{t("support.viewTicketTooltip")}</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -719,25 +721,25 @@ const SupportHeader = () => {
                                         {
                                           onSuccess: () => {
                                             toast.success(
-                                              "Ticket closed successfully"
+                                              t("support.ticketClosedSuccess")
                                             );
                                             refetchSentTickets();
                                           },
                                           onError: (error: any) => {
                                             toast.error(
                                               error.response?.data?.message ||
-                                                "Failed to close ticket"
+                                                t("support.ticketCloseError")
                                             );
                                           },
                                         }
                                       );
                                     }}
                                   >
-                                    Close
+                                    {t("support.close")}
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent className="mb-2">
-                                  <p>Close Ticket</p>
+                                  <p>{t("support.closeTicketTooltip")}</p>
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
@@ -752,31 +754,31 @@ const SupportHeader = () => {
                                   className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 cursor-pointer"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    deleteTicketMutation.mutate(
-                                      { id: ticket.id },
-                                      {
-                                        onSuccess: () => {
-                                          toast.success(
-                                            "Ticket deleted successfully"
-                                          );
-                                          refetchSentTickets();
-                                        },
-                                        onError: (error: any) => {
-                                          toast.error(
-                                            error.response?.data?.message ||
-                                              "Failed to delete ticket"
-                                          );
-                                        },
-                                      }
-                                    );
-                                  }}
-                                >
-                                  Delete
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent className="mb-2">
-                                <p>Delete Ticket</p>
-                              </TooltipContent>
+                                  deleteTicketMutation.mutate(
+                                    { id: ticket.id },
+                                    {
+                                      onSuccess: () => {
+                                        toast.success(
+                                          t("support.ticketDeletedSuccess")
+                                        );
+                                        refetchSentTickets();
+                                      },
+                                      onError: (error: any) => {
+                                        toast.error(
+                                          error.response?.data?.message ||
+                                            t("support.ticketDeleteError")
+                                        );
+                                      },
+                                    }
+                                  );
+                                }}
+                              >
+                                {t("support.delete")}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent className="mb-2">
+                              <p>{t("support.deleteTicketTooltip")}</p>
+                            </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
                         </Center>

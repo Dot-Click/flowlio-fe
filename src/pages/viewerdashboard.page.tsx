@@ -11,12 +11,14 @@ import { useFetchViewerTasks } from "@/hooks/useFetchViewerTasks";
 import { useFetchViewerProjects } from "@/hooks/useFetchViewerProjects";
 import { useActiveTimeEntries } from "@/hooks/useTimeTracking";
 import { useAllTimeEntries } from "@/hooks/useAllTimeEntries";
+import { useTranslation } from "react-i18next";
 import { format, startOfDay, endOfDay } from "date-fns";
 import { useEffect, useState, useMemo } from "react";
 import type { DateRange } from "react-day-picker";
 import { DashboardSkeleton, SkeletonWrapper } from "@/components/skeletons";
 
 const ViewerDashboardPage = () => {
+  const { t } = useTranslation();
   // Fetch real data
   const { data: tasksResponse, isLoading: isLoadingTasks, isFetching: isFetchingTasks } = useFetchViewerTasks();
   const { data: projectsResponse, isLoading: isLoadingProjects, isFetching: isFetchingProjects } = useFetchViewerProjects();
@@ -197,34 +199,34 @@ const ViewerDashboardPage = () => {
   const stats: Stat[] = [
     {
       link: "/viewer/my-tasks",
-      title: "Total Tasks",
-      description: "All tasks assigned to you",
+      title: t("viewerDashboard.totalTasks"),
+      description: t("viewerDashboard.totalTasksDesc"),
       icon: img1,
       count: String(totalTasks),
     },
     {
       link: "/viewer/my-projects",
-      title: "Total Projects",
-      description: "Projects you're involved in",
+      title: t("viewerDashboard.totalProjects"),
+      description: t("viewerDashboard.totalProjectsDesc"),
       icon: img1,
       count: String(totalProjects),
     },
     {
       link: "/viewer/my-tasks",
-      title: "Completed Tasks",
+      title: t("viewerDashboard.completedTasks"),
       icon: img1,
-      description: "Tasks you've finished",
+      description: t("viewerDashboard.completedTasksDesc"),
       count: String(completedTasks),
     },
     {
       link: "/viewer/time-tracking",
-      title: "Active Task Hour",
+      title: t("viewerDashboard.activeTaskHour"),
       description:
         isTracking && activeTimeEntry
           ? `${format(new Date(activeTimeEntry.startTime), "PPp")} - ${
               activeTimeEntry.taskTitle
             }`
-          : "No active tracking",
+          : t("viewerDashboard.noActiveTracking"),
       icon: img1,
       count: isTracking ? formatElapsedForDescription(elapsedTime) : "0s",
     },
