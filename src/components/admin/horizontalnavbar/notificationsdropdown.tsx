@@ -87,12 +87,24 @@ export const NotificationsDropdown: React.FC<{ className?: string }> = ({
       markAsReadMutation.mutate(notification.id);
     }
 
-    // Navigate to notifications page based on user role
+    const ticketId = notification.data?.ticketId;
     const userRole = user?.user.role;
+
+    if (ticketId && notification.type.includes("support_ticket")) {
+      if (userRole === "superadmin" || userRole === "subadmin") {
+        navigate(`/superadmin/support-tickets?ticketId=${ticketId}`);
+      } else if (userRole === "viewer") {
+        navigate(`/viewer/viewer-support?ticketId=${ticketId}`);
+      } else {
+        navigate(`/dashboard/support?ticketId=${ticketId}`);
+      }
+      return;
+    }
+
+    // Default redirection if no ticketId
     if (userRole === "superadmin" || userRole === "subadmin") {
       navigate("/superadmin/notifications");
     } else if (userRole === "viewer") {
-      // Check if viewer has notifications route, otherwise use dashboard
       navigate("/dashboard/notifications");
     } else {
       navigate("/dashboard/notifications");
