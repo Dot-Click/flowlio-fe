@@ -156,7 +156,7 @@ export const SupportTicketTable = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-8 rounded-full hover:bg-blue-50 text-blue-600"
+                  className="size-8 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/30 text-blue-600"
                   onClick={() => handleViewTicket(row.original)}
                 >
                   <MessageCircle className="size-4" />
@@ -173,7 +173,7 @@ export const SupportTicketTable = ({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-8 rounded-full hover:bg-green-50 text-green-600"
+                    className="size-8 rounded-full hover:bg-green-50 dark:hover:bg-green-900/30 text-green-600"
                     onClick={() => {
                       if (window.confirm("Mark as resolved and finalize conversation?")) {
                         updateSupportTicket({ 
@@ -202,7 +202,7 @@ export const SupportTicketTable = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-8 rounded-full hover:bg-red-50 text-red-600"
+                  className="size-8 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600"
                   onClick={() => {
                     if (window.confirm("Permanently delete this ticket and all history?")) {
                       deleteSupportTicket(row.original.id);

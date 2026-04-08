@@ -247,7 +247,7 @@ export const ReusableTable = <TData,>({
 
       <Box
         className={cn(
-          "rounded-md border overflow-hidden",
+          "rounded-md border overflow-x-auto",
           enableCompanyDetailsTable
             ? "rounded-t-none border-none"
             : "rounded-md",

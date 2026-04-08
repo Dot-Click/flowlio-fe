@@ -165,7 +165,7 @@ export const ViewerSupportHeader = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-10 rounded-full hover:bg-blue-50 text-blue-600 shadow-sm border border-transparent hover:border-blue-100 transition-all"
+                  className="size-10 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 shadow-sm border border-transparent hover:border-blue-100 dark:hover:border-blue-500/30 transition-all"
                   onClick={() => {
                     setSelectedTicket(row.original);
                     setIsChatModalOpen(true);

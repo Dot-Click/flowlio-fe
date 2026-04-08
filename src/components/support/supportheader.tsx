@@ -229,7 +229,7 @@ const SupportHeader = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-8 rounded-full hover:bg-blue-50 text-blue-600"
+                  className="size-8 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/30 text-blue-600"
                   onClick={() => {
                     setSelectedTicket(row.original);
                     setIsChatModalOpen(true);
@@ -249,7 +249,7 @@ const SupportHeader = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-8 rounded-full hover:bg-green-50 text-green-600"
+                    className="size-8 rounded-full hover:bg-green-50 dark:hover:bg-green-900/30 text-green-600"
                     onClick={() => {
                       if (window.confirm("Finalize and close this ticket? Record will be kept but chat will be locked.")) {
                         updateTicketMutation.mutate({ 
@@ -281,7 +281,7 @@ const SupportHeader = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-8 rounded-full hover:bg-red-50 text-red-600"
+                    className="size-8 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600"
                     onClick={() => {
                       if (window.confirm("Are you sure? This will permanently delete the ticket and all messages.")) {
                         deleteTicketMutation.mutate({ id: row.original.id }, {

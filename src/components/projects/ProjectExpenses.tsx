@@ -96,8 +96,7 @@ export const ProjectExpenses = ({
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
 
   // API hooks
-  const { data: expensesData, isLoading } =
-    useFetchProjectExpenses(projectId);
+  const { data: expensesData, isLoading } = useFetchProjectExpenses(projectId);
   const { mutate: createExpense, isPending: isCreating } =
     useCreateProjectExpense();
   const { mutate: deleteExpense, isPending: isDeleting } =
@@ -106,7 +105,8 @@ export const ProjectExpenses = ({
   const expenses = expensesData?.data || [];
   const totalSpent = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
   const remaining = budget - totalSpent;
-  const percentUsed = budget > 0 ? Math.min((totalSpent / budget) * 100, 100) : 0;
+  const percentUsed =
+    budget > 0 ? Math.min((totalSpent / budget) * 100, 100) : 0;
 
   const handleAddExpense = () => {
     if (!amount || !description || !category || !date) {
@@ -136,7 +136,7 @@ export const ProjectExpenses = ({
           setDate(new Date().toISOString().split("T")[0]);
           setShowAddForm(false);
         },
-      }
+      },
     );
   };
 
@@ -147,7 +147,7 @@ export const ProjectExpenses = ({
         onSuccess: () => {
           setDeleteConfirmId(null);
         },
-      }
+      },
     );
   };
 
@@ -178,7 +178,9 @@ export const ProjectExpenses = ({
       <Center className="h-48">
         <Box className="flex items-center justify-center p-8">
           <Box className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></Box>
-          <Box className="ml-2 text-muted-foreground">{t("expenses.loading")}</Box>
+          <Box className="ml-2 text-muted-foreground">
+            {t("expenses.loading")}
+          </Box>
         </Box>
       </Center>
     );
@@ -196,7 +198,7 @@ export const ProjectExpenses = ({
             <Button
               variant="outline"
               size="sm"
-              className="bg-card/20 border-white/40 text-white hover:bg-card/30 cursor-pointer text-xs"
+              className="bg-card/20 border-white/40 text-white hover:bg-card/30 cursor-pointer mr-8 text-xs"
               onClick={() => setShowAddForm(true)}
             >
               <Plus className="h-3 w-3 mr-1" />
@@ -221,7 +223,8 @@ export const ProjectExpenses = ({
                   </span>
                 </Flex>
                 <p className="text-xl font-bold text-blue-900 dark:text-blue-300">
-                  ${budget.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                  $
+                  {budget.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                 </p>
               </Box>
 
@@ -236,7 +239,10 @@ export const ProjectExpenses = ({
                   </span>
                 </Flex>
                 <p className="text-xl font-bold text-orange-900 dark:text-orange-300">
-                  ${totalSpent.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                  $
+                  {totalSpent.toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                  })}
                 </p>
               </Box>
 
@@ -250,8 +256,13 @@ export const ProjectExpenses = ({
                     Remaining
                   </span>
                 </Flex>
-                <p className={`text-xl font-bold ${remaining >= 0 ? "text-green-900 dark:text-green-300" : "text-red-600"}`}>
-                  ${Math.abs(remaining).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                <p
+                  className={`text-xl font-bold ${remaining >= 0 ? "text-green-900 dark:text-green-300" : "text-red-600"}`}
+                >
+                  $
+                  {Math.abs(remaining).toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                  })}
                   {remaining < 0 && (
                     <span className="text-xs ml-1 font-normal">(over)</span>
                   )}
@@ -262,8 +273,12 @@ export const ProjectExpenses = ({
             {/* Progress Bar */}
             <Box className="px-1">
               <Flex className="justify-between items-center mb-1.5">
-                <span className="text-xs text-muted-foreground">Budget Usage</span>
-                <span className={`text-xs font-semibold ${getBudgetStatusColor()}`}>
+                <span className="text-xs text-muted-foreground">
+                  Budget Usage
+                </span>
+                <span
+                  className={`text-xs font-semibold ${getBudgetStatusColor()}`}
+                >
                   {percentUsed.toFixed(1)}%
                 </span>
               </Flex>
@@ -309,7 +324,10 @@ export const ProjectExpenses = ({
             </Flex>
             {expenses.length > 0 && (
               <span className="text-xs text-muted-foreground">
-                Total: ${totalSpent.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                Total: $
+                {totalSpent.toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                })}
               </span>
             )}
           </Flex>
@@ -341,7 +359,8 @@ export const ProjectExpenses = ({
                           variant="outline"
                           className={`${catInfo.color} text-xs px-2 py-0.5 border-0`}
                         >
-                          {t(`expenses.categories.${catInfo.value}`) || catInfo.label}
+                          {t(`expenses.categories.${catInfo.value}`) ||
+                            catInfo.label}
                         </Badge>
                       </Box>
                       <Stack className="gap-0 flex-1 min-w-0">
@@ -357,7 +376,10 @@ export const ProjectExpenses = ({
                     </Flex>
                     <Flex className="items-center gap-2 flex-shrink-0 ml-2">
                       <span className="text-sm font-bold text-foreground">
-                        ${Number(expense.amount).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                        $
+                        {Number(expense.amount).toLocaleString("en-US", {
+                          minimumFractionDigits: 2,
+                        })}
                       </span>
                       {!isClient && (
                         <Button
@@ -389,7 +411,6 @@ export const ProjectExpenses = ({
           {content}
         </Card>
       )}
-
 
       {/* Add Expense Dialog */}
       <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
@@ -496,8 +517,8 @@ export const ProjectExpenses = ({
           <DialogHeader>
             <DialogTitle className="text-red-600">Delete Expense</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this expense? This action cannot be
-              undone.
+              Are you sure you want to delete this expense? This action cannot
+              be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">

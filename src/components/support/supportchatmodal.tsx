@@ -23,7 +23,7 @@ export const SupportChatModal = ({ ticket, isOpen, onClose }: SupportChatModalPr
   return (
     <GeneralModal open={isOpen} onOpenChange={onClose} contentProps={{ className: "max-w-3xl" }}>
       <Box className="space-y-4">
-        <Flex className="flex-col gap-1 border-b border-border pb-4">
+        <Flex className="flex-col gap-1 border-b border-border pb-4 pr-10">
           <Flex className="items-center justify-between w-full">
             <Flex className="items-center gap-2">
               <Hash className="size-4 text-blue-500" />

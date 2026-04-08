@@ -138,6 +138,13 @@
   margin-left: auto;
 }
 
+button,
+a,
+[role="button"],
+.cursor-pointer {
+  cursor: pointer;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

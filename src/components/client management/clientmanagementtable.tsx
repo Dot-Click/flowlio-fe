@@ -184,7 +184,7 @@ export const ClientManagementTable = () => {
       accessorKey: "name",
       header: () => <Box className="text-foreground pl-4">{t("table.name")}</Box>,
       cell: ({ row }) => (
-        <Flex className="capitalize pl-4 w-30 max-sm:w-full">
+        <Flex className="capitalize pl-4 min-w-[220px] max-sm:w-full gap-3">
           <Avatar className="size-8">
             <AvatarImage
               src={row.original.image || "https://github.com/shadcn.png"}
@@ -194,18 +194,20 @@ export const ClientManagementTable = () => {
             </AvatarFallback>
           </Avatar>
 
-          {row.original.name.length > 14
-            ? row.original.name.slice(0, 14) + "..."
-            : row.original.name}
+          <span className="truncate">
+            {row.original.name.length > 25
+              ? row.original.name.slice(0, 25) + "..."
+              : row.original.name}
+          </span>
         </Flex>
       ),
     },
 
     {
       accessorKey: "cpfcnpj",
-      header: () => <Box className="text-foreground text-center">{t("table.vat")}</Box>,
+      header: () => <Box className="text-foreground text-center min-w-[140px]">{t("table.vat")}</Box>,
       cell: ({ row }) => (
-        <Box className="captialize text-center">
+        <Box className="captialize text-center min-w-[140px]">
           {row.original.cpfcnpj || t("clientManagement.notAvailable")}
         </Box>
       ),
@@ -214,10 +216,10 @@ export const ClientManagementTable = () => {
     {
       accessorKey: "address",
       header: () => (
-        <Box className="text-foreground text-center">{t("table.address")}</Box>
+        <Box className="text-foreground text-center min-w-[180px]">{t("table.address")}</Box>
       ),
       cell: ({ row }) => (
-        <Box className="captialize text-center">
+        <Box className="captialize text-center min-w-[180px]">
           {row.original.address || t("clientManagement.notAvailable")}
         </Box>
       ),
@@ -225,10 +227,10 @@ export const ClientManagementTable = () => {
     {
       accessorKey: "email",
       header: () => (
-        <Box className="text-foreground text-center">{t("table.email")}</Box>
+        <Box className="text-foreground text-center min-w-[200px]">{t("table.email")}</Box>
       ),
       cell: ({ row }) => (
-        <Box className="captialize text-center">
+        <Box className="captialize text-center min-w-[200px]">
           {row.original.email || t("clientManagement.notAvailable")}
         </Box>
       ),
@@ -330,10 +332,10 @@ export const ClientManagementTable = () => {
     {
       accessorKey: "businessIndustry",
       header: () => (
-        <Box className="text-foreground text-center">{t("table.industry")}</Box>
+        <Box className="text-foreground text-center min-w-[140px]">{t("table.industry")}</Box>
       ),
       cell: ({ row }) => (
-        <Box className="captialize text-center">
+        <Box className="captialize text-center min-w-[140px]">
           {row.original.businessIndustry || t("clientManagement.notAvailable")}
         </Box>
       ),
