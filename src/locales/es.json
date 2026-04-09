@@ -409,7 +409,12 @@
     "nameAZ": "Nombre (A-Z)",
     "version": "Versión",
     "noAssets": "No se encontraron activos",
-    "noAssetsDesc": "Intente ampliar sus criterios de búsqueda."
+    "noAssetsDesc": "Intente ampliar sus criterios de búsqueda.",
+    "confirmDelete": "¿Estás seguro de que deseas eliminar {{fileName}}? Esta acción no se puede deshacer.",
+    "deleting": "Eliminando medio...",
+    "deleteSuccess": "Medio eliminado con éxito",
+    "deleteError": "Error al eliminar el medio",
+    "delete": "Eliminar"
   },
   "expenses": {
     "financialTracking": "Seguimiento Financiero",

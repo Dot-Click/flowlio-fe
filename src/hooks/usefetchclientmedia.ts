@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { axios } from "@/configs/axios.config";
 
 export interface MediaCenterItem {
@@ -38,11 +38,24 @@ export const useFetchClientMedia = (filters?: MediaFilters) => {
     queryKey: ["media-center", filters],
     queryFn: async (): Promise<GetMediaCenterResponse> => {
       // Use client-specific endpoint if clientId is provided, otherwise org-wide
-      const url = filters?.clientId ? `/clients/${filters.clientId}/media` : "/media";
+      const url = filters?.clientId ? `clients/${filters.clientId}/media` : "media";
       const response = await axios.get(url, { params: filters });
       return response.data;
     },
     staleTime: 1000 * 60 * 10,
     refetchOnWindowFocus: false,
+  });
+};
+
+export const useDeleteMedia = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (fileId: string) => {
+      const response = await axios.delete(`media/${encodeURIComponent(fileId)}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["media-center"] });
+    },
   });
 };

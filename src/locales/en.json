@@ -400,7 +400,14 @@
     "nameAZ": "Name (A-Z)",
     "version": "Version",
     "noAssets": "No assets found",
-    "noAssetsDesc": "Try broadening your search criteria."
+    "noAssetsDesc": "Try broadening your search criteria.",
+    "confirmDelete": "Are you sure you want to delete {{fileName}}? This action cannot be undone.",
+    "deleting": "Deleting media...",
+    "deleteSuccess": "Media deleted successfully",
+    "deleteError": "Failed to delete media",
+    "delete": "Delete",
+    "deleteTitle": "Delete Media",
+    "confirmDeleteText": "Are you sure you want to permanently delete this file? This action cannot be undone."
   },
   "expenses": {
     "financialTracking": "Financial Tracking",

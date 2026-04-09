@@ -444,7 +444,12 @@
     "nameAZ": "Nome (A-Z)",
     "version": "Versão",
     "noAssets": "Nenhum ativo encontrado",
-    "noAssetsDesc": "Tente ampliar seus critérios de pesquisa."
+    "noAssetsDesc": "Tente ampliar seus critérios de pesquisa.",
+    "confirmDelete": "Tem certeza de que deseja excluir {{fileName}}? Esta ação não pode ser desfeita.",
+    "deleting": "Excluindo mídia...",
+    "deleteSuccess": "Mídia excluída com sucesso",
+    "deleteError": "Falha ao excluir a mídia",
+    "delete": "Excluir"
   },
   "expenses": {
     "financialTracking": "Acompanhamento Financeiro",

@@ -19,17 +19,20 @@ import {
   Download,
   Eye,
   Calendar,
+  Trash2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useFetchProjects } from "@/hooks/usefetchprojects";
 import { Skeleton } from "../ui/skeleton";
 import {
   useFetchClientMedia,
+  useDeleteMedia,
   type MediaCenterItem,
 } from "@/hooks/usefetchclientmedia";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { useUser } from "@/providers/user.provider";
+import { DeleteMediaModal } from "./DeleteMediaModal";
 
 interface Project {
   id: string;
@@ -41,6 +44,8 @@ export const ClientMediaCenter: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [projectFilter, setProjectFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("newest");
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<MediaCenterItem | null>(null);
 
   const { data: userData } = useUser();
   const clientId = userData?.user?.clientId;
@@ -56,6 +61,8 @@ export const ClientMediaCenter: React.FC = () => {
     searchTerm: searchTerm || undefined,
     clientId: clientId || undefined,
   });
+
+  const deleteMedia = useDeleteMedia();
 
   const mediaItems: MediaCenterItem[] = mediaResponse?.data ?? [];
 
@@ -220,6 +227,28 @@ export const ClientMediaCenter: React.FC = () => {
 
   const handleView = (file: MediaCenterItem): void => {
     window.open(file.fileUrl, "_blank");
+  };
+
+  const handleDeleteClick = (file: MediaCenterItem) => {
+    setSelectedFile(file);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedFile) return;
+
+    const toastId = toast.loading(t("media.deleting"));
+    try {
+      await deleteMedia.mutateAsync(selectedFile.fileId);
+      toast.success(t("media.deleteSuccess"), { id: toastId });
+      setDeleteModalOpen(false);
+      setSelectedFile(null);
+    } catch (error: any) {
+      toast.error(
+        error.response?.data?.message || t("media.deleteError"),
+        { id: toastId },
+      );
+    }
   };
 
   const isLoading = mediaLoading || projectsLoading;
@@ -411,6 +440,17 @@ export const ClientMediaCenter: React.FC = () => {
                     >
                       <Download className="w-3.5 h-3.5" />
                     </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="w-10 h-9 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white backdrop-blur-md rounded-xl p-0 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteClick(file);
+                      }}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
                   </Flex>
                 </Stack>
               </Box>
@@ -425,6 +465,17 @@ export const ClientMediaCenter: React.FC = () => {
           </Box>
         )}
       </Box>
+
+      {selectedFile && (
+        <DeleteMediaModal
+          isOpen={deleteModalOpen}
+          onClose={() => setDeleteModalOpen(false)}
+          onConfirm={handleConfirmDelete}
+          fileName={selectedFile.fileName}
+          fileType={selectedFile.fileType}
+          isDeleting={deleteMedia.isPending}
+        />
+      )}
     </Stack>
   );
 };
