@@ -103,6 +103,10 @@ const TimeTrackingPage = () => {
   
   const { data: orgProjects, isLoading: projectsLoading, isFetching: projectsFetching } = useFetchProjects();
   const { data: orgTasks, isLoading: tasksLoading, isFetching: tasksFetching } = useFetchTasks();
+  const { data: orgTasksForProject } = useFetchTasks(
+    { projectId: selectedProject },
+    { enabled: !isViewer && !!selectedProject }
+  );
   const { data: viewerProjects, isLoading: viewerProjectsLoading, isFetching: viewerProjectsFetching } = useFetchViewerProjects();
   const { data: viewerTasks, isLoading: viewerTasksLoading, isFetching: viewerTasksFetching } = useFetchViewerTasks();
   
@@ -183,12 +187,19 @@ const TimeTrackingPage = () => {
     return parts.join(" ");
   };
 
-  // Build taskOptions (role-aware) before filtering
-  // Filter tasks based on selected project (role-aware)
-  const filteredTasks = useMemo(
-    () => (isViewer ? viewerTasks?.data : orgTasks?.data) || [],
-    [isViewer, viewerTasks?.data, orgTasks?.data]
-  );
+  // Quick-tracking task list: org uses /tasks/all?projectId=…; viewer filters client-side (viewer API has no project filter)
+  const filteredTasks = useMemo(() => {
+    if (!selectedProject) return [];
+    if (isViewer) {
+      const all = viewerTasks?.data || [];
+      return all.filter((task) => task.projectId === selectedProject);
+    }
+    return orgTasksForProject?.data ?? [];
+  }, [isViewer, selectedProject, viewerTasks?.data, orgTasksForProject?.data]);
+
+  useEffect(() => {
+    setSelectedTask("");
+  }, [selectedProject]);
 
   // Handle starting time tracking
   const handleStart = async () => {

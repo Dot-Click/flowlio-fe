@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Select,
   SelectTrigger,
@@ -26,9 +26,11 @@ export default function TimeModal() {
   const [selectedTask, setSelectedTask] = useState<string>("");
   const [selectedActivityType, setSelectedActivityType] = useState<string>("");
 
-  // Fetch data for regular users
   const { data: projects } = useFetchProjects();
-  const { data: tasks } = useFetchTasks();
+  const { data: tasksForProject } = useFetchTasks(
+    { projectId: selectedProject },
+    { enabled: !!selectedProject }
+  );
   const { data: activeTimeEntries } = useActiveTimeEntries();
 
   // Mutations for time tracking
@@ -62,9 +64,10 @@ export default function TimeModal() {
     }
   }, [activeTimeEntry, isTracking]);
 
-  // Filter tasks based on selected project
-  const filteredTasks =
-    tasks?.data?.filter((task) => task.projectId === selectedProject) || [];
+  const filteredTasks = useMemo(
+    () => tasksForProject?.data ?? [],
+    [tasksForProject?.data]
+  );
 
   // Handle starting time tracking
   const handleStart = async () => {

@@ -143,6 +143,9 @@ export const UserProvider: FC<BeterAuthProviderProps> = ({
       queryClient.removeQueries({ queryKey: ["project"] });
       queryClient.removeQueries({ queryKey: ["organization-clients"] });
       queryClient.removeQueries({ queryKey: ["organization-users"] });
+      queryClient.removeQueries({ queryKey: ["calendar-events"] });
+      queryClient.removeQueries({ queryKey: ["calendar-event"] });
+      queryClient.removeQueries({ queryKey: ["viewer-calendar-events"] });
     }
 
     setPreviousUserId(currentUserId || null);
