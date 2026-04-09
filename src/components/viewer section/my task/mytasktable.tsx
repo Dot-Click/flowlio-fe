@@ -7,7 +7,7 @@ import { DropdownMenu } from "@/components/ui/dropdown-menu";
 import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { DropdownMenuContent } from "@/components/ui/dropdown-menu";
 import { DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Download, Eye, File, FileText, Image } from "lucide-react";
 import {
   GeneralModal,
   useGeneralModalDisclosure,
@@ -44,6 +44,13 @@ export type Data = {
   timeSpent?: string;
   isActive?: boolean; // For tracking if task is currently being worked on
   startTime?: Date; // When the task was started
+  attachments?: Array<{
+    id: string;
+    name: string;
+    url: string;
+    size: number;
+    type: string;
+  }>;
 };
 
 interface MyTaskTableProps {
@@ -116,6 +123,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
         timeSpent,
         isActive,
         startTime,
+        attachments: task.attachments || [],
       };
     });
   };
@@ -358,7 +366,7 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
 
       <GeneralModal
         {...modalProps}
-        contentProps={{ className: "w-lg max-sm:w-full" }}
+        contentProps={{ className: "max-w-2xl max-sm:w-full" }}
       >
         {selectedTask && (
           <Stack className="gap-4">
@@ -384,9 +392,82 @@ export const MyTaskTable = ({ filteredTasks }: MyTaskTableProps) => {
                   <h1 className="text-sm font-normal text-muted-foreground">
                     {t("support.description")}
                   </h1>
-                  <p className="text-sm text-foreground">
-                    {selectedTask.description}
-                  </p>
+                  <Box className="bg-muted/50 rounded-xl p-4">
+                    <p className="text-sm text-foreground leading-relaxed">
+                      {selectedTask.description}
+                    </p>
+                  </Box>
+                </Stack>
+              )}
+
+              {/* Attachments */}
+              {selectedTask.attachments && selectedTask.attachments.length > 0 && (
+                <Stack className="gap-2">
+                  <h1 className="text-sm font-normal text-muted-foreground flex items-center gap-2">
+                    <File className="w-4 h-4" />
+                    Attachments ({selectedTask.attachments.length})
+                  </h1>
+                  <Box className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {selectedTask.attachments.map((attachment) => {
+                      const getFileIcon = (type: string) => {
+                        if (type.startsWith("image/")) return <Image className="w-4 h-4" />;
+                        if (type === "application/pdf") return <FileText className="w-4 h-4" />;
+                        return <File className="w-4 h-4" />;
+                      };
+                      const formatFileSize = (bytes: number) => {
+                        if (bytes === 0) return "0 Bytes";
+                        const k = 1024;
+                        const sizes = ["Bytes", "KB", "MB", "GB"];
+                        const i = Math.floor(Math.log(bytes) / Math.log(k));
+                        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+                      };
+                      return (
+                        <Box
+                          key={attachment.id}
+                          className="bg-card rounded-lg p-3 border border-border hover:border-blue-300 transition-colors group"
+                        >
+                          <Flex className="gap-3 items-center">
+                            <Center className="w-10 h-10 bg-blue-100 rounded-lg text-blue-600 shrink-0">
+                              {getFileIcon(attachment.type)}
+                            </Center>
+                            <Box className="flex-1 min-w-0">
+                              <p className="font-medium text-foreground text-sm truncate">
+                                {attachment.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {formatFileSize(attachment.size)}
+                              </p>
+                            </Box>
+                            <Flex className="gap-1 shrink-0">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="w-8 h-8 p-0 cursor-pointer"
+                                title="View"
+                                onClick={() => window.open(attachment.url, "_blank")}
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="w-8 h-8 p-0 cursor-pointer"
+                                title="Download"
+                                onClick={() => {
+                                  const link = document.createElement("a");
+                                  link.href = attachment.url;
+                                  link.download = attachment.name;
+                                  link.click();
+                                }}
+                              >
+                                <Download className="w-4 h-4" />
+                              </Button>
+                            </Flex>
+                          </Flex>
+                        </Box>
+                      );
+                    })}
+                  </Box>
                 </Stack>
               )}
 

@@ -28,6 +28,14 @@ export interface ViewerTask {
   creatorId: string;
   creatorName: string;
   creatorEmail: string;
+  // Attachments
+  attachments?: Array<{
+    id: string;
+    name: string;
+    url: string;
+    size: number;
+    type: string;
+  }>;
 }
 
 export const useFetchViewerTasks = () => {

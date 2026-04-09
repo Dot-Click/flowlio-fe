@@ -33,6 +33,14 @@ type Task = {
     | "changes";
   creatorName?: string;
   creatorEmail?: string;
+  description?: string;
+  attachments?: Array<{
+    id: string;
+    name: string;
+    url: string;
+    size: number;
+    type: string;
+  }>;
 };
 
 // Map backend status to frontend status
@@ -76,12 +84,14 @@ export const MyTaskHeader = () => {
       title: task.title,
       project: task.projectName,
       comments: task.description,
+      description: task.description,
       endDate: task.endDate
         ? format(new Date(task.endDate), "MMM dd, yyyy")
         : "",
       status: mapStatusToDisplay(task.status),
       creatorName: task.creatorName,
       creatorEmail: task.creatorEmail,
+      attachments: task.attachments || [],
     }));
   };
 

@@ -141,7 +141,8 @@ export const ClientManagementTable = () => {
         },
         onError: (error: any) => {
           toast.error(
-            error?.response?.data?.error || t("clientManagement.toastStatusFailed"),
+            error?.response?.data?.error ||
+              t("clientManagement.toastStatusFailed"),
           );
         },
       },
@@ -172,7 +173,8 @@ export const ClientManagementTable = () => {
         refetch();
       } catch (error: any) {
         const errorMessage =
-          error?.response?.data?.message || t("clientManagement.toastDeleteFailed");
+          error?.response?.data?.message ||
+          t("clientManagement.toastDeleteFailed");
         toast.error(errorMessage);
       }
     }
@@ -182,7 +184,9 @@ export const ClientManagementTable = () => {
   const columns: ColumnDef<Data>[] = [
     {
       accessorKey: "name",
-      header: () => <Box className="text-foreground pl-4">{t("table.name")}</Box>,
+      header: () => (
+        <Box className="text-foreground pl-4">{t("table.name")}</Box>
+      ),
       cell: ({ row }) => (
         <Flex className="capitalize pl-4 min-w-[220px] max-sm:w-full gap-3">
           <Avatar className="size-8">
@@ -205,7 +209,11 @@ export const ClientManagementTable = () => {
 
     {
       accessorKey: "cpfcnpj",
-      header: () => <Box className="text-foreground text-center min-w-[140px]">{t("table.vat")}</Box>,
+      header: () => (
+        <Box className="text-foreground text-center min-w-[140px]">
+          {t("table.vat")}
+        </Box>
+      ),
       cell: ({ row }) => (
         <Box className="captialize text-center min-w-[140px]">
           {row.original.cpfcnpj || t("clientManagement.notAvailable")}
@@ -216,7 +224,9 @@ export const ClientManagementTable = () => {
     {
       accessorKey: "address",
       header: () => (
-        <Box className="text-foreground text-center min-w-[180px]">{t("table.address")}</Box>
+        <Box className="text-foreground text-center min-w-[180px]">
+          {t("table.address")}
+        </Box>
       ),
       cell: ({ row }) => (
         <Box className="captialize text-center min-w-[180px]">
@@ -227,7 +237,9 @@ export const ClientManagementTable = () => {
     {
       accessorKey: "email",
       header: () => (
-        <Box className="text-foreground text-center min-w-[200px]">{t("table.email")}</Box>
+        <Box className="text-foreground text-center min-w-[200px]">
+          {t("table.email")}
+        </Box>
       ),
       cell: ({ row }) => (
         <Box className="captialize text-center min-w-[200px]">
@@ -332,7 +344,9 @@ export const ClientManagementTable = () => {
     {
       accessorKey: "businessIndustry",
       header: () => (
-        <Box className="text-foreground text-center min-w-[140px]">{t("table.industry")}</Box>
+        <Box className="text-foreground text-center min-w-[140px]">
+          {t("table.industry")}
+        </Box>
       ),
       cell: ({ row }) => (
         <Box className="captialize text-center min-w-[140px]">
@@ -419,8 +433,7 @@ export const ClientManagementTable = () => {
 
         return (
           <Center>
-            <Select 
-              
+            <Select
               value={status}
               onValueChange={(newStatus) =>
                 handleStatusChange(row.original.id, newStatus)
@@ -476,20 +489,26 @@ export const ClientManagementTable = () => {
       accessorKey: `customFields.${field.id}`,
       id: field.id,
       header: () => (
-        <Box className="text-center text-foreground p-1">{field.name}</Box>
+        <Box className="text-center text-foreground p-1 whitespace-nowrap min-w-[120px]">
+          {field.name}
+        </Box>
       ),
       cell: ({ row }: { row: any }) => {
         const val = row.original.customFields?.[field.id];
-        if (val === undefined || val === null || val === "") return <Box className="text-center p-1">-</Box>;
+        if (val === undefined || val === null || val === "")
+          return <Box className="text-center p-1 min-w-[120px]">-</Box>;
 
         if (field.type === "select" && field.options) {
           const option = field.options.find((opt: any) => opt.label === val);
           if (option) {
             return (
-              <Center>
-                <Flex className="items-center gap-2 px-2 py-1 bg-muted/50 rounded-full border border-border text-xs">
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: option.color }} />
-                  <span className="capitalize">{val}</span>
+              <Center className="min-w-[120px]">
+                <Flex className="items-center gap-2 px-2 py-1 bg-muted/50 rounded-full border border-border text-xs overflow-hidden">
+                  <div
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ backgroundColor: option.color }}
+                  />
+                  <span className="capitalize truncate max-w-[100px]">{val}</span>
                 </Flex>
               </Center>
             );
@@ -511,7 +530,7 @@ export const ClientManagementTable = () => {
         }
 
         return (
-          <Box className="text-center p-1 capitalize">
+          <Box className="text-center p-1 capitalize min-w-[120px] truncate max-w-[200px]" title={String(displayValue)}>
             {String(displayValue)}
           </Box>
         );
@@ -636,7 +655,7 @@ export const ClientManagementTable = () => {
   // Handle reorder completion
   const handleReorderComplete = (
     _reorderedClients: Data[],
-    updates: Array<{ id: string; position: number }>
+    updates: Array<{ id: string; position: number }>,
   ) => {
     // Update positions via API
     bulkUpdatePositions(
@@ -646,16 +665,22 @@ export const ClientManagementTable = () => {
       })),
       {
         onSuccess: () => {
-          toast.success(t("clientManagement.toastReordered", { defaultValue: "Clients reordered successfully" }));
+          toast.success(
+            t("clientManagement.toastReordered", {
+              defaultValue: "Clients reordered successfully",
+            }),
+          );
         },
         onError: (error: any) => {
           toast.error(
             error?.response?.data?.error ||
-              t("clientManagement.toastReorderFailed", { defaultValue: "Failed to reorder clients" }),
+              t("clientManagement.toastReorderFailed", {
+                defaultValue: "Failed to reorder clients",
+              }),
           );
           refetch(); // Refetch to restore original order on error
         },
-      }
+      },
     );
   };
 
@@ -715,9 +740,7 @@ export const ClientManagementTable = () => {
               <span className="text-2xl font-bold text-foreground capitalize">
                 {selectedClient.name}
               </span>
-              <span
-                className="inline-block px-3 py-1 rounded-full text-xs font-semibold mt-1 mb-2 bg-primary/10 text-primary border border-primary/20"
-              >
+              <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold mt-1 mb-2 bg-primary/10 text-primary border border-primary/20">
                 {translateClientStatus(selectedClient.status)}
               </span>
             </Stack>
@@ -804,7 +827,7 @@ export const ClientManagementTable = () => {
                   <span className="text-lg font-semibold text-gray-800 mb-2 block">
                     {t("clientManagement.viewModal.customFields")}
                   </span>
-                  <Box className="grid grid-cols-2 gap-4">
+                  <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
                     {customFieldsData.data.map((field) => {
                       const value = selectedClient.customFields?.[field.id];
                       if (value === undefined || value === null || value === "")
@@ -827,22 +850,25 @@ export const ClientManagementTable = () => {
                       return (
                         <Box
                           key={field.id}
-                          className="p-3 border border-border rounded-lg bg-gray-50/50"
+                          className="p-3 border border-border rounded-lg bg-gray-50/50 flex flex-col overflow-hidden min-w-0"
                         >
-                          <span className="text-xs font-medium text-muted-foreground block">
+                          <span className="text-xs font-medium text-muted-foreground block truncate mb-1" title={field.name}>
                             {field.name}
                           </span>
-                          <Flex className="items-center gap-2">
+                          <Flex className="items-start gap-2">
                             {field.type === "select" && field.options && (
-                              <div 
-                                className="w-2 h-2 rounded-full" 
-                                style={{ 
-                                  backgroundColor: field.options.find((opt: any) => opt.label === value)?.color || "transparent" 
-                                }} 
+                              <div
+                                className="w-2 h-2 rounded-full mt-1.5 shrink-0"
+                                style={{
+                                  backgroundColor:
+                                    field.options.find(
+                                      (opt: any) => opt.label === value,
+                                    )?.color || "transparent",
+                                }}
                               />
                             )}
-                            <span className="text-sm text-gray-800 font-semibold">
-                              {displayValue}
+                            <span className="text-sm text-gray-800 font-semibold break-words overflow-hidden break-all" style={{ wordBreak: 'break-word' }}>
+                              {String(displayValue)}
                             </span>
                           </Flex>
                         </Box>
@@ -910,20 +936,61 @@ export const ClientManagementTable = () => {
                       </Flex>
                       <Button
                         className="bg-gradient-to-r from-blue-500/50 to-cyan-400 text-white py-1 px-4 rounded font-semibold shadow hover:from-blue-600 hover:to-cyan-500 transition cursor-pointer mt-2"
-                        onClick={() => {
-                          // Simulate contract download
-                          const blob = new Blob(
-                            [
-                              `Contract for ${selectedClient.name} - ${project.name}`,
-                            ],
-                            { type: "text/plain" },
-                          );
-                          const url = window.URL.createObjectURL(blob);
-                          const a = document.createElement("a");
-                          a.href = url;
-                          a.download = project.contractFile;
-                          a.click();
-                          window.URL.revokeObjectURL(url);
+                        onClick={async () => {
+                          const rawUrl = project.contractFile;
+                          if (!rawUrl) {
+                            alert(
+                              t("clientManagement.viewModal.noContractFile", {
+                                defaultValue: "No contract file available.",
+                              }),
+                            );
+                            return;
+                          }
+
+                          try {
+                            const urlFilename =
+                              rawUrl.split("/").pop()?.split("?")[0] ||
+                              `contract-${selectedClient.name}-${project.name}.pdf`;
+
+                            // Inject fl_attachment to Cloudinary URLs
+                            let downloadUrl = rawUrl;
+                            if (
+                              rawUrl.includes("cloudinary.com") &&
+                              !rawUrl.includes("fl_attachment")
+                            ) {
+                              downloadUrl = rawUrl.replace(
+                                "/upload/",
+                                "/upload/fl_attachment/",
+                              );
+                            }
+
+                            // Fetch as blob to force a local download instead of opening a new tab
+                            const response = await fetch(downloadUrl);
+                            if (!response.ok)
+                              throw new Error("Network response was not ok");
+                            const blob = await response.blob();
+                            const blobUrl = window.URL.createObjectURL(blob);
+                            const a = document.createElement("a");
+                            a.href = blobUrl;
+                            a.download = urlFilename;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            window.URL.revokeObjectURL(blobUrl);
+                          } catch (err) {
+                            // Fallback to opening the modified URL
+                            let fallbackUrl = rawUrl;
+                            if (
+                              rawUrl.includes("cloudinary.com") &&
+                              !rawUrl.includes("fl_attachment")
+                            ) {
+                              fallbackUrl = rawUrl.replace(
+                                "/upload/",
+                                "/upload/fl_attachment/",
+                              );
+                            }
+                            window.open(fallbackUrl, "_blank");
+                          }
                         }}
                       >
                         {t("clientManagement.viewModal.downloadContract")}

@@ -586,7 +586,7 @@ export const ProjectView = () => {
                     <span className="text-lg font-semibold text-gray-800 mb-4 block">
                       {t("projects.customFields")}
                     </span>
-                    <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {customFieldsData.data.map((field) => {
                         const value = project.customFields?.[field.id];
                         if (
@@ -611,15 +611,15 @@ export const ProjectView = () => {
                         return (
                           <Box
                             key={field.id}
-                            className="p-3 border border-blue-50 rounded-lg bg-card shadow-sm"
+                            className="p-3 border border-blue-50 rounded-lg bg-card shadow-sm flex flex-col min-w-0"
                           >
-                            <span className="text-xs font-medium text-muted-foreground block mb-1">
+                            <span className="text-xs font-medium text-muted-foreground block mb-1 truncate" title={field.name}>
                               {field.name}
                             </span>
-                            <Flex className="items-center gap-2">
+                            <Flex className="items-start gap-2">
                               {field.type === "select" && field.options && (
                                 <div
-                                  className="w-2 h-2 rounded-full"
+                                  className="w-2 h-2 rounded-full mt-1.5 shrink-0"
                                   style={{
                                     backgroundColor:
                                       field.options.find(
@@ -628,7 +628,7 @@ export const ProjectView = () => {
                                   }}
                                 />
                               )}
-                              <span className="text-sm text-gray-800 font-semibold capitalize">
+                              <span className="text-sm text-gray-800 font-semibold capitalize break-words overflow-hidden break-all" style={{ wordBreak: 'break-word' }}>
                                 {String(displayValue)}
                               </span>
                             </Flex>
