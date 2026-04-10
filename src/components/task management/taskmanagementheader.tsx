@@ -81,6 +81,11 @@ export const TaskManagementHeader = () => {
     realTasks.length > 0
       ? realTasks.map((task) => {
           const project = projects.find((p) => p.id === task.projectId);
+          const assignee = users.find(
+            (u) =>
+              (u.user?.id === task.assigneeId || u.id === task.assigneeId) &&
+              u.user?.name,
+          );
           return {
             id: task.id,
             title: task.title,
@@ -92,7 +97,7 @@ export const TaskManagementHeader = () => {
             status: mapStatusToKanban(task.status) as any,
             comments: [],
             description: task.description,
-            assigneeName: task.assigneeName,
+            assigneeName: assignee?.user?.name || task.assigneeName,
             assigneeImage: task.assigneeImage,
             creatorName: task.creatorName,
             attachments: task.attachments,
@@ -264,7 +269,10 @@ export const TaskManagementHeader = () => {
                   {selectedUsers.length > 0
                     ? selectedUsers.length === 1
                       ? users.find((u) => u.user?.id === selectedUsers[0])
-                          ?.firstname || t("taskManagement.users")
+                          ?.user?.name ||
+                        users.find((u) => u.user?.id === selectedUsers[0])
+                          ?.firstname ||
+                        t("taskManagement.users")
                       : t("taskManagement.nUsers", {
                           count: selectedUsers.length,
                         })
@@ -284,7 +292,7 @@ export const TaskManagementHeader = () => {
                   checked={selectedUsers.includes(user.user?.id || user.id)}
                   onClick={() => handleUserToggle(user.user?.id || user.id)}
                 >
-                  {user.firstname} {user.lastname}
+                  {user.user?.name || `${user.firstname} ${user.lastname}`.trim()}
                 </CustomDropdownItem>
               ))}
             </CustomDropdown>

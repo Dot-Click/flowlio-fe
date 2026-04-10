@@ -167,16 +167,20 @@ const SupportHeader = () => {
     {
       accessorKey: "submittedbyName",
       header: () => <Box className="text-foreground font-semibold">User</Box>,
-      cell: ({ row }) => (
-        <Flex className="items-center gap-2">
-          <Avatar className="size-6 border border-border">
-            <AvatarFallback className="bg-muted text-[10px] font-bold">
-              {row.original.submittedbyName?.slice(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <span className="text-sm truncate max-w-[120px]">{row.original.submittedbyName}</span>
-        </Flex>
-      ),
+      cell: ({ row }) => {
+        const member = organizationMembers.find(m => m.user?.id === row.original.submittedby);
+        const displayName = member?.user?.name || row.original.submittedbyName;
+        return (
+          <Flex className="items-center gap-2">
+            <Avatar className="size-6 border border-border">
+              <AvatarFallback className="bg-muted text-[10px] font-bold">
+                {displayName?.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-sm truncate max-w-[120px]">{displayName}</span>
+          </Flex>
+        );
+      },
     },
     {
       accessorKey: "subject",
@@ -578,7 +582,7 @@ const SupportHeader = () => {
                           .filter((m: any) => m.user?.id)
                           .map((member: any) => (
                           <SelectItem key={member.id} value={member.user.id}>
-                            {member.firstname} {member.lastname}
+                            {member.user?.name || `${member.firstname} ${member.lastname}`.trim()}
                           </SelectItem>
                         ))}
                       </SelectContent>

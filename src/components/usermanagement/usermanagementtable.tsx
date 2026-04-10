@@ -201,14 +201,14 @@ export const UserManagementTable = ({
               src={row.original.user?.image || "https://github.com/shadcn.png"}
             />
             <AvatarFallback>
-              {row.original.firstname.charAt(0)}
-              {row.original.lastname.charAt(0)}
+              {row.original.user?.name?.charAt(0) || row.original.firstname.charAt(0)}
+              {row.original.user?.name?.split(" ")[1]?.charAt(0) || row.original.lastname.charAt(0)}
             </AvatarFallback>
           </Avatar>
 
           <Box className="ml-2">
             <Box className="font-medium">
-              {`${row.original.firstname} ${row.original.lastname}`}
+              {row.original.user?.name || `${row.original.firstname} ${row.original.lastname}`}
             </Box>
           </Box>
         </Flex>
@@ -314,9 +314,9 @@ export const UserManagementTable = ({
         <Box className="text-center text-foreground">{t("common.actions")}</Box>
       ),
       cell: ({ row }) => {
-        const { id, isActive, email, firstname, lastname, userrole } =
+        const { id, isActive, email, firstname, lastname, userrole, user } =
           row.original;
-        const displayName = `${firstname} ${lastname}`.trim() || email;
+        const displayName = user?.name || `${firstname} ${lastname}`.trim() || email;
         const canPromote = userrole === "viewer";
         const canDemote = userrole === "user";
         const showOrgManagerButton =

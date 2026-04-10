@@ -59,6 +59,7 @@ import { FileVersionHistoryModal } from "../common/fileversionhistorymodal";
 import { useUploadFileVersion } from "@/hooks/useuploadfileversion";
 import { Attachment } from "@/types";
 import { useFetchCustomFields } from "@/hooks/usecustomfields";
+import { useFetchOrganizationUsers } from "@/hooks/usefetchorganizationusers";
 
 import { useUser } from "@/providers/user.provider";
 import { useTranslation } from "react-i18next";
@@ -75,8 +76,11 @@ export const ProjectView = () => {
   const { id } = useParams<{ id: string }>();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  const { data: projectData, isLoading, error } = useFetchProjectById(id || "");
+  const { data: projectData, isLoading: projectLoading, error } = useFetchProjectById(id || "");
   const { data: customFieldsData } = useFetchCustomFields("project");
+  const { data: usersData, isLoading: usersLoading } = useFetchOrganizationUsers();
+
+  const isLoading = projectLoading || usersLoading;
 
   const { open, onOpenChange } = useGeneralModalDisclosure();
 
@@ -514,7 +518,18 @@ export const ProjectView = () => {
                       {t("projects.assignedTo")}
                     </p>
                     <p className="font-semibold text-foreground">
-                      {project.assignedProject || t("common.unassigned")}
+                      {(() => {
+                        const assignee = usersData?.data?.userMembers?.find(
+                          (u) =>
+                            u.user?.id === project.assignedTo ||
+                            u.id === project.assignedTo,
+                        );
+                        return (
+                          assignee?.user?.name ||
+                          project.assignedProject ||
+                          t("common.unassigned")
+                        );
+                      })()}
                     </p>
                   </Box>
                 </Box>

@@ -91,7 +91,20 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
   const { data: subtasksResponse } = useFetchSubtasks(
     !task.parentId ? task.id : undefined
   );
-  const subtasks = subtasksResponse?.data ?? [];
+  const { data: membersData } = useGetCurrentOrgUserMembers();
+  const members = membersData?.data?.userMembers || [];
+
+  const subtasks = useMemo(() => {
+    const rawSubtasks = subtasksResponse?.data ?? [];
+    return rawSubtasks.map((st) => {
+      const member = members.find((m) => m.user?.id === st.assigneeId || m.id === st.assigneeId);
+      return {
+        ...st,
+        assigneeName: member?.user?.name || st.assigneeName,
+      };
+    });
+  }, [subtasksResponse, members]);
+
   const deleteTask = useDeleteTask();
 
   const mapSubtaskStatus = (apiStatus: string) => {

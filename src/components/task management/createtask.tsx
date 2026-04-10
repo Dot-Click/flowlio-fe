@@ -801,7 +801,8 @@ export const CreateTask = ({
                             value={userMember.user?.id || userMember.id}
                             disabled={!userMember.user?.id}
                           >
-                            {userMember.firstname} {userMember.lastname} (
+                            {userMember.user?.name ||
+                              `${userMember.firstname} ${userMember.lastname}`.trim()} (
                             {userMember.email})
                             {!userMember.user?.id && " (No user account)"}
                           </SelectItem>

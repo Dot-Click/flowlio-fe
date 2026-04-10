@@ -39,6 +39,7 @@ import { axios } from "@/configs/axios.config";
 import { useFetchProjectComments } from "@/hooks/usefetchprojectcomments";
 import { useCreateProjectComment } from "@/hooks/usecreateprojectcomment";
 import { useDeleteProjectComment } from "@/hooks/usedeleteprojectcomment";
+import { useFetchOrganizationUsers } from "@/hooks/usefetchorganizationusers";
 import {
   Dialog,
   DialogContent,
@@ -72,9 +73,11 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
   const showFinancials =
     canViewInternalProjectFinancials(userData?.user) && !isClient;
   const orgProjects = useFetchProjects();
+  const orgUsers = useFetchOrganizationUsers();
   const projectsData = orgProjects.data;
-  const isLoading = orgProjects.isLoading;
-  const isFetching = orgProjects.isFetching;
+  const usersData = orgUsers.data;
+  const isLoading = orgProjects.isLoading || orgUsers.isLoading;
+  const isFetching = orgProjects.isFetching || orgUsers.isFetching;
   const error = orgProjects.error;
   const loading = isLoading || isFetching;
 
@@ -89,11 +92,17 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
 
   // Transform API data to match table expectations
   const transformedData: Data[] =
-    projectsData?.data?.map((project) => ({
-      ...project,
-      startDate: project.startDate ? new Date(project.startDate) : null,
-      endDate: project.endDate ? new Date(project.endDate) : null,
-    })) || [];
+    projectsData?.data?.map((project) => {
+      const assignee = usersData?.data?.userMembers?.find(
+        (u) => u.user?.id === project.assignedTo || u.id === project.assignedTo,
+      );
+      return {
+        ...project,
+        assignedProject: assignee?.user?.name || project.assignedProject,
+        startDate: project.startDate ? new Date(project.startDate) : null,
+        endDate: project.endDate ? new Date(project.endDate) : null,
+      };
+    }) || [];
 
   const props = useGeneralModalDisclosure();
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
