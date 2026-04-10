@@ -20,6 +20,7 @@ import { format } from "date-fns";
 import { useFetchProjectComments } from "@/hooks/usefetchprojectcomments";
 import { useFetchSubtasks } from "@/hooks/usefetchtasks";
 import { useDeleteTask } from "@/hooks/usedeletetask";
+import { useGetCurrentOrgUserMembers } from "@/hooks/usegetallusermembers";
 import { Box } from "../ui/box";
 import { Flex } from "../ui/flex";
 import { Center } from "../ui/center";
@@ -97,7 +98,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
   const subtasks = useMemo(() => {
     const rawSubtasks = subtasksResponse?.data ?? [];
     return rawSubtasks.map((st) => {
-      const member = members.find((m) => m.user?.id === st.assigneeId || m.id === st.assigneeId);
+      const member = members.find((m: any) => m.user?.id === st.assigneeId || m.id === st.assigneeId);
       return {
         ...st,
         assigneeName: member?.user?.name || st.assigneeName,
