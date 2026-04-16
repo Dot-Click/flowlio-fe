@@ -286,10 +286,11 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
         <Box className="text-foreground p-1">{t("projects.projectName")}</Box>
       ),
       cell: ({ row }) => (
-        <Box className="capitalize p-1 w-30 max-sm:w-full">
-          {row.original.projectName.length > 28
-            ? row.original.projectName.slice(0, 28) + "..."
-            : row.original.projectName}
+        <Box 
+          className="capitalize p-1 min-w-[150px] max-w-[250px] truncate max-sm:w-full" 
+          title={row.original.projectName}
+        >
+          {row.original.projectName}
         </Box>
       ),
     },
@@ -300,7 +301,12 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
         <Box className="text-foreground text-center">{t("projects.client")}</Box>
       ),
       cell: ({ row }) => (
-        <Box className="capitalize text-center">{row.original.clientName}</Box>
+        <Box 
+          className="capitalize text-center min-w-[120px] max-w-[200px] truncate mx-auto" 
+          title={row.original.clientName}
+        >
+          {row.original.clientName}
+        </Box>
       ),
     },
     {
@@ -309,7 +315,10 @@ export const ProjectTable = ({ isClient }: { isClient?: boolean }) => {
         <Box className="text-foreground text-center">{t("projects.assignedTo")}</Box>
       ),
       cell: ({ row }) => (
-        <Box className="capitalize text-center">
+        <Box 
+          className="capitalize text-center min-w-[120px] max-w-[200px] truncate mx-auto" 
+          title={row.original.assignedProject}
+        >
           {row.original.assignedProject}
         </Box>
       ),

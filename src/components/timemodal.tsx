@@ -224,13 +224,15 @@ export default function TimeModal() {
                     <SelectTrigger className="rounded-full h-14 w-full py-6 border-none">
                       {selectedActivityType === "meeting"
                         ? "Meeting"
-                        : selectedActivityType === "agenda"
+                        : selectedActivityType === "agenda" 
                         ? "Agenda"
                         : "Select Activity Type"}
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="meeting">Meeting</SelectItem>
                       <SelectItem value="agenda">Agenda</SelectItem>
+                      
+
                     </SelectContent>
                   </Select>
                 </Stack>

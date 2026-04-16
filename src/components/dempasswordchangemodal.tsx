@@ -222,7 +222,7 @@ export const DemoPasswordChangeModal: React.FC<
             >
               {isLoading ? (
                 <span className="inline-flex items-center">
-                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                   <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                   Changing Password...
                 </span>
               ) : (
@@ -230,8 +230,8 @@ export const DemoPasswordChangeModal: React.FC<
               )}
             </Button>
           </Box>
-        </form>
-      </DialogContent>
+        </form> 
+      </DialogContent> 
     </Dialog>
   );
 };
