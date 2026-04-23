@@ -29,6 +29,11 @@ const clientNavItems: NavItem[] = [
     icon: React.createElement(FileText),
   },
   {
+    title: "proposals",
+    url: "/clients/proposals",
+    icon: React.createElement(FileText),
+  },
+  {
     title: "mediaCenter",
     url: "/clients/media-center",
     icon: React.createElement(TbReportSearch),
@@ -255,6 +260,11 @@ const userOrgOwnerNavItems: NavItem[] = [
     url: "/dashboard/reports",
     title: "reports",
     icon: React.createElement(TbReportSearch),
+  },
+  {
+    url: "/dashboard/proposals",
+    title: "proposals",
+    icon: React.createElement(FileText),
   },
 ];
 

@@ -19,6 +19,7 @@ import { useAiAssistChatStore } from "@/store/aiassistchat.store";
 import { useUser } from "@/providers/user.provider";
 import { useEffect } from "react";
 import { ImageGenerationModal } from "./ImageGenerationModal";
+import { ProposalGeneratorModal } from "./ProposalGeneratorModal";
 
 const content = [
   {
@@ -213,6 +214,7 @@ const ChatBox: React.FC<{
   const [attachments, setAttachments] = useState<File[]>([]);
   const [dragOver, setDragOver] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isProposalModalOpen, setIsProposalModalOpen] = useState(false);
   const [generatedImageUrl, setGeneratedImageUrl] = useState<
     string | undefined
   >();
@@ -536,6 +538,14 @@ const ChatBox: React.FC<{
             Generate Image
           </Button>
           <Button
+            variant={"ghost"}
+            className="text-sm gap-1 text-muted-foreground"
+            onClick={() => setIsProposalModalOpen(true)}
+          >
+            <FileText className="size-4" />
+            Generate Proposal
+          </Button>
+          <Button
             size="lg"
             className="ml-auto bg-[#0c89af] rounded-full h-9 w-9 cursor-pointer"
             onClick={handleSendClick}
@@ -564,6 +574,12 @@ const ChatBox: React.FC<{
         onGenerate={handleImageGenerate}
         isLoading={storeIsLoading}
         generatedImage={generatedImageUrl}
+      />
+
+      {/* Proposal Generator Modal */}
+      <ProposalGeneratorModal
+        isOpen={isProposalModalOpen}
+        onClose={() => setIsProposalModalOpen(false)}
       />
     </Center>
   );
