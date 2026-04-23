@@ -1,6 +1,10 @@
 import React from "react";
 import FinancialOverview from "@/components/admin/reports/FinancialOverview";
+import TeamProductivity from "@/components/admin/reports/TeamProductivity";
+import ClientActivityReport from "@/components/admin/reports/ClientActivityReport";
 import { useTranslation } from "react-i18next";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DollarSign, Users, BarChart2 } from "lucide-react";
 
 const ReportsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -14,7 +18,31 @@ const ReportsPage: React.FC = () => {
         </p>
       </div>
 
-      <FinancialOverview />
+      <Tabs defaultValue="financial" className="space-y-4">
+        <TabsList className="bg-background border border-border shadow-sm p-1 h-auto">
+          <TabsTrigger value="financial" className="flex items-center gap-2 py-2">
+            <DollarSign className="w-4 h-4" />
+            Financial Overview
+          </TabsTrigger>
+          <TabsTrigger value="productivity" className="flex items-center gap-2 py-2">
+            <Users className="w-4 h-4" />
+            Team Productivity
+          </TabsTrigger>
+          <TabsTrigger value="client-activity" className="flex items-center gap-2 py-2">
+            <BarChart2 className="w-4 h-4" />
+            Client Activity
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="financial" className="space-y-4">
+          <FinancialOverview />
+        </TabsContent>
+        <TabsContent value="productivity" className="space-y-4">
+          <TeamProductivity />
+        </TabsContent>
+        <TabsContent value="client-activity" className="space-y-4">
+          <ClientActivityReport />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

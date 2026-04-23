@@ -15,7 +15,9 @@ import {
 import { useFetchFinancialOverview } from "@/hooks/useFetchFinancialOverview";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DollarSign, TrendingUp, TrendingDown, PieChart as PieChartIcon } from "lucide-react";
+import { DollarSign, TrendingUp, TrendingDown, PieChart as PieChartIcon, FileDown, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { exportFinancialCSV, exportFinancialPDF } from "@/utils/reportExport";
 
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d"];
@@ -79,6 +81,26 @@ const FinancialOverview: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Export Buttons */}
+      <div className="flex justify-end gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+          onClick={() => exportFinancialCSV(data)}
+        >
+          <FileDown className="w-4 h-4" />
+          Export CSV
+        </Button>
+        <Button
+          size="sm"
+          className="flex items-center gap-2"
+          onClick={() => exportFinancialPDF(data)}
+        >
+          <FileText className="w-4 h-4" />
+          Export PDF
+        </Button>
+      </div>
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map((card, index) => (
