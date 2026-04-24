@@ -26,7 +26,10 @@ import {
   Globe,
   Lock,
   Upload,
+  Copy,
+  Loader2,
 } from "lucide-react";
+import { useSaveProjectAsTemplate } from "@/hooks/useProjectTemplates";
 import { Badge } from "../ui/badge";
 import { Progress } from "../ui/progress";
 import { Separator } from "../ui/separator";
@@ -109,6 +112,12 @@ export const ProjectView = () => {
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadVersion = useUploadFileVersion();
+
+  // Template saving state
+  const [isSaveTemplateModalOpen, setIsSaveTemplateModalOpen] = useState(false);
+  const [templateNameInput, setTemplateNameInput] = useState("");
+  const { mutate: saveAsTemplate, isPending: isSavingTemplate } =
+    useSaveProjectAsTemplate();
 
   // Sync local edit fields when project data loads/changes
   useEffect(() => {
@@ -377,6 +386,26 @@ export const ProjectView = () => {
     setInput("");
     setReplyTo(null);
     setReplyContent("");
+  };
+
+  const handleSaveAsTemplate = () => {
+    if (!id || !templateNameInput.trim()) {
+      toast.error("Please enter a template name");
+      return;
+    }
+    saveAsTemplate(
+      {
+        projectId: id,
+        templateName: templateNameInput.trim(),
+        description: project.description || "",
+      },
+      {
+        onSuccess: () => {
+          setIsSaveTemplateModalOpen(false);
+          setTemplateNameInput("");
+        },
+      },
+    );
   };
 
   // Get comments for the current project from API
@@ -994,6 +1023,20 @@ export const ProjectView = () => {
                 </Button>
               )}
 
+              {!isClient && (
+                <Button
+                  variant="outline"
+                  className="w-full justify-start bg-card hover:bg-indigo-50 dark:hover:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800/50 text-indigo-700 dark:text-indigo-400 cursor-pointer"
+                  onClick={() => {
+                    setTemplateNameInput(project.projectName || "");
+                    setIsSaveTemplateModalOpen(true);
+                  }}
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Save as Template
+                </Button>
+              )}
+
               <Button
                 variant="outline"
                 className="w-full justify-start bg-card hover:bg-blue-50 dark:hover:bg-blue-900/20 border-blue-200 dark:border-blue-800/50 text-blue-700 dark:text-blue-400 cursor-pointer"
@@ -1331,6 +1374,66 @@ export const ProjectView = () => {
           attachmentId={activeAttachment.id}
         />
       )}
+
+      {/* Save as Template Modal */}
+      <GeneralModal
+        open={isSaveTemplateModalOpen}
+        onOpenChange={setIsSaveTemplateModalOpen}
+        contentProps={{ className: "sm:max-w-[425px]" }}
+      >
+        <Box className="p-4">
+          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <Copy className="h-5 w-5 text-indigo-600" />
+            Save as Project Template
+          </h3>
+          <p className="text-sm text-muted-foreground mb-6">
+            This will create a reusable template with all current tasks from
+            this project. You can use it to quickly set up similar projects in
+            the future.
+          </p>
+
+          <Stack className="gap-4">
+            <Box>
+              <label className="text-sm font-medium mb-1.5 block">
+                Template Name
+              </label>
+              <Input
+                value={templateNameInput}
+                onChange={(e) => setTemplateNameInput(e.target.value)}
+                placeholder="e.g., Marketing Campaign Template"
+                className="rounded-full"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSaveAsTemplate();
+                }}
+              />
+            </Box>
+
+            <Flex className="gap-3 pt-2">
+              <Button
+                variant="outline"
+                className="flex-1 rounded-full"
+                onClick={() => setIsSaveTemplateModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                onClick={handleSaveAsTemplate}
+                disabled={isSavingTemplate || !templateNameInput.trim()}
+              >
+                {isSavingTemplate ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Create Template"
+                )}
+              </Button>
+            </Flex>
+          </Stack>
+        </Box>
+      </GeneralModal>
 
       {/* Hidden File Input for Version Upload */}
       <input

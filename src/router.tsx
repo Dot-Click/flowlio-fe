@@ -191,6 +191,7 @@ const ClientProjectsPage = lazy(() => import("./pages/clientprojects.page"));
 const ClientTasksPage = lazy(() => import("./pages/clienttasks.page"));
 const ClientInvoicesPage = lazy(() => import("./pages/clientinvoices.page"));
 const ClientProposalsPage = lazy(() => import("./pages/clientproposals.page"));
+const ClientActivityPage = lazy(() => import("./pages/clientactivity.page"));
 const OrgProposalsPage = lazy(() => import("./pages/proposals.page"));
 
 // Force Light Theme on non-dashboard paths
@@ -521,6 +522,10 @@ const AppRoutes = () => {
         <Route
           path="proposals"
           element={<LazyWrapper component={ClientProposalsPage} />}
+        />
+        <Route
+          path="activity"
+          element={<LazyWrapper component={ClientActivityPage} />}
         />
         <Route
           path="media-center"

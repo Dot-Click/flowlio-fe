@@ -46,7 +46,8 @@ import { useTranslation } from "react-i18next";
 import { useFetchCustomFields } from "../../hooks/usecustomfields";
 import { Checkbox } from "../ui/checkbox";
 import { Switch } from "../ui/switch";
-import { Lock, Globe, DollarSign } from "lucide-react";
+import { Lock, Globe, DollarSign, ClipboardList } from "lucide-react";
+import { useFetchProjectTemplates } from "@/hooks/useProjectTemplates";
 
 const formSchema = z
   .object({
@@ -73,6 +74,7 @@ const formSchema = z
     customFields: z.record(z.any()).optional(),
     visibility: z.enum(["public", "private"]).default("private"),
     budget: z.coerce.number().min(0).optional(),
+    templateId: z.string().optional(),
   })
   .refine(
     (data) => {
@@ -129,6 +131,8 @@ export const CreateProject = () => {
     error: projectError,
   } = useFetchProjectById(id || "");
 
+  const { data: templatesData } = useFetchProjectTemplates();
+
   // Use the custom hooks
   const {
     mutate: createProject,
@@ -184,6 +188,7 @@ export const CreateProject = () => {
       customFields: {},
       visibility: "private",
       budget: 0,
+      templateId: "",
     },
   });
 
@@ -305,6 +310,7 @@ export const CreateProject = () => {
         customFields: values.customFields,
         visibility: values.visibility,
         ...(values.budget !== undefined && values.budget > 0 && { budget: values.budget }),
+        ...(values.templateId && values.templateId !== "none" && { templateId: values.templateId }),
       };
 
       if (isEditMode && id) {
@@ -375,6 +381,7 @@ export const CreateProject = () => {
   const onDropPdf = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file && file.type) {
+      setUploadedFile(file); // Also set as the main contract file
       const fileUrl = URL.createObjectURL(file);
       setPdfPreview(fileUrl);
 
@@ -562,6 +569,52 @@ export const CreateProject = () => {
               )}
             />
           </Box>
+          {!isEditMode && (
+            <Box className="bg-blue-50/50 border border-blue-100 rounded-2xl p-4 mb-4">
+              <FormField
+                control={form.control}
+                name="templateId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2 text-blue-900 font-semibold">
+                      <ClipboardList className="w-4 h-4" />
+                      Project Template (Optional)
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="bg-background rounded-full border-blue-200 h-12 focus:ring-blue-500">
+                          <SelectValue placeholder="Select a template to auto-create tasks" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">
+                          No Template (Blank Project)
+                        </SelectItem>
+                        {templatesData?.data?.map((template) => (
+                          <SelectItem key={template.id} value={template.id}>
+                            <div className="flex flex-col">
+                              <span className="font-medium">
+                                {template.name}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {template.taskCount} tasks included
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-blue-600/70 text-[10px] mt-1 px-2">
+                      Choosing a template will automatically set up standard
+                      tasks for this project type.
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </Box>
+          )}
+
           <Box className="bg-card/80 rounded-xl border border-border p-6 gap-4 grid grid-cols-1">
             <Box className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
               <Stack className="flex-1 w-full gap-6">

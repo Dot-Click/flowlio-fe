@@ -60,6 +60,7 @@
     "notifications": "Notifications",
     "settings": "Settings",
     "logout": "Logout",
+    "messages": "Messages",
     "mediaCenter": "Media Center",
     "viewer": "Viewer",
     "companies": "Companies",
@@ -786,6 +787,13 @@
     "viewTicketTooltip": "View Ticket",
     "closeTicketTooltip": "Close Ticket",
     "deleteTicketTooltip": "Delete Ticket"
+  },
+  "activity": {
+    "title": "Activity & Messages",
+    "subtitle": "View recent updates and send messages to the organization.",
+    "noClient": "No client information found.",
+    "sendMessage": "Send Message",
+    "logPlaceholder": "Log a {{type}}..."
   },
   "viewerDashboard": {
     "totalTasks": "Total Tasks",

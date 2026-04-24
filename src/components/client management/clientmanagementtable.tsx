@@ -45,6 +45,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { TableSkeleton, ErrorState } from "@/components/skeletons";
+import { ClientTimeline } from "./ClientTimeline";
 // import { GrantAccessModal } from "./GrantAccessModal";
 
 // Mock data for fallback (will be replaced by API data)
@@ -727,23 +728,26 @@ export const ClientManagementTable = () => {
 
       {/* Edit Client Modal */}
       {selectedClient && (
-        <GeneralModal open={props.open} onOpenChange={props.onOpenChange}>
-          <Box className="w-full bg-card rounded-xl border border-border p-6 gap-4 overflow-y-auto">
-            <Stack className="items-center">
-              <Box className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-2">
-                <img
-                  src={selectedClient.image}
-                  alt="Client"
-                  className="rounded-full w-20 h-20 object-cover"
-                />
-              </Box>
-              <span className="text-2xl font-bold text-foreground capitalize">
-                {selectedClient.name}
-              </span>
-              <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold mt-1 mb-2 bg-primary/10 text-primary border border-primary/20">
-                {translateClientStatus(selectedClient.status)}
-              </span>
-            </Stack>
+        <GeneralModal open={props.open} onOpenChange={props.onOpenChange} contentProps={{ className: "sm:max-w-5xl w-[95vw] p-0" }}>
+          <Box className="w-full bg-card rounded-xl border-none overflow-y-auto max-h-[90vh]">
+            <Flex className="items-start max-md:flex-col h-full min-h-[600px]">
+              {/* Left Column: Profile, Social, Projects */}
+              <Box className="flex-1 p-8 space-y-8 min-w-0 border-r border-border/50 max-md:border-r-0 max-md:border-b">
+                <Stack className="items-center">
+                  <Box className="w-32 h-32 rounded-full bg-muted flex items-center justify-center mb-4 ring-4 ring-indigo-50 shadow-lg dark:ring-indigo-900/20">
+                    <img
+                      src={selectedClient.image || "https://github.com/shadcn.png"}
+                      alt="Client"
+                      className="rounded-full w-full h-full object-cover"
+                    />
+                  </Box>
+                  <span className="text-4xl font-black text-foreground capitalize text-center tracking-tight">
+                    {selectedClient.name}
+                  </span>
+                  <span className="inline-block px-5 py-2 rounded-full text-xs font-black mt-3 bg-indigo-600 text-white shadow-md">
+                    {translateClientStatus(selectedClient.status)}
+                  </span>
+                </Stack>
 
             {/* Social Media Links */}
             {selectedClient.socialMediaLinks && (
@@ -1000,6 +1004,20 @@ export const ClientManagementTable = () => {
                 </Stack>
               )}
             </Box>
+
+              </Box>
+
+              {/* Right Column: Interaction Timeline */}
+              <Box className="w-[380px] max-md:w-full p-8 bg-muted/20 h-full flex flex-col border-l border-border/50 max-md:border-l-0">
+                <h3 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
+                  <span className="w-2 h-6 bg-indigo-600 rounded-full" />
+                  Activity Timeline
+                </h3>
+                <Box className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                  <ClientTimeline clientId={selectedClient.id} />
+                </Box>
+              </Box>
+            </Flex>
           </Box>
         </GeneralModal>
       )}

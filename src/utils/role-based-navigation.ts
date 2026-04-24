@@ -34,6 +34,11 @@ const clientNavItems: NavItem[] = [
     icon: React.createElement(FileText),
   },
   {
+    title: "messages",
+    url: "/clients/activity",
+    icon: React.createElement(MessageCircleQuestion),
+  },
+  {
     title: "mediaCenter",
     url: "/clients/media-center",
     icon: React.createElement(TbReportSearch),
@@ -187,6 +192,11 @@ const userOrgOwnerNavItems: NavItem[] = [
     icon: React.createElement(SquareKanban),
   },
   {
+    url: "/dashboard/reports",
+    title: "reports",
+    icon: React.createElement(TbReportSearch),
+  },
+  {
     url: "/dashboard/project",
     title: "projects",
     icon: React.createElement(GroupIcon),
@@ -255,11 +265,6 @@ const userOrgOwnerNavItems: NavItem[] = [
     url: "/dashboard/settings",
     title: "settings",
     icon: React.createElement(IoSettingsOutline),
-  },
-  {
-    url: "/dashboard/reports",
-    title: "reports",
-    icon: React.createElement(TbReportSearch),
   },
   {
     url: "/dashboard/proposals",
