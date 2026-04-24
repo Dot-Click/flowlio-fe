@@ -26,7 +26,6 @@ import {
   DropdownMenuItem,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import sidebarBg from "/dashboard/aisidebarimg.png";
 
 export const AiAssitSidebar: React.FC<{ className?: string }> = ({
   className,
@@ -60,14 +59,10 @@ export const AiAssitSidebar: React.FC<{ className?: string }> = ({
 
   return (
     <Sidebar
-      // **:data-[sidebar=sidebar]:bg-red-400
       className={cn(
-        "**:data-[sidebar=sidebar]:bg-[var(--sidebar-bg)] **:data-[sidebar=sidebar]:bg-center **:data-[sidebar=sidebar]:bg-cover **:data-[sidebar=sidebar]:text-white absolute mt-24 z-[1] **:data-[sidebar=sidebar]:rounded-l-lg  **:data-[sidebar=sidebar]:overflow-hidden inset-y-0 mb-1 ml-2 h-screen",
-        className
+        "**:data-[sidebar=sidebar]:bg-[url('/dashboard/aisidebarimg.png')] **:data-[sidebar=sidebar]:bg-center **:data-[sidebar=sidebar]:bg-cover **:data-[sidebar=sidebar]:text-white absolute mt-24 z-[1] **:data-[sidebar=sidebar]:rounded-l-lg **:data-[sidebar=sidebar]:overflow-hidden inset-y-0 mb-1 ml-2 h-screen",
+        className,
       )}
-      style={{
-        "--sidebar-bg": `url(${sidebarBg})`,
-      } as React.CSSProperties}
       collapsible="icon"
     >
       <SidebarHeader className="relative p-6">
@@ -76,13 +71,13 @@ export const AiAssitSidebar: React.FC<{ className?: string }> = ({
             isCompact={state === "collapsed"}
             className={cn(
               state === "collapsed" ? "hidden" : "max-w-[70%]",
-              "min-w-0"
+              "min-w-0",
             )}
           />
           <SidebarTrigger
             className={cn(
               "text-white max-md:text-foreground bg-gray-100/20 hover:bg-gray-100/30",
-              state === "collapsed" ? "-ml-4 rotate-180" : "ml-auto"
+              state === "collapsed" ? "-ml-4 rotate-180" : "ml-auto",
             )}
           />
         </Flex>
@@ -90,7 +85,7 @@ export const AiAssitSidebar: React.FC<{ className?: string }> = ({
         <Stack
           className={cn(
             "text-gray-300 text-sm mt-2 gap-0",
-            state === "collapsed" && "hidden"
+            state === "collapsed" && "hidden",
           )}
         >
           <h1 className="text-lg font-semibold text-white max-md:text-foreground">
@@ -115,7 +110,7 @@ export const AiAssitSidebar: React.FC<{ className?: string }> = ({
                 <p
                   className={cn(
                     "bg-card/30 border border-white/80 text-white/90 rounded-full p-1 h-7 w-18 text-center cursor-pointer hover:bg-card/30 text-[12px] max-md:text-foreground",
-                    state === "collapsed" && "hidden"
+                    state === "collapsed" && "hidden",
                   )}
                 >
                   Today
@@ -124,7 +119,7 @@ export const AiAssitSidebar: React.FC<{ className?: string }> = ({
                   <p
                     className={cn(
                       "text-foreground text-xs text-center mt-4 max-md:text-foreground",
-                      state === "collapsed" && "hidden"
+                      state === "collapsed" && "hidden",
                     )}
                   >
                     No chats yet.
@@ -138,7 +133,7 @@ export const AiAssitSidebar: React.FC<{ className?: string }> = ({
                         onClick={() => {
                           if (
                             window.confirm(
-                              "Are you sure you want to clear all chat history?"
+                              "Are you sure you want to clear all chat history?",
                             )
                           ) {
                             clearAllChats();
@@ -156,7 +151,7 @@ export const AiAssitSidebar: React.FC<{ className?: string }> = ({
                             "flex-1 cursor-pointer hover:bg-card/30 max-sm:hover:text-foreground my-1 py-1 px-2 rounded-lg capitalize",
                             chat.id === activeChatId &&
                               " text-white font-semibold",
-                            state === "collapsed" && "hidden"
+                            state === "collapsed" && "hidden",
                           )}
                           tooltip={{ children: chat.title }}
                           onClick={() => setActiveChat(chat.id)}
@@ -209,7 +204,7 @@ export const AiAssitSidebar: React.FC<{ className?: string }> = ({
                                 onClick={() => {
                                   if (
                                     window.confirm(
-                                      `Are you sure you want to delete "${chat.title}"? This action cannot be undone.`
+                                      `Are you sure you want to delete "${chat.title}"? This action cannot be undone.`,
                                     )
                                   ) {
                                     deleteChat(chat.id);
