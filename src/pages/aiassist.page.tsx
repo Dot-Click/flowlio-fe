@@ -24,6 +24,7 @@ import { Center } from "@/components/ui/center";
 import { Stack } from "@/components/ui/stack";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router";
+import newChatIcon from "/dashboard/newchaticon.svg";
 
 export const AiAssistPage = () => {
   const modalProps = useGeneralModalDisclosure();
@@ -128,7 +129,7 @@ export const AiAssistPage = () => {
                     onClick={handleNewChat}
                   >
                     <img
-                      src="/dashboard/newchaticon.svg"
+                      src={newChatIcon}
                       alt="plus"
                       className="size-4"
                     />

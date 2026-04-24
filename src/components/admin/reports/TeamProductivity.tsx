@@ -130,7 +130,7 @@ const TeamProductivity: React.FC = () => {
                    formatter={(value: number) => [`${value} hrs`, 'Hours Logged']}
                 />
                 <Bar dataKey="Hours Logged" radius={[4, 4, 0, 0]}>
-                  {timeChartData.map((entry, index) => (
+                  {timeChartData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Bar>

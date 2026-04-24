@@ -20,6 +20,7 @@ import { useUser } from "@/providers/user.provider";
 import { useEffect } from "react";
 import { ImageGenerationModal } from "./ImageGenerationModal";
 import { ProposalGeneratorModal } from "./ProposalGeneratorModal";
+import welcomeIcon from "/dashboard/ailogocircleicon.svg";
 
 const content = [
   {
@@ -155,7 +156,7 @@ const WelcomeContent = () => {
   return (
     <Stack className="w-full max-w-3xl mx-auto items-center justify-center bg-background h-full p-2">
       <img
-        src="/dashboard/ailogocircleicon.svg"
+        src={welcomeIcon}
         alt="frame"
         className="size-20"
       />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -12,10 +12,7 @@ import {
   DragEndEvent,
 } from "@dnd-kit/core";
 import {
-  arrayMove,
-  SortableContext,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { Box } from "../ui/box";
 import { Flex } from "../ui/flex";
@@ -120,7 +117,6 @@ export const CRMPipeline = () => {
     }
 
     const activeId = active.id as string;
-    const overId = over.id as string;
 
     const currentContainer = findContainer(activeId);
     

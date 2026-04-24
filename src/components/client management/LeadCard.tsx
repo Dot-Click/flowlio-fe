@@ -1,10 +1,9 @@
-import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Box } from "../ui/box";
 import { Flex } from "../ui/flex";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { DollarSign, Phone, Mail, Clock, MoreVertical } from "lucide-react";
+import { DollarSign, Clock } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { useLeadInsights } from "@/hooks/useCRM";
 

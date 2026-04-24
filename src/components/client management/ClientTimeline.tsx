@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { 
   useClientTimeline, 
   useAddInteraction, 
-  useLeadInsights,
-  ClientInteraction 
+  useLeadInsights
 } from "@/hooks/useCRM";
 import { Box } from "../ui/box";
 import { Flex } from "../ui/flex";

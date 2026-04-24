@@ -14,7 +14,6 @@ import { Flex } from "../ui/flex";
 import { ClientManagementTable } from "./clientmanagementtable";
 import { useTranslation } from "react-i18next";
 import { CRMPipeline } from "./CRMPipeline";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { useState } from "react";
 
 export const ClientManagementHeader = () => {

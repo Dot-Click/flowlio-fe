@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Box } from "../ui/box";
+import botGif from "/dashboard/botgif.gif";
 import { Button } from "../ui/button";
 import { Flex } from "../ui/flex";
 import { Stack } from "../ui/stack";
@@ -1073,7 +1074,7 @@ Description: ${userInput}`,
         className="w-20 h-20 fixed bottom-12 right-0 z-50 cursor-pointer bg-transparent"
       >
         <img
-          src="/dashboard/botgif.gif"
+          src={botGif}
           alt="AI Bot"
           className="rounded-full bg-transparent"
         />
@@ -1092,7 +1093,7 @@ Description: ${userInput}`,
         <Flex className="items-center gap-3">
           <Box className="relative">
             <img
-              src="/dashboard/botgif.gif"
+              src={botGif}
               alt="AI Bot"
               className="w-10 h-10 rounded-full border-2 border-white"
             />

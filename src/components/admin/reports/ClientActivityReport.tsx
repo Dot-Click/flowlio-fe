@@ -15,7 +15,6 @@ import {
 import { useFetchClientActivity } from "@/hooks/useFetchClientActivity";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -77,7 +76,7 @@ const ClientActivityReport: React.FC = () => {
     );
   }
 
-  const { clientStats, statusDistribution, projectStatusSummary } = data;
+  const { clientStats, projectStatusSummary } = data;
 
   // Summary stats
   const totalClients = clientStats.length;

@@ -26,6 +26,7 @@ import {
   DropdownMenuItem,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
+import sidebarBg from "/dashboard/aisidebarimg.png";
 
 export const AiAssitSidebar: React.FC<{ className?: string }> = ({
   className,
@@ -61,9 +62,12 @@ export const AiAssitSidebar: React.FC<{ className?: string }> = ({
     <Sidebar
       // **:data-[sidebar=sidebar]:bg-red-400
       className={cn(
-        "**:data-[sidebar=sidebar]:bg-[url('/dashboard/aisidebarimg.png')]  **:data-[sidebar=sidebar]:bg-center **:data-[sidebar=sidebar]:bg-cover **:data-[sidebar=sidebar]:text-white absolute mt-24 z-[1] **:data-[sidebar=sidebar]:rounded-l-lg  **:data-[sidebar=sidebar]:overflow-hidden inset-y-0 mb-1 ml-2 h-screen",
+        "**:data-[sidebar=sidebar]:bg-[var(--sidebar-bg)] **:data-[sidebar=sidebar]:bg-center **:data-[sidebar=sidebar]:bg-cover **:data-[sidebar=sidebar]:text-white absolute mt-24 z-[1] **:data-[sidebar=sidebar]:rounded-l-lg  **:data-[sidebar=sidebar]:overflow-hidden inset-y-0 mb-1 ml-2 h-screen",
         className
       )}
+      style={{
+        "--sidebar-bg": `url(${sidebarBg})`,
+      } as React.CSSProperties}
       collapsible="icon"
     >
       <SidebarHeader className="relative p-6">
