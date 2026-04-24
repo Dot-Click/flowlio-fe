@@ -50,6 +50,14 @@ export const ProjectHeader = () => {
             </Button>
             <Button
               variant="outline"
+              className="bg-black text-white border border-border rounded-full px-6 py-5 items-center gap-2 cursor-pointer hover:bg-muted/50"
+              onClick={() => navigate("/dashboard/project/templates")}
+            >
+              <Settings2 className="w-4 h-4" />
+              Project Templates
+            </Button>
+            <Button
+              variant="outline"
               className="bg-black text-white border border-border  rounded-full px-6 py-5 flex items-center gap-2 cursor-pointer"
               onClick={() =>
                 !showGranttChart
